@@ -14,6 +14,7 @@ import {
 } from '../controllers/project.controller.js';
 import { taskRoutes } from './task.routes.js';
 import { labelRoutes } from './label.routes.js';
+import { getProjectDependencyGraph } from '../controllers/dependency.controller.js';
 
 export const projectRoutes = Router({ mergeParams: true });
 
@@ -36,6 +37,9 @@ projectRoutes.delete('/:projectId/members/:userId', removeMember);
 
 // Mount Label routes under /:projectId/labels
 projectRoutes.use('/:projectId/labels', labelRoutes);
+
+// Mount project dependency graph endpoint
+projectRoutes.get('/:projectId/dependencies/graph', getProjectDependencyGraph);
 
 // Mount Task routes under /:projectId/tasks
 projectRoutes.use('/:projectId/tasks', taskRoutes);

@@ -15,6 +15,11 @@ import {
   deleteSubtask,
 } from '../controllers/task.controller.js';
 import { assignTaskLabel, removeTaskLabel } from '../controllers/label.controller.js';
+import {
+  getTaskDependencies,
+  createDependency,
+  deleteDependency,
+} from '../controllers/dependency.controller.js';
 
 export const taskRoutes = Router({ mergeParams: true });
 
@@ -39,3 +44,8 @@ taskRoutes.get('/:taskId/subtasks', listSubtasks);
 taskRoutes.post('/:taskId/subtasks', createSubtask);
 taskRoutes.patch('/:taskId/subtasks/:subtaskId', updateSubtask);
 taskRoutes.delete('/:taskId/subtasks/:subtaskId', deleteSubtask);
+
+// Task Dependency endpoints
+taskRoutes.get('/:taskId/dependencies', getTaskDependencies);
+taskRoutes.post('/:taskId/dependencies', createDependency);
+taskRoutes.delete('/:taskId/dependencies/:dependencyId', deleteDependency);

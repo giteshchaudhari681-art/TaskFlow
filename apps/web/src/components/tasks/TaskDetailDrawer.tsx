@@ -25,6 +25,7 @@ import {
 import { taskApi, labelApi } from '../../lib/api';
 import { LabelBadge } from '../labels/LabelBadge';
 import { LabelPickerPopover } from '../labels/LabelPickerPopover';
+import { TaskDependenciesSection } from '../dependencies/TaskDependenciesSection';
 
 interface TaskDetailDrawerProps {
   organizationId: string;
@@ -572,6 +573,20 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   {isAddingSubtask ? 'Adding...' : 'Add'}
                 </button>
               </form>
+            </div>
+
+            {/* Task Dependencies Section */}
+            <div className="pt-4 border-t border-slate-800">
+              <TaskDependenciesSection
+                organizationId={organizationId}
+                projectId={projectId}
+                taskId={taskId}
+                canManage={true}
+                onDependenciesChanged={() => {
+                  loadTask();
+                  onUpdated();
+                }}
+              />
             </div>
 
             {/* Metadata Footer */}

@@ -30,6 +30,9 @@ import {
   LabelItem,
   CreateLabelPayload,
   UpdateLabelPayload,
+  TaskDependenciesResponse,
+  CreateDependencyPayload,
+  ProjectDependencyGraph,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -598,6 +601,64 @@ export const labelApi = {
       {
         method: 'DELETE',
       }
+    );
+    return res.data;
+  },
+};
+
+export const dependencyApi = {
+  getTaskDependencies: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string
+  ): Promise<TaskDependenciesResponse> => {
+    const res = await apiFetch<TaskDependenciesResponse>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/dependencies`
+    );
+    return res.data;
+  },
+
+  createDependency: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    data: CreateDependencyPayload
+  ) => {
+    const res = await apiFetch<{
+      id: string;
+      projectId: string;
+      predecessorId: string;
+      successorId: string;
+      type: string;
+      createdAt: string;
+    }>(`/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/dependencies`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  deleteDependency: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    dependencyId: string
+  ) => {
+    const res = await apiFetch<{ success: boolean }>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/dependencies/${dependencyId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+
+  getProjectGraph: async (
+    organizationId: string,
+    projectId: string
+  ): Promise<ProjectDependencyGraph> => {
+    const res = await apiFetch<ProjectDependencyGraph>(
+      `/organizations/${organizationId}/projects/${projectId}/dependencies/graph`
     );
     return res.data;
   },

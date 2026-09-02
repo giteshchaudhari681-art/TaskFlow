@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Calendar, CheckSquare, AlertCircle, MoreHorizontal, ChevronRight } from 'lucide-react';
+import {
+  Calendar,
+  CheckSquare,
+  AlertCircle,
+  MoreHorizontal,
+  ChevronRight,
+  Link2,
+} from 'lucide-react';
 import { TaskListItem, TaskStatus, TaskPriority } from '@taskflow/shared';
 import { LabelBadge } from '../labels/LabelBadge';
 
@@ -204,6 +211,29 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
                   month: 'short',
                   day: 'numeric',
                 })}
+              </span>
+            </span>
+          )}
+
+          {/* Dependency indicator */}
+          {task.dependencySummary && task.dependencySummary.totalDependencies > 0 && (
+            <span
+              className={`flex items-center text-[11px] font-medium ${
+                task.dependencySummary.hasUnresolvedBlockers
+                  ? 'text-rose-400 font-semibold'
+                  : 'text-taskflow-muted'
+              }`}
+              title={
+                task.dependencySummary.hasUnresolvedBlockers
+                  ? `Blocked by ${task.dependencySummary.blockedByCount} task(s)`
+                  : `${task.dependencySummary.totalDependencies} linked dependencies`
+              }
+            >
+              <Link2 className="w-3.5 h-3.5 mr-1 text-cyan-400" />
+              <span>
+                {task.dependencySummary.hasUnresolvedBlockers
+                  ? `Blocked (${task.dependencySummary.blockedByCount})`
+                  : task.dependencySummary.totalDependencies}
               </span>
             </span>
           )}

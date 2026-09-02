@@ -111,15 +111,49 @@ export class TaskRepository extends BaseRepository {
             label: true,
           },
         },
+        dependenciesAsPredecessor: {
+          select: {
+            id: true,
+            type: true,
+            successor: { select: { id: true, status: true } },
+          },
+        },
+        dependenciesAsSuccessor: {
+          select: {
+            id: true,
+            type: true,
+            predecessor: { select: { id: true, status: true } },
+          },
+        },
       },
     });
 
     if (!task) return null;
 
-    const { labels, ...rest } = task;
+    const blockedBy = task.dependenciesAsSuccessor.filter(d => d.type === 'BLOCKS');
+    const blocking = task.dependenciesAsPredecessor.filter(d => d.type === 'BLOCKS');
+    const related = [
+      ...task.dependenciesAsPredecessor.filter(d => d.type === 'RELATES_TO'),
+      ...task.dependenciesAsSuccessor.filter(d => d.type === 'RELATES_TO'),
+    ];
+    const hasUnresolvedBlockers = blockedBy.some(
+      d => d.predecessor.status !== TaskStatus.DONE && d.predecessor.status !== TaskStatus.CANCELLED
+    );
+
+    const dependencySummary = {
+      blockedByCount: blockedBy.length,
+      blockingCount: blocking.length,
+      relatedCount: related.length,
+      totalDependencies: blockedBy.length + blocking.length + related.length,
+      hasUnresolvedBlockers,
+    };
+
+    const { labels, dependenciesAsPredecessor: _dp, dependenciesAsSuccessor: _ds, ...rest } = task;
+
     return {
       ...rest,
       labels: labels.map(tl => tl.label),
+      dependencySummary,
     };
   }
 
@@ -199,18 +233,59 @@ export class TaskRepository extends BaseRepository {
             label: true,
           },
         },
+        dependenciesAsPredecessor: {
+          select: {
+            id: true,
+            type: true,
+          },
+        },
+        dependenciesAsSuccessor: {
+          select: {
+            id: true,
+            type: true,
+            predecessor: { select: { status: true } },
+          },
+        },
       },
     });
 
     return tasks.map(task => {
       const subtaskCount = task.subtasks.length;
       const completedSubtaskCount = task.subtasks.filter(s => s.isCompleted).length;
-      const { subtasks: _, labels, ...rest } = task;
+
+      const blockedBy = task.dependenciesAsSuccessor.filter(d => d.type === 'BLOCKS');
+      const blocking = task.dependenciesAsPredecessor.filter(d => d.type === 'BLOCKS');
+      const related = [
+        ...task.dependenciesAsPredecessor.filter(d => d.type === 'RELATES_TO'),
+        ...task.dependenciesAsSuccessor.filter(d => d.type === 'RELATES_TO'),
+      ];
+      const hasUnresolvedBlockers = blockedBy.some(
+        d =>
+          d.predecessor.status !== TaskStatus.DONE && d.predecessor.status !== TaskStatus.CANCELLED
+      );
+
+      const dependencySummary = {
+        blockedByCount: blockedBy.length,
+        blockingCount: blocking.length,
+        relatedCount: related.length,
+        totalDependencies: blockedBy.length + blocking.length + related.length,
+        hasUnresolvedBlockers,
+      };
+
+      const {
+        subtasks: _,
+        labels,
+        dependenciesAsPredecessor: _dp,
+        dependenciesAsSuccessor: _ds,
+        ...rest
+      } = task;
+
       return {
         ...rest,
         subtaskCount,
         completedSubtaskCount,
         labels: labels.map(tl => tl.label),
+        dependencySummary,
       };
     });
   }
