@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, CheckSquare, AlertCircle, MoreHorizontal, ChevronRight } from 'lucide-react';
 import { TaskListItem, TaskStatus, TaskPriority } from '@taskflow/shared';
+import { LabelBadge } from '../labels/LabelBadge';
 
 interface KanbanCardProps {
   task: TaskListItem;
@@ -140,9 +141,32 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
       </div>
 
       {/* Title */}
-      <h4 className="text-sm font-semibold text-white group-hover:text-cyan-200 transition-colors line-clamp-2 leading-snug mb-3">
+      <h4 className="text-sm font-semibold text-white group-hover:text-cyan-200 transition-colors line-clamp-2 leading-snug mb-2">
         {task.title}
       </h4>
+
+      {/* Labels */}
+      {task.labels && task.labels.length > 0 && (
+        <div
+          className="flex flex-wrap items-center gap-1.5 mb-3"
+          onClick={e => e.stopPropagation()}
+        >
+          {task.labels.slice(0, 3).map(label => (
+            <LabelBadge key={label.id} label={label} size="xs" />
+          ))}
+          {task.labels.length > 3 && (
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700"
+              title={task.labels
+                .slice(3)
+                .map(l => l.name)
+                .join(', ')}
+            >
+              +{task.labels.length - 3}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Bottom row: Subtasks, Due Date, and Assignee */}
       <div className="flex items-center justify-between pt-2 border-t border-taskflow-border/50 text-xs text-taskflow-muted">

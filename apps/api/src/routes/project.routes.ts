@@ -13,6 +13,7 @@ import {
   removeMember,
 } from '../controllers/project.controller.js';
 import { taskRoutes } from './task.routes.js';
+import { labelRoutes } from './label.routes.js';
 
 export const projectRoutes = Router({ mergeParams: true });
 
@@ -32,6 +33,9 @@ projectRoutes.get('/:projectId/members', listMembers);
 projectRoutes.post('/:projectId/members', addMember);
 projectRoutes.patch('/:projectId/members/:userId', updateMemberRole);
 projectRoutes.delete('/:projectId/members/:userId', removeMember);
+
+// Mount Label routes under /:projectId/labels
+projectRoutes.use('/:projectId/labels', labelRoutes);
 
 // Mount Task routes under /:projectId/tasks
 projectRoutes.use('/:projectId/tasks', taskRoutes);

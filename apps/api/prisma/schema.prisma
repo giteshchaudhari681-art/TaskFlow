@@ -157,7 +157,6 @@ model Organization {
 
   members  OrganizationMember[]
   projects Project[]
-  labels   Label[]
 
   @@map("organizations")
 }
@@ -199,6 +198,7 @@ model Project {
   objectives      Objective[]
   milestones      Milestone[]
   tasks           Task[]
+  labels          Label[]
   discussions     Discussion[]
   activities      Activity[]
   insights        ProjectInsight[]
@@ -343,15 +343,19 @@ model Subtask {
 
 model Label {
   id             String   @id @default(uuid()) @db.Uuid
-  organizationId String   @db.Uuid
+  projectId      String   @db.Uuid
   name           String
-  colorHex       String   @default("#6366f1")
+  normalizedName String
+  color          String   @default("cyan")
+  description    String?
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  taskLabels   TaskLabel[]
+  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskLabels TaskLabel[]
 
-  @@unique([organizationId, name])
+  @@unique([projectId, normalizedName])
+  @@index([projectId])
   @@map("labels")
 }
 
@@ -366,6 +370,7 @@ model TaskLabel {
 
   @@unique([taskId, labelId])
   @@index([labelId])
+  @@index([taskId])
   @@map("task_labels")
 }
 

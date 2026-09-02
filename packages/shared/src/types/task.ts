@@ -1,4 +1,5 @@
 import { TaskStatus, TaskPriority } from './domain.js';
+import { LabelItem } from './label.js';
 
 export { TaskStatus, TaskPriority };
 
@@ -44,6 +45,7 @@ export interface TaskDetail {
   subtasks: SubtaskItem[];
   subtaskCount: number;
   completedSubtaskCount: number;
+  labels?: LabelItem[];
 }
 
 export interface TaskListItem {
@@ -64,6 +66,7 @@ export interface TaskListItem {
   assignee?: TaskUserSummary | null;
   subtaskCount: number;
   completedSubtaskCount: number;
+  labels?: LabelItem[];
 }
 
 export interface CreateTaskPayload {
@@ -103,4 +106,6 @@ export interface TaskFilterParams {
   assigneeId?: string;
   search?: string;
   archived?: boolean;
+  labelIds?: string[];
+  labelMatch?: 'ANY' | 'ALL';
 }

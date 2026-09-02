@@ -78,7 +78,7 @@ export class TaskRepository extends BaseRepository {
   }
 
   async findById(id: string, projectId: string) {
-    return this.db.task.findFirst({
+    const task = await this.db.task.findFirst({
       where: {
         id,
         projectId,
@@ -106,8 +106,21 @@ export class TaskRepository extends BaseRepository {
             },
           },
         },
+        labels: {
+          include: {
+            label: true,
+          },
+        },
       },
     });
+
+    if (!task) return null;
+
+    const { labels, ...rest } = task;
+    return {
+      ...rest,
+      labels: labels.map(tl => tl.label),
+    };
   }
 
   async listByProject(
@@ -118,6 +131,8 @@ export class TaskRepository extends BaseRepository {
       assigneeId?: string;
       search?: string;
       archived?: boolean;
+      labelIds?: string[];
+      labelMatch?: 'ANY' | 'ALL';
     }
   ) {
     const where: Prisma.TaskWhereInput = {
@@ -152,6 +167,23 @@ export class TaskRepository extends BaseRepository {
       ];
     }
 
+    if (filter?.labelIds && filter.labelIds.length > 0) {
+      if (filter.labelMatch === 'ALL') {
+        where.AND = [
+          ...((where.AND as any[]) || []),
+          ...filter.labelIds.map(labelId => ({
+            labels: { some: { labelId } },
+          })),
+        ];
+      } else {
+        where.labels = {
+          some: {
+            labelId: { in: filter.labelIds },
+          },
+        };
+      }
+    }
+
     const tasks = await this.db.task.findMany({
       where,
       orderBy: [{ taskNumber: 'desc' }],
@@ -162,17 +194,23 @@ export class TaskRepository extends BaseRepository {
         subtasks: {
           select: { id: true, isCompleted: true },
         },
+        labels: {
+          include: {
+            label: true,
+          },
+        },
       },
     });
 
     return tasks.map(task => {
       const subtaskCount = task.subtasks.length;
       const completedSubtaskCount = task.subtasks.filter(s => s.isCompleted).length;
-      const { subtasks: _, ...rest } = task;
+      const { subtasks: _, labels, ...rest } = task;
       return {
         ...rest,
         subtaskCount,
         completedSubtaskCount,
+        labels: labels.map(tl => tl.label),
       };
     });
   }
@@ -383,6 +421,40 @@ export class TaskRepository extends BaseRepository {
   async deleteSubtask(subtaskId: string, taskId: string) {
     return this.db.subtask.delete({
       where: { id: subtaskId, taskId },
+    });
+  }
+
+  // ========================================================================
+  // Task Labels
+  // ========================================================================
+
+  async assignLabel(taskId: string, labelId: string) {
+    return this.db.taskLabel.upsert({
+      where: {
+        taskId_labelId: { taskId, labelId },
+      },
+      update: {},
+      create: {
+        taskId,
+        labelId,
+      },
+      include: {
+        label: true,
+      },
+    });
+  }
+
+  async removeLabel(taskId: string, labelId: string) {
+    return this.db.taskLabel.deleteMany({
+      where: { taskId, labelId },
+    });
+  }
+
+  async findTaskLabel(taskId: string, labelId: string) {
+    return this.db.taskLabel.findUnique({
+      where: {
+        taskId_labelId: { taskId, labelId },
+      },
     });
   }
 }

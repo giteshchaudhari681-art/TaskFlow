@@ -24,12 +24,27 @@ export const listTasks = async (
     const search = req.query.search as string | undefined;
     const archived = req.query.archived === 'true';
 
+    let labelIds: string[] | undefined;
+    if (req.query.labelIds) {
+      if (Array.isArray(req.query.labelIds)) {
+        labelIds = (req.query.labelIds as string[]).map(s => String(s).trim()).filter(Boolean);
+      } else if (typeof req.query.labelIds === 'string') {
+        labelIds = (req.query.labelIds as string)
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+      }
+    }
+    const labelMatch = req.query.labelMatch === 'ALL' ? 'ALL' : 'ANY';
+
     const tasks = await taskService.listTasks(organizationId, projectId, req.user!.id, {
       status,
       priority,
       assigneeId,
       search,
       archived,
+      labelIds,
+      labelMatch,
     });
     return sendSuccess(res, tasks);
   } catch (err: unknown) {
