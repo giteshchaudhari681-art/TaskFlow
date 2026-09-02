@@ -11,6 +11,13 @@ import {
   UpdateOrganizationPayload,
   AddMemberPayload,
   UpdateMemberRolePayload,
+  ProjectDetail,
+  ProjectListItem,
+  ProjectMemberDetail,
+  CreateProjectPayload,
+  UpdateProjectPayload,
+  AddProjectMemberPayload,
+  ProjectRole,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -237,6 +244,109 @@ export const api = {
   removeMember: async (organizationId: string, userId: string) => {
     const res = await apiFetch<{ message: string }>(
       `/organizations/${organizationId}/members/${userId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+};
+
+export const orgApi = api;
+
+export const projectApi = {
+  listProjects: async (organizationId: string, filter?: { status?: string; search?: string }) => {
+    const params = new URLSearchParams();
+    if (filter?.status && filter.status !== 'ALL') params.append('status', filter.status);
+    if (filter?.search) params.append('search', filter.search);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    const res = await apiFetch<ProjectListItem[]>(`/organizations/${organizationId}/projects${qs}`);
+    return res.data;
+  },
+
+  createProject: async (organizationId: string, data: CreateProjectPayload) => {
+    const res = await apiFetch<ProjectDetail>(`/organizations/${organizationId}/projects`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  getProject: async (organizationId: string, projectId: string) => {
+    const res = await apiFetch<ProjectDetail>(
+      `/organizations/${organizationId}/projects/${projectId}`
+    );
+    return res.data;
+  },
+
+  updateProject: async (organizationId: string, projectId: string, data: UpdateProjectPayload) => {
+    const res = await apiFetch<ProjectDetail>(
+      `/organizations/${organizationId}/projects/${projectId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  archiveProject: async (organizationId: string, projectId: string) => {
+    const res = await apiFetch<ProjectDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/archive`,
+      {
+        method: 'POST',
+      }
+    );
+    return res.data;
+  },
+
+  unarchiveProject: async (organizationId: string, projectId: string) => {
+    const res = await apiFetch<ProjectDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/unarchive`,
+      {
+        method: 'POST',
+      }
+    );
+    return res.data;
+  },
+
+  getMembers: async (organizationId: string, projectId: string) => {
+    const res = await apiFetch<ProjectMemberDetail[]>(
+      `/organizations/${organizationId}/projects/${projectId}/members`
+    );
+    return res.data;
+  },
+
+  addMember: async (organizationId: string, projectId: string, data: AddProjectMemberPayload) => {
+    const res = await apiFetch<ProjectMemberDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/members`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  updateMemberRole: async (
+    organizationId: string,
+    projectId: string,
+    userId: string,
+    role: ProjectRole
+  ) => {
+    const res = await apiFetch<ProjectMemberDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/members/${userId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ role }),
+      }
+    );
+    return res.data;
+  },
+
+  removeMember: async (organizationId: string, projectId: string, userId: string) => {
+    const res = await apiFetch<{ removed: boolean; userId: string; projectId: string }>(
+      `/organizations/${organizationId}/projects/${projectId}/members/${userId}`,
       {
         method: 'DELETE',
       }

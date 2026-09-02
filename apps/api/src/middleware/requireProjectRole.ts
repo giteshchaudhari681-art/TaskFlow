@@ -4,7 +4,8 @@ import { organizationRepository } from '../repositories/organization.repository.
 import { sendError } from '../utils/response.js';
 
 const PROJECT_ROLE_RANK: Record<ProjectRole, number> = {
-  [ProjectRole.LEAD]: 3,
+  [ProjectRole.LEAD]: 4,
+  [ProjectRole.ADMIN]: 3,
   [ProjectRole.MEMBER]: 2,
   [ProjectRole.VIEWER]: 1,
 };
@@ -37,7 +38,7 @@ export const requireProjectRole = (...allowedRoles: ProjectRole[]) => {
     }
 
     // Tenant boundary check: if organization context is present, ensure project belongs to it
-    const orgId = req.headers['x-organization-id'] as string;
+    const orgId = req.params.organizationId || (req.headers['x-organization-id'] as string);
     if (orgId && membership.project.organizationId !== orgId) {
       return sendError(
         res,

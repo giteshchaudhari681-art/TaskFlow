@@ -4,6 +4,8 @@ import * as orgController from '../controllers/organization.controller.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireOrgRole } from '../middleware/requireOrgRole.js';
 
+import { projectRoutes } from './project.routes.js';
+
 export const organizationRoutes = Router();
 
 // Base authentication required on all organization operations
@@ -11,6 +13,9 @@ organizationRoutes.use(requireAuth);
 
 // List all user organizations
 organizationRoutes.get('/', orgController.getOrganizations);
+
+// Nested project management routes
+organizationRoutes.use('/:organizationId/projects', projectRoutes);
 
 // Workspace details & metadata update
 organizationRoutes.get('/:organizationId', requireOrgRole(), orgController.getWorkspace);

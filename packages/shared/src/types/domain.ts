@@ -11,6 +11,7 @@ export enum UserRole {
 
 export enum ProjectRole {
   LEAD = 'LEAD',
+  ADMIN = 'ADMIN',
   MEMBER = 'MEMBER',
   VIEWER = 'VIEWER',
 }

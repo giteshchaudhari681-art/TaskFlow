@@ -22,12 +22,17 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './components/auth/LoginPage';
 import { RegisterPage } from './components/auth/RegisterPage';
 import { SettingsLayout, SettingsTab } from './components/settings/SettingsLayout';
+import { ProjectsList } from './components/projects/ProjectsList';
+import { ProjectDetailShell } from './components/projects/ProjectDetailShell';
 
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
     useAuth();
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
-  const [currentView, setCurrentView] = useState<'dashboard' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<
+    'dashboard' | 'projects' | 'project-details' | 'settings'
+  >('dashboard');
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
@@ -97,7 +102,7 @@ const MainApp: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <span className="font-bold text-lg tracking-tight text-white">TaskFlow</span>
                   <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
-                    v0.4.0 • PR 4
+                    v0.5.0 • PR 5
                   </span>
                 </div>
                 <p className="text-xs text-taskflow-muted">
@@ -120,6 +125,19 @@ const MainApp: React.FC = () => {
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
                   <span>Dashboard</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('projects')}
+                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    currentView === 'projects' || currentView === 'project-details'
+                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Projects</span>
                 </button>
 
                 <button
@@ -242,6 +260,24 @@ const MainApp: React.FC = () => {
             onBackToDashboard={() => setCurrentView('dashboard')}
             initialTab={settingsTab}
           />
+        ) : currentView === 'projects' && activeOrg ? (
+          <ProjectsList
+            organizationId={activeOrg.organizationId}
+            organizationName={activeOrg.organizationName}
+            onSelectProject={id => {
+              setSelectedProjectId(id);
+              setCurrentView('project-details');
+            }}
+          />
+        ) : currentView === 'project-details' && activeOrg && selectedProjectId ? (
+          <ProjectDetailShell
+            organizationId={activeOrg.organizationId}
+            projectId={selectedProjectId}
+            onBack={() => {
+              setSelectedProjectId(null);
+              setCurrentView('projects');
+            }}
+          />
         ) : (
           <>
             {/* Authenticated Hero Banner */}
@@ -270,8 +306,17 @@ const MainApp: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <button
                     type="button"
+                    onClick={() => setCurrentView('projects')}
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold flex items-center space-x-2 shadow-glow-cyan transition-all cursor-pointer"
+                  >
+                    <Layers className="w-4 h-4" />
+                    <span>View Projects</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => openSettings('members')}
-                    className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center space-x-2 transition-colors"
+                    className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center space-x-2 transition-colors cursor-pointer"
                   >
                     <Users className="w-4 h-4" />
                     <span>Manage Workspace Members</span>
@@ -280,7 +325,7 @@ const MainApp: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => openSettings('profile')}
-                    className="px-4 py-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-white text-xs font-medium flex items-center space-x-2 transition-colors"
+                    className="px-4 py-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-white text-xs font-medium flex items-center space-x-2 transition-colors cursor-pointer"
                   >
                     <Settings className="w-4 h-4 text-taskflow-muted" />
                     <span>Edit Profile & Security</span>
