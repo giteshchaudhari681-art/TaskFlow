@@ -266,6 +266,7 @@ model Milestone {
 model Task {
   id            String       @id @default(uuid()) @db.Uuid
   taskNumber    Int
+  issueKey      String?
   projectId     String       @db.Uuid
   title         String
   description   String?
@@ -277,6 +278,8 @@ model Task {
   objectiveId   String?      @db.Uuid
   dueDate       DateTime?
   estimateHours Float?
+  completedAt   DateTime?
+  archivedAt    DateTime?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -299,6 +302,7 @@ model Task {
   @@index([projectId, status])
   @@index([assigneeId])
   @@index([dueDate])
+  @@index([issueKey])
   @@index([milestoneId])
   @@index([objectiveId])
   @@map("tasks")
@@ -320,14 +324,15 @@ model TaskDependency {
 }
 
 model Subtask {
-  id          String   @id @default(uuid()) @db.Uuid
-  taskId      String   @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  taskId      String    @db.Uuid
   title       String
-  isCompleted Boolean  @default(false)
-  order       Int      @default(0)
-  assigneeId  String?  @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isCompleted Boolean   @default(false)
+  order       Int       @default(0)
+  assigneeId  String?   @db.Uuid
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   task     Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
   assignee User? @relation(fields: [assigneeId], references: [id], onDelete: SetNull)

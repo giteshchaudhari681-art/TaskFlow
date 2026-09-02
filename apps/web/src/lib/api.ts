@@ -18,6 +18,14 @@ import {
   UpdateProjectPayload,
   AddProjectMemberPayload,
   ProjectRole,
+  TaskDetail,
+  TaskListItem,
+  SubtaskItem,
+  CreateTaskPayload,
+  UpdateTaskPayload,
+  CreateSubtaskPayload,
+  UpdateSubtaskPayload,
+  TaskFilterParams,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -347,6 +355,143 @@ export const projectApi = {
   removeMember: async (organizationId: string, projectId: string, userId: string) => {
     const res = await apiFetch<{ removed: boolean; userId: string; projectId: string }>(
       `/organizations/${organizationId}/projects/${projectId}/members/${userId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+};
+
+export const taskApi = {
+  listTasks: async (organizationId: string, projectId: string, filters?: TaskFilterParams) => {
+    const params = new URLSearchParams();
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.priority) params.set('priority', filters.priority);
+    if (filters?.assigneeId) params.set('assigneeId', filters.assigneeId);
+    if (filters?.search) params.set('search', filters.search);
+    if (filters?.archived !== undefined) params.set('archived', String(filters.archived));
+
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const res = await apiFetch<TaskListItem[]>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks${queryString}`
+    );
+    return res.data;
+  },
+
+  createTask: async (organizationId: string, projectId: string, data: CreateTaskPayload) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  getTask: async (organizationId: string, projectId: string, taskId: string) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}`
+    );
+    return res.data;
+  },
+
+  updateTask: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    data: UpdateTaskPayload
+  ) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  archiveTask: async (organizationId: string, projectId: string, taskId: string) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/archive`,
+      {
+        method: 'POST',
+      }
+    );
+    return res.data;
+  },
+
+  unarchiveTask: async (organizationId: string, projectId: string, taskId: string) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/unarchive`,
+      {
+        method: 'POST',
+      }
+    );
+    return res.data;
+  },
+
+  deleteTask: async (organizationId: string, projectId: string, taskId: string) => {
+    const res = await apiFetch<{ success: boolean; message: string }>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+
+  // Subtasks
+  listSubtasks: async (organizationId: string, projectId: string, taskId: string) => {
+    const res = await apiFetch<SubtaskItem[]>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/subtasks`
+    );
+    return res.data;
+  },
+
+  createSubtask: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    data: CreateSubtaskPayload
+  ) => {
+    const res = await apiFetch<SubtaskItem>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/subtasks`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  updateSubtask: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    subtaskId: string,
+    data: UpdateSubtaskPayload
+  ) => {
+    const res = await apiFetch<SubtaskItem>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/subtasks/${subtaskId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  deleteSubtask: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    subtaskId: string
+  ) => {
+    const res = await apiFetch<{ success: boolean; message: string }>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/subtasks/${subtaskId}`,
       {
         method: 'DELETE',
       }

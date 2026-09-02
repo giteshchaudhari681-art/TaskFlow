@@ -12,6 +12,7 @@ import {
   updateMemberRole,
   removeMember,
 } from '../controllers/project.controller.js';
+import { taskRoutes } from './task.routes.js';
 
 export const projectRoutes = Router({ mergeParams: true });
 
@@ -31,3 +32,6 @@ projectRoutes.get('/:projectId/members', listMembers);
 projectRoutes.post('/:projectId/members', addMember);
 projectRoutes.patch('/:projectId/members/:userId', updateMemberRole);
 projectRoutes.delete('/:projectId/members/:userId', removeMember);
+
+// Mount Task routes under /:projectId/tasks
+projectRoutes.use('/:projectId/tasks', taskRoutes);
