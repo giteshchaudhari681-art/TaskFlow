@@ -27,8 +27,8 @@ jobs:
       - name: Verify code formatting
         run: npm run format:check
 
-      - name: Type check all workspaces
-        run: npm run type-check
-
       - name: Build packages and apps
         run: npm run build
+
+      - name: Type check all workspaces
+        run: npm run type-check

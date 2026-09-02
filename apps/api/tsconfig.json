@@ -9,5 +9,6 @@
     "declaration": false,
     "sourceMap": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [{ "path": "../../packages/shared" }, { "path": "../../packages/validation" }]
 }
