@@ -21,7 +21,8 @@
     "prisma:format": "npm run prisma:format --workspace=@taskflow/api",
     "prisma:format:check": "npm run prisma:format:check --workspace=@taskflow/api",
     "prisma:migrate": "npm run prisma:migrate --workspace=@taskflow/api",
-    "prisma:seed": "npm run prisma:seed --workspace=@taskflow/api"
+    "prisma:seed": "npm run prisma:seed --workspace=@taskflow/api",
+    "test": "npm run test --workspace=@taskflow/api"
   },
   "devDependencies": {
     "prettier": "^3.5.0",

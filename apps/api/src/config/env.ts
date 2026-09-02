@@ -11,6 +11,9 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
   RATE_LIMIT_MAX: z.coerce.number().default(500),
   JWT_SECRET: z.string().min(16).default('development-jwt-secret-min-32-chars-for-taskflow-api'),
+  JWT_EXPIRES_IN: z.string().default('15m'),
+  REFRESH_TOKEN_EXPIRES_DAYS: z.coerce.number().default(7),
+  COOKIE_SECRET: z.string().min(16).default('development-cookie-secret-min-32-chars-taskflow'),
   DATABASE_URL: z
     .string()
     .min(1, { message: 'DATABASE_URL is required' })

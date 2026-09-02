@@ -30,6 +30,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/taskflow_ci?schema=public
       NODE_ENV: test
       JWT_SECRET: ci-test-jwt-secret-min-32-chars-for-taskflow
+      COOKIE_SECRET: ci-test-cookie-secret-min-32-chars-taskflow
 
     steps:
       - name: Checkout code
@@ -67,3 +68,6 @@ jobs:
 
       - name: Type check all workspaces
         run: npm run type-check
+
+      - name: Run automated test suite
+        run: npm run test
