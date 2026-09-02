@@ -135,6 +135,8 @@ export class TaskService {
       assigneeId?: string;
       search?: string;
       archived?: boolean;
+      labelIds?: string[];
+      labelMatch?: 'ANY' | 'ALL';
     }
   ) {
     // Read access requires org membership + project membership (or org admin)

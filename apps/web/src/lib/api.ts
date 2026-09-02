@@ -27,6 +27,9 @@ import {
   UpdateSubtaskPayload,
   TaskFilterParams,
   TaskStatus,
+  LabelItem,
+  CreateLabelPayload,
+  UpdateLabelPayload,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -372,6 +375,12 @@ export const taskApi = {
     if (filters?.assigneeId) params.set('assigneeId', filters.assigneeId);
     if (filters?.search) params.set('search', filters.search);
     if (filters?.archived !== undefined) params.set('archived', String(filters.archived));
+    if (filters?.labelIds && filters.labelIds.length > 0) {
+      params.set('labelIds', filters.labelIds.join(','));
+    }
+    if (filters?.labelMatch) {
+      params.set('labelMatch', filters.labelMatch);
+    }
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
     const res = await apiFetch<TaskListItem[]>(
@@ -509,6 +518,83 @@ export const taskApi = {
   ) => {
     const res = await apiFetch<{ success: boolean; message: string }>(
       `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/subtasks/${subtaskId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+
+  assignLabel: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    labelId: string
+  ) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/labels`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ labelId }),
+      }
+    );
+    return res.data;
+  },
+
+  removeLabel: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    labelId: string
+  ) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/labels/${labelId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+};
+
+export const labelApi = {
+  listLabels: async (organizationId: string, projectId: string) => {
+    const res = await apiFetch<LabelItem[]>(
+      `/organizations/${organizationId}/projects/${projectId}/labels`
+    );
+    return res.data;
+  },
+
+  createLabel: async (organizationId: string, projectId: string, data: CreateLabelPayload) => {
+    const res = await apiFetch<LabelItem>(
+      `/organizations/${organizationId}/projects/${projectId}/labels`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  updateLabel: async (
+    organizationId: string,
+    projectId: string,
+    labelId: string,
+    data: UpdateLabelPayload
+  ) => {
+    const res = await apiFetch<LabelItem>(
+      `/organizations/${organizationId}/projects/${projectId}/labels/${labelId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  deleteLabel: async (organizationId: string, projectId: string, labelId: string) => {
+    const res = await apiFetch<{ success: boolean }>(
+      `/organizations/${organizationId}/projects/${projectId}/labels/${labelId}`,
       {
         method: 'DELETE',
       }

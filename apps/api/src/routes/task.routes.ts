@@ -14,6 +14,7 @@ import {
   updateSubtask,
   deleteSubtask,
 } from '../controllers/task.controller.js';
+import { assignTaskLabel, removeTaskLabel } from '../controllers/label.controller.js';
 
 export const taskRoutes = Router({ mergeParams: true });
 
@@ -28,6 +29,10 @@ taskRoutes.patch('/:taskId/status', updateTaskStatus);
 taskRoutes.delete('/:taskId', deleteTask);
 taskRoutes.post('/:taskId/archive', archiveTask);
 taskRoutes.post('/:taskId/unarchive', unarchiveTask);
+
+// Task Label endpoints
+taskRoutes.post('/:taskId/labels', assignTaskLabel);
+taskRoutes.delete('/:taskId/labels/:labelId', removeTaskLabel);
 
 // Subtask endpoints
 taskRoutes.get('/:taskId/subtasks', listSubtasks);

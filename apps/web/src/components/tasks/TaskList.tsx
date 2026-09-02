@@ -13,10 +13,17 @@ import {
   Kanban,
   List as ListIcon,
 } from 'lucide-react';
-import { TaskListItem, TaskStatus, TaskPriority, ProjectMemberDetail } from '@taskflow/shared';
-import { taskApi } from '../../lib/api';
+import {
+  TaskListItem,
+  TaskStatus,
+  TaskPriority,
+  ProjectMemberDetail,
+  LabelItem,
+} from '@taskflow/shared';
+import { taskApi, labelApi } from '../../lib/api';
 import { CreateTaskModal } from './CreateTaskModal';
 import { TaskDetailDrawer } from './TaskDetailDrawer';
+import { LabelBadge } from '../labels/LabelBadge';
 
 interface TaskListProps {
   organizationId: string;
@@ -46,15 +53,24 @@ export const TaskList: React.FC<TaskListProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const [assigneeFilter, setAssigneeFilter] = useState<string>('ALL');
+  const [labelFilter, setLabelFilter] = useState<string>('ALL');
   const [showArchived, setShowArchived] = useState(false);
+  const [projectLabels, setProjectLabels] = useState<LabelItem[]>([]);
 
   // Modals & Drawers
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   useEffect(() => {
+    labelApi
+      .listLabels(organizationId, projectId)
+      .then(setProjectLabels)
+      .catch(() => {});
+  }, [organizationId, projectId]);
+
+  useEffect(() => {
     loadTasks();
-  }, [projectId, statusFilter, priorityFilter, assigneeFilter, showArchived]);
+  }, [projectId, statusFilter, priorityFilter, assigneeFilter, labelFilter, showArchived]);
 
   // Debounced search
   useEffect(() => {
@@ -75,11 +91,13 @@ export const TaskList: React.FC<TaskListProps> = ({
         assigneeId?: string;
         search?: string;
         archived?: boolean;
+        labelIds?: string[];
       } = {};
 
       if (statusFilter !== 'ALL') filterParams.status = statusFilter as TaskStatus;
       if (priorityFilter !== 'ALL') filterParams.priority = priorityFilter as TaskPriority;
       if (assigneeFilter !== 'ALL') filterParams.assigneeId = assigneeFilter;
+      if (labelFilter !== 'ALL') filterParams.labelIds = [labelFilter];
       if (search.trim()) filterParams.search = search.trim();
       if (showArchived) filterParams.archived = true;
 
@@ -240,6 +258,20 @@ export const TaskList: React.FC<TaskListProps> = ({
             ))}
           </select>
 
+          {/* Label filter */}
+          <select
+            value={labelFilter}
+            onChange={e => setLabelFilter(e.target.value)}
+            className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-medium text-slate-300 focus:outline-none focus:border-cyan-500"
+          >
+            <option value="ALL">All Labels</option>
+            {projectLabels.map(l => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+
           {/* Show Archived Toggle */}
           <button
             type="button"
@@ -376,6 +408,16 @@ export const TaskList: React.FC<TaskListProps> = ({
                     <h4 className="text-sm font-medium text-white group-hover:text-cyan-300 transition-colors truncate">
                       {task.title}
                     </h4>
+                    {task.labels && task.labels.length > 0 && (
+                      <div
+                        className="flex flex-wrap items-center gap-1.5 mt-1.5"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {task.labels.map(label => (
+                          <LabelBadge key={label.id} label={label} size="xs" />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 

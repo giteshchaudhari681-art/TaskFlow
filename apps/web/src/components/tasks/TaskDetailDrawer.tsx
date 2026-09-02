@@ -12,6 +12,7 @@ import {
   Save,
   CheckSquare,
   Square,
+  Tag,
 } from 'lucide-react';
 import {
   TaskDetail,
@@ -19,8 +20,11 @@ import {
   TaskPriority,
   ProjectMemberDetail,
   SubtaskItem,
+  LabelItem,
 } from '@taskflow/shared';
-import { taskApi } from '../../lib/api';
+import { taskApi, labelApi } from '../../lib/api';
+import { LabelBadge } from '../labels/LabelBadge';
+import { LabelPickerPopover } from '../labels/LabelPickerPopover';
 
 interface TaskDetailDrawerProps {
   organizationId: string;
@@ -63,11 +67,25 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
 
+  // Label states
+  const [projectLabels, setProjectLabels] = useState<LabelItem[]>([]);
+  const [isLabelPickerOpen, setIsLabelPickerOpen] = useState(false);
+
   useEffect(() => {
     if (isOpen && taskId) {
       loadTask();
+      loadLabels();
     }
   }, [isOpen, taskId]);
+
+  const loadLabels = async () => {
+    try {
+      const data = await labelApi.listLabels(organizationId, projectId);
+      setProjectLabels(data);
+    } catch {
+      // Ignore label list error
+    }
+  };
 
   const loadTask = async () => {
     try {
@@ -360,6 +378,103 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   onChange={e => setDueDate(e.target.value)}
                   className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
                 />
+              </div>
+            </div>
+
+            {/* Labels Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-cyan-400" />
+                  Labels
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsLabelPickerOpen(!isLabelPickerOpen)}
+                    className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+                  >
+                    <span>+ Add Label</span>
+                  </button>
+
+                  <LabelPickerPopover
+                    isOpen={isLabelPickerOpen}
+                    onClose={() => setIsLabelPickerOpen(false)}
+                    labels={projectLabels}
+                    selectedLabelIds={task?.labels?.map(l => l.id) || []}
+                    onToggleLabel={async labelId => {
+                      const isAssigned = task?.labels?.some(l => l.id === labelId);
+                      try {
+                        let updated: TaskDetail;
+                        if (isAssigned) {
+                          updated = await taskApi.removeLabel(
+                            organizationId,
+                            projectId,
+                            taskId,
+                            labelId
+                          );
+                        } else {
+                          updated = await taskApi.assignLabel(
+                            organizationId,
+                            projectId,
+                            taskId,
+                            labelId
+                          );
+                        }
+                        setTask(updated);
+                        onUpdated();
+                      } catch (err: unknown) {
+                        const apiErr = err as { message?: string };
+                        setError(apiErr.message || 'Failed to update label');
+                      }
+                    }}
+                    onCreateLabel={async (name, color) => {
+                      try {
+                        const created = await labelApi.createLabel(organizationId, projectId, {
+                          name,
+                          color,
+                        });
+                        setProjectLabels(prev => [...prev, created]);
+                        return created;
+                      } catch (err: unknown) {
+                        const apiErr = err as { message?: string };
+                        setError(apiErr.message || 'Failed to create label');
+                        return null;
+                      }
+                    }}
+                    canCreateLabel={true}
+                  />
+                </div>
+              </div>
+
+              {/* Attached Label Badges */}
+              <div className="flex flex-wrap items-center gap-2 min-h-[36px] p-2.5 bg-slate-950/60 border border-slate-800 rounded-xl">
+                {task?.labels && task.labels.length > 0 ? (
+                  task.labels.map(label => (
+                    <LabelBadge
+                      key={label.id}
+                      label={label}
+                      size="sm"
+                      onRemove={async () => {
+                        try {
+                          const updated = await taskApi.removeLabel(
+                            organizationId,
+                            projectId,
+                            taskId,
+                            label.id
+                          );
+                          setTask(updated);
+                          onUpdated();
+                        } catch (err: unknown) {
+                          const apiErr = err as { message?: string };
+                          setError(apiErr.message || 'Failed to remove label');
+                        }
+                      }}
+                    />
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-500 italic">No labels attached</span>
+                )}
               </div>
             </div>
 

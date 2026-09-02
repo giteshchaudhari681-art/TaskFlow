@@ -11,8 +11,14 @@ import {
   Archive,
   Layers,
 } from 'lucide-react';
-import { TaskListItem, TaskStatus, TaskPriority, ProjectMemberDetail } from '@taskflow/shared';
-import { taskApi } from '../../lib/api';
+import {
+  TaskListItem,
+  TaskStatus,
+  TaskPriority,
+  ProjectMemberDetail,
+  LabelItem,
+} from '@taskflow/shared';
+import { taskApi, labelApi } from '../../lib/api';
 import { KanbanColumn } from './KanbanColumn';
 import { CreateTaskModal } from '../tasks/CreateTaskModal';
 import { TaskDetailDrawer } from '../tasks/TaskDetailDrawer';
@@ -65,6 +71,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [search, setSearch] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const [assigneeFilter, setAssigneeFilter] = useState<string>('ALL');
+  const [labelFilter, setLabelFilter] = useState<string>('ALL');
+  const [projectLabels, setProjectLabels] = useState<LabelItem[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>('number_desc');
   const [showArchived, setShowArchived] = useState(false);
 
@@ -88,6 +96,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               ? undefined
               : assigneeFilter
             : undefined,
+        labelIds: labelFilter !== 'ALL' ? [labelFilter] : undefined,
         archived: showArchived,
       });
       setTasks(data);
@@ -97,7 +106,22 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [organizationId, projectId, search, priorityFilter, assigneeFilter, showArchived]);
+  }, [
+    organizationId,
+    projectId,
+    search,
+    priorityFilter,
+    assigneeFilter,
+    labelFilter,
+    showArchived,
+  ]);
+
+  useEffect(() => {
+    labelApi
+      .listLabels(organizationId, projectId)
+      .then(setProjectLabels)
+      .catch(() => {});
+  }, [organizationId, projectId]);
 
   useEffect(() => {
     fetchTasks();
@@ -205,11 +229,16 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     setSearch('');
     setPriorityFilter('ALL');
     setAssigneeFilter('ALL');
+    setLabelFilter('ALL');
     setShowArchived(false);
   };
 
   const hasActiveFilters =
-    search.trim() !== '' || priorityFilter !== 'ALL' || assigneeFilter !== 'ALL' || showArchived;
+    search.trim() !== '' ||
+    priorityFilter !== 'ALL' ||
+    assigneeFilter !== 'ALL' ||
+    labelFilter !== 'ALL' ||
+    showArchived;
 
   return (
     <div className="space-y-4">
@@ -275,6 +304,22 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               {members.map(m => (
                 <option key={m.userId} value={m.userId}>
                   {m.user.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Label filter */}
+          <div className="relative">
+            <select
+              value={labelFilter}
+              onChange={e => setLabelFilter(e.target.value)}
+              className="px-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 cursor-pointer max-w-[150px] truncate"
+            >
+              <option value="ALL">All Labels</option>
+              {projectLabels.map(l => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
                 </option>
               ))}
             </select>
