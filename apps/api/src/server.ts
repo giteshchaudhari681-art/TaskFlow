@@ -1,9 +1,11 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { healthRoutes } from './routes/health.routes.js';
+import { authRoutes } from './routes/auth.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
 
@@ -12,6 +14,9 @@ export const createServer = (): Express => {
 
   // Security Headers
   app.use(helmet());
+
+  // Cookie Parser
+  app.use(cookieParser(env.COOKIE_SECRET));
 
   // CORS Configuration
   app.use(
@@ -48,6 +53,7 @@ export const createServer = (): Express => {
 
   // Versioned API Routes
   app.use(`${env.API_PREFIX}/health`, healthRoutes);
+  app.use(`${env.API_PREFIX}/auth`, authRoutes);
 
   // 404 Not Found Handler
   app.use(notFoundHandler);

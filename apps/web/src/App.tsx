@@ -6,25 +6,31 @@ import {
   Brain,
   ShieldCheck,
   Server,
-  Terminal,
   CheckCircle2,
   AlertCircle,
   RefreshCw,
   Boxes,
   Workflow,
-  Sparkles,
+  LogOut,
+  Building2,
 } from 'lucide-react';
 import type { HealthCheckData } from '@taskflow/shared';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { LoginPage } from './components/auth/LoginPage';
+import { RegisterPage } from './components/auth/RegisterPage';
 
-export const App: React.FC = () => {
+const MainApp: React.FC = () => {
+  const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
+    useAuth();
+  const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [health, setHealth] = useState<HealthCheckData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [healthLoading, setHealthLoading] = useState<boolean>(true);
+  const [healthError, setHealthError] = useState<string | null>(null);
   const [lastChecked, setLastChecked] = useState<Date>(new Date());
 
   const fetchHealth = async () => {
-    setLoading(true);
-    setError(null);
+    setHealthLoading(true);
+    setHealthError(null);
     try {
       const res = await fetch('/api/v1/health');
       if (!res.ok) {
@@ -38,19 +44,28 @@ export const App: React.FC = () => {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to connect to API server';
-      setError(msg);
+      setHealthError(msg);
       setHealth(null);
     } finally {
-      setLoading(false);
+      setHealthLoading(false);
       setLastChecked(new Date());
     }
   };
 
   useEffect(() => {
     fetchHealth();
-    const interval = setInterval(fetchHealth, 15000);
-    return () => clearInterval(interval);
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
+          <p className="text-sm text-taskflow-muted">Restoring secure session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex flex-col">
@@ -67,18 +82,18 @@ export const App: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <span className="font-bold text-lg tracking-tight text-white">TaskFlow</span>
                 <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
-                  v0.2.0 • PR 2
+                  v0.3.0 • PR 3
                 </span>
               </div>
               <p className="text-xs text-taskflow-muted">AI-Powered Project Operations Platform</p>
             </div>
           </div>
 
-          {/* System Health Indicator Badge */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
-              <span className="text-taskflow-muted">API Status:</span>
-              {loading && !health ? (
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            {/* System Health Indicator Badge */}
+            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
+              <span className="text-taskflow-muted">API:</span>
+              {healthLoading && !health ? (
                 <span className="flex items-center text-amber-400">
                   <RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />
                   Connecting...
@@ -91,58 +106,123 @@ export const App: React.FC = () => {
               ) : (
                 <span className="flex items-center text-rose-400 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 mr-1" />
-                  Disconnected
+                  Offline
                 </span>
               )}
             </div>
 
+            {isAuthenticated && user ? (
+              <div className="flex items-center space-x-3">
+                {/* Organization / Workspace Selector */}
+                {organizations.length > 0 && activeOrg && (
+                  <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
+                    <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                    <select
+                      value={activeOrg.organizationId}
+                      onChange={e => {
+                        const found = organizations.find(o => o.organizationId === e.target.value);
+                        if (found) setActiveOrg(found);
+                      }}
+                      className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
+                    >
+                      {organizations.map(org => (
+                        <option
+                          key={org.organizationId}
+                          value={org.organizationId}
+                          className="bg-taskflow-surface text-white"
+                        >
+                          {org.organizationName} ({org.role})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Authenticated User Pill */}
+                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs text-white">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white">
+                    {user.name.charAt(0)}
+                  </div>
+                  <span className="hidden md:inline font-medium">{user.name}</span>
+                </div>
+
+                {/* Sign Out Button */}
+                <button
+                  onClick={logout}
+                  title="Sign out of current session"
+                  className="p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : null}
+
             <button
               onClick={fetchHealth}
-              disabled={loading}
+              disabled={healthLoading}
               title="Refresh Health Status"
               className="p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${healthLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content Container */}
+      {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-8">
-        {/* Hero & Vision Banner */}
-        <section className="relative overflow-hidden rounded-2xl glass-panel p-8 border border-taskflow-border">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/10 to-indigo-600/10 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 max-w-3xl space-y-4">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-800/50 text-indigo-300 text-xs font-medium">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Foundation Architecture Blueprint</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              A serious operations engine for modern engineering teams.
-            </h1>
-            <p className="text-taskflow-text-dim text-base leading-relaxed">
-              TaskFlow goes beyond generic task management. It combines deterministic dependency
-              graphs, real-time collaboration, and proactive AI delivery intelligence to help teams
-              ship complex projects on time.
-            </p>
+        {!isAuthenticated ? (
+          <div className="py-6 space-y-8">
+            {authView === 'login' ? (
+              <LoginPage onSwitchToRegister={() => setAuthView('register')} />
+            ) : (
+              <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
+            )}
           </div>
-        </section>
+        ) : (
+          <>
+            {/* Authenticated Hero Banner */}
+            <section className="relative overflow-hidden rounded-2xl glass-panel p-8 border border-taskflow-border">
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/10 to-indigo-600/10 blur-3xl pointer-events-none" />
 
-        {/* System Health Card */}
+              <div className="relative z-10 max-w-3xl space-y-4">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/50 text-emerald-300 text-xs font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Authenticated Session Active • PR 3</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                  Welcome back, {user?.name}.
+                </h1>
+                <p className="text-taskflow-text-dim text-base leading-relaxed">
+                  Active workspace:{' '}
+                  <span className="text-cyan-300 font-semibold">
+                    {activeOrg?.organizationName || 'Personal Workspace'}
+                  </span>{' '}
+                  (Role:{' '}
+                  <span className="text-indigo-300 font-mono font-medium">{activeOrg?.role}</span>).
+                  Your access tokens are securely managed in client memory with automatic HTTP-only
+                  refresh token rotation.
+                </p>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* System Health Card (Always visible to inspect live PostgreSQL status) */}
         <section className="glass-card rounded-xl p-6 border border-taskflow-border space-y-4">
           <div className="flex items-center justify-between border-b border-taskflow-border pb-4">
             <div className="flex items-center space-x-2.5">
               <Server className="w-5 h-5 text-cyan-400" />
-              <h2 className="font-semibold text-white text-base">Backend Health Probe</h2>
+              <h2 className="font-semibold text-white text-base">
+                Backend & Database Health Probe
+              </h2>
             </div>
             <span className="text-xs text-taskflow-muted font-mono">
               Last checked: {lastChecked.toLocaleTimeString()}
             </span>
           </div>
 
-          {error ? (
+          {healthError ? (
             <div className="p-4 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-sm flex items-start space-x-3">
               <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
               <div>
@@ -225,7 +305,6 @@ export const App: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Pillar 1 */}
             <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-cyan-500/40 transition-all group">
               <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/60 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-105 transition-transform">
                 <Boxes className="w-5 h-5" />
@@ -237,7 +316,6 @@ export const App: React.FC = () => {
               </p>
             </div>
 
-            {/* Pillar 2 */}
             <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-indigo-500/40 transition-all group">
               <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/60 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-105 transition-transform">
                 <GitBranch className="w-5 h-5" />
@@ -249,7 +327,6 @@ export const App: React.FC = () => {
               </p>
             </div>
 
-            {/* Pillar 3 */}
             <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-purple-500/40 transition-all group">
               <div className="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-800/60 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-105 transition-transform">
                 <Activity className="w-5 h-5" />
@@ -261,7 +338,6 @@ export const App: React.FC = () => {
               </p>
             </div>
 
-            {/* Pillar 4 */}
             <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-emerald-500/40 transition-all group">
               <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400 mb-3 group-hover:scale-105 transition-transform">
                 <Brain className="w-5 h-5" />
@@ -275,77 +351,18 @@ export const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Design System Baseline Showcase */}
-        <section className="glass-card rounded-xl p-6 border border-taskflow-border space-y-4">
-          <div className="flex items-center justify-between border-b border-taskflow-border pb-4">
-            <div className="flex items-center space-x-2.5">
-              <Terminal className="w-5 h-5 text-indigo-400" />
-              <h2 className="font-semibold text-white text-base">
-                Design System & Semantic Tokens
-              </h2>
-            </div>
-            <span className="text-xs text-taskflow-muted">Tailwind CSS + Custom Tokens</span>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <span className="text-xs text-taskflow-muted uppercase tracking-wider block mb-2 font-medium">
-                Task Status Tokens
-              </span>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2.5 py-1 text-xs rounded-md bg-slate-800/80 text-slate-300 border border-slate-700">
-                  Backlog
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-sky-950/70 text-sky-300 border border-sky-800/60">
-                  Todo
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-amber-950/70 text-amber-300 border border-amber-800/60">
-                  In Progress
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-indigo-950/70 text-indigo-300 border border-indigo-800/60">
-                  In Review
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-rose-950/70 text-rose-300 border border-rose-800/60">
-                  Blocked
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-emerald-950/70 text-emerald-300 border border-emerald-800/60">
-                  Done
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <span className="text-xs text-taskflow-muted uppercase tracking-wider block mb-2 font-medium">
-                Priority Scale
-              </span>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2.5 py-1 text-xs rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30 font-medium">
-                  Urgent (P0)
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                  High (P1)
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  Medium (P2)
-                </span>
-                <span className="px-2.5 py-1 text-xs rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  Low (P3)
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* PR 2 Scope Boundary Notice */}
+        {/* PR 3 Scope Boundary Notice */}
         <section className="rounded-xl border border-taskflow-border bg-taskflow-surface/60 p-5 flex items-start space-x-3.5">
           <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
-            <span className="font-semibold text-white">PR 2 Database Foundation</span>
+            <span className="font-semibold text-white">
+              PR 3 Authentication & Authorization Foundation
+            </span>
             <p className="text-taskflow-muted leading-relaxed">
-              This milestone implements the real PostgreSQL database foundation, Prisma ORM schema
-              with 20 core relational models, centralized singleton client, and database health
-              telemetry. Authentication APIs, project execution, and AI operations are scheduled for
-              upcoming PRs.
+              This milestone establishes the complete authentication engine: Dual-token JWT
+              architecture, cryptographically hashed session rotation in PostgreSQL, transactional
+              registration with automatic OWNER workspace provisioning, and multi-tenant RBAC
+              middleware. Project and task CRUD operations are scheduled for upcoming PRs.
             </p>
           </div>
         </section>
@@ -353,8 +370,16 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-taskflow-border py-4 px-6 text-center text-xs text-taskflow-muted">
-        TaskFlow Monorepo Architecture • PR 2 Database Foundation Complete • Ready for PR 3
+        TaskFlow Operations Platform • PR 3 Authentication Complete • Ready for PR 4
       </footer>
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 };
