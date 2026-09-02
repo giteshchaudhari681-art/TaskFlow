@@ -47,6 +47,9 @@ jobs:
       - name: Verify code formatting
         run: npm run format:check
 
+      - name: Run linter
+        run: npm run lint
+
       - name: Verify Prisma schema formatting
         run: npm run prisma:format:check
 
