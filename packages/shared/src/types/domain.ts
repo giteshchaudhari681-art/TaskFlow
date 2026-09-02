@@ -9,6 +9,40 @@ export enum UserRole {
   GUEST = 'GUEST',
 }
 
+export enum ProjectRole {
+  LEAD = 'LEAD',
+  MEMBER = 'MEMBER',
+  VIEWER = 'VIEWER',
+}
+
+export enum MilestoneStatus {
+  OPEN = 'OPEN',
+  COMPLETED = 'COMPLETED',
+  CLOSED = 'CLOSED',
+}
+
+export enum ObjectiveStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  ACHIEVED = 'ACHIEVED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum RecommendationStatus {
+  ACTIVE = 'ACTIVE',
+  APPLIED = 'APPLIED',
+  DISMISSED = 'DISMISSED',
+}
+
+export enum ActivityActionType {
+  CREATED = 'CREATED',
+  UPDATED = 'UPDATED',
+  DELETED = 'DELETED',
+  STATUS_CHANGED = 'STATUS_CHANGED',
+  ASSIGNED = 'ASSIGNED',
+  COMMENTED = 'COMMENTED',
+}
+
 export enum ProjectStatus {
   PLANNING = 'PLANNING',
   ACTIVE = 'ACTIVE',

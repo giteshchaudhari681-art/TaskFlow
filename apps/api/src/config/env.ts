@@ -11,6 +11,10 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
   RATE_LIMIT_MAX: z.coerce.number().default(500),
   JWT_SECRET: z.string().min(16).default('development-jwt-secret-min-32-chars-for-taskflow-api'),
+  DATABASE_URL: z
+    .string()
+    .min(1, { message: 'DATABASE_URL is required' })
+    .default('postgresql://postgres:postgres@localhost:5432/taskflow_dev?schema=public'),
 });
 
 const parseEnv = () => {
