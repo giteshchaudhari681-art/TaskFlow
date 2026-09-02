@@ -3,6 +3,14 @@ import {
   CurrentUserResponse,
   ApiSuccessResponse,
   ApiErrorResponse,
+  UserProfile,
+  UpdateProfilePayload,
+  ChangePasswordPayload,
+  OrganizationDetails,
+  OrganizationMemberItem,
+  UpdateOrganizationPayload,
+  AddMemberPayload,
+  UpdateMemberRolePayload,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -112,6 +120,7 @@ export const apiFetch = async <T>(
 };
 
 export const api = {
+  // Authentication
   login: async (credentials: LoginInput) => {
     const res = await apiFetch<AuthResponseData>('/auth/login', {
       method: 'POST',
@@ -148,6 +157,90 @@ export const api = {
 
   getMe: async () => {
     const res = await apiFetch<CurrentUserResponse>('/auth/me');
+    return res.data;
+  },
+
+  // User Profile & Security
+  getProfile: async () => {
+    const res = await apiFetch<UserProfile>('/users/me');
+    return res.data;
+  },
+
+  updateProfile: async (data: UpdateProfilePayload) => {
+    const res = await apiFetch<UserProfile>('/users/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  changePassword: async (data: ChangePasswordPayload) => {
+    const res = await apiFetch<{ accessToken: string; message: string }>('/users/me/password', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+    if (res.data.accessToken) {
+      setAccessToken(res.data.accessToken);
+    }
+    return res.data;
+  },
+
+  // Organization & Workspace Management
+  getOrganizations: async () => {
+    const res = await apiFetch<OrganizationDetails[]>('/organizations');
+    return res.data;
+  },
+
+  getWorkspace: async (organizationId: string) => {
+    const res = await apiFetch<OrganizationDetails>(`/organizations/${organizationId}`);
+    return res.data;
+  },
+
+  updateWorkspace: async (organizationId: string, data: UpdateOrganizationPayload) => {
+    const res = await apiFetch<OrganizationDetails>(`/organizations/${organizationId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  getMembers: async (organizationId: string) => {
+    const res = await apiFetch<OrganizationMemberItem[]>(
+      `/organizations/${organizationId}/members`
+    );
+    return res.data;
+  },
+
+  addMember: async (organizationId: string, data: AddMemberPayload) => {
+    const res = await apiFetch<OrganizationMemberItem>(`/organizations/${organizationId}/members`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  updateMemberRole: async (
+    organizationId: string,
+    userId: string,
+    data: UpdateMemberRolePayload
+  ) => {
+    const res = await apiFetch<OrganizationMemberItem>(
+      `/organizations/${organizationId}/members/${userId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  removeMember: async (organizationId: string, userId: string) => {
+    const res = await apiFetch<{ message: string }>(
+      `/organizations/${organizationId}/members/${userId}`,
+      {
+        method: 'DELETE',
+      }
+    );
     return res.data;
   },
 };

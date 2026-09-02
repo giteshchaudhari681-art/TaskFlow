@@ -54,6 +54,26 @@ export class UserRepository extends BaseRepository {
       return { user, organization, membership };
     });
   }
+
+  async updateProfile(
+    id: string,
+    data: { name?: string; avatarUrl?: string | null }
+  ): Promise<User> {
+    return this.db.user.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
+      },
+    });
+  }
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<User> {
+    return this.db.user.update({
+      where: { id },
+      data: { passwordHash },
+    });
+  }
 }
 
 export const userRepository = new UserRepository();

@@ -13,16 +13,22 @@ import {
   Workflow,
   LogOut,
   Building2,
+  Settings,
+  LayoutDashboard,
+  Users,
 } from 'lucide-react';
 import type { HealthCheckData } from '@taskflow/shared';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './components/auth/LoginPage';
 import { RegisterPage } from './components/auth/RegisterPage';
+import { SettingsLayout, SettingsTab } from './components/settings/SettingsLayout';
 
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
     useAuth();
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'settings'>('dashboard');
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
   const [healthError, setHealthError] = useState<string | null>(null);
@@ -56,6 +62,11 @@ const MainApp: React.FC = () => {
     fetchHealth();
   }, []);
 
+  const openSettings = (tab: SettingsTab = 'profile') => {
+    setSettingsTab(tab);
+    setCurrentView('settings');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex items-center justify-center">
@@ -72,21 +83,59 @@ const MainApp: React.FC = () => {
       {/* Top Navigation Bar */}
       <header className="sticky top-0 z-50 glass-panel border-b border-taskflow-border px-6 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center">
-              <div className="w-full h-full bg-taskflow-surface rounded-[10px] flex items-center justify-center">
-                <Workflow className="w-5 h-5 text-cyan-400" />
+          <div className="flex items-center space-x-6">
+            <div
+              className="flex items-center space-x-3 cursor-pointer"
+              onClick={() => setCurrentView('dashboard')}
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center">
+                <div className="w-full h-full bg-taskflow-surface rounded-[10px] flex items-center justify-center">
+                  <Workflow className="w-5 h-5 text-cyan-400" />
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="font-bold text-lg tracking-tight text-white">TaskFlow</span>
+                  <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
+                    v0.4.0 • PR 4
+                  </span>
+                </div>
+                <p className="text-xs text-taskflow-muted">
+                  AI-Powered Project Operations Platform
+                </p>
               </div>
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-lg tracking-tight text-white">TaskFlow</span>
-                <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
-                  v0.3.0 • PR 3
-                </span>
-              </div>
-              <p className="text-xs text-taskflow-muted">AI-Powered Project Operations Platform</p>
-            </div>
+
+            {/* Navigation Tabs (Dashboard vs Settings) */}
+            {isAuthenticated && (
+              <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-taskflow-border">
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('dashboard')}
+                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    currentView === 'dashboard'
+                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                  }`}
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span>Dashboard</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openSettings('workspace')}
+                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    currentView === 'settings'
+                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                  }`}
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Settings & Workspace</span>
+                </button>
+              </nav>
+            )}
           </div>
 
           <div className="flex items-center space-x-3 sm:space-x-4">
@@ -138,13 +187,22 @@ const MainApp: React.FC = () => {
                   </div>
                 )}
 
-                {/* Authenticated User Pill */}
-                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs text-white">
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white">
-                    {user.name.charAt(0)}
+                {/* Authenticated User Pill -> Opens Settings */}
+                <button
+                  type="button"
+                  onClick={() => openSettings('profile')}
+                  title="Open user profile settings"
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer"
+                >
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden">
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      user.name.charAt(0)
+                    )}
                   </div>
                   <span className="hidden md:inline font-medium">{user.name}</span>
-                </div>
+                </button>
 
                 {/* Sign Out Button */}
                 <button
@@ -179,6 +237,11 @@ const MainApp: React.FC = () => {
               <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
             )}
           </div>
+        ) : currentView === 'settings' ? (
+          <SettingsLayout
+            onBackToDashboard={() => setCurrentView('dashboard')}
+            initialTab={settingsTab}
+          />
         ) : (
           <>
             {/* Authenticated Hero Banner */}
@@ -188,21 +251,41 @@ const MainApp: React.FC = () => {
               <div className="relative z-10 max-w-3xl space-y-4">
                 <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/50 text-emerald-300 text-xs font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Authenticated Session Active • PR 3</span>
+                  <span>
+                    Active Workspace: {activeOrg?.organizationName || 'Personal Workspace'}
+                  </span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
                   Welcome back, {user?.name}.
                 </h1>
                 <p className="text-taskflow-text-dim text-base leading-relaxed">
-                  Active workspace:{' '}
-                  <span className="text-cyan-300 font-semibold">
-                    {activeOrg?.organizationName || 'Personal Workspace'}
-                  </span>{' '}
-                  (Role:{' '}
-                  <span className="text-indigo-300 font-mono font-medium">{activeOrg?.role}</span>).
-                  Your access tokens are securely managed in client memory with automatic HTTP-only
-                  refresh token rotation.
+                  You are viewing the{' '}
+                  <span className="text-cyan-300 font-semibold">{activeOrg?.organizationName}</span>{' '}
+                  workspace with{' '}
+                  <span className="text-indigo-300 font-mono font-medium">{activeOrg?.role}</span>{' '}
+                  permissions. Manage your identity, update workspace metadata, or administer team
+                  members through the Settings panel.
                 </p>
+
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => openSettings('members')}
+                    className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center space-x-2 transition-colors"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Manage Workspace Members</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openSettings('profile')}
+                    className="px-4 py-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-white text-xs font-medium flex items-center space-x-2 transition-colors"
+                  >
+                    <Settings className="w-4 h-4 text-taskflow-muted" />
+                    <span>Edit Profile & Security</span>
+                  </button>
+                </div>
               </div>
             </section>
           </>
@@ -351,18 +434,16 @@ const MainApp: React.FC = () => {
           </div>
         </section>
 
-        {/* PR 3 Scope Boundary Notice */}
+        {/* Scope Milestone Notice */}
         <section className="rounded-xl border border-taskflow-border bg-taskflow-surface/60 p-5 flex items-start space-x-3.5">
           <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
-            <span className="font-semibold text-white">
-              PR 3 Authentication & Authorization Foundation
-            </span>
+            <span className="font-semibold text-white">PR 4 Identity & Workspace Operations</span>
             <p className="text-taskflow-muted leading-relaxed">
-              This milestone establishes the complete authentication engine: Dual-token JWT
-              architecture, cryptographically hashed session rotation in PostgreSQL, transactional
-              registration with automatic OWNER workspace provisioning, and multi-tenant RBAC
-              middleware. Project and task CRUD operations are scheduled for upcoming PRs.
+              This milestone establishes the complete user profile and organization workspace
+              operations: Profile & avatar management, cryptographic password rotation with session
+              invalidation, workspace metadata updates, member directory with RBAC
+              promotion/demotion matrix, and multi-tenant security guards.
             </p>
           </div>
         </section>
@@ -370,7 +451,7 @@ const MainApp: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-taskflow-border py-4 px-6 text-center text-xs text-taskflow-muted">
-        TaskFlow Operations Platform • PR 3 Authentication Complete • Ready for PR 4
+        TaskFlow Operations Platform • PR 4 Workspace Management Complete
       </footer>
     </div>
   );

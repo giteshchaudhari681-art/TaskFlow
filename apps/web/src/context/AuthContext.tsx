@@ -20,6 +20,8 @@ interface AuthContextType {
   login: (credentials: LoginInput) => Promise<void>;
   register: (data: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  updateUser: (updated: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,7 +40,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(me.user);
         setOrganizations(me.organizations);
         if (me.organizations.length > 0) {
-          setActiveOrg(me.organizations[0]);
+          setActiveOrg(prev => {
+            if (prev) {
+              const stillExists = me.organizations.find(
+                o => o.organizationId === prev.organizationId
+              );
+              if (stillExists) return stillExists;
+            }
+            return me.organizations[0];
+          });
         }
       } else {
         setUser(null);
@@ -58,16 +68,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fetchSession();
   }, [fetchSession]);
 
-  const login = async (credentials: LoginInput) => {
-    setIsLoading(true);
+  const refreshUser = async () => {
     try {
-      await api.login(credentials);
       const me = await api.getMe();
       setUser(me.user);
       setOrganizations(me.organizations);
       if (me.organizations.length > 0) {
-        setActiveOrg(me.organizations[0]);
+        setActiveOrg(prev => {
+          if (prev) {
+            const stillExists = me.organizations.find(
+              o => o.organizationId === prev.organizationId
+            );
+            if (stillExists) return stillExists;
+          }
+          return me.organizations[0];
+        });
       }
+    } catch {
+      // Ignored if session is invalid
+    }
+  };
+
+  const updateUser = (updated: Partial<AuthUser>) => {
+    setUser(prev => (prev ? { ...prev, ...updated } : null));
+  };
+
+  const login = async (credentials: LoginInput) => {
+    setIsLoading(true);
+    try {
+      await api.login(credentials);
+      await refreshUser();
     } finally {
       setIsLoading(false);
     }
@@ -77,12 +107,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     try {
       await api.register(data);
-      const me = await api.getMe();
-      setUser(me.user);
-      setOrganizations(me.organizations);
-      if (me.organizations.length > 0) {
-        setActiveOrg(me.organizations[0]);
-      }
+      await refreshUser();
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +137,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         register,
         logout,
+        refreshUser,
+        updateUser,
       }}
     >
       {children}
