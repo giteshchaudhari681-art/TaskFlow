@@ -86,6 +86,14 @@ export const updateTaskSchema = z
 
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
+export const updateTaskStatusSchema = z.object({
+  status: z.nativeEnum(TaskStatus, {
+    errorMap: () => ({ message: 'Invalid task status' }),
+  }),
+});
+
+export type UpdateTaskStatusInput = z.infer<typeof updateTaskStatusSchema>;
+
 export const createSubtaskSchema = z.object({
   title: z
     .string()

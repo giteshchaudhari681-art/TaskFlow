@@ -203,6 +203,27 @@ export class TaskService {
     });
   }
 
+  async updateTaskStatus(
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    actorUserId: string,
+    status: TaskStatus
+  ) {
+    const { rank } = await this.getActorProjectPermissions(organizationId, projectId, actorUserId);
+
+    if (rank < RANK_MEMBER) {
+      throw new AppError('INSUFFICIENT_PERMISSIONS', 'Viewers cannot modify task status', 403);
+    }
+
+    const task = await taskRepository.findById(taskId, projectId);
+    if (!task) {
+      throw new AppError('TASK_NOT_FOUND', 'Task not found in this project', 404);
+    }
+
+    return taskRepository.updateStatus(taskId, projectId, status);
+  }
+
   async archiveTask(
     organizationId: string,
     projectId: string,

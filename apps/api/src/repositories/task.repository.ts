@@ -236,6 +236,32 @@ export class TaskRepository extends BaseRepository {
     });
   }
 
+  async updateStatus(id: string, projectId: string, status: TaskStatus) {
+    return this.db.task.update({
+      where: { id, projectId },
+      data: {
+        status,
+        completedAt: status === TaskStatus.DONE ? new Date() : null,
+      },
+      include: {
+        assignee: {
+          select: { id: true, name: true, email: true, avatarUrl: true },
+        },
+        reporter: {
+          select: { id: true, name: true, email: true, avatarUrl: true },
+        },
+        subtasks: {
+          orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+          include: {
+            assignee: {
+              select: { id: true, name: true, email: true, avatarUrl: true },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async archive(id: string, projectId: string) {
     return this.db.task.update({
       where: { id, projectId },

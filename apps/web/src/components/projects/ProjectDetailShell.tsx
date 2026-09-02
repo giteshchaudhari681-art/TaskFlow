@@ -24,6 +24,7 @@ import {
 import { updateProjectSchema } from '@taskflow/validation';
 import { projectApi, orgApi } from '../../lib/api';
 import { TaskList } from '../tasks/TaskList';
+import { KanbanBoard } from '../kanban/KanbanBoard';
 
 interface ProjectDetailShellProps {
   organizationId: string;
@@ -50,6 +51,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
 }) => {
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [activeTab, setActiveTab] = useState<ProjectTab>('overview');
+  const [taskViewMode, setTaskViewMode] = useState<'board' | 'list'>('board');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -312,7 +314,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
           {(
             [
               { id: 'overview', label: 'Overview', icon: Activity },
-              { id: 'tasks', label: 'Tasks', icon: Kanban, badge: 'PR 6' },
+              { id: 'tasks', label: 'Board & Tasks', icon: Kanban },
               { id: 'timeline', label: 'Timeline', icon: Milestone, badge: 'Future' },
               { id: 'members', label: 'Members', icon: Users },
               { id: 'settings', label: 'Settings', icon: Settings },
@@ -448,16 +450,29 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         </div>
       )}
 
-      {/* TAB 2: TASKS */}
-      {activeTab === 'tasks' && (
-        <TaskList
-          organizationId={organizationId}
-          projectId={projectId}
-          projectKey={project.key}
-          members={members}
-          canManageTasks={project?.userRole !== ProjectRole.VIEWER}
-        />
-      )}
+      {/* TAB 2: TASKS & KANBAN */}
+      {activeTab === 'tasks' &&
+        (taskViewMode === 'board' ? (
+          <KanbanBoard
+            organizationId={organizationId}
+            projectId={projectId}
+            projectKey={project.key}
+            members={members}
+            canManageTasks={project?.userRole !== ProjectRole.VIEWER}
+            viewMode={taskViewMode}
+            onViewModeChange={setTaskViewMode}
+          />
+        ) : (
+          <TaskList
+            organizationId={organizationId}
+            projectId={projectId}
+            projectKey={project.key}
+            members={members}
+            canManageTasks={project?.userRole !== ProjectRole.VIEWER}
+            viewMode={taskViewMode}
+            onViewModeChange={setTaskViewMode}
+          />
+        ))}
 
       {/* TAB 3: TIMELINE (Future) */}
       {activeTab === 'timeline' && (

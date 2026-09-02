@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import {
   createTaskSchema,
   updateTaskSchema,
+  updateTaskStatusSchema,
   createSubtaskSchema,
   updateSubtaskSchema,
 } from '@taskflow/validation';
@@ -112,6 +113,40 @@ export const updateTask = async (
       taskId,
       req.user!.id,
       parseResult.data
+    );
+    return sendSuccess(res, task);
+  } catch (err: unknown) {
+    return next(err);
+  }
+};
+
+export const updateTaskStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<Response | void> => {
+  try {
+    const organizationId = req.params.organizationId as string;
+    const projectId = req.params.projectId as string;
+    const taskId = req.params.taskId as string;
+
+    const parseResult = updateTaskStatusSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return sendError(
+        res,
+        'VALIDATION_ERROR',
+        'Invalid task status input data',
+        400,
+        parseResult.error.format()
+      );
+    }
+
+    const task = await taskService.updateTaskStatus(
+      organizationId,
+      projectId,
+      taskId,
+      req.user!.id,
+      parseResult.data.status
     );
     return sendSuccess(res, task);
   } catch (err: unknown) {

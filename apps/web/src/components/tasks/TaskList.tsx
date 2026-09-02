@@ -10,6 +10,8 @@ import {
   RefreshCw,
   Layers,
   Archive,
+  Kanban,
+  List as ListIcon,
 } from 'lucide-react';
 import { TaskListItem, TaskStatus, TaskPriority, ProjectMemberDetail } from '@taskflow/shared';
 import { taskApi } from '../../lib/api';
@@ -22,6 +24,8 @@ interface TaskListProps {
   projectKey: string;
   members: ProjectMemberDetail[];
   canManageTasks: boolean;
+  viewMode?: 'board' | 'list';
+  onViewModeChange?: (mode: 'board' | 'list') => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -30,6 +34,8 @@ export const TaskList: React.FC<TaskListProps> = ({
   projectKey,
   members,
   canManageTasks,
+  viewMode = 'list',
+  onViewModeChange,
 }) => {
   const [tasks, setTasks] = useState<TaskListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -256,6 +262,38 @@ export const TaskList: React.FC<TaskListProps> = ({
           >
             <RefreshCw className="w-4 h-4" />
           </button>
+
+          {/* View Mode Toggle */}
+          {onViewModeChange && (
+            <div className="flex items-center p-0.5 rounded-xl border border-slate-800 bg-slate-950">
+              <button
+                type="button"
+                onClick={() => onViewModeChange('board')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  viewMode === 'board'
+                    ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60 shadow-sm'
+                    : 'text-taskflow-muted hover:text-white'
+                }`}
+                title="Board view"
+              >
+                <Kanban className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Board</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onViewModeChange('list')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60 shadow-sm'
+                    : 'text-taskflow-muted hover:text-white'
+                }`}
+                title="List view"
+              >
+                <ListIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+            </div>
+          )}
 
           {/* Create Task CTA */}
           {canManageTasks && (

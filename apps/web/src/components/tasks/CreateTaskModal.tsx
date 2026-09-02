@@ -10,6 +10,7 @@ interface CreateTaskModalProps {
   projectKey: string;
   members: ProjectMemberDetail[];
   isOpen: boolean;
+  initialStatus?: TaskStatus;
   onClose: () => void;
   onCreated: () => void;
 }
@@ -20,17 +21,32 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   projectKey,
   members,
   isOpen,
+  initialStatus,
   onClose,
   onCreated,
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState<TaskStatus>(TaskStatus.TODO);
+  const [status, setStatus] = useState<TaskStatus>(initialStatus || TaskStatus.TODO);
   const [priority, setPriority] = useState<TaskPriority>(TaskPriority.MEDIUM);
   const [assigneeId, setAssigneeId] = useState<string>('');
   const [dueDate, setDueDate] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialStatus) {
+        setStatus(initialStatus);
+      }
+      setTitle('');
+      setDescription('');
+      setPriority(TaskPriority.MEDIUM);
+      setAssigneeId('');
+      setDueDate('');
+      setError(null);
+    }
+  }, [isOpen, initialStatus]);
 
   if (!isOpen) return null;
 
