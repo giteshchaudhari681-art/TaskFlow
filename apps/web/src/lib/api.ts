@@ -26,6 +26,7 @@ import {
   CreateSubtaskPayload,
   UpdateSubtaskPayload,
   TaskFilterParams,
+  TaskStatus,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -408,6 +409,22 @@ export const taskApi = {
       {
         method: 'PATCH',
         body: JSON.stringify(data),
+      }
+    );
+    return res.data;
+  },
+
+  updateTaskStatus: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    status: TaskStatus
+  ) => {
+    const res = await apiFetch<TaskDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
       }
     );
     return res.data;

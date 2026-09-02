@@ -5,6 +5,7 @@ import {
   createTask,
   getTask,
   updateTask,
+  updateTaskStatus,
   archiveTask,
   unarchiveTask,
   deleteTask,
@@ -23,6 +24,7 @@ taskRoutes.get('/', listTasks);
 taskRoutes.post('/', createTask);
 taskRoutes.get('/:taskId', getTask);
 taskRoutes.patch('/:taskId', updateTask);
+taskRoutes.patch('/:taskId/status', updateTaskStatus);
 taskRoutes.delete('/:taskId', deleteTask);
 taskRoutes.post('/:taskId/archive', archiveTask);
 taskRoutes.post('/:taskId/unarchive', unarchiveTask);
