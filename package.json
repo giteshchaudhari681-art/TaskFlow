@@ -15,7 +15,13 @@
     "lint": "npm run lint --workspaces --if-present",
     "type-check": "npm run build:packages && npm run type-check --workspaces --if-present",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "prisma:generate": "npm run prisma:generate --workspace=@taskflow/api",
+    "prisma:validate": "npm run prisma:validate --workspace=@taskflow/api",
+    "prisma:format": "npm run prisma:format --workspace=@taskflow/api",
+    "prisma:format:check": "npm run prisma:format:check --workspace=@taskflow/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace=@taskflow/api",
+    "prisma:seed": "npm run prisma:seed --workspace=@taskflow/api"
   },
   "devDependencies": {
     "prettier": "^3.5.0",

@@ -45,4 +45,8 @@ export interface HealthCheckData {
   environment: string;
   timestamp: string;
   uptimeSeconds: number;
+  database?: {
+    status: 'connected' | 'disconnected';
+    latencyMs?: number;
+  };
 }

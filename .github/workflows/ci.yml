@@ -11,6 +11,26 @@ jobs:
     name: Lint, Type Check & Build
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: taskflow_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/taskflow_ci?schema=public
+      NODE_ENV: test
+      JWT_SECRET: ci-test-jwt-secret-min-32-chars-for-taskflow
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,6 +46,21 @@ jobs:
 
       - name: Verify code formatting
         run: npm run format:check
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Verify Prisma schema formatting
+        run: npm run prisma:format:check
+
+      - name: Validate Prisma schema
+        run: npm run prisma:validate
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Test apply Prisma migrations
+        run: npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
 
       - name: Build packages and apps
         run: npm run build

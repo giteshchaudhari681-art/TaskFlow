@@ -1,0 +1,510 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('OWNER', 'ADMIN', 'MEMBER', 'GUEST');
+
+-- CreateEnum
+CREATE TYPE "ProjectRole" AS ENUM ('LEAD', 'MEMBER', 'VIEWER');
+
+-- CreateEnum
+CREATE TYPE "ProjectStatus" AS ENUM ('PLANNING', 'ACTIVE', 'PAUSED', 'COMPLETED', 'ARCHIVED');
+
+-- CreateEnum
+CREATE TYPE "MilestoneStatus" AS ENUM ('OPEN', 'COMPLETED', 'CLOSED');
+
+-- CreateEnum
+CREATE TYPE "ObjectiveStatus" AS ENUM ('DRAFT', 'ACTIVE', 'ACHIEVED', 'CANCELLED');
+
+-- CreateEnum
+CREATE TYPE "TaskStatus" AS ENUM ('BACKLOG', 'TODO', 'IN_PROGRESS', 'IN_REVIEW', 'BLOCKED', 'DONE', 'CANCELLED');
+
+-- CreateEnum
+CREATE TYPE "TaskPriority" AS ENUM ('URGENT', 'HIGH', 'MEDIUM', 'LOW', 'NONE');
+
+-- CreateEnum
+CREATE TYPE "DependencyType" AS ENUM ('BLOCKS', 'BLOCKED_BY', 'RELATES_TO');
+
+-- CreateEnum
+CREATE TYPE "RiskLevel" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
+
+-- CreateEnum
+CREATE TYPE "RecommendationStatus" AS ENUM ('ACTIVE', 'APPLIED', 'DISMISSED');
+
+-- CreateEnum
+CREATE TYPE "ActivityActionType" AS ENUM ('CREATED', 'UPDATED', 'DELETED', 'STATUS_CHANGED', 'ASSIGNED', 'COMMENTED');
+
+-- CreateTable
+CREATE TABLE "users" (
+    "id" UUID NOT NULL,
+    "email" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "avatarUrl" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "organizations" (
+    "id" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "logoUrl" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "organization_members" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "role" "UserRole" NOT NULL DEFAULT 'MEMBER',
+    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "organization_members_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "projects" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "description" TEXT,
+    "status" "ProjectStatus" NOT NULL DEFAULT 'PLANNING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "projects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "project_members" (
+    "id" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "role" "ProjectRole" NOT NULL DEFAULT 'MEMBER',
+    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "project_members_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "objectives" (
+    "id" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "status" "ObjectiveStatus" NOT NULL DEFAULT 'DRAFT',
+    "targetDate" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "objectives_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "milestones" (
+    "id" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "dueDate" TIMESTAMP(3),
+    "status" "MilestoneStatus" NOT NULL DEFAULT 'OPEN',
+    "progressPercent" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "milestones_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tasks" (
+    "id" UUID NOT NULL,
+    "taskNumber" INTEGER NOT NULL,
+    "projectId" UUID NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "status" "TaskStatus" NOT NULL DEFAULT 'TODO',
+    "priority" "TaskPriority" NOT NULL DEFAULT 'MEDIUM',
+    "assigneeId" UUID,
+    "reporterId" UUID,
+    "milestoneId" UUID,
+    "objectiveId" UUID,
+    "dueDate" TIMESTAMP(3),
+    "estimateHours" DOUBLE PRECISION,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "tasks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "task_dependencies" (
+    "id" UUID NOT NULL,
+    "predecessorId" UUID NOT NULL,
+    "successorId" UUID NOT NULL,
+    "type" "DependencyType" NOT NULL DEFAULT 'BLOCKS',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "task_dependencies_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "subtasks" (
+    "id" UUID NOT NULL,
+    "taskId" UUID NOT NULL,
+    "title" TEXT NOT NULL,
+    "isCompleted" BOOLEAN NOT NULL DEFAULT false,
+    "order" INTEGER NOT NULL DEFAULT 0,
+    "assigneeId" UUID,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "subtasks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "labels" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "colorHex" TEXT NOT NULL DEFAULT '#6366f1',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "labels_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "task_labels" (
+    "id" UUID NOT NULL,
+    "taskId" UUID NOT NULL,
+    "labelId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "task_labels_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "discussions" (
+    "id" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "authorId" UUID,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "discussions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "comments" (
+    "id" UUID NOT NULL,
+    "taskId" UUID,
+    "discussionId" UUID,
+    "authorId" UUID,
+    "parentId" UUID,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "comments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "attachments" (
+    "id" UUID NOT NULL,
+    "taskId" UUID NOT NULL,
+    "uploadedById" UUID,
+    "filename" TEXT NOT NULL,
+    "fileUrl" TEXT NOT NULL,
+    "fileSize" INTEGER NOT NULL,
+    "mimeType" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "attachments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "activities" (
+    "id" UUID NOT NULL,
+    "projectId" UUID,
+    "taskId" UUID,
+    "actorId" UUID,
+    "actionType" "ActivityActionType" NOT NULL,
+    "fieldChanged" TEXT,
+    "oldValue" TEXT,
+    "newValue" TEXT,
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "activities_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "notifications" (
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "title" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "linkUrl" TEXT,
+    "isRead" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "notifications_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "planner_items" (
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "taskId" UUID,
+    "date" DATE NOT NULL,
+    "order" INTEGER NOT NULL DEFAULT 0,
+    "notes" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "planner_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "project_insights" (
+    "id" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "riskLevel" "RiskLevel" NOT NULL DEFAULT 'LOW',
+    "title" TEXT NOT NULL,
+    "summary" TEXT NOT NULL,
+    "recommendedAction" TEXT,
+    "metadata" JSONB,
+    "isDismissed" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "project_insights_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ai_recommendations" (
+    "id" UUID NOT NULL,
+    "projectId" UUID NOT NULL,
+    "type" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "suggestion" TEXT NOT NULL,
+    "impactScore" DOUBLE PRECISION,
+    "status" "RecommendationStatus" NOT NULL DEFAULT 'ACTIVE',
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ai_recommendations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "organizations_slug_key" ON "organizations"("slug");
+
+-- CreateIndex
+CREATE INDEX "organization_members_userId_idx" ON "organization_members"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "organization_members_organizationId_userId_key" ON "organization_members"("organizationId", "userId");
+
+-- CreateIndex
+CREATE INDEX "projects_organizationId_status_idx" ON "projects"("organizationId", "status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "projects_organizationId_key_key" ON "projects"("organizationId", "key");
+
+-- CreateIndex
+CREATE INDEX "project_members_userId_idx" ON "project_members"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "project_members_projectId_userId_key" ON "project_members"("projectId", "userId");
+
+-- CreateIndex
+CREATE INDEX "objectives_projectId_idx" ON "objectives"("projectId");
+
+-- CreateIndex
+CREATE INDEX "milestones_projectId_dueDate_idx" ON "milestones"("projectId", "dueDate");
+
+-- CreateIndex
+CREATE INDEX "tasks_projectId_status_idx" ON "tasks"("projectId", "status");
+
+-- CreateIndex
+CREATE INDEX "tasks_assigneeId_idx" ON "tasks"("assigneeId");
+
+-- CreateIndex
+CREATE INDEX "tasks_dueDate_idx" ON "tasks"("dueDate");
+
+-- CreateIndex
+CREATE INDEX "tasks_milestoneId_idx" ON "tasks"("milestoneId");
+
+-- CreateIndex
+CREATE INDEX "tasks_objectiveId_idx" ON "tasks"("objectiveId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tasks_projectId_taskNumber_key" ON "tasks"("projectId", "taskNumber");
+
+-- CreateIndex
+CREATE INDEX "task_dependencies_successorId_idx" ON "task_dependencies"("successorId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "task_dependencies_predecessorId_successorId_key" ON "task_dependencies"("predecessorId", "successorId");
+
+-- CreateIndex
+CREATE INDEX "subtasks_taskId_order_idx" ON "subtasks"("taskId", "order");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "labels_organizationId_name_key" ON "labels"("organizationId", "name");
+
+-- CreateIndex
+CREATE INDEX "task_labels_labelId_idx" ON "task_labels"("labelId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "task_labels_taskId_labelId_key" ON "task_labels"("taskId", "labelId");
+
+-- CreateIndex
+CREATE INDEX "discussions_projectId_createdAt_idx" ON "discussions"("projectId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "comments_taskId_createdAt_idx" ON "comments"("taskId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "comments_discussionId_createdAt_idx" ON "comments"("discussionId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "attachments_taskId_idx" ON "attachments"("taskId");
+
+-- CreateIndex
+CREATE INDEX "activities_taskId_createdAt_idx" ON "activities"("taskId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "activities_projectId_createdAt_idx" ON "activities"("projectId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "notifications_userId_isRead_createdAt_idx" ON "notifications"("userId", "isRead", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "planner_items_userId_date_idx" ON "planner_items"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "project_insights_projectId_riskLevel_isDismissed_idx" ON "project_insights"("projectId", "riskLevel", "isDismissed");
+
+-- CreateIndex
+CREATE INDEX "ai_recommendations_projectId_status_idx" ON "ai_recommendations"("projectId", "status");
+
+-- AddForeignKey
+ALTER TABLE "organization_members" ADD CONSTRAINT "organization_members_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "organization_members" ADD CONSTRAINT "organization_members_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "projects" ADD CONSTRAINT "projects_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "project_members" ADD CONSTRAINT "project_members_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "project_members" ADD CONSTRAINT "project_members_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "objectives" ADD CONSTRAINT "objectives_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "milestones" ADD CONSTRAINT "milestones_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_assigneeId_fkey" FOREIGN KEY ("assigneeId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_reporterId_fkey" FOREIGN KEY ("reporterId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_milestoneId_fkey" FOREIGN KEY ("milestoneId") REFERENCES "milestones"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_objectiveId_fkey" FOREIGN KEY ("objectiveId") REFERENCES "objectives"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "task_dependencies" ADD CONSTRAINT "task_dependencies_predecessorId_fkey" FOREIGN KEY ("predecessorId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "task_dependencies" ADD CONSTRAINT "task_dependencies_successorId_fkey" FOREIGN KEY ("successorId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "subtasks" ADD CONSTRAINT "subtasks_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "subtasks" ADD CONSTRAINT "subtasks_assigneeId_fkey" FOREIGN KEY ("assigneeId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "labels" ADD CONSTRAINT "labels_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "task_labels" ADD CONSTRAINT "task_labels_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "task_labels" ADD CONSTRAINT "task_labels_labelId_fkey" FOREIGN KEY ("labelId") REFERENCES "labels"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "discussions" ADD CONSTRAINT "discussions_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "discussions" ADD CONSTRAINT "discussions_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_discussionId_fkey" FOREIGN KEY ("discussionId") REFERENCES "discussions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "comments"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "attachments" ADD CONSTRAINT "attachments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "attachments" ADD CONSTRAINT "attachments_uploadedById_fkey" FOREIGN KEY ("uploadedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "activities" ADD CONSTRAINT "activities_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "activities" ADD CONSTRAINT "activities_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "activities" ADD CONSTRAINT "activities_actorId_fkey" FOREIGN KEY ("actorId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "planner_items" ADD CONSTRAINT "planner_items_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "planner_items" ADD CONSTRAINT "planner_items_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "project_insights" ADD CONSTRAINT "project_insights_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ai_recommendations" ADD CONSTRAINT "ai_recommendations_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

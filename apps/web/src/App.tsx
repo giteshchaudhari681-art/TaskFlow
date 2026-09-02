@@ -67,7 +67,7 @@ export const App: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <span className="font-bold text-lg tracking-tight text-white">TaskFlow</span>
                 <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
-                  v0.1.0 • PR 1
+                  v0.2.0 • PR 2
                 </span>
               </div>
               <p className="text-xs text-taskflow-muted">AI-Powered Project Operations Platform</p>
@@ -157,7 +157,7 @@ export const App: React.FC = () => {
               </div>
             </div>
           ) : health ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
                 <span className="text-xs text-taskflow-muted block">Service</span>
                 <span className="font-mono text-sm font-semibold text-cyan-300">
@@ -165,10 +165,33 @@ export const App: React.FC = () => {
                 </span>
               </div>
               <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
-                <span className="text-xs text-taskflow-muted block">Status</span>
+                <span className="text-xs text-taskflow-muted block">API Status</span>
                 <span className="font-semibold text-sm text-emerald-400 uppercase flex items-center mt-0.5">
                   <CheckCircle2 className="w-4 h-4 mr-1 inline" />
                   {health.status}
+                </span>
+              </div>
+              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
+                <span className="text-xs text-taskflow-muted block">Database</span>
+                <span
+                  className={`font-semibold text-sm flex items-center mt-0.5 ${
+                    health.database?.status === 'connected' ? 'text-emerald-400' : 'text-amber-400'
+                  }`}
+                >
+                  {health.database?.status === 'connected' ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-1 inline" />
+                      Connected
+                      {health.database.latencyMs !== undefined
+                        ? ` (${health.database.latencyMs}ms)`
+                        : ''}
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-4 h-4 mr-1 inline" />
+                      Offline
+                    </>
+                  )}
                 </span>
               </div>
               <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
@@ -313,15 +336,15 @@ export const App: React.FC = () => {
           </div>
         </section>
 
-        {/* PR 1 Scope Boundary Notice */}
+        {/* PR 2 Scope Boundary Notice */}
         <section className="rounded-xl border border-taskflow-border bg-taskflow-surface/60 p-5 flex items-start space-x-3.5">
           <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
-            <span className="font-semibold text-white">PR 1 Scope Boundary</span>
+            <span className="font-semibold text-white">PR 2 Database Foundation</span>
             <p className="text-taskflow-muted leading-relaxed">
-              This milestone intentionally implements only the core foundation, build pipeline,
-              health probes, monorepo packages, and architecture documentation. Authentication,
-              database schema migrations, project workspaces, and AI operations are scheduled for
+              This milestone implements the real PostgreSQL database foundation, Prisma ORM schema
+              with 20 core relational models, centralized singleton client, and database health
+              telemetry. Authentication APIs, project execution, and AI operations are scheduled for
               upcoming PRs.
             </p>
           </div>
@@ -330,7 +353,7 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-taskflow-border py-4 px-6 text-center text-xs text-taskflow-muted">
-        TaskFlow Monorepo Architecture • PR 1 Complete • Ready for PR 2
+        TaskFlow Monorepo Architecture • PR 2 Database Foundation Complete • Ready for PR 3
       </footer>
     </div>
   );
