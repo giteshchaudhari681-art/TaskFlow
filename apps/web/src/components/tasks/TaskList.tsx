@@ -12,6 +12,7 @@ import {
   Archive,
   Kanban,
   List as ListIcon,
+  Link2,
 } from 'lucide-react';
 import {
   TaskListItem,
@@ -435,6 +436,29 @@ export const TaskList: React.FC<TaskListProps> = ({
                       <CheckSquare className="w-3 h-3 text-cyan-400" />
                       <span>
                         {task.completedSubtaskCount}/{task.subtaskCount}
+                      </span>
+                    </span>
+                  )}
+
+                  {/* Dependency pill */}
+                  {task.dependencySummary && task.dependencySummary.totalDependencies > 0 && (
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-md border ${
+                        task.dependencySummary.hasUnresolvedBlockers
+                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                          : 'bg-slate-800/80 text-slate-300 border-slate-700/80'
+                      }`}
+                      title={
+                        task.dependencySummary.hasUnresolvedBlockers
+                          ? `Blocked by ${task.dependencySummary.blockedByCount} task(s)`
+                          : `${task.dependencySummary.totalDependencies} linked dependencies`
+                      }
+                    >
+                      <Link2 className="w-3 h-3 text-cyan-400" />
+                      <span>
+                        {task.dependencySummary.hasUnresolvedBlockers
+                          ? `Blocked (${task.dependencySummary.blockedByCount})`
+                          : task.dependencySummary.totalDependencies}
                       </span>
                     </span>
                   )}

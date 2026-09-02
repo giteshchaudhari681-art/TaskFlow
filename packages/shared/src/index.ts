@@ -6,4 +6,5 @@ export * from './types/organization.js';
 export * from './types/project.js';
 export * from './types/task.js';
 export * from './types/label.js';
+export * from './types/dependency.js';
 export * from './constants/index.js';

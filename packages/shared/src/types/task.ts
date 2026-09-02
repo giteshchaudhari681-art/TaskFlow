@@ -1,5 +1,6 @@
 import { TaskStatus, TaskPriority } from './domain.js';
 import { LabelItem } from './label.js';
+import { TaskDependencySummary } from './dependency.js';
 
 export { TaskStatus, TaskPriority };
 
@@ -46,6 +47,7 @@ export interface TaskDetail {
   subtaskCount: number;
   completedSubtaskCount: number;
   labels?: LabelItem[];
+  dependencySummary?: TaskDependencySummary;
 }
 
 export interface TaskListItem {
@@ -67,6 +69,7 @@ export interface TaskListItem {
   subtaskCount: number;
   completedSubtaskCount: number;
   labels?: LabelItem[];
+  dependencySummary?: TaskDependencySummary;
 }
 
 export interface CreateTaskPayload {

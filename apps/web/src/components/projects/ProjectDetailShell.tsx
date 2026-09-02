@@ -14,6 +14,7 @@ import {
   Kanban,
   Milestone,
   Tag,
+  GitFork,
 } from 'lucide-react';
 import {
   ProjectDetail,
@@ -27,6 +28,7 @@ import { projectApi, orgApi } from '../../lib/api';
 import { TaskList } from '../tasks/TaskList';
 import { KanbanBoard } from '../kanban/KanbanBoard';
 import { ProjectLabelsSettings } from '../labels/ProjectLabelsSettings';
+import { DependencyGraphView } from '../dependencies/DependencyGraphView';
 
 interface ProjectDetailShellProps {
   organizationId: string;
@@ -34,7 +36,8 @@ interface ProjectDetailShellProps {
   onBack: () => void;
 }
 
-type ProjectTab = 'overview' | 'members' | 'settings' | 'tasks' | 'labels' | 'timeline';
+type ProjectTab =
+  'overview' | 'members' | 'settings' | 'tasks' | 'labels' | 'dependencies' | 'timeline';
 
 const PRESET_COLORS = [
   { label: 'Cyan', value: '#06b6d4' },
@@ -318,6 +321,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               { id: 'overview', label: 'Overview', icon: Activity },
               { id: 'tasks', label: 'Board & Tasks', icon: Kanban },
               { id: 'labels', label: 'Labels', icon: Tag },
+              { id: 'dependencies', label: 'Dependencies', icon: GitFork },
               { id: 'timeline', label: 'Timeline', icon: Milestone, badge: 'Future' },
               { id: 'members', label: 'Members', icon: Users },
               { id: 'settings', label: 'Settings', icon: Settings },
@@ -488,7 +492,18 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         </div>
       )}
 
-      {/* TAB 4: TIMELINE (Future) */}
+      {/* TAB 4: DEPENDENCIES GRAPH */}
+      {activeTab === 'dependencies' && (
+        <div className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-taskflow-surface/30">
+          <DependencyGraphView
+            organizationId={organizationId}
+            projectId={projectId}
+            projectKey={project.key}
+          />
+        </div>
+      )}
+
+      {/* TAB 5: TIMELINE (Future) */}
       {activeTab === 'timeline' && (
         <div className="glass-panel rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30 space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-indigo-950/60 border border-indigo-800/60 text-indigo-400 flex items-center justify-center mx-auto shadow-glow-indigo">
