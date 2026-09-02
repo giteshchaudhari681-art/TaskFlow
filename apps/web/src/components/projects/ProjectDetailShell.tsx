@@ -23,6 +23,7 @@ import {
 } from '@taskflow/shared';
 import { updateProjectSchema } from '@taskflow/validation';
 import { projectApi, orgApi } from '../../lib/api';
+import { TaskList } from '../tasks/TaskList';
 
 interface ProjectDetailShellProps {
   organizationId: string;
@@ -447,24 +448,15 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         </div>
       )}
 
-      {/* TAB 2: TASKS (Coming in PR 6) */}
+      {/* TAB 2: TASKS */}
       {activeTab === 'tasks' && (
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30 space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-cyan-950/60 border border-cyan-800/60 text-cyan-400 flex items-center justify-center mx-auto shadow-glow-cyan">
-            <Kanban className="w-8 h-8" />
-          </div>
-          <div className="max-w-md mx-auto space-y-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-cyan-950 text-cyan-400 border border-cyan-800/60">
-              PR 6 Milestone Feature
-            </span>
-            <h3 className="text-lg font-bold text-white">Task Management & Kanban Board</h3>
-            <p className="text-xs text-taskflow-muted leading-relaxed">
-              The project execution layer is being prepared. In PR 6, this workspace will provide
-              drag-and-drop Kanban columns (Backlog, Todo, In Progress, Review, Blocked, Done),
-              subtask tracking, and AI-assisted priority assignment.
-            </p>
-          </div>
-        </div>
+        <TaskList
+          organizationId={organizationId}
+          projectId={projectId}
+          projectKey={project.key}
+          members={members}
+          canManageTasks={project?.userRole !== ProjectRole.VIEWER}
+        />
       )}
 
       {/* TAB 3: TIMELINE (Future) */}
