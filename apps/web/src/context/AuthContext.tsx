@@ -94,23 +94,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const login = async (credentials: LoginInput) => {
-    setIsLoading(true);
-    try {
-      await api.login(credentials);
-      await refreshUser();
-    } finally {
-      setIsLoading(false);
-    }
+    await api.login(credentials);
+    await refreshUser();
   };
 
   const register = async (data: RegisterInput) => {
-    setIsLoading(true);
-    try {
-      await api.register(data);
-      await refreshUser();
-    } finally {
-      setIsLoading(false);
-    }
+    await api.register(data);
+    await refreshUser();
   };
 
   const logout = async () => {
