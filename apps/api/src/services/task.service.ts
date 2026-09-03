@@ -1,7 +1,14 @@
-import { TaskStatus, TaskPriority, UserRole, ProjectRole } from '@prisma/client';
+import {
+  TaskStatus,
+  TaskPriority,
+  UserRole,
+  ProjectRole,
+  ActivityActionType,
+} from '@prisma/client';
 import { taskRepository } from '../repositories/task.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
+import { activityRepository } from '../repositories/activity.repository.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const RANK_SUPER = 5;
@@ -122,6 +129,19 @@ export class TaskService {
       actorUserId
     );
 
+    // Record activity
+    await activityRepository.create({
+      projectId,
+      taskId: task.id,
+      actorId: actorUserId,
+      actionType: ActivityActionType.TASK_CREATED,
+      metadata: {
+        taskNumber: task.taskNumber,
+        issueKey: task.issueKey,
+        taskTitle: task.title,
+      },
+    });
+
     return task;
   }
 
@@ -195,7 +215,7 @@ export class TaskService {
       await this.validateAssignee(projectId, data.assigneeId);
     }
 
-    return taskRepository.update(taskId, projectId, {
+    const updated = await taskRepository.update(taskId, projectId, {
       title: data.title,
       description: data.description,
       status: data.status,
@@ -206,6 +226,111 @@ export class TaskService {
       estimateHours: data.estimateHours,
       milestoneId: data.milestoneId,
     });
+
+    // Detect changes and generate relevant activities
+    if (data.status && data.status !== task.status) {
+      await activityRepository.create({
+        projectId,
+        taskId,
+        actorId: actorUserId,
+        actionType: ActivityActionType.TASK_STATUS_CHANGED,
+        fieldChanged: 'status',
+        oldValue: task.status,
+        newValue: data.status,
+        metadata: {
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: task.title,
+          from: task.status,
+          to: data.status,
+        },
+      });
+    }
+
+    if (data.priority && data.priority !== task.priority) {
+      await activityRepository.create({
+        projectId,
+        taskId,
+        actorId: actorUserId,
+        actionType: ActivityActionType.TASK_PRIORITY_CHANGED,
+        fieldChanged: 'priority',
+        oldValue: task.priority,
+        newValue: data.priority,
+        metadata: {
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: task.title,
+          from: task.priority,
+          to: data.priority,
+        },
+      });
+    }
+
+    if (data.assigneeId !== undefined && data.assigneeId !== task.assigneeId) {
+      const isUnassign = !data.assigneeId;
+      await activityRepository.create({
+        projectId,
+        taskId,
+        actorId: actorUserId,
+        actionType: isUnassign
+          ? ActivityActionType.TASK_UNASSIGNED
+          : ActivityActionType.TASK_ASSIGNED,
+        fieldChanged: 'assigneeId',
+        oldValue: task.assigneeId,
+        newValue: data.assigneeId ?? null,
+        metadata: {
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: task.title,
+          previousAssigneeId: task.assigneeId,
+          newAssigneeId: data.assigneeId ?? null,
+        },
+      });
+    }
+
+    if (data.milestoneId !== undefined && data.milestoneId !== task.milestoneId) {
+      await activityRepository.create({
+        projectId,
+        taskId,
+        actorId: actorUserId,
+        actionType: ActivityActionType.TASK_MILESTONE_CHANGED,
+        fieldChanged: 'milestoneId',
+        oldValue: task.milestoneId,
+        newValue: data.milestoneId ?? null,
+        metadata: {
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: task.title,
+          previousMilestoneId: task.milestoneId,
+          newMilestoneId: data.milestoneId ?? null,
+        },
+      });
+    }
+
+    if (
+      !data.status &&
+      !data.priority &&
+      data.assigneeId === undefined &&
+      data.milestoneId === undefined &&
+      (data.title ||
+        data.description !== undefined ||
+        data.dueDate !== undefined ||
+        data.estimateHours !== undefined)
+    ) {
+      await activityRepository.create({
+        projectId,
+        taskId,
+        actorId: actorUserId,
+        actionType: ActivityActionType.TASK_UPDATED,
+        metadata: {
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: updated.title,
+        },
+      });
+    }
+
+    return updated;
   }
 
   async updateTaskStatus(
@@ -226,7 +351,28 @@ export class TaskService {
       throw new AppError('TASK_NOT_FOUND', 'Task not found in this project', 404);
     }
 
-    return taskRepository.updateStatus(taskId, projectId, status);
+    const updated = await taskRepository.updateStatus(taskId, projectId, status);
+
+    if (status !== task.status) {
+      await activityRepository.create({
+        projectId,
+        taskId,
+        actorId: actorUserId,
+        actionType: ActivityActionType.TASK_STATUS_CHANGED,
+        fieldChanged: 'status',
+        oldValue: task.status,
+        newValue: status,
+        metadata: {
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: task.title,
+          from: task.status,
+          to: status,
+        },
+      });
+    }
+
+    return updated;
   }
 
   async archiveTask(

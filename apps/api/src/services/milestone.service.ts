@@ -1,7 +1,8 @@
-import { MilestoneStatus, UserRole, ProjectRole } from '@prisma/client';
+import { MilestoneStatus, UserRole, ProjectRole, ActivityActionType } from '@prisma/client';
 import { milestoneRepository } from '../repositories/milestone.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
+import { activityRepository } from '../repositories/activity.repository.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const RANK_SUPER = 5;
@@ -77,7 +78,7 @@ export class MilestoneService {
       throw new AppError('INSUFFICIENT_PERMISSIONS', 'Viewers cannot create milestones', 403);
     }
 
-    return milestoneRepository.create(projectId, {
+    const milestone = await milestoneRepository.create(projectId, {
       title: data.title,
       description: data.description,
       startDate: data.startDate ? new Date(data.startDate) : null,
@@ -85,6 +86,19 @@ export class MilestoneService {
       status: data.status,
       displayOrder: data.displayOrder,
     });
+
+    // Record activity
+    await activityRepository.create({
+      projectId,
+      actorId: actorUserId,
+      actionType: ActivityActionType.MILESTONE_CREATED,
+      metadata: {
+        milestoneId: milestone.id,
+        milestoneTitle: milestone.title,
+      },
+    });
+
+    return milestone;
   }
 
   // -------------------------------------------------------
@@ -164,10 +178,14 @@ export class MilestoneService {
           : null;
 
     if (resolvedStart && resolvedDue && resolvedStart > resolvedDue) {
-      throw new AppError('INVALID_DATE_RANGE', 'startDate must be on or before dueDate', 400);
+      throw new AppError(
+        'INVALID_DATE_RANGE',
+        'Milestone startDate must be on or before dueDate',
+        400
+      );
     }
 
-    return milestoneRepository.update(milestoneId, projectId, {
+    const updated = await milestoneRepository.update(milestoneId, projectId, {
       title: data.title,
       description: data.description,
       startDate:
@@ -181,6 +199,26 @@ export class MilestoneService {
       status: data.status,
       displayOrder: data.displayOrder,
     });
+
+    // Record activity
+    const actionType =
+      data.status === MilestoneStatus.COMPLETED && existing.status !== MilestoneStatus.COMPLETED
+        ? ActivityActionType.MILESTONE_COMPLETED
+        : ActivityActionType.MILESTONE_UPDATED;
+
+    await activityRepository.create({
+      projectId,
+      actorId: actorUserId,
+      actionType,
+      metadata: {
+        milestoneId: updated.id,
+        milestoneTitle: updated.title,
+        fromStatus: existing.status,
+        toStatus: updated.status,
+      },
+    });
+
+    return updated;
   }
 
   // -------------------------------------------------------

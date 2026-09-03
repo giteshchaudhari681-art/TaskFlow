@@ -1,8 +1,9 @@
-import { UserRole, ProjectRole, DependencyType } from '@taskflow/shared';
+import { UserRole, ProjectRole, DependencyType, ActivityActionType } from '@taskflow/shared';
 import { DependencyRepository } from '../repositories/dependency.repository.js';
 import { TaskRepository } from '../repositories/task.repository.js';
 import { ProjectRepository } from '../repositories/project.repository.js';
 import { OrganizationRepository } from '../repositories/organization.repository.js';
+import { activityRepository } from '../repositories/activity.repository.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const dependencyRepository = new DependencyRepository();
@@ -308,6 +309,25 @@ export class DependencyService {
         type: canonicalType === 'BLOCKS' ? DependencyType.BLOCKS : DependencyType.RELATES_TO,
       });
 
+      // Record activity
+      await activityRepository.create({
+        projectId,
+        taskId,
+        actorId: actorUserId,
+        actionType: ActivityActionType.TASK_DEPENDENCY_ADDED,
+        metadata: {
+          dependencyId: created.id,
+          dependencyType: created.type,
+          predecessorId,
+          successorId,
+          sourceTaskNumber: sourceTask.taskNumber,
+          sourceIssueKey: sourceTask.issueKey,
+          targetTaskNumber: targetTask.taskNumber,
+          targetIssueKey: targetTask.issueKey,
+          targetTaskTitle: targetTask.title,
+        },
+      });
+
       return {
         id: created.id,
         projectId: created.projectId,
@@ -362,6 +382,19 @@ export class DependencyService {
     }
 
     await dependencyRepository.delete(dependencyId, projectId);
+
+    // Record activity
+    await activityRepository.create({
+      projectId,
+      taskId,
+      actorId: actorUserId,
+      actionType: ActivityActionType.TASK_DEPENDENCY_REMOVED,
+      metadata: {
+        dependencyId,
+        dependencyType: dependency.type,
+      },
+    });
+
     return { success: true };
   }
 

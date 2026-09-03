@@ -15,6 +15,7 @@ import {
   Milestone,
   Tag,
   GitFork,
+  History,
 } from 'lucide-react';
 import {
   ProjectDetail,
@@ -31,6 +32,7 @@ import { ProjectLabelsSettings } from '../labels/ProjectLabelsSettings';
 import { DependencyGraphView } from '../dependencies/DependencyGraphView';
 import { MilestonesView } from '../milestones/MilestonesView';
 import { TimelineView } from '../milestones/TimelineView';
+import { ProjectActivityFeed } from '../collaboration/ProjectActivityFeed';
 
 interface ProjectDetailShellProps {
   organizationId: string;
@@ -39,7 +41,14 @@ interface ProjectDetailShellProps {
 }
 
 type ProjectTab =
-  'overview' | 'members' | 'settings' | 'tasks' | 'labels' | 'dependencies' | 'timeline';
+  | 'overview'
+  | 'members'
+  | 'settings'
+  | 'tasks'
+  | 'labels'
+  | 'dependencies'
+  | 'timeline'
+  | 'activity';
 
 const PRESET_COLORS = [
   { label: 'Cyan', value: '#06b6d4' },
@@ -326,6 +335,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               { id: 'labels', label: 'Labels', icon: Tag },
               { id: 'dependencies', label: 'Dependencies', icon: GitFork },
               { id: 'timeline', label: 'Milestones', icon: Milestone },
+              { id: 'activity', label: 'Activity', icon: History },
               { id: 'members', label: 'Members', icon: Users },
               { id: 'settings', label: 'Settings', icon: Settings },
             ] as const
@@ -531,6 +541,11 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
             <TimelineView organizationId={organizationId} projectId={projectId} />
           )}
         </div>
+      )}
+
+      {/* TAB: ACTIVITY FEED */}
+      {activeTab === 'activity' && (
+        <ProjectActivityFeed organizationId={organizationId} projectId={projectId} />
       )}
 
       {/* TAB 4: MEMBERS */}
