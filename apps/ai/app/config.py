@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     ai_service_host: str = "127.0.0.1"
     ai_service_port: int = 8000
     app_env: str = "development"
+    ai_service_token: Optional[str] = "taskflow-internal-dev-token"
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
     ai_request_timeout_seconds: float = 30.0

@@ -90,6 +90,7 @@ def test_settings() -> Settings:
         app_env="testing",
         ai_service_host="127.0.0.1",
         ai_service_port=8000,
+        ai_service_token="test-internal-token-secret",
         openai_api_key="sk-test-mock-key-12345",
         openai_model="gpt-4o-mini",
         ai_request_timeout_seconds=5.0,
@@ -104,7 +105,10 @@ def client(mock_provider: MockAIProvider, test_settings: Settings) -> TestClient
         settings=test_settings,
     )
 
-    with TestClient(app) as test_client:
+    with TestClient(
+        app,
+        headers={"X-TaskFlow-Service-Token": "test-internal-token-secret"},
+    ) as test_client:
         yield test_client
 
     app.dependency_overrides.clear()

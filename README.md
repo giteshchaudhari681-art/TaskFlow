@@ -101,6 +101,7 @@ TaskFlow/
 - **Node.js**: `>= 20.0.0` (Tested on Node 25)
 - **npm**: `>= 10.0.0`
 - **Python**: `>= 3.12` (For AI Subsystem)
+- **Docker & Docker Compose**: `>= 24.0.0` / `>= v2.20.0` (Optional, for containerized development)
 
 ### Installation
 
@@ -112,7 +113,7 @@ cd TaskFlow
 npm install
 ```
 
-For the Python AI service:
+For the Python AI service (local non-Docker setup):
 
 ```bash
 cd apps/ai
@@ -136,9 +137,37 @@ cp apps/web/.env.example apps/web/.env
 cp apps/ai/.env.example apps/ai/.env
 ```
 
-### Running Locally
+---
 
-To run the platform services concurrently in development mode:
+## 🐳 Docker-Based Development
+
+TaskFlow provides complete containerized orchestration using Docker Compose:
+
+```bash
+# Build and start all backend services (PostgreSQL, Python AI, Express API)
+docker compose up -d --build
+
+# Verify container status and healthchecks
+docker compose ps
+
+# View service logs
+docker compose logs -f taskflow-api taskflow-ai
+
+# Stop all containers
+docker compose down
+```
+
+### Service Architecture in Docker:
+
+- **taskflow-postgres** (`postgres:16-alpine`): Runs on port `5432` with named volume persistence (`taskflow-postgres-data`).
+- **taskflow-ai** (`apps/ai/Dockerfile`): Runs Python 3.13 FastAPI on port `8000` with non-root security and healthcheck.
+- **taskflow-api** (`apps/api/Dockerfile`): Runs Node.js Express on port `5000`, waits for PostgreSQL and AI service health before starting.
+
+---
+
+## 💻 Local Non-Docker Development
+
+To run the platform services concurrently in local development mode:
 
 **Terminal 1 — Express API Server (runs on http://localhost:5000):**
 

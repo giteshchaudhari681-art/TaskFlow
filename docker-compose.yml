@@ -1,0 +1,101 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: taskflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-taskflow_dev}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-taskflow_dev}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - taskflow-network
+
+  taskflow-ai:
+    build:
+      context: ./apps/ai
+      dockerfile: Dockerfile
+    container_name: taskflow-ai
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      AI_SERVICE_HOST: 0.0.0.0
+      AI_SERVICE_PORT: 8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-taskflow-internal-dev-token}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      AI_REQUEST_TIMEOUT_SECONDS: 30.0
+    ports:
+      - '8000:8000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health').getcode() == 200 else 1)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - taskflow-network
+
+  taskflow-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: taskflow-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-taskflow_dev}?schema=public
+      AI_SERVICE_URL: http://taskflow-ai:8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-taskflow-internal-dev-token}
+      AI_SERVICE_TIMEOUT_MS: 30000
+      JWT_SECRET: ${JWT_SECRET:-development-jwt-secret-min-32-chars-for-taskflow-api}
+      COOKIE_SECRET: ${COOKIE_SECRET:-development-cookie-secret-min-32-chars-taskflow}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    ports:
+      - '5000:5000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      taskflow-ai:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://127.0.0.1:5000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1));",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - taskflow-network
+
+networks:
+  taskflow-network:
+    name: taskflow-network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: taskflow-postgres-data
+    driver: local
