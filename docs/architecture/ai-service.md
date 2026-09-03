@@ -131,9 +131,21 @@ TaskFlow maintains explicit separation of OpenAPI contracts across its two servi
 
 ### Contract Alignment Invariant
 
-- **TypeScript**: `AIAnalysisRequest`, `AIAnalysisResponse` in `@taskflow/shared`
-- **Zod**: `aiAnalysisBodySchema`, `aiAnalysisParamsSchema` in `@taskflow/validation`
-- **Python Pydantic**: `AIAnalysisRequest`, `AIAnalysisResponse` in `app.models`
+- **TypeScript**: `AIAnalysisRequest`, `AIAnalysisResponse`, `AIRecommendation`, `AIAttentionArea` in `@taskflow/shared`
+- **Zod**: `aiAnalysisBodySchema`, `aiAnalysisParamsSchema`, `aiAnalysisResponseSchema` in `@taskflow/validation`
+- **Python Pydantic**: `AIAnalysisRequest`, `AIAnalysisResponse`, `AIRecommendation`, `AIAttentionArea` in `app.models`
 - **OpenAPI**: Reusable schemas in `openApiSpec.components.schemas`
 
 OpenAPI documentation makes contracts discoverable and formally testable without changing service boundaries, data ownership, or authorization policies.
+
+---
+
+## 8. AI Project Intelligence & Grounded Recommendations (PR 20)
+
+PR 20 introduces real user-facing AI project intelligence to the Project Command Center dashboard:
+
+- **Strict Grounding**: Recommendations and attention areas are grounded in deterministic PR 14 project health telemetry (health status, health reasons, canonical completion percentage, active blocker chains, and milestone deadlines).
+- **Advisory Only**: The AI engine is purely interpretive. It cannot mutate project health, change task states, or reassign resources.
+- **Categorized Actionability**: Recommendations are classified by urgency (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) and category (`BLOCKER`, `DELIVERY_RISK`, `MILESTONE`, `PRIORITY`, `OWNERSHIP`, `WORKLOAD`, `PROCESS`).
+- **Defense in Depth**: Every LLM response is parsed and validated by Python Pydantic models before transmission, validated by Node Zod schemas upon receipt, and rendered in React via strongly typed TypeScript interfaces.
+- **Abuse Prevention**: Dedicated rate limiting (10 requests per minute) prevents external LLM provider abuse.

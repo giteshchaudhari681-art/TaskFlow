@@ -17,6 +17,7 @@ from app.config import Settings
 from app.models.requests import AIAnalysisContext, AIOperation
 from app.models.responses import (
     AIAnalysisResponse,
+    AIAttentionArea,
     AIRecommendation,
     RecommendationCategory,
     RecommendationPriority,
@@ -73,10 +74,22 @@ class OpenAIProvider(BaseAIProvider):
                 "Provide clear recommendations for completion."
             ),
             AIOperation.PROJECT_INSIGHT: (
-                "You are an Enterprise Delivery Risk Analyst for TaskFlow. "
-                "Analyze the project's health signals, velocity bottlenecks, overdue tasks, "
-                "and milestone trajectory. Deliver strategic, highly actionable insights to "
-                "mitigate project slippage."
+                "You are an Enterprise Project Intelligence Assistant for TaskFlow. "
+                "Analyze the supplied deterministic project telemetry (health state, score, "
+                "completion rate, overdue tasks, blockers, and milestone health).\n\n"
+                "STRICT GROUNDING & BEHAVIORAL RULES:\n"
+                "1. Base recommendations and insights ONLY on supplied telemetry and context.\n"
+                "2. Never invent tasks, milestones, metrics, assignees, dates, or non-existent "
+                "risks.\n"
+                "3. Clearly distinguish observed database facts from your advisory "
+                "recommendations.\n"
+                "4. Do NOT claim an action has already taken place.\n"
+                "5. All recommendations and priorities are strictly ADVISORY and do not alter "
+                "deterministic project health.\n"
+                "6. If project has NO_DATA or zero tasks, explicitly indicate more tasks are "
+                "needed rather than hallucinating.\n"
+                "7. Focus on: (1) what is going well, (2) what requires attention, (3) which "
+                "delivery risks are most critical, and (4) concrete actions for the team."
             ),
         }
 
@@ -86,14 +99,22 @@ class OpenAIProvider(BaseAIProvider):
             f"{op_instruction}\n\n"
             "CRITICAL: Respond ONLY with a valid JSON object strictly matching this schema:\n"
             "{\n"
-            '  "summary": "Clear, informative paragraph summarizing the analysis",\n'
+            '  "summary": "Concise executive summary paragraph explaining project trajectory",\n'
             '  "recommendations": [\n'
             "    {\n"
-            '      "title": "Short title of recommendation",\n'
+            '      "title": "Short actionable recommendation title",\n'
             '      "description": "Concrete explanation of recommended action",\n'
             '      "priority": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",\n'
-            '      "category": "RISK_MITIGATION" | "PROCESS" | "RESOURCE" | '
-            '"PLANNING" | "QUALITY"\n'
+            '      "category": "BLOCKER" | "DELIVERY_RISK" | "MILESTONE" | "PRIORITY" | '
+            '"OWNERSHIP" | "WORKLOAD" | "PROCESS" | "RISK_MITIGATION" | "PLANNING" | "QUALITY" | '
+            '"RESOURCE"\n'
+            "    }\n"
+            "  ],\n"
+            '  "attention_areas": [\n'
+            "    {\n"
+            '      "title": "Specific area needing attention",\n'
+            '      "description": "Fact-grounded explanation of issue from project telemetry",\n'
+            '      "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"\n'
             "    }\n"
             "  ]\n"
             "}"
@@ -115,6 +136,22 @@ class OpenAIProvider(BaseAIProvider):
                 f"- Description: {proj.description or 'None'}"
             )
 
+        if context.health:
+            h = context.health
+            reasons_str = "; ".join(h.reasons) if h.reasons else "No specific risk triggers logged"
+            parts.append(
+                f"### Authoritative Deterministic Project Health (PR14 Engine)\n"
+                f"- Health State: {h.state}\n"
+                f"- Health Score: {h.score}/100\n"
+                f"- Deterministic Health Triggers: {reasons_str}"
+            )
+
+        if context.delivery_risks:
+            r_lines = [
+                f"- [{r.severity}] {r.type}: {r.message}" for r in context.delivery_risks[:10]
+            ]
+            parts.append("### Authoritative Deterministic Delivery Risks\n" + "\n".join(r_lines))
+
         if context.metrics:
             m = context.metrics
             parts.append(
@@ -131,7 +168,7 @@ class OpenAIProvider(BaseAIProvider):
             m_lines = [
                 f"- {m.title} [Status: {m.status}, Progress: {m.progress_percentage}%, "
                 f"Due: {m.due_date or 'No Date'}]"
-                for m in context.milestones[:5]
+                for m in context.milestones[:10]
             ]
             parts.append("### Key Milestones\n" + "\n".join(m_lines))
 
@@ -139,7 +176,7 @@ class OpenAIProvider(BaseAIProvider):
             t_lines = [
                 f"- [{t.issue_key}] {t.title} (Status: {t.status}, Priority: {t.priority}, "
                 f"Assignee: {t.assignee or 'Unassigned'})"
-                for t in context.tasks[:20]
+                for t in context.tasks[:30]
             ]
             parts.append("### Scoped Tasks\n" + "\n".join(t_lines))
 
@@ -198,6 +235,23 @@ class OpenAIProvider(BaseAIProvider):
                         )
                     )
 
+            raw_attentions = parsed.get("attention_areas", [])
+            attention_areas: List[AIAttentionArea] = []
+            for item in raw_attentions:
+                if isinstance(item, dict) and "title" in item and "description" in item:
+                    try:
+                        sev = RecommendationPriority(item.get("severity", "HIGH").upper())
+                    except ValueError:
+                        sev = RecommendationPriority.HIGH
+
+                    attention_areas.append(
+                        AIAttentionArea(
+                            title=item["title"],
+                            description=item["description"],
+                            severity=sev,
+                        )
+                    )
+
             usage = response.usage
             metadata: Dict[str, Any] = {
                 "model": response.model or self.settings.openai_model,
@@ -212,6 +266,7 @@ class OpenAIProvider(BaseAIProvider):
                 operation=operation,
                 summary=summary,
                 recommendations=recommendations,
+                attention_areas=attention_areas,
                 metadata=metadata,
             )
 

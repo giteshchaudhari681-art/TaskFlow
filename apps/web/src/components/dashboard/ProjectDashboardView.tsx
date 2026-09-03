@@ -27,6 +27,7 @@ import {
   MilestoneHealth,
 } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
+import { AIProjectIntelligence } from './AIProjectIntelligence';
 
 interface ProjectDashboardViewProps {
   organizationId: string;
@@ -367,6 +368,14 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 2.5. AI PROJECT INTELLIGENCE & ADVISORY RECOMMENDATIONS */}
+      <AIProjectIntelligence
+        organizationId={organizationId}
+        projectId={projectId}
+        totalTasks={metrics.totalTasks}
+        onNavigateTab={onNavigateTab}
+      />
 
       {/* 3. KEY METRICS GRID (6 KPI Cards) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

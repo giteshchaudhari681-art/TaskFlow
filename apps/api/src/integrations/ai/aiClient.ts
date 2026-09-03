@@ -1,5 +1,6 @@
 import { env } from '../../config/env.js';
 import type { AIOperation, AIAnalysisResponse } from '@taskflow/shared';
+import { aiAnalysisResponseSchema } from '@taskflow/validation';
 
 export interface AIAnalysisContextPayload {
   project?: {
@@ -33,6 +34,16 @@ export interface AIAnalysisContextPayload {
     due_date?: string | null;
     assignee?: string | null;
     description?: string | null;
+  }>;
+  health?: {
+    state: string;
+    score: number;
+    reasons: string[];
+  };
+  delivery_risks?: Array<{
+    type: string;
+    severity: string;
+    message: string;
   }>;
 }
 
@@ -156,7 +167,16 @@ export class AIClient implements IAIClient {
         throw new AIClientError(errorMessage, response.status >= 500 ? 502 : 400, errorCode);
       }
 
-      return responseData as AIAnalysisResponse;
+      const validation = aiAnalysisResponseSchema.safeParse(responseData);
+      if (!validation.success) {
+        throw new AIProviderError(
+          'Internal AI service returned payload failing schema validation',
+          502,
+          'AI_SCHEMA_VALIDATION_ERROR'
+        );
+      }
+
+      return validation.data as AIAnalysisResponse;
     } catch (err: unknown) {
       if (err instanceof AIClientError) {
         throw err;

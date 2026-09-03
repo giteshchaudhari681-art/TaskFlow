@@ -3,7 +3,23 @@ export type AIOperation = 'PROJECT_SUMMARY' | 'TASK_SUMMARY' | 'PROJECT_INSIGHT'
 export type RecommendationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export type RecommendationCategory =
-  'RISK_MITIGATION' | 'PROCESS' | 'RESOURCE' | 'PLANNING' | 'QUALITY';
+  | 'BLOCKER'
+  | 'DELIVERY_RISK'
+  | 'MILESTONE'
+  | 'PRIORITY'
+  | 'OWNERSHIP'
+  | 'WORKLOAD'
+  | 'PROCESS'
+  | 'RISK_MITIGATION'
+  | 'PLANNING'
+  | 'QUALITY'
+  | 'RESOURCE';
+
+export interface AIAttentionArea {
+  title: string;
+  description: string;
+  severity: RecommendationPriority;
+}
 
 export interface AIRecommendation {
   title: string;
@@ -17,6 +33,7 @@ export interface AIAnalysisResponse {
   operation: AIOperation;
   summary: string;
   recommendations: AIRecommendation[];
+  attention_areas?: AIAttentionArea[];
   metadata: Record<string, unknown>;
 }
 

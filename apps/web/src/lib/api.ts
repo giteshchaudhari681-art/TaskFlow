@@ -52,6 +52,8 @@ import {
   SearchResponse,
   SearchQueryFilter,
   ProjectDashboardResponse,
+  AIAnalysisResponse,
+  AIOperation,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -319,6 +321,21 @@ export const projectApi = {
   ): Promise<ProjectDashboardResponse> => {
     const res = await apiFetch<ProjectDashboardResponse>(
       `/organizations/${organizationId}/projects/${projectId}/dashboard`
+    );
+    return res.data;
+  },
+
+  analyzeProject: async (
+    organizationId: string,
+    projectId: string,
+    body: { operation: AIOperation; user_prompt?: string } = { operation: 'PROJECT_INSIGHT' }
+  ): Promise<AIAnalysisResponse> => {
+    const res = await apiFetch<AIAnalysisResponse>(
+      `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }
     );
     return res.data;
   },
