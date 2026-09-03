@@ -69,6 +69,7 @@ export const updateTaskSchema = z
       .max(1000, { message: 'Estimate hours cannot exceed 1000' })
       .nullable()
       .optional(),
+    milestoneId: z.string().uuid({ message: 'Invalid milestone ID' }).nullable().optional(),
   })
   .refine(
     data =>
@@ -78,7 +79,8 @@ export const updateTaskSchema = z
       data.priority !== undefined ||
       data.assigneeId !== undefined ||
       data.dueDate !== undefined ||
-      data.estimateHours !== undefined,
+      data.estimateHours !== undefined ||
+      data.milestoneId !== undefined,
     {
       message: 'At least one field must be provided for task update',
     }

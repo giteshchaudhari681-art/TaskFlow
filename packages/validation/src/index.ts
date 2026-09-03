@@ -7,3 +7,4 @@ export * from './project.js';
 export * from './task.js';
 export * from './label.js';
 export * from './dependency.js';
+export * from './milestone.js';

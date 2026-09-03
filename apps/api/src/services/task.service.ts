@@ -137,6 +137,7 @@ export class TaskService {
       archived?: boolean;
       labelIds?: string[];
       labelMatch?: 'ANY' | 'ALL';
+      milestoneId?: string | 'none';
     }
   ) {
     // Read access requires org membership + project membership (or org admin)
@@ -176,6 +177,7 @@ export class TaskService {
       assigneeId?: string | null;
       dueDate?: string | null;
       estimateHours?: number | null;
+      milestoneId?: string | null;
     }
   ) {
     const { rank } = await this.getActorProjectPermissions(organizationId, projectId, actorUserId);
@@ -202,6 +204,7 @@ export class TaskService {
       dueDate:
         data.dueDate !== undefined ? (data.dueDate ? new Date(data.dueDate) : null) : undefined,
       estimateHours: data.estimateHours,
+      milestoneId: data.milestoneId,
     });
   }
 

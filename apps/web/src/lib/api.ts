@@ -33,6 +33,11 @@ import {
   TaskDependenciesResponse,
   CreateDependencyPayload,
   ProjectDependencyGraph,
+  MilestoneListItem,
+  MilestoneDetail,
+  CreateMilestonePayload,
+  UpdateMilestonePayload,
+  ProjectTimelineResponse,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -659,6 +664,73 @@ export const dependencyApi = {
   ): Promise<ProjectDependencyGraph> => {
     const res = await apiFetch<ProjectDependencyGraph>(
       `/organizations/${organizationId}/projects/${projectId}/dependencies/graph`
+    );
+    return res.data;
+  },
+};
+
+export const milestoneApi = {
+  list: async (organizationId: string, projectId: string): Promise<MilestoneListItem[]> => {
+    const res = await apiFetch<MilestoneListItem[]>(
+      `/organizations/${organizationId}/projects/${projectId}/milestones`
+    );
+    return res.data;
+  },
+
+  create: async (
+    organizationId: string,
+    projectId: string,
+    data: CreateMilestonePayload
+  ): Promise<MilestoneListItem> => {
+    const res = await apiFetch<MilestoneListItem>(
+      `/organizations/${organizationId}/projects/${projectId}/milestones`,
+      { method: 'POST', body: JSON.stringify(data) }
+    );
+    return res.data;
+  },
+
+  get: async (
+    organizationId: string,
+    projectId: string,
+    milestoneId: string
+  ): Promise<MilestoneDetail> => {
+    const res = await apiFetch<MilestoneDetail>(
+      `/organizations/${organizationId}/projects/${projectId}/milestones/${milestoneId}`
+    );
+    return res.data;
+  },
+
+  update: async (
+    organizationId: string,
+    projectId: string,
+    milestoneId: string,
+    data: UpdateMilestonePayload
+  ): Promise<MilestoneListItem> => {
+    const res = await apiFetch<MilestoneListItem>(
+      `/organizations/${organizationId}/projects/${projectId}/milestones/${milestoneId}`,
+      { method: 'PATCH', body: JSON.stringify(data) }
+    );
+    return res.data;
+  },
+
+  delete: async (
+    organizationId: string,
+    projectId: string,
+    milestoneId: string
+  ): Promise<{ deleted: boolean; milestoneId: string }> => {
+    const res = await apiFetch<{ deleted: boolean; milestoneId: string }>(
+      `/organizations/${organizationId}/projects/${projectId}/milestones/${milestoneId}`,
+      { method: 'DELETE' }
+    );
+    return res.data;
+  },
+
+  getTimeline: async (
+    organizationId: string,
+    projectId: string
+  ): Promise<ProjectTimelineResponse> => {
+    const res = await apiFetch<ProjectTimelineResponse>(
+      `/organizations/${organizationId}/projects/${projectId}/timeline`
     );
     return res.data;
   },

@@ -1,6 +1,7 @@
 import { TaskStatus, TaskPriority } from './domain.js';
 import { LabelItem } from './label.js';
 import { TaskDependencySummary } from './dependency.js';
+import { MilestoneSummary } from './milestone.js';
 
 export { TaskStatus, TaskPriority };
 
@@ -35,6 +36,7 @@ export interface TaskDetail {
   priority: TaskPriority;
   assigneeId: string | null;
   reporterId: string | null;
+  milestoneId: string | null;
   dueDate: string | null;
   estimateHours: number | null;
   completedAt: string | null;
@@ -43,6 +45,7 @@ export interface TaskDetail {
   updatedAt: string;
   assignee?: TaskUserSummary | null;
   reporter?: TaskUserSummary | null;
+  milestone?: MilestoneSummary | null;
   subtasks: SubtaskItem[];
   subtaskCount: number;
   completedSubtaskCount: number;
@@ -60,6 +63,7 @@ export interface TaskListItem {
   priority: TaskPriority;
   assigneeId: string | null;
   reporterId: string | null;
+  milestoneId: string | null;
   dueDate: string | null;
   completedAt: string | null;
   archivedAt: string | null;
@@ -70,6 +74,7 @@ export interface TaskListItem {
   completedSubtaskCount: number;
   labels?: LabelItem[];
   dependencySummary?: TaskDependencySummary;
+  milestone?: MilestoneSummary | null;
 }
 
 export interface CreateTaskPayload {
@@ -80,6 +85,7 @@ export interface CreateTaskPayload {
   assigneeId?: string | null;
   dueDate?: string | null;
   estimateHours?: number | null;
+  milestoneId?: string | null;
 }
 
 export interface UpdateTaskPayload {
@@ -90,6 +96,7 @@ export interface UpdateTaskPayload {
   assigneeId?: string | null;
   dueDate?: string | null;
   estimateHours?: number | null;
+  milestoneId?: string | null;
 }
 
 export interface CreateSubtaskPayload {
@@ -111,4 +118,5 @@ export interface TaskFilterParams {
   archived?: boolean;
   labelIds?: string[];
   labelMatch?: 'ANY' | 'ALL';
+  milestoneId?: string | 'none';
 }

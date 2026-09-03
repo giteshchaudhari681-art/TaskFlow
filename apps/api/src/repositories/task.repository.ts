@@ -125,6 +125,9 @@ export class TaskRepository extends BaseRepository {
             predecessor: { select: { id: true, status: true } },
           },
         },
+        milestone: {
+          select: { id: true, title: true, status: true },
+        },
       },
     });
 
@@ -152,6 +155,8 @@ export class TaskRepository extends BaseRepository {
 
     return {
       ...rest,
+      milestoneId: task.milestoneId,
+      milestone: task.milestone ?? null,
       labels: labels.map(tl => tl.label),
       dependencySummary,
     };
@@ -167,6 +172,7 @@ export class TaskRepository extends BaseRepository {
       archived?: boolean;
       labelIds?: string[];
       labelMatch?: 'ANY' | 'ALL';
+      milestoneId?: string | 'none';
     }
   ) {
     const where: Prisma.TaskWhereInput = {
@@ -218,6 +224,14 @@ export class TaskRepository extends BaseRepository {
       }
     }
 
+    if (filter?.milestoneId !== undefined) {
+      if (filter.milestoneId === 'none') {
+        where.milestoneId = null;
+      } else {
+        where.milestoneId = filter.milestoneId;
+      }
+    }
+
     const tasks = await this.db.task.findMany({
       where,
       orderBy: [{ taskNumber: 'desc' }],
@@ -245,6 +259,9 @@ export class TaskRepository extends BaseRepository {
             type: true,
             predecessor: { select: { status: true } },
           },
+        },
+        milestone: {
+          select: { id: true, title: true, status: true },
         },
       },
     });
@@ -282,6 +299,8 @@ export class TaskRepository extends BaseRepository {
 
       return {
         ...rest,
+        milestoneId: task.milestoneId,
+        milestone: task.milestone ?? null,
         subtaskCount,
         completedSubtaskCount,
         labels: labels.map(tl => tl.label),
@@ -301,6 +320,7 @@ export class TaskRepository extends BaseRepository {
       assigneeId?: string | null;
       dueDate?: Date | null;
       estimateHours?: number | null;
+      milestoneId?: string | null;
     }
   ) {
     // Check if status is transitioning to DONE
@@ -315,6 +335,14 @@ export class TaskRepository extends BaseRepository {
       ...(data.dueDate !== undefined && { dueDate: data.dueDate }),
       ...(data.estimateHours !== undefined && { estimateHours: data.estimateHours }),
     };
+
+    if (data.milestoneId !== undefined) {
+      if (data.milestoneId === null) {
+        updateData.milestone = { disconnect: true };
+      } else {
+        updateData.milestone = { connect: { id: data.milestoneId } };
+      }
+    }
 
     if (data.assigneeId !== undefined) {
       if (data.assigneeId === null) {

@@ -14,7 +14,9 @@ import {
 } from '../controllers/project.controller.js';
 import { taskRoutes } from './task.routes.js';
 import { labelRoutes } from './label.routes.js';
+import { milestoneRoutes } from './milestone.routes.js';
 import { getProjectDependencyGraph } from '../controllers/dependency.controller.js';
+import { getProjectTimeline } from '../controllers/milestone.controller.js';
 
 export const projectRoutes = Router({ mergeParams: true });
 
@@ -40,6 +42,12 @@ projectRoutes.use('/:projectId/labels', labelRoutes);
 
 // Mount project dependency graph endpoint
 projectRoutes.get('/:projectId/dependencies/graph', getProjectDependencyGraph);
+
+// Mount Milestone routes under /:projectId/milestones
+projectRoutes.use('/:projectId/milestones', milestoneRoutes);
+
+// Timeline data endpoint
+projectRoutes.get('/:projectId/timeline', getProjectTimeline);
 
 // Mount Task routes under /:projectId/tasks
 projectRoutes.use('/:projectId/tasks', taskRoutes);
