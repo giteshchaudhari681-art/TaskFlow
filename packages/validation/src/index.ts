@@ -11,3 +11,4 @@ export * from './milestone.js';
 export * from './comment.js';
 export * from './activity.js';
 export * from './notification.js';
+export * from './search.js';

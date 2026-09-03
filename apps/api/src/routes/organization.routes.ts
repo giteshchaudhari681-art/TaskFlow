@@ -5,6 +5,7 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { requireOrgRole } from '../middleware/requireOrgRole.js';
 
 import { projectRoutes } from './project.routes.js';
+import searchRoutes from './search.routes.js';
 
 export const organizationRoutes = Router();
 
@@ -16,6 +17,9 @@ organizationRoutes.get('/', orgController.getOrganizations);
 
 // Nested project management routes
 organizationRoutes.use('/:organizationId/projects', projectRoutes);
+
+// Organization-scoped search
+organizationRoutes.use('/:organizationId/search', searchRoutes);
 
 // Workspace details & metadata update
 organizationRoutes.get('/:organizationId', requireOrgRole(), orgController.getWorkspace);

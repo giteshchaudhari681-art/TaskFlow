@@ -49,6 +49,8 @@ import {
   UpdateNotificationPreferencesPayload,
   MyWorkResponse,
   MyWorkFilter,
+  SearchResponse,
+  SearchQueryFilter,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -903,6 +905,31 @@ export const workApi = {
     const query = params.toString() ? `?${params.toString()}` : '';
 
     const res = await apiFetch<MyWorkResponse>(`/work/my-work${query}`);
+    return res.data;
+  },
+};
+
+export const searchApi = {
+  search: async (
+    organizationId: string,
+    filter: SearchQueryFilter,
+    signal?: AbortSignal
+  ): Promise<SearchResponse> => {
+    const params = new URLSearchParams();
+    params.set('q', filter.q);
+    if (filter.type && filter.type !== 'all') params.set('type', filter.type);
+    if (filter.projectId) params.set('projectId', filter.projectId);
+    if (filter.limit) params.set('limit', String(filter.limit));
+
+    const res = await apiFetch<SearchResponse>(
+      `/organizations/${organizationId}/search?${params.toString()}`,
+      {
+        signal,
+        headers: {
+          'x-organization-id': organizationId,
+        },
+      }
+    );
     return res.data;
   },
 };
