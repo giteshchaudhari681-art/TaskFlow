@@ -204,3 +204,5 @@ export class DependencyRepository {
     });
   }
 }
+
+export const dependencyRepository = new DependencyRepository();

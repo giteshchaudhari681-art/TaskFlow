@@ -83,10 +83,68 @@ class DeliveryRiskContext(BaseModel):
     message: str = Field(..., description="Concise human-readable risk description")
 
 
+class TaskDependencyContext(BaseModel):
+    """Dependency relationship for a task."""
+
+    task_id: str = Field(..., description="Related task UUID")
+    issue_key: str = Field(..., description="Related task issue key e.g. ALPHA-5")
+    title: str = Field(..., description="Related task title")
+    status: str = Field(..., description="Related task status e.g. TODO, IN_PROGRESS, DONE")
+    relationship: str = Field(
+        ...,
+        description="Relationship type e.g. BLOCKING_PREDECESSOR, BLOCKED_SUCCESSOR, RELATES_TO",
+    )
+
+
+class SubtaskContext(BaseModel):
+    """Subtask item context."""
+
+    id: str = Field(..., description="Subtask UUID")
+    title: str = Field(..., description="Subtask title")
+    status: str = Field(..., description="Subtask status")
+    is_completed: bool = Field(default=False, description="Whether subtask is completed")
+
+
+class TaskCommentContext(BaseModel):
+    """Bounded, sanitized task comment context."""
+
+    author: str = Field(..., description="Author display name")
+    content: str = Field(..., description="Sanitized comment content")
+    created_at: Optional[str] = Field(default=None, description="Comment timestamp")
+
+
+class TaskDetailContext(BaseModel):
+    """Comprehensive, bounded context for single-task AI intelligence."""
+
+    task_id: str = Field(..., description="Task UUID")
+    issue_key: str = Field(..., description="Task key identifier e.g. ALPHA-12")
+    title: str = Field(..., description="Task title")
+    status: str = Field(..., description="Task status")
+    priority: str = Field(..., description="Task priority")
+    due_date: Optional[str] = Field(default=None, description="Due date timestamp string")
+    created_at: Optional[str] = Field(default=None, description="Created timestamp string")
+    assignee: Optional[str] = Field(default=None, description="Assignee name")
+    labels: List[str] = Field(default_factory=list, description="Attached label names")
+    description: Optional[str] = Field(default=None, description="Sanitized task description")
+    subtasks: List[SubtaskContext] = Field(default_factory=list, description="Subtasks list")
+    dependencies: List[TaskDependencyContext] = Field(
+        default_factory=list, description="Active dependencies"
+    )
+    recent_comments: List[TaskCommentContext] = Field(
+        default_factory=list, description="Recent bounded comments"
+    )
+    parent_project: Optional[ProjectContext] = Field(
+        default=None, description="Parent project overview"
+    )
+
+
 class AIAnalysisContext(BaseModel):
     """Aggregated project and task domain context for AI synthesis."""
 
     project: Optional[ProjectContext] = Field(default=None, description="Project metadata context")
+    target_task: Optional[TaskDetailContext] = Field(
+        default=None, description="Detailed target task context for individual task operations"
+    )
     tasks: List[TaskContext] = Field(default_factory=list, description="Tasks in scope")
     metrics: Optional[ProjectMetricsContext] = Field(
         default=None, description="Deterministic project metrics"

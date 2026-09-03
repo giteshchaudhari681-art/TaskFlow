@@ -35,6 +35,42 @@ export interface AIAnalysisContextPayload {
     assignee?: string | null;
     description?: string | null;
   }>;
+  target_task?: {
+    task_id: string;
+    issue_key: string;
+    title: string;
+    status: string;
+    priority: string;
+    due_date?: string | null;
+    created_at?: string | null;
+    assignee?: string | null;
+    labels?: string[];
+    description?: string | null;
+    subtasks?: Array<{
+      id: string;
+      title: string;
+      status: string;
+      is_completed: boolean;
+    }>;
+    dependencies?: Array<{
+      task_id: string;
+      issue_key: string;
+      title: string;
+      status: string;
+      relationship: string;
+    }>;
+    recent_comments?: Array<{
+      author: string;
+      content: string;
+      created_at?: string | null;
+    }>;
+    parent_project?: {
+      project_id: string;
+      project_key: string;
+      project_name: string;
+      project_status?: string | null;
+    };
+  };
   health?: {
     state: string;
     score: number;

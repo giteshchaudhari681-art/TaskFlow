@@ -328,7 +328,9 @@ export const projectApi = {
   analyzeProject: async (
     organizationId: string,
     projectId: string,
-    body: { operation: AIOperation; user_prompt?: string } = { operation: 'PROJECT_INSIGHT' }
+    body: { operation: AIOperation; taskId?: string; user_prompt?: string } = {
+      operation: 'PROJECT_INSIGHT',
+    }
   ): Promise<AIAnalysisResponse> => {
     const res = await apiFetch<AIAnalysisResponse>(
       `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
@@ -600,6 +602,26 @@ export const taskApi = {
       `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/labels/${labelId}`,
       {
         method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+
+  analyzeTask: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    options?: { user_prompt?: string }
+  ): Promise<AIAnalysisResponse> => {
+    const res = await apiFetch<AIAnalysisResponse>(
+      `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          operation: 'TASK_SUMMARY',
+          taskId,
+          user_prompt: options?.user_prompt,
+        }),
       }
     );
     return res.data;

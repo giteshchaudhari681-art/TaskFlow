@@ -13,12 +13,22 @@ export type RecommendationCategory =
   | 'RISK_MITIGATION'
   | 'PLANNING'
   | 'QUALITY'
-  | 'RESOURCE';
+  | 'RESOURCE'
+  | 'DEPENDENCY'
+  | 'DEADLINE'
+  | 'UNBLOCK'
+  | 'EXECUTION';
 
 export interface AIAttentionArea {
   title: string;
   description: string;
   severity: RecommendationPriority;
+}
+
+export interface AIDependencyImpact {
+  has_blocking_dependencies?: boolean;
+  hasBlockingDependencies?: boolean;
+  description: string;
 }
 
 export interface AIRecommendation {
@@ -34,6 +44,7 @@ export interface AIAnalysisResponse {
   summary: string;
   recommendations: AIRecommendation[];
   attention_areas?: AIAttentionArea[];
+  dependency_impact?: AIDependencyImpact;
   metadata: Record<string, unknown>;
 }
 
@@ -44,5 +55,6 @@ export interface AIAnalysisParams {
 
 export interface AIAnalysisRequestBody {
   operation: AIOperation;
+  taskId?: string;
   user_prompt?: string;
 }

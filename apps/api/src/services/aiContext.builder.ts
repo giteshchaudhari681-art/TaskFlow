@@ -1,4 +1,7 @@
 import { projectDashboardRepository } from '../repositories/projectDashboard.repository.js';
+import { taskRepository } from '../repositories/task.repository.js';
+import { dependencyRepository } from '../repositories/dependency.repository.js';
+import { commentRepository } from '../repositories/comment.repository.js';
 import type { AIAnalysisContextPayload } from '../integrations/ai/aiClient.js';
 import { TaskStatus } from '@prisma/client';
 import { calculateCanonicalCompletion, evaluateProjectHealth } from './projectHealth.rules.js';
@@ -162,6 +165,137 @@ export class AIContextBuilder {
       delivery_risks: deliveryRisks,
       milestones: sanitizedMilestones,
       tasks: sanitizedTasks,
+    };
+  }
+
+  /**
+   * Constructs sanitized, AI-relevant domain context for a single targeted task.
+   */
+  async buildTaskContext(projectId: string, taskId: string): Promise<AIAnalysisContextPayload> {
+    const task = await taskRepository.findById(taskId, projectId);
+    if (!task) {
+      throw new Error(`Task ${taskId} not found in project ${projectId} for AI context generation`);
+    }
+
+    // 1. Fetch dependencies for this task
+    const deps = await dependencyRepository.findByTaskId(taskId, projectId);
+    const sanitizedDeps = deps.map(d => {
+      const isPredecessor = d.predecessorId === taskId;
+      const related = isPredecessor ? d.successor : d.predecessor;
+      let relationship = 'RELATES_TO';
+      if (d.type === 'BLOCKS') {
+        relationship = isPredecessor ? 'BLOCKED_SUCCESSOR' : 'BLOCKING_PREDECESSOR';
+      }
+      return {
+        task_id: related.id,
+        issue_key: related.issueKey || `TASK-${related.taskNumber}`,
+        title: related.title,
+        status: related.status,
+        relationship,
+      };
+    });
+
+    // 2. Fetch recent bounded comments (up to 5)
+    const rawComments = await commentRepository.listByTask(taskId, { limit: 5 });
+    const sanitizedComments = rawComments.map(c => ({
+      author: c.author?.name || 'Team Member',
+      content: c.content.slice(0, 300),
+      created_at: c.createdAt.toISOString(),
+    }));
+
+    // 3. Subtasks (up to 20)
+    const sanitizedSubtasks = (task.subtasks || []).slice(0, 20).map(st => ({
+      id: st.id,
+      title: st.title,
+      status: st.isCompleted ? 'DONE' : 'TODO',
+      is_completed: st.isCompleted,
+    }));
+
+    // 4. Labels
+    const labels = (task.labels || []).map(l => l.name);
+
+    // 5. Parent project context and health snapshot
+    const projectData = await projectDashboardRepository.getProjectDashboardData(projectId);
+    const parentProject = projectData.project
+      ? {
+          project_id: projectData.project.id,
+          project_key: projectData.project.key,
+          project_name: projectData.project.name,
+          project_status: projectData.project.status,
+        }
+      : undefined;
+
+    const totalTasks = projectData.tasks.length;
+    const completedTasks = projectData.tasks.filter(t => t.status === TaskStatus.DONE).length;
+    const cancelledTasks = projectData.tasks.filter(t => t.status === TaskStatus.CANCELLED).length;
+    const eligibleTasks = Math.max(0, totalTasks - cancelledTasks);
+    const now = new Date();
+    const urgentOverdueTasks = projectData.tasks.filter(
+      t =>
+        t.status !== TaskStatus.DONE &&
+        t.status !== TaskStatus.CANCELLED &&
+        t.dueDate &&
+        new Date(t.dueDate) < now &&
+        (t.priority === 'URGENT' || t.priority === 'HIGH')
+    ).length;
+    const overdueTasks = projectData.tasks.filter(
+      t =>
+        t.status !== TaskStatus.DONE &&
+        t.status !== TaskStatus.CANCELLED &&
+        t.dueDate &&
+        new Date(t.dueDate) < now
+    ).length;
+    const blockedTasks = projectData.tasks.filter(t => {
+      if (t.status === TaskStatus.DONE || t.status === TaskStatus.CANCELLED) return false;
+      return t.dependenciesAsSuccessor?.some(
+        dep => dep.type === 'BLOCKS' && dep.predecessor?.status !== TaskStatus.DONE
+      );
+    }).length;
+    const overdueMilestones = projectData.milestones.filter(
+      m => m.status !== 'COMPLETED' && m.dueDate && new Date(m.dueDate) < now
+    ).length;
+    const completionPercentage = calculateCanonicalCompletion(
+      completedTasks,
+      totalTasks,
+      cancelledTasks
+    );
+    const healthEval = evaluateProjectHealth(
+      {
+        completionPercentage,
+        urgentOverdueTasks,
+        overdueTasks,
+        blockedTasks,
+        overdueMilestones,
+        atRiskMilestones: 0,
+      },
+      totalTasks,
+      eligibleTasks,
+      projectData.milestones.length
+    );
+
+    return {
+      project: parentProject,
+      target_task: {
+        task_id: task.id,
+        issue_key: task.issueKey || `${task.project.key}-${task.taskNumber}`,
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        due_date: task.dueDate ? task.dueDate.toISOString() : null,
+        created_at: task.createdAt ? task.createdAt.toISOString() : null,
+        assignee: task.assignee?.name || null,
+        labels,
+        description: task.description ? task.description.slice(0, 800) : null,
+        subtasks: sanitizedSubtasks,
+        dependencies: sanitizedDeps,
+        recent_comments: sanitizedComments,
+        parent_project: parentProject,
+      },
+      health: {
+        state: healthEval.state,
+        score: healthEval.score,
+        reasons: healthEval.reasons,
+      },
     };
   }
 }

@@ -31,6 +31,7 @@ import { LabelPickerPopover } from '../labels/LabelPickerPopover';
 import { TaskDependenciesSection } from '../dependencies/TaskDependenciesSection';
 import { TaskCommentsSection } from '../collaboration/TaskCommentsSection';
 import { TaskActivityTimeline } from '../collaboration/TaskActivityTimeline';
+import { AITaskIntelligence } from './AITaskIntelligence';
 
 interface TaskDetailDrawerProps {
   organizationId: string;
@@ -654,6 +655,16 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   loadTask();
                   onUpdated();
                 }}
+              />
+            </div>
+
+            {/* AI Task Intelligence Section */}
+            <div className="pt-4 border-t border-slate-800">
+              <AITaskIntelligence
+                organizationId={organizationId}
+                projectId={projectId}
+                taskId={taskId}
+                taskKey={task ? task.issueKey || `TASK-${task.taskNumber}` : undefined}
               />
             </div>
 

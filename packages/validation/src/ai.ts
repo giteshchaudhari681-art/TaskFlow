@@ -11,6 +11,7 @@ export const aiAnalysisBodySchema = z.object({
       message: "Operation must be one of: 'PROJECT_SUMMARY', 'TASK_SUMMARY', 'PROJECT_INSIGHT'",
     }),
   }),
+  taskId: z.string().uuid('Invalid task ID format').optional(),
   user_prompt: z
     .string()
     .trim()
@@ -32,6 +33,10 @@ export const recommendationCategorySchema = z.enum([
   'PLANNING',
   'QUALITY',
   'RESOURCE',
+  'DEPENDENCY',
+  'DEADLINE',
+  'UNBLOCK',
+  'EXECUTION',
 ]);
 
 export const aiRecommendationSchema = z.object({
@@ -47,12 +52,20 @@ export const aiAttentionAreaSchema = z.object({
   severity: recommendationPrioritySchema,
 });
 
+export const aiDependencyImpactSchema = z.object({
+  has_blocking_dependencies: z.boolean().optional(),
+  hasBlockingDependencies: z.boolean().optional(),
+  description: z.string().default(''),
+});
+
 export const aiAnalysisResponseSchema = z.object({
   request_id: z.string().min(1, 'Request ID is required'),
   operation: z.enum(['PROJECT_SUMMARY', 'TASK_SUMMARY', 'PROJECT_INSIGHT']),
   summary: z.string().min(1, 'Summary cannot be empty'),
   recommendations: z.array(aiRecommendationSchema).default([]),
   attention_areas: z.array(aiAttentionAreaSchema).default([]),
+  dependency_impact: aiDependencyImpactSchema.optional(),
+  dependencyImpact: aiDependencyImpactSchema.optional(),
   metadata: z.record(z.unknown()).default({}),
 });
 
@@ -60,4 +73,5 @@ export type AIAnalysisParamsInput = z.infer<typeof aiAnalysisParamsSchema>;
 export type AIAnalysisBodyInput = z.infer<typeof aiAnalysisBodySchema>;
 export type AIRecommendationInput = z.infer<typeof aiRecommendationSchema>;
 export type AIAttentionAreaInput = z.infer<typeof aiAttentionAreaSchema>;
+export type AIDependencyImpactInput = z.infer<typeof aiDependencyImpactSchema>;
 export type AIAnalysisResponseInput = z.infer<typeof aiAnalysisResponseSchema>;
