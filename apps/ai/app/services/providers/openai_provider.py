@@ -11,6 +11,7 @@ from openai import (
     AuthenticationError,
     RateLimitError,
 )
+from pydantic import ValidationError
 
 from app.config import Settings
 from app.models.requests import AIAnalysisContext, AIOperation
@@ -232,6 +233,11 @@ class OpenAIProvider(BaseAIProvider):
             logger.error("Failed to parse JSON response from OpenAI: %s", str(exc))
             raise AIProviderExecutionError(
                 "Invalid JSON structure returned by upstream AI provider"
+            ) from exc
+        except ValidationError as exc:
+            logger.error("Pydantic validation of OpenAI response failed: %s", str(exc))
+            raise AIProviderExecutionError(
+                "Upstream AI provider returned response failing schema validation"
             ) from exc
         except Exception as exc:
             logger.exception("Unexpected error during OpenAI completion")

@@ -69,6 +69,8 @@ source .venv/bin/activate
 
 ### 3. Install Dependencies
 
+Install version-constrained dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -83,14 +85,15 @@ cp .env.example .env
 
 Configure your environment variables:
 
-| Variable                     | Default       | Description                                                        |
-| ---------------------------- | ------------- | ------------------------------------------------------------------ |
-| `OPENAI_API_KEY`             | _(None)_      | OpenAI API secret key (leave blank in development/test if mocking) |
-| `OPENAI_MODEL`               | `gpt-4o-mini` | Target OpenAI model identifier                                     |
-| `AI_SERVICE_HOST`            | `127.0.0.1`   | Host interface to bind server                                      |
-| `AI_SERVICE_PORT`            | `8000`        | HTTP port                                                          |
-| `APP_ENV`                    | `development` | Environment name (`development`, `testing`, `production`)          |
-| `AI_REQUEST_TIMEOUT_SECONDS` | `30`          | Timeout in seconds for upstream provider requests                  |
+| Variable                     | Default                       | Description                                                        |
+| ---------------------------- | ----------------------------- | ------------------------------------------------------------------ |
+| `OPENAI_API_KEY`             | _(None)_                      | OpenAI API secret key (leave blank in development/test if mocking) |
+| `OPENAI_MODEL`               | `gpt-4o-mini`                 | Target OpenAI model identifier                                     |
+| `AI_SERVICE_HOST`            | `127.0.0.1`                   | Host interface to bind server                                      |
+| `AI_SERVICE_PORT`            | `8000`                        | HTTP port                                                          |
+| `APP_ENV`                    | `development`                 | Environment name (`development`, `testing`, `production`)          |
+| `AI_SERVICE_TOKEN`           | `taskflow-internal-dev-token` | Shared internal service authentication token                       |
+| `AI_REQUEST_TIMEOUT_SECONDS` | `30`                          | Timeout in seconds for upstream provider requests                  |
 
 ### 5. Running the Service
 

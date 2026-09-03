@@ -19,6 +19,7 @@ import { getProjectDependencyGraph } from '../controllers/dependency.controller.
 import { getProjectTimeline } from '../controllers/milestone.controller.js';
 import { getProjectActivity } from '../controllers/activity.controller.js';
 import { getProjectDashboard } from '../controllers/projectDashboard.controller.js';
+import { analyzeProjectWithAI } from '../controllers/ai.controller.js';
 
 export const projectRoutes = Router({ mergeParams: true });
 
@@ -27,6 +28,9 @@ projectRoutes.use(requireAuth);
 
 // Project Dashboard 2.0 endpoint
 projectRoutes.get('/:projectId/dashboard', getProjectDashboard);
+
+// AI Analysis endpoint
+projectRoutes.post('/:projectId/ai/analyze', analyzeProjectWithAI);
 
 // Project CRUD endpoints
 projectRoutes.get('/', listProjects);

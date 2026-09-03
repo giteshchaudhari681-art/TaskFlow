@@ -18,6 +18,9 @@ const envSchema = z.object({
     .string()
     .min(1, { message: 'DATABASE_URL is required' })
     .default('postgresql://postgres:postgres@localhost:5432/taskflow_dev?schema=public'),
+  AI_SERVICE_URL: z.string().url().default('http://127.0.0.1:8000'),
+  AI_SERVICE_TOKEN: z.string().default('taskflow-internal-dev-token'),
+  AI_SERVICE_TIMEOUT_MS: z.coerce.number().default(30000),
 });
 
 const parseEnv = () => {

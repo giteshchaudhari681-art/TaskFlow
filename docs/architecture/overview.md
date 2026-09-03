@@ -53,4 +53,6 @@ TaskFlow is **NOT** a microservices architecture. It does not use Kafka, Redis, 
 4. **Unified Validation Strategy**:
    - **Frontend & Express API**: Zod schemas (`@taskflow/validation`) and TypeScript types (`@taskflow/shared`).
    - **Python AI Service**: Pydantic v2 models (`app.models.requests`, `app.models.responses`).
-5. **Traceability & Correlation**: Every AI operation carries a traceable `request_id` passed or auto-generated at the service boundary to correlate execution telemetry.
+5. **Internal Service Authentication**: Inter-service communication between Express and the Python AI service is secured via the `X-TaskFlow-Service-Token` header. Python rejects unauthenticated or invalid tokens with HTTP 401.
+6. **Traceability & Correlation**: Every AI operation carries a traceable `request_id` passed or auto-generated at the service boundary to correlate execution telemetry.
+7. **Container Orchestration (Docker)**: Multi-container local orchestration is managed via Docker Compose (`docker-compose.yml`), provisioning PostgreSQL (`postgres:16-alpine`), Python AI (`taskflow-ai`), and Node.js Express (`taskflow-api`) connected via a private bridge network (`taskflow-network`) with healthcheck readiness dependencies.

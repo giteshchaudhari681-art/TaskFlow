@@ -3,7 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config import Settings
+from app.config import Settings, get_settings
 from app.main import app
 from app.models.requests import AIAnalysisRequest, AIOperation
 from app.routes.ai import get_ai_service
@@ -92,14 +92,22 @@ async def test_ai_service_direct_unit(sample_request: AIAnalysisRequest) -> None
     assert mock.last_request["operation"] == AIOperation.PROJECT_SUMMARY
 
 
-def test_provider_configuration_error_returns_503(sample_request: AIAnalysisRequest) -> None:
+def test_provider_configuration_error_returns_503(
+    sample_request: AIAnalysisRequest,
+    test_settings: Settings,
+) -> None:
     """Provider configuration failure returns 503 with standardized error code."""
     failing_provider = MockAIProvider(
         fail_with=AIProviderConfigurationError("OpenAI API key is missing")
     )
-    app.dependency_overrides[get_ai_service] = lambda: AIService(provider=failing_provider)
+    app.dependency_overrides[get_settings] = lambda: test_settings
+    app.dependency_overrides[get_ai_service] = lambda: AIService(
+        provider=failing_provider, settings=test_settings
+    )
 
-    with TestClient(app) as test_client:
+    with TestClient(
+        app, headers={"X-TaskFlow-Service-Token": test_settings.ai_service_token}
+    ) as test_client:
         payload = sample_request.model_dump(mode="json")
         response = test_client.post("/ai/analyze", json=payload)
         assert response.status_code == 503
@@ -111,14 +119,22 @@ def test_provider_configuration_error_returns_503(sample_request: AIAnalysisRequ
     app.dependency_overrides.clear()
 
 
-def test_provider_execution_error_returns_502(sample_request: AIAnalysisRequest) -> None:
+def test_provider_execution_error_returns_502(
+    sample_request: AIAnalysisRequest,
+    test_settings: Settings,
+) -> None:
     """Upstream provider error returns 502 with sanitized message."""
     failing_provider = MockAIProvider(
         fail_with=AIProviderExecutionError("Rate limit reached on upstream AI provider")
     )
-    app.dependency_overrides[get_ai_service] = lambda: AIService(provider=failing_provider)
+    app.dependency_overrides[get_settings] = lambda: test_settings
+    app.dependency_overrides[get_ai_service] = lambda: AIService(
+        provider=failing_provider, settings=test_settings
+    )
 
-    with TestClient(app) as test_client:
+    with TestClient(
+        app, headers={"X-TaskFlow-Service-Token": test_settings.ai_service_token}
+    ) as test_client:
         payload = sample_request.model_dump(mode="json")
         response = test_client.post("/ai/analyze", json=payload)
         assert response.status_code == 502
@@ -129,14 +145,22 @@ def test_provider_execution_error_returns_502(sample_request: AIAnalysisRequest)
     app.dependency_overrides.clear()
 
 
-def test_unexpected_error_returns_500_without_leak(sample_request: AIAnalysisRequest) -> None:
+def test_unexpected_error_returns_500_without_leak(
+    sample_request: AIAnalysisRequest,
+    test_settings: Settings,
+) -> None:
     """Unexpected exception returns 500 and prevents leaking internal stack trace."""
     failing_provider = MockAIProvider(
         fail_with=RuntimeError("internal database memory explosion sk-1234567890abcdef")
     )
-    app.dependency_overrides[get_ai_service] = lambda: AIService(provider=failing_provider)
+    app.dependency_overrides[get_settings] = lambda: test_settings
+    app.dependency_overrides[get_ai_service] = lambda: AIService(
+        provider=failing_provider, settings=test_settings
+    )
 
-    with TestClient(app) as test_client:
+    with TestClient(
+        app, headers={"X-TaskFlow-Service-Token": test_settings.ai_service_token}
+    ) as test_client:
         payload = sample_request.model_dump(mode="json")
         response = test_client.post("/ai/analyze", json=payload)
         assert response.status_code == 500
@@ -175,3 +199,90 @@ def test_openai_provider_prompt_builders(sample_request: AIAnalysisRequest) -> N
     assert "Total Active Tasks: 25" in user_content
     assert "ALPHA-101" in user_content
     assert "Provide an overview of potential bottlenecks." in user_content
+
+
+def test_service_token_missing_rejected(sample_request: AIAnalysisRequest) -> None:
+    """POST /ai/analyze without X-TaskFlow-Service-Token returns 401."""
+    with TestClient(app) as unauthed_client:
+        payload = sample_request.model_dump(mode="json")
+        response = unauthed_client.post("/ai/analyze", json=payload)
+        assert response.status_code == 401
+        data = response.json()
+        assert data["success"] is False
+        assert data["error"]["code"] == "UNAUTHORIZED_SERVICE"
+
+
+def test_service_token_invalid_rejected(sample_request: AIAnalysisRequest) -> None:
+    """POST /ai/analyze with incorrect token returns 401."""
+    with TestClient(
+        app,
+        headers={"X-TaskFlow-Service-Token": "completely-wrong-token"},
+    ) as invalid_client:
+        payload = sample_request.model_dump(mode="json")
+        response = invalid_client.post("/ai/analyze", json=payload)
+        assert response.status_code == 401
+        data = response.json()
+        assert data["success"] is False
+        assert data["error"]["code"] == "UNAUTHORIZED_SERVICE"
+
+
+def test_request_id_propagated_from_header(
+    client: TestClient,
+    sample_request: AIAnalysisRequest,
+) -> None:
+    """X-Request-ID header is propagated when request_id is omitted in body."""
+    payload = sample_request.model_dump(mode="json")
+    payload["request_id"] = None
+
+    response = client.post(
+        "/ai/analyze",
+        json=payload,
+        headers={"X-Request-ID": "express-trace-id-abc1234"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["request_id"] == "express-trace-id-abc1234"
+
+
+@pytest.mark.asyncio
+async def test_openai_provider_schema_validation_failure(
+    sample_request: AIAnalysisRequest,
+) -> None:
+    """OpenAIProvider wraps schema/Pydantic validation errors in AIProviderExecutionError."""
+    import json
+
+    settings = Settings(openai_api_key="sk-test-key")
+    provider = OpenAIProvider(settings)
+
+    class FakeMessage:
+        content = json.dumps({"summary": {"invalid": "dict_not_str"}})
+
+    class FakeChoice:
+        message = FakeMessage()
+
+    class FakeCompletion:
+        choices = [FakeChoice()]
+        model = "gpt-4o-mini"
+        usage = None
+
+    class FakeCompletions:
+        async def create(self, **kwargs):
+            return FakeCompletion()
+
+    class FakeChat:
+        completions = FakeCompletions()
+
+    class FakeClient:
+        chat = FakeChat()
+
+    provider._client = FakeClient()
+
+    with pytest.raises(AIProviderExecutionError) as exc_info:
+        await provider.analyze(
+            request_id=sample_request.request_id,
+            operation=sample_request.operation,
+            context=sample_request.context,
+            user_prompt=sample_request.user_prompt,
+        )
+
+    assert "schema validation" in str(exc_info.value)

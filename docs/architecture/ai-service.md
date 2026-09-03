@@ -33,7 +33,7 @@ While TypeScript and Node.js excel at high-concurrency web I/O, relational datab
 
 ### Why Pydantic was Selected
 
-Pydantic (v2) provides high-performance, Rust-backed runtime validation, strict type coercion, JSON schema generation, and first-class integration with modern AI tooling (including OpenAI structured outputs). It serves as the strict runtime contract guardian at the AI service boundary.
+Pydantic provides strongly typed runtime validation and structured contracts for the Python AI service. It ensures strict type coercion, field constraints (such as non-negative task metrics and bounded progress percentages), and predictable response envelopes. While OpenAI JSON mode ensures that the upstream model responds with valid JSON-formatted output, Pydantic performs the critical application-level schema validation on that output before returning data to the backend.
 
 ### Why Node.js Remains the Primary Backend
 
@@ -46,7 +46,7 @@ Node.js/Express remains the authoritative source of truth for:
 - PostgreSQL persistence and ACID transactions via Prisma
 - Real-time client event broadcasting via Socket.IO
 
-Python is **NOT** the database owner and does not perform direct database queries. Express retrieves authoritative data from PostgreSQL, applies tenant filtering, and passes a structured context payload to Python.
+Python is **NOT** the database owner and has **zero direct database access**. Express retrieves authoritative data from PostgreSQL, applies tenant filtering, and passes a structured, sanitized context payload to Python.
 
 ---
 
@@ -57,63 +57,63 @@ TaskFlow maintains an intentional separation of validation responsibilities:
 | Layer                      | Technology                       | Responsibility                                                                                |
 | -------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------- |
 | **Frontend & Express API** | **Zod** (`@taskflow/validation`) | Client-side form validation, API route parameter/body validation, tenant security boundaries. |
-| **Python AI Subsystem**    | **Pydantic v2** (`app.models`)   | Internal request/response validation, context constraints, LLM schema enforcement.            |
+| **Python AI Subsystem**    | **Pydantic v2** (`app.models`)   | Strongly typed runtime validation and structured contracts for the Python AI service.         |
 
 This avoids forcing TypeScript domain types into Python or replacing battle-tested Zod schemas in Express.
 
 ---
 
-## 4. End-to-End Request Flow
+## 4. End-to-End Request Flow (PR 16)
 
 ```
-1. User requests AI Project Summary in React UI
+1. Authenticated User triggers AI operation in TaskFlow
    │
-2. Express verifies JWT session, tenant org membership, and project access (RBAC)
+2. Express verifies JWT session and resolves tenant context
    │
-3. Express Service queries PostgreSQL via Prisma to fetch project metadata, active tasks,
-   milestones, and PR 14 deterministic project health metrics
+3. Express AIService checks RBAC:
+   - OWNER, ADMIN, MEMBER: Allowed
+   - VIEWER: Rejected (403 Forbidden)
    │
-4. Express dispatches internal HTTP POST /ai/analyze with structured AIAnalysisRequest payload
+4. AIContextBuilder queries Prisma for project metadata, active tasks, milestones,
+   and deterministic health metrics (sanitizes sensitive data)
    │
-5. Python FastAPI route receives payload -> Pydantic validates AIAnalysisRequest
+5. AIClient sends internal HTTP request to Python AI service:
+   - Target: http://taskflow-ai:8000/ai/analyze (or localhost in local dev)
+   - Headers: X-Request-ID, X-TaskFlow-Service-Token
+   - Payload: AIAnalysisRequest
    │
-6. AIService coordinates execution -> passes context to BaseAIProvider
+6. Python FastAPI verifies internal service token and validates payload with Pydantic
    │
-7. OpenAIProvider constructs system & user prompts -> invokes AsyncOpenAI
+7. AIService delegates to OpenAIProvider -> AsyncOpenAI (with prompt synthesis & JSON mode)
    │
-8. OpenAI returns structured JSON -> validated against AIAnalysisResponse
+8. OpenAI returns JSON -> Pydantic validates AIAnalysisResponse structure
    │
-9. Response flows back to Express -> Express logs audit activity -> returns to React UI
+9. Response returns to Express AIClient -> Express Controller -> JSON API envelope
 ```
 
 ---
 
 ## 5. Security & Boundary Isolation
 
-1. **Zero Secret Exposure**: Third-party LLM credentials (`OPENAI_API_KEY`) are kept isolated in the internal AI service environment. They are never transmitted over the network to the browser or returned in health endpoints.
-2. **Authoritative Authorization**: Python never decides if a user has permission to view a project. Express is the sole authorization authority.
-3. **Internal Network Binding**: The Python service defaults to listening on `127.0.0.1:8000` to prevent public ingress.
-4. **Sanitized Error Responses**: Upstream provider failures (rate limits, timeouts, authentication errors) return standardized error envelopes (`AI_PROVIDER_ERROR`, `AI_PROVIDER_NOT_CONFIGURED`) without exposing raw exceptions or stack traces.
-5. **Correlation Tracking**: Every request carries a `request_id` (caller-supplied or auto-generated UUID) to support end-to-end tracing across service boundaries.
+1. **Internal Service Authentication**: Service-to-service communication is secured via the `X-TaskFlow-Service-Token` header. Python rejects unauthenticated or invalid tokens with HTTP 401.
+2. **Zero Secret Exposure**: Third-party LLM credentials (`OPENAI_API_KEY`) and internal service tokens are kept strictly in backend environment configurations. They are never transmitted to the browser or returned in health endpoints.
+3. **Authoritative Authorization**: Python never decides if a user has permission to view a project. Express is the sole authorization authority.
+4. **Internal Network Binding**: In Docker, the Python service communicates across the internal Docker bridge network (`taskflow-network`). The browser never contacts the Python service directly.
+5. **Sanitized Error Responses**: Upstream provider failures (rate limits, timeouts, authentication errors) return standardized error envelopes (`AI_PROVIDER_ERROR`, `AI_PROVIDER_NOT_CONFIGURED`) without exposing raw exceptions or stack traces.
+6. **Correlation Tracking**: Every request carries a `request_id` (propagated from Express via `X-Request-ID` or generated) across both Node.js and Python.
 
 ---
 
-## 6. Supported Operations (PR 15)
+## 6. Docker Architecture (PR 16)
 
-The initial operational scope is intentionally focused:
+TaskFlow provides a reproducible containerized development environment via Docker Compose:
 
-- `PROJECT_SUMMARY`: Synthesizes an executive overview from active tasks, metrics, and milestones.
-- `TASK_SUMMARY`: Analyzes task risks, blockers, and execution priorities.
-- `PROJECT_INSIGHT`: Evaluates delivery bottlenecks and produces prioritized recommendations.
+```
+Docker Compose
+  ├── PostgreSQL 16 (postgres:16-alpine) [Named Volume: taskflow-postgres-data]
+  ├── Node.js / Express API (Multi-stage Node 20 Alpine)
+  └── Python AI Service (Python 3.13-slim with non-root taskflow user)
+```
 
-Operations outside this controlled enumeration are rejected at runtime with HTTP 422.
-
----
-
-## 7. Future Expansion Roadmap
-
-PR 15 establishes the foundational boundary. Future PRs will expand on this architecture:
-
-- **PR 16–18**: Express client integration, caching, and background task queue dispatch.
-- **PR 19**: Sentry tracing and observability correlation across Express and Python.
-- **PR 20–24**: Automated testing pipelines (Playwright), containerization (Docker), and OpenAPI synchronization.
+- **Healthcheck-Driven Startup**: `taskflow-api` depends on both `postgres` and `taskflow-ai` with `condition: service_healthy`.
+- **Reproducibility**: Eliminates local environment mismatches while preserving the modular monolith architecture.
