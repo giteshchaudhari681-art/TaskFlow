@@ -16,6 +16,7 @@ import {
   Settings,
   LayoutDashboard,
   Users,
+  CheckSquare,
 } from 'lucide-react';
 import type { HealthCheckData } from '@taskflow/shared';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -24,15 +25,18 @@ import { RegisterPage } from './components/auth/RegisterPage';
 import { SettingsLayout, SettingsTab } from './components/settings/SettingsLayout';
 import { ProjectsList } from './components/projects/ProjectsList';
 import { ProjectDetailShell } from './components/projects/ProjectDetailShell';
+import { NotificationCenter } from './components/notifications/NotificationCenter';
+import { MyWorkView } from './components/work/MyWorkView';
 
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
     useAuth();
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [currentView, setCurrentView] = useState<
-    'dashboard' | 'projects' | 'project-details' | 'settings'
+    'dashboard' | 'projects' | 'project-details' | 'settings' | 'my-work'
   >('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [deepLinkTaskId, setDeepLinkTaskId] = useState<string | null>(null);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
@@ -69,7 +73,14 @@ const MainApp: React.FC = () => {
 
   const openSettings = (tab: SettingsTab = 'profile') => {
     setSettingsTab(tab);
+    setDeepLinkTaskId(null);
     setCurrentView('settings');
+  };
+
+  const handleOpenTask = (projectId: string, taskId: string) => {
+    setSelectedProjectId(projectId);
+    setDeepLinkTaskId(taskId);
+    setCurrentView('project-details');
   };
 
   if (isLoading) {
@@ -142,6 +153,22 @@ const MainApp: React.FC = () => {
 
                 <button
                   type="button"
+                  onClick={() => {
+                    setDeepLinkTaskId(null);
+                    setCurrentView('my-work');
+                  }}
+                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    currentView === 'my-work'
+                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                  }`}
+                >
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  <span>My Work</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => openSettings('workspace')}
                   className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'settings'
@@ -205,6 +232,9 @@ const MainApp: React.FC = () => {
                   </div>
                 )}
 
+                {/* Notification Center */}
+                <NotificationCenter onOpenTask={handleOpenTask} />
+
                 {/* Authenticated User Pill -> Opens Settings */}
                 <button
                   type="button"
@@ -255,6 +285,8 @@ const MainApp: React.FC = () => {
               <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
             )}
           </div>
+        ) : currentView === 'my-work' ? (
+          <MyWorkView onOpenTask={handleOpenTask} />
         ) : currentView === 'settings' ? (
           <SettingsLayout
             onBackToDashboard={() => setCurrentView('dashboard')}
@@ -266,6 +298,7 @@ const MainApp: React.FC = () => {
             organizationName={activeOrg.organizationName}
             onSelectProject={id => {
               setSelectedProjectId(id);
+              setDeepLinkTaskId(null);
               setCurrentView('project-details');
             }}
           />
@@ -273,8 +306,10 @@ const MainApp: React.FC = () => {
           <ProjectDetailShell
             organizationId={activeOrg.organizationId}
             projectId={selectedProjectId}
+            initialTaskId={deepLinkTaskId}
             onBack={() => {
               setSelectedProjectId(null);
+              setDeepLinkTaskId(null);
               setCurrentView('projects');
             }}
           />

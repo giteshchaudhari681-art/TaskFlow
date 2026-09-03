@@ -3,6 +3,7 @@ import { milestoneRepository } from '../repositories/milestone.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
+import { notificationService } from './notification.service.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const RANK_SUPER = 5;
@@ -217,6 +218,19 @@ export class MilestoneService {
         toStatus: updated.status,
       },
     });
+
+    // If completed, notify assignees of tasks in this milestone
+    if (
+      data.status === MilestoneStatus.COMPLETED &&
+      existing.status !== MilestoneStatus.COMPLETED
+    ) {
+      await notificationService.notifyMilestoneCompleted({
+        projectId,
+        milestoneId: updated.id,
+        milestoneTitle: updated.title,
+        actorId: actorUserId,
+      });
+    }
 
     return updated;
   }

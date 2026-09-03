@@ -1,6 +1,7 @@
 import { UserRole, ProjectRole, ActivityActionType } from '@prisma/client';
 import { commentRepository } from '../repositories/comment.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
+import { notificationService } from './notification.service.js';
 import { taskRepository } from '../repositories/task.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
@@ -128,6 +129,18 @@ export class CommentService {
         issueKey: task.issueKey,
         taskTitle: task.title,
       },
+    });
+
+    // Notify task assignee and reporter
+    await notificationService.notifyCommentCreated({
+      taskId,
+      projectId,
+      taskNumber: task.taskNumber,
+      issueKey: task.issueKey,
+      taskTitle: task.title,
+      commentId: comment.id,
+      actorId: actorUserId,
+      commentSnippet: data.content.slice(0, 100),
     });
 
     return this.formatComment(comment);

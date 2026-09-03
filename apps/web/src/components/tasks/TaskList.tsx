@@ -34,6 +34,7 @@ interface TaskListProps {
   canManageTasks: boolean;
   viewMode?: 'board' | 'list';
   onViewModeChange?: (mode: 'board' | 'list') => void;
+  initialSelectedTaskId?: string | null;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -44,6 +45,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   canManageTasks,
   viewMode = 'list',
   onViewModeChange,
+  initialSelectedTaskId,
 }) => {
   const [tasks, setTasks] = useState<TaskListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,9 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   // Modals & Drawers
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
+    initialSelectedTaskId || null
+  );
 
   useEffect(() => {
     labelApi

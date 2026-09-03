@@ -4,6 +4,7 @@ import { TaskRepository } from '../repositories/task.repository.js';
 import { ProjectRepository } from '../repositories/project.repository.js';
 import { OrganizationRepository } from '../repositories/organization.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
+import { notificationService } from './notification.service.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const dependencyRepository = new DependencyRepository();
@@ -327,6 +328,16 @@ export class DependencyService {
           targetTaskTitle: targetTask.title,
         },
       });
+
+      // Notify assignee of the successor (blocked) task if this is a BLOCKS dependency
+      if (created.type === DependencyType.BLOCKS) {
+        await notificationService.notifyDependencyAdded({
+          projectId,
+          predecessorId,
+          successorId,
+          actorId: actorUserId,
+        });
+      }
 
       return {
         id: created.id,

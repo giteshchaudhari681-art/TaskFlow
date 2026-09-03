@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { User, Lock, Building2, Users, ArrowLeft } from 'lucide-react';
+import { User, Lock, Building2, Users, ArrowLeft, Bell } from 'lucide-react';
 import { ProfileSettings } from './ProfileSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { WorkspaceSettings } from './WorkspaceSettings';
 import { MembersSettings } from './MembersSettings';
+import { NotificationSettings } from './NotificationSettings';
 
-export type SettingsTab = 'profile' | 'security' | 'workspace' | 'members';
+export type SettingsTab = 'profile' | 'security' | 'workspace' | 'members' | 'notifications';
 
 interface SettingsLayoutProps {
   onBackToDashboard: () => void;
@@ -21,6 +22,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
   const tabs = [
     { id: 'profile' as SettingsTab, label: 'Profile & Identity', icon: User },
     { id: 'security' as SettingsTab, label: 'Security & Password', icon: Lock },
+    { id: 'notifications' as SettingsTab, label: 'Notifications', icon: Bell },
     { id: 'workspace' as SettingsTab, label: 'Workspace Settings', icon: Building2 },
     { id: 'members' as SettingsTab, label: 'Workspace Members', icon: Users },
   ];
@@ -74,6 +76,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
           <div className="glass-card p-6 rounded-2xl border border-taskflow-border">
             {activeTab === 'profile' && <ProfileSettings />}
             {activeTab === 'security' && <SecuritySettings />}
+            {activeTab === 'notifications' && <NotificationSettings />}
             {activeTab === 'workspace' && <WorkspaceSettings />}
             {activeTab === 'members' && <MembersSettings />}
           </div>
