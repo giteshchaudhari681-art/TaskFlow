@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
     ai_request_timeout_seconds: float = 30.0
+    sentry_dsn: Optional[str] = None
+    sentry_environment: Optional[str] = None
+    sentry_traces_sample_rate: float = 0.0
 
     model_config = SettingsConfigDict(
         env_file=".env",

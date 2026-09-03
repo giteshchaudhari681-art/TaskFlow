@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@sentry/react": "^10.73.0",
     "@taskflow/shared": "*",
     "@taskflow/validation": "*",
     "clsx": "^2.1.1",

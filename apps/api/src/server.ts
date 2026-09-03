@@ -13,11 +13,19 @@ import workRoutes from './routes/work.routes.js';
 import searchRoutes from './routes/search.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
+import { requestIdMiddleware } from './middleware/requestId.js';
+import { initSentry } from './monitoring/sentry.js';
 import { docsRouter } from './docs/swagger.js';
 import { openApiSpec } from './docs/openapi.js';
 
 export const createServer = (): Express => {
+  // Initialize Sentry observability if configured
+  initSentry();
+
   const app = express();
+
+  // Request correlation middleware (sets X-Request-ID on request and response)
+  app.use(requestIdMiddleware);
 
   // Security Headers with Swagger UI compatibility
   app.use(

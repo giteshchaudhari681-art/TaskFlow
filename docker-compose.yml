@@ -35,6 +35,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       AI_REQUEST_TIMEOUT_SECONDS: 30.0
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
     ports:
       - '8000:8000'
     healthcheck:
@@ -68,6 +70,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-development-jwt-secret-min-32-chars-for-taskflow-api}
       COOKIE_SECRET: ${COOKIE_SECRET:-development-cookie-secret-min-32-chars-taskflow}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
     ports:
       - '5000:5000'
     depends_on:

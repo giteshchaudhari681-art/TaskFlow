@@ -31,6 +31,7 @@ import { MyWorkView } from './components/work/MyWorkView';
 import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
@@ -621,8 +622,10 @@ const MainApp: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };

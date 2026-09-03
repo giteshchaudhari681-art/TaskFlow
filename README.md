@@ -212,6 +212,17 @@ The public API manages all user sessions, organizations, projects, Kanban tasks,
 
 ---
 
+## 🔭 Production Observability & Error Monitoring
+
+TaskFlow features multi-tier error monitoring powered by **Sentry**:
+
+- **Frontend SPA (`apps/web`)**: Integrated `@sentry/react` runtime telemetry and React `<ErrorBoundary>` fallback with sanitized client telemetry.
+- **Node.js API (`apps/api`)**: Integrated `@sentry/node` capturing unexpected 5xx runtime errors, tracing requests via `X-Request-ID` correlation middleware, and filtering out expected 4xx operational errors.
+- **Python AI Service (`apps/ai`)**: Integrated `sentry-sdk[fastapi]` capturing provider failures (502) and unhandled exceptions (500) while scrubbing authentication secrets.
+- **Architecture Guide**: Detailed documentation is available at [`docs/architecture/observability.md`](docs/architecture/observability.md).
+
+---
+
 ## 🧪 Verification & Quality Checks
 
 Run the following scripts from the monorepo root:
