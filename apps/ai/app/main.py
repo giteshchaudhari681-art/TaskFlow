@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.models.responses import ErrorDetail, ErrorResponse
+from app.monitoring import init_sentry
 from app.routes.ai import router as ai_router
 from app.routes.health import router as health_router
 
@@ -25,6 +26,7 @@ logger = logging.getLogger("taskflow.ai")
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application startup and shutdown lifespan management."""
     settings = get_settings()
+    init_sentry(settings)
     logger.info("Starting TaskFlow AI Service in %s mode", settings.app_env)
     yield
     logger.info("Shutting down TaskFlow AI Service")

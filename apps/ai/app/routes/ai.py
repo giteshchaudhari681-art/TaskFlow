@@ -14,6 +14,7 @@ from app.models.responses import (
     ErrorDetail,
     ErrorResponse,
 )
+from app.monitoring import capture_exception
 from app.services.ai_service import AIService
 from app.services.providers.openai_provider import (
     AIProviderConfigurationError,
@@ -94,6 +95,17 @@ async def analyze_context(
         )
     except AIProviderExecutionError as exc:
         logger.error("AI provider execution failed: %s", str(exc))
+        op_name = (
+            request.operation.value
+            if hasattr(request.operation, "value")
+            else str(request.operation)
+        )
+        capture_exception(
+            exc,
+            request_id=request.request_id,
+            operation=op_name,
+            extra={"status_code": 502, "error_code": "AI_PROVIDER_ERROR"},
+        )
         return JSONResponse(
             status_code=status.HTTP_502_BAD_GATEWAY,
             content=ErrorResponse(
@@ -105,8 +117,19 @@ async def analyze_context(
                 ),
             ).model_dump(),
         )
-    except Exception:
+    except Exception as exc:
         logger.exception("Unexpected error during AI analysis")
+        op_name = (
+            request.operation.value
+            if hasattr(request.operation, "value")
+            else str(request.operation)
+        )
+        capture_exception(
+            exc,
+            request_id=request.request_id,
+            operation=op_name,
+            extra={"status_code": 500, "error_code": "AI_INTERNAL_ERROR"},
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=ErrorResponse(

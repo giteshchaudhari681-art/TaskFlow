@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { ERROR_CODES, HTTP_STATUS } from '@taskflow/shared';
 import { sendError } from '../utils/response.js';
 import { env } from '../config/env.js';
+import { captureException } from '../monitoring/sentry.js';
 
 export class AppError extends Error {
   constructor(
@@ -18,16 +19,27 @@ export class AppError extends Error {
 
 export const errorHandler = (
   err: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): Response => {
   // Handle AppError instances
   if (err instanceof AppError) {
+    // Only capture high-severity unexpected AppErrors (5xx)
+    if (err.statusCode >= 500) {
+      captureException(err, {
+        requestId: req.id || (req.headers['x-request-id'] as string),
+        userId: req.user?.id,
+        organizationId: req.orgMember?.organizationId,
+        route: req.path,
+        method: req.method,
+        statusCode: err.statusCode,
+      });
+    }
     return sendError(res, err.code, err.message, err.statusCode, err.details);
   }
 
-  // Handle Zod validation errors
+  // Handle Zod validation errors (expected 400 operational error, filtered from Sentry)
   if (err instanceof ZodError) {
     const issues = err.issues.map(issue => ({
       field: issue.path.join('.'),
@@ -43,7 +55,16 @@ export const errorHandler = (
     );
   }
 
-  // Handle unexpected internal server errors
+  // Handle unexpected internal server errors (captured to Sentry)
+  captureException(err, {
+    requestId: req.id || (req.headers['x-request-id'] as string),
+    userId: req.user?.id,
+    organizationId: req.orgMember?.organizationId,
+    route: req.path,
+    method: req.method,
+    statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+  });
+
   console.error('[Unhandled Error]', err);
   const message = env.NODE_ENV === 'production' ? 'Internal server error' : err.message;
 

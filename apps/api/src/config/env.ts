@@ -21,6 +21,9 @@ const envSchema = z.object({
   AI_SERVICE_URL: z.string().url().default('http://127.0.0.1:8000'),
   AI_SERVICE_TOKEN: z.string().default('taskflow-internal-dev-token'),
   AI_SERVICE_TIMEOUT_MS: z.coerce.number().default(30000),
+  SENTRY_DSN: z.string().optional(),
+  SENTRY_ENVIRONMENT: z.string().optional(),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),
 });
 
 const parseEnv = () => {

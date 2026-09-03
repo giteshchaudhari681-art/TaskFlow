@@ -1,0 +1,193 @@
+import * as Sentry from '@sentry/node';
+import { env } from '../config/env.js';
+
+export interface SentryDiagnosticContext {
+  requestId?: string;
+  userId?: string;
+  organizationId?: string;
+  projectId?: string;
+  operation?: string;
+  route?: string;
+  method?: string;
+  statusCode?: number;
+  extra?: Record<string, unknown>;
+}
+
+let initialized = false;
+
+const SENSITIVE_HEADERS = new Set([
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'x-taskflow-service-token',
+  'x-api-key',
+  'proxy-authorization',
+]);
+
+const SENSITIVE_FIELD_PATTERNS = [
+  /password/i,
+  /secret/i,
+  /token/i,
+  /api[_-]?key/i,
+  /authorization/i,
+  /credit[_-]?card/i,
+];
+
+/**
+ * Recursively redacts sensitive keys in objects or JSON payloads.
+ */
+export const redactSensitiveData = (data: unknown, depth = 0): unknown => {
+  if (depth > 5 || data === null || data === undefined) {
+    return data;
+  }
+
+  if (typeof data === 'string') {
+    return data;
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(item => redactSensitiveData(item, depth + 1));
+  }
+
+  if (typeof data === 'object') {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data)) {
+      const isSensitive = SENSITIVE_FIELD_PATTERNS.some(pattern => pattern.test(key));
+      if (isSensitive) {
+        sanitized[key] = '[REDACTED]';
+      } else if (typeof value === 'object' && value !== null) {
+        sanitized[key] = redactSensitiveData(value, depth + 1);
+      } else {
+        sanitized[key] = value;
+      }
+    }
+    return sanitized;
+  }
+
+  return data;
+};
+
+/**
+ * Initializes Sentry for Node.js / Express runtime.
+ * Idempotent and optional; does nothing if SENTRY_DSN is absent or in test environment.
+ */
+export const initSentry = (force = false, dsnOverride?: string): boolean => {
+  if (initialized && !force) {
+    return true;
+  }
+
+  const dsn = dsnOverride || process.env.SENTRY_DSN || env.SENTRY_DSN;
+  if (!dsn) {
+    return false;
+  }
+
+  Sentry.init({
+    dsn,
+    environment: env.SENTRY_ENVIRONMENT || env.NODE_ENV || 'development',
+    release: 'taskflow-api@0.1.0',
+    tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE || 0,
+    beforeSend(event) {
+      // Scrub sensitive HTTP request headers
+      if (event.request?.headers) {
+        for (const headerKey of Object.keys(event.request.headers)) {
+          if (SENSITIVE_HEADERS.has(headerKey.toLowerCase())) {
+            event.request.headers[headerKey] = '[REDACTED]';
+          }
+        }
+      }
+
+      // Scrub request cookies if present
+      if (event.request?.cookies) {
+        event.request.cookies = { cookies: '[REDACTED]' };
+      }
+
+      // Scrub request body data if present
+      if (event.request?.data) {
+        event.request.data = redactSensitiveData(event.request.data);
+      }
+
+      // Ensure service tag is explicitly set
+      event.tags = {
+        ...event.tags,
+        service: 'api',
+      };
+
+      return event;
+    },
+  });
+
+  initialized = true;
+  return true;
+};
+
+/**
+ * Reports unexpected application exceptions to Sentry with sanitized diagnostic context.
+ */
+export const captureException = (
+  error: unknown,
+  context?: SentryDiagnosticContext
+): string | undefined => {
+  if (!initialized && !(process.env.SENTRY_DSN || env.SENTRY_DSN)) {
+    return undefined;
+  }
+
+  return Sentry.withScope(scope => {
+    scope.setTag('service', 'api');
+
+    if (context?.requestId) {
+      scope.setTag('request_id', context.requestId);
+      scope.setContext('correlation', { request_id: context.requestId });
+    }
+
+    if (context?.userId) {
+      scope.setUser({ id: context.userId });
+    }
+
+    if (context?.organizationId) {
+      scope.setTag('organization_id', context.organizationId);
+    }
+
+    if (context?.projectId) {
+      scope.setTag('project_id', context.projectId);
+    }
+
+    if (context?.operation) {
+      scope.setTag('operation', context.operation);
+    }
+
+    if (context?.route) {
+      scope.setTag('route', context.route);
+    }
+
+    if (context?.method) {
+      scope.setTag('method', context.method);
+    }
+
+    if (context?.statusCode) {
+      scope.setTag('status_code', String(context.statusCode));
+    }
+
+    if (context?.extra) {
+      const sanitizedExtra = redactSensitiveData(context.extra) as Record<string, unknown>;
+      scope.setContext('diagnostic_data', sanitizedExtra);
+    }
+
+    return Sentry.captureException(error);
+  });
+};
+
+/**
+ * Returns whether Sentry is currently active and initialized.
+ */
+export const isSentryEnabled = (): boolean => initialized;
+
+/**
+ * Reset initialization state (used strictly for test isolation).
+ */
+export const resetSentryForTesting = (): void => {
+  initialized = false;
+};
+
+export const setInitializedForTesting = (val: boolean): void => {
+  initialized = val;
+};
