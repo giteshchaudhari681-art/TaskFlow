@@ -36,6 +36,7 @@ export const listTasks = async (
       }
     }
     const labelMatch = req.query.labelMatch === 'ALL' ? 'ALL' : 'ANY';
+    const milestoneId = req.query.milestoneId as string | undefined;
 
     const tasks = await taskService.listTasks(organizationId, projectId, req.user!.id, {
       status,
@@ -45,6 +46,7 @@ export const listTasks = async (
       archived,
       labelIds,
       labelMatch,
+      milestoneId,
     });
     return sendSuccess(res, tasks);
   } catch (err: unknown) {

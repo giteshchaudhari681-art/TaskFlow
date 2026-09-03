@@ -29,6 +29,8 @@ import { TaskList } from '../tasks/TaskList';
 import { KanbanBoard } from '../kanban/KanbanBoard';
 import { ProjectLabelsSettings } from '../labels/ProjectLabelsSettings';
 import { DependencyGraphView } from '../dependencies/DependencyGraphView';
+import { MilestonesView } from '../milestones/MilestonesView';
+import { TimelineView } from '../milestones/TimelineView';
 
 interface ProjectDetailShellProps {
   organizationId: string;
@@ -57,6 +59,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [activeTab, setActiveTab] = useState<ProjectTab>('overview');
   const [taskViewMode, setTaskViewMode] = useState<'board' | 'list'>('board');
+  const [milestoneSubTab, setMilestoneSubTab] = useState<'milestones' | 'timeline'>('milestones');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -322,7 +325,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               { id: 'tasks', label: 'Board & Tasks', icon: Kanban },
               { id: 'labels', label: 'Labels', icon: Tag },
               { id: 'dependencies', label: 'Dependencies', icon: GitFork },
-              { id: 'timeline', label: 'Timeline', icon: Milestone, badge: 'Future' },
+              { id: 'timeline', label: 'Milestones', icon: Milestone },
               { id: 'members', label: 'Members', icon: Users },
               { id: 'settings', label: 'Settings', icon: Settings },
             ] as const
@@ -340,11 +343,6 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
-                {'badge' in tab && (
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-cyan-950/80 text-cyan-400 border border-cyan-800/60">
-                    {tab.badge}
-                  </span>
-                )}
               </button>
             );
           })}
@@ -503,22 +501,38 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         </div>
       )}
 
-      {/* TAB 5: TIMELINE (Future) */}
+      {/* TAB 5: MILESTONES & TIMELINE */}
       {activeTab === 'timeline' && (
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30 space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-950/60 border border-indigo-800/60 text-indigo-400 flex items-center justify-center mx-auto shadow-glow-indigo">
-            <Milestone className="w-8 h-8" />
+        <div className="space-y-6">
+          {/* Sub-tab switcher */}
+          <div className="flex items-center gap-1 border-b border-taskflow-border/60 pb-3">
+            {(['milestones', 'timeline'] as const).map(subTab => (
+              <button
+                key={subTab}
+                onClick={() => setMilestoneSubTab(subTab)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                  milestoneSubTab === subTab
+                    ? 'bg-taskflow-surface text-cyan-300 border-cyan-500/40'
+                    : 'text-taskflow-muted hover:text-white border-transparent hover:bg-taskflow-surface/50'
+                }`}
+              >
+                {subTab.charAt(0).toUpperCase() + subTab.slice(1)}
+              </button>
+            ))}
           </div>
-          <div className="max-w-md mx-auto space-y-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-950 text-indigo-400 border border-indigo-800/60">
-              Future Milestone
-            </span>
-            <h3 className="text-lg font-bold text-white">Project Timeline & Dependency Engine</h3>
-            <p className="text-xs text-taskflow-muted leading-relaxed">
-              Gantt scheduling, critical path analysis, and milestone progress curves will render
-              here once the Task Dependency engine is integrated.
-            </p>
-          </div>
+
+          {milestoneSubTab === 'milestones' ? (
+            <MilestonesView
+              organizationId={organizationId}
+              projectId={projectId}
+              userRole={project.userRole}
+            />
+          ) : (
+            <TimelineView
+              organizationId={organizationId}
+              projectId={projectId}
+            />
+          )}
         </div>
       )}
 
