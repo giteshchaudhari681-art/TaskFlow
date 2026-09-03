@@ -60,15 +60,21 @@ TaskFlow/
 │   │   │   └── index.css        # Semantic tokens & custom theme
 │   │   └── package.json
 │   │
-│   └── api/                     # Backend Node.js + Express REST API
-│       ├── src/
-│       │   ├── config/          # Zod environment validation
-│       │   ├── controllers/     # HTTP transport controllers
-│       │   ├── middleware/      # Error handling, 404, rate limit
-│       │   ├── routes/          # Express route definitions
-│       │   ├── utils/           # Standard response envelope
-│       │   └── server.ts        # Express app configuration
-│       └── package.json
+│   ├── api/                     # Backend Node.js + Express REST API (Primary Backend)
+│   │   ├── src/
+│   │   │   ├── config/          # Zod environment validation
+│   │   │   ├── controllers/     # HTTP transport controllers
+│   │   │   ├── middleware/      # Error handling, 404, rate limit
+│   │   │   ├── routes/          # Express route definitions
+│   │   │   ├── utils/           # Standard response envelope
+│   │   │   └── server.ts        # Express app configuration
+│   │   └── package.json
+│   │
+│   └── ai/                      # Python AI Service Subsystem (FastAPI + Pydantic v2)
+│       ├── app/                 # FastAPI application, models, routes, services
+│       ├── tests/               # Pytest suite
+│       ├── pyproject.toml       # Python package configuration
+│       └── requirements.txt     # Pinned Python dependencies
 │
 ├── packages/
 │   ├── shared/                  # Universal types, enums, response models
@@ -76,7 +82,7 @@ TaskFlow/
 │   └── config/                  # Shared presets and configurations
 │
 ├── docs/                        # Architectural Blueprints & ADRs
-│   ├── architecture/            # System, backend, frontend, DB, auth, security
+│   ├── architecture/            # System, backend, frontend, DB, auth, security, AI
 │   ├── product/                 # Vision, information architecture
 │   ├── api/                     # REST conventions & error contracts
 │   └── decisions/               # Architecture Decision Records (ADRs)
@@ -94,6 +100,7 @@ TaskFlow/
 
 - **Node.js**: `>= 20.0.0` (Tested on Node 25)
 - **npm**: `>= 10.0.0`
+- **Python**: `>= 3.12` (For AI Subsystem)
 
 ### Installation
 
@@ -105,21 +112,35 @@ cd TaskFlow
 npm install
 ```
 
+For the Python AI service:
+
+```bash
+cd apps/ai
+python -m venv .venv
+# On Windows:
+.\.venv\Scripts\activate
+# On Unix:
+source .venv/bin/activate
+pip install -r requirements.txt
+cd ../..
+```
+
 ### Environment Setup
 
-Copy the root `.env.example` to your workspace environments:
+Copy the environment files to your workspace environments:
 
 ```bash
 cp .env.example .env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
+cp apps/ai/.env.example apps/ai/.env
 ```
 
 ### Running Locally
 
-To run both backend and frontend concurrently in development mode:
+To run the platform services concurrently in development mode:
 
-**Terminal 1 — API Server (runs on http://localhost:5000):**
+**Terminal 1 — Express API Server (runs on http://localhost:5000):**
 
 ```bash
 npm run dev:api
@@ -129,6 +150,13 @@ npm run dev:api
 
 ```bash
 npm run dev:web
+```
+
+**Terminal 3 — Python AI Service (runs on http://127.0.0.1:8000):**
+
+```bash
+cd apps/ai
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 ---
