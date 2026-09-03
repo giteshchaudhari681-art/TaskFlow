@@ -22,9 +22,14 @@
     "prisma:format:check": "npm run prisma:format:check --workspace=@taskflow/api",
     "prisma:migrate": "npm run prisma:migrate --workspace=@taskflow/api",
     "prisma:seed": "npm run prisma:seed --workspace=@taskflow/api",
-    "test": "npm run test --workspace=@taskflow/api"
+    "test": "npm run test --workspace=@taskflow/api",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "prettier": "^3.5.0",
     "typescript": "^5.7.3"
   },

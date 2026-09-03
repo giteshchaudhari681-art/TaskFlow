@@ -220,6 +220,9 @@ Run the following scripts from the monorepo root:
 | ---------------------- | ----------------------------------------------------------------------------- |
 | `npm run type-check`   | Runs TypeScript compilation verification across all workspaces                |
 | `npm run build`        | Builds `@taskflow/shared`, `@taskflow/validation`, `apps/api`, and `apps/web` |
+| `npm run test`         | Executes Vitest unit and integration test suite                               |
+| `npm run test:e2e`     | Runs full Playwright browser automation test suite headlessly                 |
+| `npm run test:e2e:ui`  | Launches Playwright interactive runner with time-travel debugging             |
 | `npm run format:check` | Verifies code formatting consistency with Prettier                            |
 | `npm run format`       | Automatically formats all codebase files                                      |
 

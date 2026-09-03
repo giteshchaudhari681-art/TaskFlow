@@ -71,3 +71,24 @@ jobs:
 
       - name: Run automated test suite
         run: npm run test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E test suite
+        run: npm run test:e2e
+        env:
+          CI: 'true'
+          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/taskflow_ci?schema=public
+          JWT_SECRET: ci-test-jwt-secret-min-32-chars-for-taskflow
+          COOKIE_SECRET: ci-test-cookie-secret-min-32-chars-taskflow
+          E2E_BASE_URL: http://localhost:5173
+          E2E_API_URL: http://localhost:5000
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
