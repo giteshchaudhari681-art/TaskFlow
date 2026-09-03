@@ -31,15 +31,31 @@ class RecommendationCategory(str, Enum):
     PLANNING = "PLANNING"
     QUALITY = "QUALITY"
     RESOURCE = "RESOURCE"
+    DEPENDENCY = "DEPENDENCY"
+    DEADLINE = "DEADLINE"
+    UNBLOCK = "UNBLOCK"
+    EXECUTION = "EXECUTION"
 
 
 class AIAttentionArea(BaseModel):
-    """Specific project area requiring attention grounded in telemetry."""
+    """Specific project or task area requiring attention grounded in telemetry."""
 
     title: str = Field(..., min_length=1, description="Brief attention area header")
     description: str = Field(..., min_length=1, description="Fact-based explanation")
     severity: RecommendationPriority = Field(
         default=RecommendationPriority.HIGH, description="Severity of the attention item"
+    )
+
+
+class AIDependencyImpact(BaseModel):
+    """Structured impact assessment of task dependencies."""
+
+    has_blocking_dependencies: bool = Field(
+        default=False,
+        description="Whether task is blocked by unresolved predecessor dependencies",
+    )
+    description: str = Field(
+        default="", description="Fact-grounded explanation of dependency impact"
     )
 
 
@@ -67,6 +83,9 @@ class AIAnalysisResponse(BaseModel):
     )
     attention_areas: List[AIAttentionArea] = Field(
         default_factory=list, description="Specific project areas requiring attention"
+    )
+    dependency_impact: Optional[AIDependencyImpact] = Field(
+        default=None, description="Structured assessment of dependency blockers"
     )
     metadata: Dict[str, Any] = Field(
         default_factory=dict, description="Execution telemetry (model, tokens, latency)"

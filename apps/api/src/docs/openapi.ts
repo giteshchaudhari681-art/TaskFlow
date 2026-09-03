@@ -410,6 +410,10 @@ export const openApiSpec = {
           'PLANNING',
           'QUALITY',
           'RESOURCE',
+          'DEPENDENCY',
+          'DEADLINE',
+          'UNBLOCK',
+          'EXECUTION',
         ],
       },
       RegisterRequest: {
@@ -1100,12 +1104,18 @@ export const openApiSpec = {
           },
         },
       },
-      // PR 15/16 AI Analysis Schemas
+      // PR 15/16/20/21 AI Analysis Schemas
       AIAnalysisRequest: {
         type: 'object',
         required: ['operation'],
         properties: {
           operation: { $ref: '#/components/schemas/AIOperationEnum' },
+          taskId: {
+            type: 'string',
+            format: 'uuid',
+            description: 'Task UUID required when operation is TASK_SUMMARY',
+            example: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+          },
           user_prompt: {
             type: 'string',
             maxLength: 2000,
@@ -1140,6 +1150,20 @@ export const openApiSpec = {
           severity: { $ref: '#/components/schemas/RecommendationPriorityEnum' },
         },
       },
+      AIDependencyImpact: {
+        type: 'object',
+        required: ['has_blocking_dependencies', 'description'],
+        properties: {
+          has_blocking_dependencies: {
+            type: 'boolean',
+            example: true,
+          },
+          description: {
+            type: 'string',
+            example: 'Work is blocked by uncompleted predecessor task ALPHA-40.',
+          },
+        },
+      },
       AIAnalysisResponse: {
         type: 'object',
         required: ['request_id', 'operation', 'summary', 'recommendations', 'metadata'],
@@ -1158,6 +1182,9 @@ export const openApiSpec = {
           attention_areas: {
             type: 'array',
             items: { $ref: '#/components/schemas/AIAttentionArea' },
+          },
+          dependency_impact: {
+            $ref: '#/components/schemas/AIDependencyImpact',
           },
           metadata: {
             type: 'object',

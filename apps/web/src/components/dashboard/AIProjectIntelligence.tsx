@@ -76,6 +76,13 @@ const CATEGORY_LABELS: Record<RecommendationCategory, { label: string; icon: Rea
   PLANNING: { label: 'Planning', icon: <Clock className="w-3.5 h-3.5 text-sky-400" /> },
   QUALITY: { label: 'Quality', icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> },
   RESOURCE: { label: 'Resource', icon: <Layers className="w-3.5 h-3.5 text-purple-400" /> },
+  DEPENDENCY: { label: 'Dependency', icon: <Layers className="w-3.5 h-3.5 text-blue-400" /> },
+  DEADLINE: { label: 'Deadline', icon: <Clock className="w-3.5 h-3.5 text-rose-400" /> },
+  UNBLOCK: { label: 'Unblock', icon: <ShieldAlert className="w-3.5 h-3.5 text-amber-400" /> },
+  EXECUTION: {
+    label: 'Execution',
+    icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />,
+  },
 };
 
 export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({

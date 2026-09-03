@@ -1,6 +1,7 @@
 import { ProjectRole, UserRole } from '@prisma/client';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
+import { taskRepository } from '../repositories/task.repository.js';
 import { aiContextBuilder } from './aiContext.builder.js';
 import { aiClient, type IAIClient } from '../integrations/ai/aiClient.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -45,7 +46,7 @@ export class AIService {
   }
 
   /**
-   * Authorizes caller, aggregates project context, and dispatches to Python AI service.
+   * Authorizes caller, aggregates project or task context, and dispatches to Python AI service.
    */
   async analyzeProject(
     organizationId: string,
@@ -53,13 +54,23 @@ export class AIService {
     userId: string,
     operation: AIOperation,
     userPrompt?: string,
-    requestId?: string
+    requestId?: string,
+    taskId?: string
   ): Promise<AIAnalysisResponse> {
     // 1. Authorize tenant, project, and RBAC boundary
     await this.checkProjectAccess(organizationId, projectId, userId);
 
     // 2. Build sanitized, deterministic AI context from Prisma
-    const context = await aiContextBuilder.buildProjectContext(projectId);
+    let context;
+    if (operation === 'TASK_SUMMARY' && taskId) {
+      const task = await taskRepository.findById(taskId, projectId);
+      if (!task) {
+        throw new AppError('NOT_FOUND', 'Task not found in this project', 404);
+      }
+      context = await aiContextBuilder.buildTaskContext(projectId, taskId);
+    } else {
+      context = await aiContextBuilder.buildProjectContext(projectId);
+    }
 
     // 3. Delegate to internal Python AI service
     try {

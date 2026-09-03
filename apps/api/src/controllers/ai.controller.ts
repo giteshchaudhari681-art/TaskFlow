@@ -22,7 +22,7 @@ export const analyzeProjectWithAI = async (
     }
 
     const { organizationId, projectId } = paramsResult.data;
-    const { operation, user_prompt } = bodyResult.data;
+    const { operation, taskId, user_prompt } = bodyResult.data;
 
     const requestId =
       (req.headers['x-request-id'] as string) ||
@@ -35,7 +35,8 @@ export const analyzeProjectWithAI = async (
       req.user!.id,
       operation,
       user_prompt,
-      requestId
+      requestId,
+      taskId
     );
 
     return sendSuccess(res, analysis, 200);
