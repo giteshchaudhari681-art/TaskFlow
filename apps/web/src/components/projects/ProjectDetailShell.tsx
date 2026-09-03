@@ -10,7 +10,6 @@ import {
   AlertCircle,
   Plus,
   Trash2,
-  Sparkles,
   Kanban,
   Milestone,
   Tag,
@@ -33,6 +32,7 @@ import { DependencyGraphView } from '../dependencies/DependencyGraphView';
 import { MilestonesView } from '../milestones/MilestonesView';
 import { TimelineView } from '../milestones/TimelineView';
 import { ProjectActivityFeed } from '../collaboration/ProjectActivityFeed';
+import { ProjectDashboardView } from '../dashboard/ProjectDashboardView';
 
 interface ProjectDetailShellProps {
   organizationId: string;
@@ -69,6 +69,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
 }) => {
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [activeTab, setActiveTab] = useState<ProjectTab>(initialTaskId ? 'tasks' : 'overview');
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null | undefined>(initialTaskId);
   const [taskViewMode, setTaskViewMode] = useState<'board' | 'list'>('board');
   const [milestoneSubTab, setMilestoneSubTab] = useState<'milestones' | 'timeline'>('milestones');
   const [loading, setLoading] = useState(true);
@@ -361,110 +362,26 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         </div>
       </div>
 
-      {/* TAB 1: OVERVIEW */}
+      {/* TAB 1: OVERVIEW / DASHBOARD 2.0 */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Overview Card */}
-            <div className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-taskflow-surface space-y-4">
-              <h2 className="text-sm font-bold text-white tracking-tight uppercase text-taskflow-muted">
-                Project Scope & Objectives
-              </h2>
-              <p className="text-sm text-taskflow-text leading-relaxed">
-                {project.description ||
-                  'No description provided for this project. Navigate to Settings to outline core scope, objectives, and milestones.'}
-              </p>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-taskflow-border/60">
-                <div className="p-3 rounded-xl bg-taskflow-bg/60 border border-taskflow-border/60">
-                  <span className="text-[10px] uppercase font-bold text-taskflow-muted">Key</span>
-                  <p className="text-sm font-mono font-bold text-cyan-300 mt-0.5">{project.key}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-taskflow-bg/60 border border-taskflow-border/60">
-                  <span className="text-[10px] uppercase font-bold text-taskflow-muted">
-                    Status
-                  </span>
-                  <p className="text-sm font-semibold text-white mt-0.5">{project.status}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-taskflow-bg/60 border border-taskflow-border/60">
-                  <span className="text-[10px] uppercase font-bold text-taskflow-muted">Team</span>
-                  <p className="text-sm font-semibold text-white mt-0.5">
-                    {project.memberCount} Members
-                  </p>
-                </div>
-                <div className="p-3 rounded-xl bg-taskflow-bg/60 border border-taskflow-border/60">
-                  <span className="text-[10px] uppercase font-bold text-taskflow-muted">
-                    Updated
-                  </span>
-                  <p className="text-xs font-semibold text-white mt-1">
-                    {new Date(project.updatedAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Upcoming Features Preview Banner */}
-            <div className="glass-panel rounded-2xl border border-cyan-500/20 p-6 bg-gradient-to-br from-cyan-950/30 to-indigo-950/30 space-y-3">
-              <div className="flex items-center space-x-2 text-cyan-400">
-                <Sparkles className="w-5 h-5" />
-                <h3 className="text-sm font-bold tracking-tight">
-                  PR 5 Foundation Active — PR 6 Execution Engine Coming Next
-                </h3>
-              </div>
-              <p className="text-xs text-taskflow-muted leading-relaxed">
-                PR 5 establishes the project entity, role-based authorization, and team roster. The
-                next milestone (PR 6) introduces the live Task Lifecycle, Kanban views, sprint
-                planning, and dependency graphs directly under this project umbrella.
-              </p>
-            </div>
-          </div>
-
-          {/* Members Sidebar Preview */}
-          <div className="space-y-6">
-            <div className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-taskflow-surface space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white tracking-tight">Project Team</h3>
-                <button
-                  onClick={() => setActiveTab('members')}
-                  className="text-xs text-cyan-400 hover:text-cyan-300 font-medium"
-                >
-                  View all ({project.members?.length || project.memberCount})
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {project.members && project.members.length > 0 ? (
-                  project.members.slice(0, 5).map(m => (
-                    <div key={m.id} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2.5">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden">
-                          {m.user.avatarUrl ? (
-                            <img
-                              src={m.user.avatarUrl}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            m.user.name.charAt(0)
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-white">{m.user.name}</p>
-                          <p className="text-[10px] text-taskflow-muted">{m.user.email}</p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-taskflow-bg border border-taskflow-border text-cyan-300">
-                        {m.role}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-taskflow-muted">No members assigned.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProjectDashboardView
+          organizationId={organizationId}
+          projectId={projectId}
+          onOpenTask={taskId => {
+            setSelectedTaskId(taskId);
+            setActiveTab('tasks');
+          }}
+          onNavigateTab={tab => {
+            if (tab === 'tasks') setActiveTab('tasks');
+            else if (tab === 'milestones') setActiveTab('timeline');
+            else if (tab === 'dependencies') setActiveTab('dependencies');
+            else if (tab === 'activity') setActiveTab('activity');
+            else if (tab === 'settings') setActiveTab('settings');
+          }}
+          onCreateTask={() => {
+            setActiveTab('tasks');
+          }}
+        />
       )}
 
       {/* TAB 2: TASKS & KANBAN */}
@@ -478,7 +395,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
             canManageTasks={project?.userRole !== ProjectRole.VIEWER}
             viewMode={taskViewMode}
             onViewModeChange={setTaskViewMode}
-            initialSelectedTaskId={initialTaskId}
+            initialSelectedTaskId={selectedTaskId}
           />
         ) : (
           <TaskList
@@ -489,7 +406,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
             canManageTasks={project?.userRole !== ProjectRole.VIEWER}
             viewMode={taskViewMode}
             onViewModeChange={setTaskViewMode}
-            initialSelectedTaskId={initialTaskId}
+            initialSelectedTaskId={selectedTaskId}
           />
         ))}
 
