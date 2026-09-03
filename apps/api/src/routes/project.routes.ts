@@ -20,8 +20,25 @@ import { getProjectTimeline } from '../controllers/milestone.controller.js';
 import { getProjectActivity } from '../controllers/activity.controller.js';
 import { getProjectDashboard } from '../controllers/projectDashboard.controller.js';
 import { analyzeProjectWithAI } from '../controllers/ai.controller.js';
+import rateLimit from 'express-rate-limit';
+import { env } from '../config/env.js';
 
 export const projectRoutes = Router({ mergeParams: true });
+
+// Scoped rate limiter for expensive AI operations (10 requests per minute)
+const aiRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: env.NODE_ENV === 'test' ? 1000 : 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many AI analysis requests. Please wait before requesting another analysis.',
+    },
+  },
+});
 
 // All project routes require active authenticated session
 projectRoutes.use(requireAuth);
@@ -29,8 +46,8 @@ projectRoutes.use(requireAuth);
 // Project Dashboard 2.0 endpoint
 projectRoutes.get('/:projectId/dashboard', getProjectDashboard);
 
-// AI Analysis endpoint
-projectRoutes.post('/:projectId/ai/analyze', analyzeProjectWithAI);
+// AI Analysis endpoint with specialized abuse/cost rate limit
+projectRoutes.post('/:projectId/ai/analyze', aiRateLimiter, analyzeProjectWithAI);
 
 // Project CRUD endpoints
 projectRoutes.get('/', listProjects);

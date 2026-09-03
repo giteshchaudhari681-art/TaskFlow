@@ -18,6 +18,7 @@ from app.models.requests import (
 )
 from app.models.responses import (
     AIAnalysisResponse,
+    AIAttentionArea,
     AIRecommendation,
     RecommendationCategory,
     RecommendationPriority,
@@ -70,11 +71,20 @@ class MockAIProvider(BaseAIProvider):
             ),
         ]
 
+        attentions = [
+            AIAttentionArea(
+                title="2 Overdue High-Priority Tasks",
+                description="Tasks ALPHA-101 and ALPHA-102 require immediate review.",
+                severity=RecommendationPriority.HIGH,
+            )
+        ]
+
         return AIAnalysisResponse(
             request_id=request_id,
             operation=operation,
             summary=f"Synthesized mock summary for operation {operation.value}.",
             recommendations=recs,
+            attention_areas=attentions,
             metadata={"model": "mock-provider", "provider": "test-mock"},
         )
 

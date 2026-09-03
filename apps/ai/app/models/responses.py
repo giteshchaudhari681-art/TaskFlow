@@ -20,11 +20,27 @@ class RecommendationPriority(str, Enum):
 class RecommendationCategory(str, Enum):
     """Categorical classification of an AI recommendation."""
 
-    RISK_MITIGATION = "RISK_MITIGATION"
+    BLOCKER = "BLOCKER"
+    DELIVERY_RISK = "DELIVERY_RISK"
+    MILESTONE = "MILESTONE"
+    PRIORITY = "PRIORITY"
+    OWNERSHIP = "OWNERSHIP"
+    WORKLOAD = "WORKLOAD"
     PROCESS = "PROCESS"
-    RESOURCE = "RESOURCE"
+    RISK_MITIGATION = "RISK_MITIGATION"
     PLANNING = "PLANNING"
     QUALITY = "QUALITY"
+    RESOURCE = "RESOURCE"
+
+
+class AIAttentionArea(BaseModel):
+    """Specific project area requiring attention grounded in telemetry."""
+
+    title: str = Field(..., min_length=1, description="Brief attention area header")
+    description: str = Field(..., min_length=1, description="Fact-based explanation")
+    severity: RecommendationPriority = Field(
+        default=RecommendationPriority.HIGH, description="Severity of the attention item"
+    )
 
 
 class AIRecommendation(BaseModel):
@@ -48,6 +64,9 @@ class AIAnalysisResponse(BaseModel):
     summary: str = Field(..., min_length=1, description="Synthesized executive summary or insight")
     recommendations: List[AIRecommendation] = Field(
         default_factory=list, description="Actionable recommendations"
+    )
+    attention_areas: List[AIAttentionArea] = Field(
+        default_factory=list, description="Specific project areas requiring attention"
     )
     metadata: Dict[str, Any] = Field(
         default_factory=dict, description="Execution telemetry (model, tokens, latency)"

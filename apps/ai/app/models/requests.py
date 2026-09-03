@@ -65,6 +65,24 @@ class MilestoneContext(BaseModel):
     )
 
 
+class ProjectHealthContext(BaseModel):
+    """Deterministic project health assessment context (from PR14 engine)."""
+
+    state: str = Field(..., description="Deterministic project health state e.g. ON_TRACK, AT_RISK")
+    score: int = Field(default=100, ge=0, le=100, description="Project health score (0-100)")
+    reasons: List[str] = Field(
+        default_factory=list, description="Specific triggers/reasons for health state"
+    )
+
+
+class DeliveryRiskContext(BaseModel):
+    """Deterministic delivery risk item (from PR14 risk engine)."""
+
+    type: str = Field(..., description="Risk classification type")
+    severity: str = Field(..., description="Severity level e.g. CRITICAL, HIGH, MEDIUM, LOW")
+    message: str = Field(..., description="Concise human-readable risk description")
+
+
 class AIAnalysisContext(BaseModel):
     """Aggregated project and task domain context for AI synthesis."""
 
@@ -75,6 +93,12 @@ class AIAnalysisContext(BaseModel):
     )
     milestones: List[MilestoneContext] = Field(
         default_factory=list, description="Milestones in scope"
+    )
+    health: Optional[ProjectHealthContext] = Field(
+        default=None, description="Authoritative deterministic project health"
+    )
+    delivery_risks: List[DeliveryRiskContext] = Field(
+        default_factory=list, description="Authoritative deterministic delivery risks"
     )
 
 

@@ -264,6 +264,22 @@ export const openApiSpec = {
           },
         },
       },
+      RateLimitExceeded: {
+        description: 'Rate limit exceeded for client/workspace',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+            example: {
+              success: false,
+              error: {
+                code: 'RATE_LIMIT_EXCEEDED',
+                message:
+                  'Too many AI analysis requests. Please wait before requesting another analysis.',
+              },
+            },
+          },
+        },
+      },
     },
     schemas: {
       ErrorDetail: {
@@ -378,15 +394,22 @@ export const openApiSpec = {
       },
       RecommendationPriorityEnum: {
         type: 'string',
-        enum: ['HIGH', 'MEDIUM', 'LOW'],
+        enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'],
       },
       RecommendationCategoryEnum: {
         type: 'string',
         enum: [
+          'BLOCKER',
+          'DELIVERY_RISK',
+          'MILESTONE',
+          'PRIORITY',
+          'OWNERSHIP',
+          'WORKLOAD',
+          'PROCESS',
           'RISK_MITIGATION',
-          'RESOURCE_ALLOCATION',
-          'PROCESS_IMPROVEMENT',
-          'TIMELINE_ADJUSTMENT',
+          'PLANNING',
+          'QUALITY',
+          'RESOURCE',
         ],
       },
       RegisterRequest: {
@@ -1104,6 +1127,19 @@ export const openApiSpec = {
           category: { $ref: '#/components/schemas/RecommendationCategoryEnum' },
         },
       },
+      AIAttentionArea: {
+        type: 'object',
+        required: ['title', 'description', 'severity'],
+        properties: {
+          title: { type: 'string', example: '2 Overdue High-Priority Tasks' },
+          description: {
+            type: 'string',
+            example:
+              'Tasks ALPHA-12 and ALPHA-15 have passed target completion dates without updates.',
+          },
+          severity: { $ref: '#/components/schemas/RecommendationPriorityEnum' },
+        },
+      },
       AIAnalysisResponse: {
         type: 'object',
         required: ['request_id', 'operation', 'summary', 'recommendations', 'metadata'],
@@ -1118,6 +1154,10 @@ export const openApiSpec = {
           recommendations: {
             type: 'array',
             items: { $ref: '#/components/schemas/AIRecommendation' },
+          },
+          attention_areas: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/AIAttentionArea' },
           },
           metadata: {
             type: 'object',
@@ -2179,6 +2219,8 @@ export const openApiSpec = {
           401: { $ref: '#/components/responses/Unauthorized' },
           403: { $ref: '#/components/responses/Forbidden' },
           404: { $ref: '#/components/responses/NotFound' },
+          429: { $ref: '#/components/responses/RateLimitExceeded' },
+          500: { $ref: '#/components/responses/InternalServerError' },
           502: {
             description: 'Upstream AI provider error occurred during analysis',
             content: {

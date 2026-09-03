@@ -237,6 +237,15 @@ Run the following scripts from the monorepo root:
 | `npm run format:check` | Verifies code formatting consistency with Prettier                            |
 | `npm run format`       | Automatically formats all codebase files                                      |
 
+### AI Project Intelligence & Recommendations (PR 20)
+
+TaskFlow integrates an advisory AI Project Intelligence capability embedded into the Project Command Center:
+
+- **Grounded Telemetry**: Consumes authoritative PR 14 deterministic project health signals (health state, score, completion percentage, blocker chains, and milestone dates).
+- **Executive Synthesis & Attention Areas**: Identifies what is going well, which risks are most pressing, and specific attention areas requiring team action.
+- **Categorized Actionability**: Produces structured recommendations across categories (`BLOCKER`, `DELIVERY_RISK`, `MILESTONE`, `PRIORITY`, `OWNERSHIP`, `WORKLOAD`, `PROCESS`) with strict priority tiers (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+- **Defense in Depth**: Upstream LLM responses undergo dual validation (Python Pydantic ➔ Node.js Zod ➔ TypeScript frontend).
+
 ### Health Check Endpoint
 
 Once the API server is running, probe system telemetry at:
