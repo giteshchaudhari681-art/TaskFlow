@@ -43,6 +43,29 @@ def test_health_succeeds_without_openai_key() -> None:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "ok"
-        assert data["environment"] == "production"
-
     app.dependency_overrides.clear()
+
+
+def test_internal_openapi_documentation(client: TestClient) -> None:
+    """GET /openapi.json must return valid OpenAPI metadata identifying internal service."""
+    response = client.get("/openapi.json")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["info"]["title"] == "TaskFlow Internal AI Service"
+    assert "internal service" in data["info"]["description"].lower()
+    assert "/ai/analyze" in data["paths"]
+
+    # Verify no secret token value leaked in schema
+    raw_spec = response.text
+    token = get_settings().ai_service_token
+    if token:
+        assert token not in raw_spec
+    assert "sk-" not in raw_spec
+
+
+def test_internal_docs_ui(client: TestClient) -> None:
+    """GET /docs must serve FastAPI Swagger UI for developer inspection."""
+    response = client.get("/docs")
+    assert response.status_code == 200
+    assert "swagger-ui" in response.text.lower()

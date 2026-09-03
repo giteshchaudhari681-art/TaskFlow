@@ -117,3 +117,23 @@ Docker Compose
 
 - **Healthcheck-Driven Startup**: `taskflow-api` depends on both `postgres` and `taskflow-ai` with `condition: service_healthy`.
 - **Reproducibility**: Eliminates local environment mismatches while preserving the modular monolith architecture.
+
+---
+
+## 7. OpenAPI & Contract Hardening (PR 17)
+
+TaskFlow maintains explicit separation of OpenAPI contracts across its two service boundaries:
+
+| Boundary                   | Framework       | Specification Route | Documentation Explorer | Security Model                               | Audience                               |
+| -------------------------- | --------------- | ------------------- | ---------------------- | -------------------------------------------- | -------------------------------------- |
+| **Public Application API** | Express/Node.js | `/openapi.json`     | `/docs`, `/api/docs`   | Bearer JWT + HTTP-only cookie                | Frontend clients, external consumers   |
+| **Internal AI Subsystem**  | FastAPI/Python  | `/openapi.json`     | `/docs`, `/redoc`      | `X-TaskFlow-Service-Token` (Internal header) | Backend engineers, service diagnostics |
+
+### Contract Alignment Invariant
+
+- **TypeScript**: `AIAnalysisRequest`, `AIAnalysisResponse` in `@taskflow/shared`
+- **Zod**: `aiAnalysisBodySchema`, `aiAnalysisParamsSchema` in `@taskflow/validation`
+- **Python Pydantic**: `AIAnalysisRequest`, `AIAnalysisResponse` in `app.models`
+- **OpenAPI**: Reusable schemas in `openApiSpec.components.schemas`
+
+OpenAPI documentation makes contracts discoverable and formally testable without changing service boundaries, data ownership, or authorization policies.

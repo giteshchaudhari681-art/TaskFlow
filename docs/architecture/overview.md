@@ -56,3 +56,7 @@ TaskFlow is **NOT** a microservices architecture. It does not use Kafka, Redis, 
 5. **Internal Service Authentication**: Inter-service communication between Express and the Python AI service is secured via the `X-TaskFlow-Service-Token` header. Python rejects unauthenticated or invalid tokens with HTTP 401.
 6. **Traceability & Correlation**: Every AI operation carries a traceable `request_id` passed or auto-generated at the service boundary to correlate execution telemetry.
 7. **Container Orchestration (Docker)**: Multi-container local orchestration is managed via Docker Compose (`docker-compose.yml`), provisioning PostgreSQL (`postgres:16-alpine`), Python AI (`taskflow-ai`), and Node.js Express (`taskflow-api`) connected via a private bridge network (`taskflow-network`) with healthcheck readiness dependencies.
+8. **OpenAPI & Dual HTTP Documentation Boundaries (PR 17)**:
+   - **Public REST API Contract**: `React SPA -> Express API -> OpenAPI 3.1.0 Specification -> Swagger UI (/docs, /api/docs)`. Formally documents public routes, JWT authentication, Zod-aligned schemas, and deterministic response envelopes.
+   - **Internal AI Service Contract**: `Express -> Python AI -> FastAPI Native OpenAPI (/docs on port 8000)`. Strictly private service documentation for the AI subsystem.
+     OpenAPI documentation makes contracts explicit, discoverable, and type-safe without altering service ownership, tenant isolation, or authorization boundaries.

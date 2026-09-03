@@ -31,8 +31,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(
-    title="TaskFlow AI Service",
-    description="Dedicated Python + Pydantic AI subsystem for TaskFlow project intelligence",
+    title="TaskFlow Internal AI Service",
+    description=(
+        "Dedicated Python + Pydantic AI subsystem for TaskFlow project intelligence. "
+        "This API is an internal service. Public clients must use the Node.js TaskFlow API."
+    ),
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
