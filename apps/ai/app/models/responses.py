@@ -72,6 +72,19 @@ class AIRecommendation(BaseModel):
     )
 
 
+class AIDecomposedSubtask(BaseModel):
+    """Structured proposal for subtask decomposition."""
+
+    title: str = Field(..., min_length=1, max_length=200, description="Clear, actionable title")
+    description: Optional[str] = Field(
+        default=None, max_length=1000, description="Concise scope and acceptance criteria"
+    )
+    priority: Optional[RecommendationPriority] = Field(
+        default=RecommendationPriority.MEDIUM, description="Recommended priority level"
+    )
+    order: int = Field(default=1, ge=1, le=50, description="Sequential execution order")
+
+
 class AIAnalysisResponse(BaseModel):
     """Structured response payload returned by POST /ai/analyze."""
 
@@ -87,6 +100,10 @@ class AIAnalysisResponse(BaseModel):
     dependency_impact: Optional[AIDependencyImpact] = Field(
         default=None, description="Structured assessment of dependency blockers"
     )
+    subtasks: List[AIDecomposedSubtask] = Field(
+        default_factory=list, description="Proposed decomposed subtask items"
+    )
+    notes: List[str] = Field(default_factory=list, description="Advisory decomposition notes")
     metadata: Dict[str, Any] = Field(
         default_factory=dict, description="Execution telemetry (model, tokens, latency)"
     )

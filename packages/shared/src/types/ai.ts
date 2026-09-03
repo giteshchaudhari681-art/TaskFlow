@@ -1,4 +1,5 @@
-export type AIOperation = 'PROJECT_SUMMARY' | 'TASK_SUMMARY' | 'PROJECT_INSIGHT';
+export type AIOperation =
+  'PROJECT_SUMMARY' | 'TASK_SUMMARY' | 'PROJECT_INSIGHT' | 'TASK_DECOMPOSITION';
 
 export type RecommendationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
@@ -38,6 +39,13 @@ export interface AIRecommendation {
   category: RecommendationCategory;
 }
 
+export interface AIDecomposedSubtask {
+  title: string;
+  description?: string;
+  priority?: RecommendationPriority;
+  order: number;
+}
+
 export interface AIAnalysisResponse {
   request_id: string;
   operation: AIOperation;
@@ -45,6 +53,8 @@ export interface AIAnalysisResponse {
   recommendations: AIRecommendation[];
   attention_areas?: AIAttentionArea[];
   dependency_impact?: AIDependencyImpact;
+  subtasks?: AIDecomposedSubtask[];
+  notes?: string[];
   metadata: Record<string, unknown>;
 }
 

@@ -658,13 +658,18 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               />
             </div>
 
-            {/* AI Task Intelligence Section */}
+            {/* AI Task Intelligence & Decomposition Section */}
             <div className="pt-4 border-t border-slate-800">
               <AITaskIntelligence
                 organizationId={organizationId}
                 projectId={projectId}
                 taskId={taskId}
                 taskKey={task ? task.issueKey || `TASK-${task.taskNumber}` : undefined}
+                existingSubtaskTitles={task?.subtasks?.map(st => st.title) || []}
+                onSubtasksCreated={() => {
+                  loadTask();
+                  onUpdated();
+                }}
               />
             </div>
 

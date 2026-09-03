@@ -18,6 +18,7 @@ from app.models.requests import (
 from app.models.responses import (
     AIAnalysisResponse,
     AIAttentionArea,
+    AIDecomposedSubtask,
     AIDependencyImpact,
     AIRecommendation,
     ErrorDetail,
@@ -43,6 +44,7 @@ __all__ = [
     "RecommendationPriority",
     "RecommendationCategory",
     "AIAttentionArea",
+    "AIDecomposedSubtask",
     "AIDependencyImpact",
     "AIRecommendation",
     "AIAnalysisResponse",

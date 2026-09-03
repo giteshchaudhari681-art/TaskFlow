@@ -390,7 +390,7 @@ export const openApiSpec = {
       },
       AIOperationEnum: {
         type: 'string',
-        enum: ['PROJECT_SUMMARY', 'TASK_SUMMARY', 'PROJECT_INSIGHT'],
+        enum: ['PROJECT_SUMMARY', 'TASK_SUMMARY', 'PROJECT_INSIGHT', 'TASK_DECOMPOSITION'],
       },
       RecommendationPriorityEnum: {
         type: 'string',
@@ -1164,6 +1164,30 @@ export const openApiSpec = {
           },
         },
       },
+      AIDecomposedSubtask: {
+        type: 'object',
+        required: ['title', 'order'],
+        properties: {
+          title: {
+            type: 'string',
+            maxLength: 200,
+            example: 'Configure OAuth application credentials',
+          },
+          description: {
+            type: 'string',
+            maxLength: 1000,
+            example: 'Register provider client credentials and configure environment settings.',
+          },
+          priority: {
+            $ref: '#/components/schemas/RecommendationPriorityEnum',
+          },
+          order: {
+            type: 'integer',
+            minimum: 1,
+            example: 1,
+          },
+        },
+      },
       AIAnalysisResponse: {
         type: 'object',
         required: ['request_id', 'operation', 'summary', 'recommendations', 'metadata'],
@@ -1185,6 +1209,14 @@ export const openApiSpec = {
           },
           dependency_impact: {
             $ref: '#/components/schemas/AIDependencyImpact',
+          },
+          subtasks: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/AIDecomposedSubtask' },
+          },
+          notes: {
+            type: 'array',
+            items: { type: 'string' },
           },
           metadata: {
             type: 'object',

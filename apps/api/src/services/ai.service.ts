@@ -62,12 +62,14 @@ export class AIService {
 
     // 2. Build sanitized, deterministic AI context from Prisma
     let context;
-    if (operation === 'TASK_SUMMARY' && taskId) {
+    if ((operation === 'TASK_SUMMARY' || operation === 'TASK_DECOMPOSITION') && taskId) {
       const task = await taskRepository.findById(taskId, projectId);
       if (!task) {
         throw new AppError('NOT_FOUND', 'Task not found in this project', 404);
       }
       context = await aiContextBuilder.buildTaskContext(projectId, taskId);
+    } else if (operation === 'TASK_DECOMPOSITION' && !taskId) {
+      throw new AppError('VALIDATION_ERROR', 'taskId is required for TASK_DECOMPOSITION', 400);
     } else {
       context = await aiContextBuilder.buildProjectContext(projectId);
     }
