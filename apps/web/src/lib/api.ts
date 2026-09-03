@@ -38,6 +38,11 @@ import {
   CreateMilestonePayload,
   UpdateMilestonePayload,
   ProjectTimelineResponse,
+  CommentItem,
+  CreateCommentPayload,
+  UpdateCommentPayload,
+  DeleteCommentResponse,
+  ActivityItem,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -731,6 +736,98 @@ export const milestoneApi = {
   ): Promise<ProjectTimelineResponse> => {
     const res = await apiFetch<ProjectTimelineResponse>(
       `/organizations/${organizationId}/projects/${projectId}/timeline`
+    );
+    return res.data;
+  },
+};
+
+export const commentApi = {
+  listComments: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string
+  ): Promise<CommentItem[]> => {
+    const res = await apiFetch<CommentItem[]>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/comments`
+    );
+    return res.data;
+  },
+
+  createComment: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    payload: CreateCommentPayload
+  ): Promise<CommentItem> => {
+    const res = await apiFetch<CommentItem>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/comments`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }
+    );
+    return res.data;
+  },
+
+  updateComment: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    commentId: string,
+    payload: UpdateCommentPayload
+  ): Promise<CommentItem> => {
+    const res = await apiFetch<CommentItem>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/comments/${commentId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }
+    );
+    return res.data;
+  },
+
+  deleteComment: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    commentId: string
+  ): Promise<DeleteCommentResponse> => {
+    const res = await apiFetch<DeleteCommentResponse>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/comments/${commentId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    return res.data;
+  },
+};
+
+export const activityApi = {
+  getTaskActivity: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    limit?: number
+  ): Promise<ActivityItem[]> => {
+    const query = limit ? `?limit=${limit}` : '';
+    const res = await apiFetch<ActivityItem[]>(
+      `/organizations/${organizationId}/projects/${projectId}/tasks/${taskId}/activity${query}`
+    );
+    return res.data;
+  },
+
+  getProjectActivity: async (
+    organizationId: string,
+    projectId: string,
+    options?: { limit?: number; filterType?: string }
+  ): Promise<ActivityItem[]> => {
+    const params = new URLSearchParams();
+    if (options?.limit) params.set('limit', String(options.limit));
+    if (options?.filterType) params.set('filterType', options.filterType);
+    const query = params.toString() ? `?${params.toString()}` : '';
+
+    const res = await apiFetch<ActivityItem[]>(
+      `/organizations/${organizationId}/projects/${projectId}/activity${query}`
     );
     return res.data;
   },

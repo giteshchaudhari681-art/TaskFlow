@@ -9,10 +9,12 @@ import {
   Loader2,
   Trash2,
   Archive,
-  Save,
   CheckSquare,
   Square,
   Tag,
+  MessageSquare,
+  History,
+  FileText,
 } from 'lucide-react';
 import {
   TaskDetail,
@@ -23,9 +25,12 @@ import {
   LabelItem,
 } from '@taskflow/shared';
 import { taskApi, labelApi } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 import { LabelBadge } from '../labels/LabelBadge';
 import { LabelPickerPopover } from '../labels/LabelPickerPopover';
 import { TaskDependenciesSection } from '../dependencies/TaskDependenciesSection';
+import { TaskCommentsSection } from '../collaboration/TaskCommentsSection';
+import { TaskActivityTimeline } from '../collaboration/TaskActivityTimeline';
 
 interface TaskDetailDrawerProps {
   organizationId: string;
@@ -50,11 +55,14 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
   onUpdated,
   onDeleted,
 }) => {
+  const { user } = useAuth();
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [drawerTab, setDrawerTab] = useState<'details' | 'comments' | 'activity'>('details');
+  const [activityTrigger, setActivityTrigger] = useState(0);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -273,10 +281,70 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           </div>
         </div>
 
+        {/* Drawer Sub-tabs */}
+        <div className="flex items-center px-6 border-b border-slate-800 bg-slate-950/40 shrink-0">
+          <button
+            type="button"
+            onClick={() => setDrawerTab('details')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+              drawerTab === 'details'
+                ? 'border-cyan-400 text-cyan-400'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Details</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDrawerTab('comments')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+              drawerTab === 'comments'
+                ? 'border-cyan-400 text-cyan-400'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Comments</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDrawerTab('activity')}
+            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+              drawerTab === 'activity'
+                ? 'border-cyan-400 text-cyan-400'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>Activity</span>
+          </button>
+        </div>
+
         {/* Drawer Body */}
         {loading ? (
           <div className="flex-1 flex items-center justify-center p-12 text-slate-400">
             <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+          </div>
+        ) : drawerTab === 'comments' ? (
+          <div className="flex-1 overflow-y-auto p-6">
+            <TaskCommentsSection
+              organizationId={organizationId}
+              projectId={projectId}
+              taskId={taskId}
+              currentUserId={user?.id || ''}
+              canComment={true}
+              onActivityChanged={() => setActivityTrigger(prev => prev + 1)}
+            />
+          </div>
+        ) : drawerTab === 'activity' ? (
+          <div className="flex-1 overflow-y-auto p-6">
+            <TaskActivityTimeline
+              organizationId={organizationId}
+              projectId={projectId}
+              taskId={taskId}
+              refreshTrigger={activityTrigger}
+            />
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -649,24 +717,23 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           >
             Close
           </button>
-          <button
-            type="button"
-            onClick={() => handleSave()}
-            disabled={saving || !title.trim()}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium rounded-xl shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
+          {drawerTab === 'details' && (
+            <button
+              type="button"
+              onClick={() => handleSave()}
+              disabled={saving || !title.trim()}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium rounded-xl shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
                 <span>Save Changes</span>
-              </>
-            )}
-          </button>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

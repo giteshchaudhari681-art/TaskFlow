@@ -1,9 +1,10 @@
-import { ProjectRole, UserRole } from '@prisma/client';
+import { ProjectRole, UserRole, ActivityActionType } from '@prisma/client';
 import { CreateLabelInput, UpdateLabelInput } from '@taskflow/validation';
 import { labelRepository } from '../repositories/label.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { taskRepository } from '../repositories/task.repository.js';
+import { activityRepository } from '../repositories/activity.repository.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const PROJECT_ROLE_RANK: Record<ProjectRole, number> = {
@@ -216,6 +217,24 @@ export class LabelService {
     }
 
     await taskRepository.assignLabel(taskId, labelId);
+
+    // Record activity
+    await activityRepository.create({
+      projectId,
+      taskId,
+      actorId: actorUserId,
+      actionType: ActivityActionType.TASK_LABEL_ADDED,
+      fieldChanged: 'label',
+      metadata: {
+        labelId,
+        labelName: label.name,
+        labelColor: label.color,
+        taskNumber: task.taskNumber,
+        issueKey: task.issueKey,
+        taskTitle: task.title,
+      },
+    });
+
     return taskRepository.findById(taskId, projectId);
   }
 
@@ -247,6 +266,24 @@ export class LabelService {
     }
 
     await taskRepository.removeLabel(taskId, labelId);
+
+    // Record activity
+    await activityRepository.create({
+      projectId,
+      taskId,
+      actorId: actorUserId,
+      actionType: ActivityActionType.TASK_LABEL_REMOVED,
+      fieldChanged: 'label',
+      metadata: {
+        labelId,
+        labelName: label.name,
+        labelColor: label.color,
+        taskNumber: task.taskNumber,
+        issueKey: task.issueKey,
+        taskTitle: task.title,
+      },
+    });
+
     return taskRepository.findById(taskId, projectId);
   }
 }

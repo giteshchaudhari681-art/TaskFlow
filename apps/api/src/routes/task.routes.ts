@@ -20,6 +20,13 @@ import {
   createDependency,
   deleteDependency,
 } from '../controllers/dependency.controller.js';
+import {
+  listComments,
+  createComment,
+  updateComment,
+  deleteComment,
+} from '../controllers/comment.controller.js';
+import { getTaskActivity } from '../controllers/activity.controller.js';
 
 export const taskRoutes = Router({ mergeParams: true });
 
@@ -49,3 +56,12 @@ taskRoutes.delete('/:taskId/subtasks/:subtaskId', deleteSubtask);
 taskRoutes.get('/:taskId/dependencies', getTaskDependencies);
 taskRoutes.post('/:taskId/dependencies', createDependency);
 taskRoutes.delete('/:taskId/dependencies/:dependencyId', deleteDependency);
+
+// Task Comment endpoints
+taskRoutes.get('/:taskId/comments', listComments);
+taskRoutes.post('/:taskId/comments', createComment);
+taskRoutes.patch('/:taskId/comments/:commentId', updateComment);
+taskRoutes.delete('/:taskId/comments/:commentId', deleteComment);
+
+// Task Activity endpoint
+taskRoutes.get('/:taskId/activity', getTaskActivity);

@@ -8,4 +8,6 @@ export * from './types/task.js';
 export * from './types/label.js';
 export * from './types/dependency.js';
 export * from './types/milestone.js';
+export * from './types/comment.js';
+export * from './types/activity.js';
 export * from './constants/index.js';
