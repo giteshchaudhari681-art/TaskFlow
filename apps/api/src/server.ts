@@ -10,6 +10,7 @@ import { userRoutes } from './routes/user.routes.js';
 import { organizationRoutes } from './routes/organization.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import workRoutes from './routes/work.routes.js';
+import searchRoutes from './routes/search.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
 
@@ -62,6 +63,7 @@ export const createServer = (): Express => {
   app.use(`${env.API_PREFIX}/organizations`, organizationRoutes);
   app.use(`${env.API_PREFIX}/notifications`, notificationRoutes);
   app.use(`${env.API_PREFIX}/work`, workRoutes);
+  app.use(`${env.API_PREFIX}/search`, searchRoutes);
 
   // 404 Not Found Handler
   app.use(notFoundHandler);

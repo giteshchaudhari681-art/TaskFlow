@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   Users,
   CheckSquare,
+  Search,
 } from 'lucide-react';
 import type { HealthCheckData } from '@taskflow/shared';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -27,6 +28,9 @@ import { ProjectsList } from './components/projects/ProjectsList';
 import { ProjectDetailShell } from './components/projects/ProjectDetailShell';
 import { NotificationCenter } from './components/notifications/NotificationCenter';
 import { MyWorkView } from './components/work/MyWorkView';
+import { GlobalSearchModal } from './components/search/GlobalSearchModal';
+import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
+import { getPlatformCommandKey } from './components/command/commandRegistry';
 
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
@@ -37,6 +41,7 @@ const MainApp: React.FC = () => {
   >('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [deepLinkTaskId, setDeepLinkTaskId] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
@@ -70,6 +75,22 @@ const MainApp: React.FC = () => {
   useEffect(() => {
     fetchHealth();
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(prev => !prev);
+      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const platformKey = getPlatformCommandKey();
 
   const openSettings = (tab: SettingsTab = 'profile') => {
     setSettingsTab(tab);
@@ -207,6 +228,39 @@ const MainApp: React.FC = () => {
 
             {isAuthenticated && user ? (
               <div className="flex items-center space-x-3">
+                {/* Global Search & Command Trigger */}
+                {activeOrg && (
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchOpen(true)}
+                    className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-taskflow-muted hover:text-white transition-all cursor-pointer shadow-sm group"
+                    title={`Global Search & Commands (${platformKey}K)`}
+                  >
+                    <Search className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-cyan-400 transition-colors" />
+                    <span className="hidden sm:inline">Search...</span>
+                    <kbd className="hidden sm:inline px-1.5 py-0.2 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border group-hover:text-cyan-300 transition-colors">
+                      {platformKey}K
+                    </kbd>
+                  </button>
+                )}
+
+                {/* Cross-Project Quick Switcher */}
+                {activeOrg && (
+                  <ProjectSwitcher
+                    organizationId={activeOrg.organizationId}
+                    selectedProjectId={selectedProjectId}
+                    onSelectProject={id => {
+                      setSelectedProjectId(id);
+                      setDeepLinkTaskId(null);
+                      setCurrentView('project-details');
+                    }}
+                    onViewAllProjects={() => {
+                      setSelectedProjectId(null);
+                      setCurrentView('projects');
+                    }}
+                  />
+                )}
+
                 {/* Organization / Workspace Selector */}
                 {organizations.length > 0 && activeOrg && (
                   <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
@@ -533,6 +587,34 @@ const MainApp: React.FC = () => {
       <footer className="border-t border-taskflow-border py-4 px-6 text-center text-xs text-taskflow-muted">
         TaskFlow Operations Platform • PR 4 Workspace Management Complete
       </footer>
+
+      {/* Global Search & Command Palette Modal */}
+      {isAuthenticated && activeOrg && (
+        <GlobalSearchModal
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          organizationId={activeOrg.organizationId}
+          onSelectTask={handleOpenTask}
+          onSelectProject={id => {
+            setSelectedProjectId(id);
+            setDeepLinkTaskId(null);
+            setCurrentView('project-details');
+          }}
+          goToDashboard={() => setCurrentView('dashboard')}
+          goToProjects={() => {
+            setSelectedProjectId(null);
+            setCurrentView('projects');
+          }}
+          goToMyWork={() => {
+            setDeepLinkTaskId(null);
+            setCurrentView('my-work');
+          }}
+          openNotifications={() => {
+            // Can open notifications
+          }}
+          openSettings={openSettings}
+        />
+      )}
     </div>
   );
 };

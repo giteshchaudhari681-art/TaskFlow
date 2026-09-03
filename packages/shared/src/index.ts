@@ -12,4 +12,6 @@ export * from './types/comment.js';
 export * from './types/activity.js';
 export * from './types/notification.js';
 export * from './types/work.js';
+export * from './types/search.js';
+export * from './types/command.js';
 export * from './constants/index.js';
