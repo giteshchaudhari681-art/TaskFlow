@@ -18,11 +18,15 @@ import { milestoneRoutes } from './milestone.routes.js';
 import { getProjectDependencyGraph } from '../controllers/dependency.controller.js';
 import { getProjectTimeline } from '../controllers/milestone.controller.js';
 import { getProjectActivity } from '../controllers/activity.controller.js';
+import { getProjectDashboard } from '../controllers/projectDashboard.controller.js';
 
 export const projectRoutes = Router({ mergeParams: true });
 
 // All project routes require active authenticated session
 projectRoutes.use(requireAuth);
+
+// Project Dashboard 2.0 endpoint
+projectRoutes.get('/:projectId/dashboard', getProjectDashboard);
 
 // Project CRUD endpoints
 projectRoutes.get('/', listProjects);

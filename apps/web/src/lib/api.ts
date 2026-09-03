@@ -51,6 +51,7 @@ import {
   MyWorkFilter,
   SearchResponse,
   SearchQueryFilter,
+  ProjectDashboardResponse,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -308,6 +309,16 @@ export const projectApi = {
   getProject: async (organizationId: string, projectId: string) => {
     const res = await apiFetch<ProjectDetail>(
       `/organizations/${organizationId}/projects/${projectId}`
+    );
+    return res.data;
+  },
+
+  getDashboard: async (
+    organizationId: string,
+    projectId: string
+  ): Promise<ProjectDashboardResponse> => {
+    const res = await apiFetch<ProjectDashboardResponse>(
+      `/organizations/${organizationId}/projects/${projectId}/dashboard`
     );
     return res.data;
   },

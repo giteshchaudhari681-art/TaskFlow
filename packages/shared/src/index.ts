@@ -14,4 +14,5 @@ export * from './types/notification.js';
 export * from './types/work.js';
 export * from './types/search.js';
 export * from './types/command.js';
+export * from './types/projectDashboard.js';
 export * from './constants/index.js';
