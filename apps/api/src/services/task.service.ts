@@ -9,6 +9,7 @@ import { taskRepository } from '../repositories/task.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
+import { notificationService } from './notification.service.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const RANK_SUPER = 5;
@@ -142,6 +143,19 @@ export class TaskService {
       },
     });
 
+    // Notify assigned user if assigned at creation
+    if (task.assigneeId) {
+      await notificationService.notifyTaskAssigned({
+        taskId: task.id,
+        projectId,
+        taskNumber: task.taskNumber,
+        issueKey: task.issueKey,
+        taskTitle: task.title,
+        assigneeId: task.assigneeId,
+        actorId: actorUserId,
+      });
+    }
+
     return task;
   }
 
@@ -245,6 +259,19 @@ export class TaskService {
           to: data.status,
         },
       });
+
+      // Notify assignee if status changed
+      await notificationService.notifyTaskStatusChanged({
+        taskId: task.id,
+        projectId,
+        taskNumber: task.taskNumber,
+        issueKey: task.issueKey,
+        taskTitle: task.title,
+        fromStatus: task.status,
+        toStatus: data.status,
+        assigneeId: task.assigneeId,
+        actorId: actorUserId,
+      });
     }
 
     if (data.priority && data.priority !== task.priority) {
@@ -286,6 +313,32 @@ export class TaskService {
           newAssigneeId: data.assigneeId ?? null,
         },
       });
+
+      // Notify previous assignee of unassignment if previously assigned
+      if (task.assigneeId) {
+        await notificationService.notifyTaskUnassigned({
+          taskId: task.id,
+          projectId,
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: task.title,
+          previousAssigneeId: task.assigneeId,
+          actorId: actorUserId,
+        });
+      }
+
+      // Notify new assignee of assignment if newly assigned
+      if (data.assigneeId) {
+        await notificationService.notifyTaskAssigned({
+          taskId: task.id,
+          projectId,
+          taskNumber: task.taskNumber,
+          issueKey: task.issueKey,
+          taskTitle: task.title,
+          assigneeId: data.assigneeId,
+          actorId: actorUserId,
+        });
+      }
     }
 
     if (data.milestoneId !== undefined && data.milestoneId !== task.milestoneId) {
@@ -369,6 +422,19 @@ export class TaskService {
           from: task.status,
           to: status,
         },
+      });
+
+      // Notify assignee if status changed
+      await notificationService.notifyTaskStatusChanged({
+        taskId: task.id,
+        projectId,
+        taskNumber: task.taskNumber,
+        issueKey: task.issueKey,
+        taskTitle: task.title,
+        fromStatus: task.status,
+        toStatus: status,
+        assigneeId: task.assigneeId,
+        actorId: actorUserId,
       });
     }
 

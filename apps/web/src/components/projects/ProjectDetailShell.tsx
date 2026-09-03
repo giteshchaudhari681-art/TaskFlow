@@ -38,6 +38,7 @@ interface ProjectDetailShellProps {
   organizationId: string;
   projectId: string;
   onBack: () => void;
+  initialTaskId?: string | null;
 }
 
 type ProjectTab =
@@ -64,9 +65,10 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
   organizationId,
   projectId,
   onBack,
+  initialTaskId,
 }) => {
   const [project, setProject] = useState<ProjectDetail | null>(null);
-  const [activeTab, setActiveTab] = useState<ProjectTab>('overview');
+  const [activeTab, setActiveTab] = useState<ProjectTab>(initialTaskId ? 'tasks' : 'overview');
   const [taskViewMode, setTaskViewMode] = useState<'board' | 'list'>('board');
   const [milestoneSubTab, setMilestoneSubTab] = useState<'milestones' | 'timeline'>('milestones');
   const [loading, setLoading] = useState(true);
@@ -476,6 +478,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
             canManageTasks={project?.userRole !== ProjectRole.VIEWER}
             viewMode={taskViewMode}
             onViewModeChange={setTaskViewMode}
+            initialSelectedTaskId={initialTaskId}
           />
         ) : (
           <TaskList
@@ -486,6 +489,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
             canManageTasks={project?.userRole !== ProjectRole.VIEWER}
             viewMode={taskViewMode}
             onViewModeChange={setTaskViewMode}
+            initialSelectedTaskId={initialTaskId}
           />
         ))}
 

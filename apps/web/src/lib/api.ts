@@ -43,6 +43,12 @@ import {
   UpdateCommentPayload,
   DeleteCommentResponse,
   ActivityItem,
+  NotificationListResponse,
+  UnreadCountResponse,
+  NotificationPreferences,
+  UpdateNotificationPreferencesPayload,
+  MyWorkResponse,
+  MyWorkFilter,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -829,6 +835,74 @@ export const activityApi = {
     const res = await apiFetch<ActivityItem[]>(
       `/organizations/${organizationId}/projects/${projectId}/activity${query}`
     );
+    return res.data;
+  },
+};
+
+export const notificationApi = {
+  list: async (options?: {
+    limit?: number;
+    unreadOnly?: boolean;
+  }): Promise<NotificationListResponse> => {
+    const params = new URLSearchParams();
+    if (options?.limit) params.set('limit', String(options.limit));
+    if (options?.unreadOnly !== undefined) params.set('unreadOnly', String(options.unreadOnly));
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const res = await apiFetch<NotificationListResponse>(`/notifications${query}`);
+    return res.data;
+  },
+
+  getUnreadCount: async (): Promise<UnreadCountResponse> => {
+    const res = await apiFetch<UnreadCountResponse>('/notifications/unread-count');
+    return res.data;
+  },
+
+  markRead: async (
+    notificationId: string
+  ): Promise<{ id: string; isRead: boolean; readAt?: string | null }> => {
+    const res = await apiFetch<{ id: string; isRead: boolean; readAt?: string | null }>(
+      `/notifications/${notificationId}/read`,
+      { method: 'PATCH' }
+    );
+    return res.data;
+  },
+
+  markAllRead: async (): Promise<{ count: number }> => {
+    const res = await apiFetch<{ count: number }>('/notifications/read-all', {
+      method: 'POST',
+    });
+    return res.data;
+  },
+
+  getPreferences: async (): Promise<NotificationPreferences> => {
+    const res = await apiFetch<NotificationPreferences>('/notifications/preferences');
+    return res.data;
+  },
+
+  updatePreferences: async (
+    data: UpdateNotificationPreferencesPayload
+  ): Promise<NotificationPreferences> => {
+    const res = await apiFetch<NotificationPreferences>('/notifications/preferences', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+};
+
+export const workApi = {
+  getMyWork: async (options?: {
+    filter?: MyWorkFilter;
+    projectId?: string;
+    search?: string;
+  }): Promise<MyWorkResponse> => {
+    const params = new URLSearchParams();
+    if (options?.filter) params.set('filter', options.filter);
+    if (options?.projectId) params.set('projectId', options.projectId);
+    if (options?.search) params.set('search', options.search);
+    const query = params.toString() ? `?${params.toString()}` : '';
+
+    const res = await apiFetch<MyWorkResponse>(`/work/my-work${query}`);
     return res.data;
   },
 };

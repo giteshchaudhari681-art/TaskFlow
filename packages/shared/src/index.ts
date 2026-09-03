@@ -10,4 +10,6 @@ export * from './types/dependency.js';
 export * from './types/milestone.js';
 export * from './types/comment.js';
 export * from './types/activity.js';
+export * from './types/notification.js';
+export * from './types/work.js';
 export * from './constants/index.js';

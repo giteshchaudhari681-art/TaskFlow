@@ -113,6 +113,19 @@ enum ActivityActionType {
   MILESTONE_COMPLETED
 }
 
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_UNASSIGNED
+  COMMENT_CREATED
+  TASK_STATUS_CHANGED
+  TASK_PRIORITY_CHANGED
+  TASK_MILESTONE_CHANGED
+  TASK_DEPENDENCY_ADDED
+  TASK_DEPENDENCY_REMOVED
+  MILESTONE_COMPLETED
+  SYSTEM
+}
+
 // ------------------------------------------------------------
 // Core Tenant & Identity Models
 // ------------------------------------------------------------
@@ -130,17 +143,20 @@ model User {
   organizationMemberships OrganizationMember[]
   projectMemberships      ProjectMember[]
 
+  notificationPreferences Json?
+
   // Work Attribution
-  assignedTasks    Task[]         @relation("TaskAssignee")
-  reportedTasks    Task[]         @relation("TaskReporter")
-  assignedSubtasks Subtask[]
-  comments         Comment[]
-  attachments      Attachment[]
-  activities       Activity[]
-  notifications    Notification[]
-  plannerItems     PlannerItem[]
-  discussions      Discussion[]
-  sessions         Session[]
+  assignedTasks          Task[]         @relation("TaskAssignee")
+  reportedTasks          Task[]         @relation("TaskReporter")
+  assignedSubtasks       Subtask[]
+  comments               Comment[]
+  attachments            Attachment[]
+  activities             Activity[]
+  notifications          Notification[]
+  notificationsTriggered Notification[] @relation("NotificationActor")
+  plannerItems           PlannerItem[]
+  discussions            Discussion[]
+  sessions               Session[]
 
   @@map("users")
 }
@@ -220,6 +236,7 @@ model Project {
   labels          Label[]
   discussions     Discussion[]
   activities      Activity[]
+  notifications   Notification[]
   insights        ProjectInsight[]
   recommendations AIRecommendation[]
 
@@ -316,6 +333,7 @@ model Task {
   comments                  Comment[]
   attachments               Attachment[]
   activities                Activity[]
+  notifications             Notification[]
   plannerItems              PlannerItem[]
 
   @@unique([projectId, taskNumber])
@@ -480,17 +498,27 @@ model Activity {
 }
 
 model Notification {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  type      NotificationType @default(SYSTEM)
   title     String
   message   String
   linkUrl   String?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  taskId    String?          @db.Uuid
+  projectId String?          @db.Uuid
+  actorId   String?          @db.Uuid
+  metadata  Json?
+  createdAt DateTime         @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actor   User?    @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead, createdAt])
+  @@index([userId, createdAt])
   @@map("notifications")
 }
 

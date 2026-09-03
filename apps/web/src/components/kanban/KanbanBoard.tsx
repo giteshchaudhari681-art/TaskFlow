@@ -31,6 +31,7 @@ interface KanbanBoardProps {
   canManageTasks: boolean;
   viewMode?: 'board' | 'list';
   onViewModeChange?: (mode: 'board' | 'list') => void;
+  initialSelectedTaskId?: string | null;
 }
 
 type SortOption = 'number_desc' | 'number_asc' | 'priority_desc' | 'due_date' | 'created_desc';
@@ -61,6 +62,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   canManageTasks,
   viewMode = 'board',
   onViewModeChange,
+  initialSelectedTaskId,
 }) => {
   const [tasks, setTasks] = useState<TaskListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +83,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [createModalInitialStatus, setCreateModalInitialStatus] = useState<TaskStatus>(
     TaskStatus.TODO
   );
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
+    initialSelectedTaskId || null
+  );
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);

@@ -8,6 +8,8 @@ import { healthRoutes } from './routes/health.routes.js';
 import { authRoutes } from './routes/auth.routes.js';
 import { userRoutes } from './routes/user.routes.js';
 import { organizationRoutes } from './routes/organization.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import workRoutes from './routes/work.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
 
@@ -58,6 +60,8 @@ export const createServer = (): Express => {
   app.use(`${env.API_PREFIX}/auth`, authRoutes);
   app.use(`${env.API_PREFIX}/users`, userRoutes);
   app.use(`${env.API_PREFIX}/organizations`, organizationRoutes);
+  app.use(`${env.API_PREFIX}/notifications`, notificationRoutes);
+  app.use(`${env.API_PREFIX}/work`, workRoutes);
 
   // 404 Not Found Handler
   app.use(notFoundHandler);
