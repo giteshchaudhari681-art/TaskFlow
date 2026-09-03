@@ -54,7 +54,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
     });
     memberToken = memberRes.body.data.accessToken;
     memberUserId = memberRes.body.data.user.id;
-    await prisma.organizationMember.create({ data: { organizationId: ownerOrgId, userId: memberUserId, role: 'MEMBER' } });
+    await prisma.organizationMember.create({
+      data: { organizationId: ownerOrgId, userId: memberUserId, role: 'MEMBER' },
+    });
 
     // 3. Register Viewer
     const viewerRes = await request(app).post('/api/v1/auth/register').send({
@@ -64,7 +66,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
     });
     viewerToken = viewerRes.body.data.accessToken;
     viewerUserId = viewerRes.body.data.user.id;
-    await prisma.organizationMember.create({ data: { organizationId: ownerOrgId, userId: viewerUserId, role: 'MEMBER' } });
+    await prisma.organizationMember.create({
+      data: { organizationId: ownerOrgId, userId: viewerUserId, role: 'MEMBER' },
+    });
 
     // 4. Register Foreign user (no access)
     const foreignRes = await request(app).post('/api/v1/auth/register').send({
@@ -110,7 +114,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
   afterAll(async () => {
     await prisma.project.deleteMany({ where: { id: { in: [testProjectId, foreignProjectId] } } });
-    await prisma.user.deleteMany({ where: { email: { in: [ownerEmail, memberEmail, viewerEmail, foreignEmail] } } });
+    await prisma.user.deleteMany({
+      where: { email: { in: [ownerEmail, memberEmail, viewerEmail, foreignEmail] } },
+    });
   });
 
   // ================================================================
@@ -233,7 +239,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
   describe('GET /milestones/:id — Get Milestone Detail', () => {
     it('returns milestone with task list', async () => {
       const res = await request(app)
-        .get(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`)
+        .get(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`
+        )
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(200);
@@ -245,7 +253,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('returns 404 for non-existent milestone', async () => {
       const res = await request(app)
-        .get(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/00000000-0000-0000-0000-000000000000`)
+        .get(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/00000000-0000-0000-0000-000000000000`
+        )
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(404);
@@ -253,7 +263,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('foreign user cannot get milestone detail', async () => {
       const res = await request(app)
-        .get(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`)
+        .get(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`
+        )
         .set('Authorization', `Bearer ${foreignToken}`);
 
       expect(res.status).toBe(403);
@@ -277,7 +289,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('milestone task count reflects associated task', async () => {
       const res = await request(app)
-        .get(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`)
+        .get(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`
+        )
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(200);
@@ -286,11 +300,15 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('can filter tasks by milestoneId', async () => {
       const res = await request(app)
-        .get(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/tasks?milestoneId=${milestoneId}`)
+        .get(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/tasks?milestoneId=${milestoneId}`
+        )
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.every((t: { milestoneId: string | null }) => t.milestoneId === milestoneId)).toBe(true);
+      expect(
+        res.body.data.every((t: { milestoneId: string | null }) => t.milestoneId === milestoneId)
+      ).toBe(true);
     });
 
     it('can filter tasks with milestoneId=none for unassigned', async () => {
@@ -299,7 +317,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.every((t: { milestoneId: string | null }) => t.milestoneId === null)).toBe(true);
+      expect(
+        res.body.data.every((t: { milestoneId: string | null }) => t.milestoneId === null)
+      ).toBe(true);
     });
 
     it('can unassign task from milestone', async () => {
@@ -319,7 +339,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
   describe('PATCH /milestones/:id — Update Milestone', () => {
     it('owner can update milestone title', async () => {
       const res = await request(app)
-        .patch(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`)
+        .patch(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`
+        )
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({ title: 'Alpha Launch v2' });
 
@@ -329,7 +351,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('member can update milestone', async () => {
       const res = await request(app)
-        .patch(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`)
+        .patch(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`
+        )
         .set('Authorization', `Bearer ${memberToken}`)
         .send({ status: MilestoneStatus.COMPLETED });
 
@@ -339,7 +363,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('viewer cannot update milestone', async () => {
       const res = await request(app)
-        .patch(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`)
+        .patch(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`
+        )
         .set('Authorization', `Bearer ${viewerToken}`)
         .send({ title: 'Viewer Update Attempt' });
 
@@ -348,7 +374,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('rejects empty update body', async () => {
       const res = await request(app)
-        .patch(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`)
+        .patch(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${milestoneId}`
+        )
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({});
 
@@ -410,7 +438,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('viewer cannot delete milestone', async () => {
       const res = await request(app)
-        .delete(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${secondMilestoneId}`)
+        .delete(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${secondMilestoneId}`
+        )
         .set('Authorization', `Bearer ${viewerToken}`);
 
       expect(res.status).toBe(403);
@@ -418,7 +448,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
     it('owner can delete milestone, tasks preserved', async () => {
       const res = await request(app)
-        .delete(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${secondMilestoneId}`)
+        .delete(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${secondMilestoneId}`
+        )
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(200);
@@ -448,7 +480,9 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
 
       // Owner of testProject should not access foreign milestone using their project's endpoint
       const res = await request(app)
-        .get(`/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${foreignMilestoneId}`)
+        .get(
+          `/api/v1/organizations/${ownerOrgId}/projects/${testProjectId}/milestones/${foreignMilestoneId}`
+        )
         .set('Authorization', `Bearer ${ownerToken}`);
 
       expect(res.status).toBe(404);

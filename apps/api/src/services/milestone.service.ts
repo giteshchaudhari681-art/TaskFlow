@@ -71,11 +71,7 @@ export class MilestoneService {
       displayOrder?: number;
     }
   ) {
-    const { rank } = await this.getActorProjectPermissions(
-      organizationId,
-      projectId,
-      actorUserId
-    );
+    const { rank } = await this.getActorProjectPermissions(organizationId, projectId, actorUserId);
 
     if (rank < RANK_MEMBER) {
       throw new AppError('INSUFFICIENT_PERMISSIONS', 'Viewers cannot create milestones', 403);
@@ -138,11 +134,7 @@ export class MilestoneService {
       displayOrder?: number;
     }
   ) {
-    const { rank } = await this.getActorProjectPermissions(
-      organizationId,
-      projectId,
-      actorUserId
-    );
+    const { rank } = await this.getActorProjectPermissions(organizationId, projectId, actorUserId);
 
     if (rank < RANK_MEMBER) {
       throw new AppError('INSUFFICIENT_PERMISSIONS', 'Viewers cannot update milestones', 403);
@@ -156,30 +148,36 @@ export class MilestoneService {
     // Validate date range with existing values
     const resolvedStart =
       data.startDate !== undefined
-        ? (data.startDate ? new Date(data.startDate) : null)
-        : (existing.startDate ? new Date(existing.startDate) : null);
+        ? data.startDate
+          ? new Date(data.startDate)
+          : null
+        : existing.startDate
+          ? new Date(existing.startDate)
+          : null;
     const resolvedDue =
       data.dueDate !== undefined
-        ? (data.dueDate ? new Date(data.dueDate) : null)
-        : (existing.dueDate ? new Date(existing.dueDate) : null);
+        ? data.dueDate
+          ? new Date(data.dueDate)
+          : null
+        : existing.dueDate
+          ? new Date(existing.dueDate)
+          : null;
 
     if (resolvedStart && resolvedDue && resolvedStart > resolvedDue) {
-      throw new AppError(
-        'INVALID_DATE_RANGE',
-        'startDate must be on or before dueDate',
-        400
-      );
+      throw new AppError('INVALID_DATE_RANGE', 'startDate must be on or before dueDate', 400);
     }
 
     return milestoneRepository.update(milestoneId, projectId, {
       title: data.title,
       description: data.description,
-      startDate: data.startDate !== undefined
-        ? (data.startDate ? new Date(data.startDate) : null)
-        : undefined,
-      dueDate: data.dueDate !== undefined
-        ? (data.dueDate ? new Date(data.dueDate) : null)
-        : undefined,
+      startDate:
+        data.startDate !== undefined
+          ? data.startDate
+            ? new Date(data.startDate)
+            : null
+          : undefined,
+      dueDate:
+        data.dueDate !== undefined ? (data.dueDate ? new Date(data.dueDate) : null) : undefined,
       status: data.status,
       displayOrder: data.displayOrder,
     });
@@ -195,11 +193,7 @@ export class MilestoneService {
     milestoneId: string,
     actorUserId: string
   ) {
-    const { rank } = await this.getActorProjectPermissions(
-      organizationId,
-      projectId,
-      actorUserId
-    );
+    const { rank } = await this.getActorProjectPermissions(organizationId, projectId, actorUserId);
 
     if (rank < RANK_MEMBER) {
       throw new AppError('INSUFFICIENT_PERMISSIONS', 'Viewers cannot delete milestones', 403);
@@ -231,12 +225,9 @@ export class MilestoneService {
     }
 
     const today = new Date();
-    const rangeStart = dates.length > 0
-      ? new Date(Math.min(...dates.map(d => d.getTime())))
-      : today;
-    const rangeEnd = dates.length > 0
-      ? new Date(Math.max(...dates.map(d => d.getTime())))
-      : today;
+    const rangeStart =
+      dates.length > 0 ? new Date(Math.min(...dates.map(d => d.getTime()))) : today;
+    const rangeEnd = dates.length > 0 ? new Date(Math.max(...dates.map(d => d.getTime()))) : today;
 
     return {
       projectId,

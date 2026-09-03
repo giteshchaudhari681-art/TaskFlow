@@ -33,7 +33,13 @@ export const createMilestone = async (
 
     const parseResult = createMilestoneSchema.safeParse(req.body);
     if (!parseResult.success) {
-      return sendError(res, 'VALIDATION_ERROR', 'Invalid milestone data', 400, parseResult.error.format());
+      return sendError(
+        res,
+        'VALIDATION_ERROR',
+        'Invalid milestone data',
+        400,
+        parseResult.error.format()
+      );
     }
 
     const milestone = await milestoneService.createMilestone(
@@ -81,7 +87,13 @@ export const updateMilestone = async (
 
     const parseResult = updateMilestoneSchema.safeParse(req.body);
     if (!parseResult.success) {
-      return sendError(res, 'VALIDATION_ERROR', 'Invalid milestone update data', 400, parseResult.error.format());
+      return sendError(
+        res,
+        'VALIDATION_ERROR',
+        'Invalid milestone update data',
+        400,
+        parseResult.error.format()
+      );
     }
 
     const milestone = await milestoneService.updateMilestone(

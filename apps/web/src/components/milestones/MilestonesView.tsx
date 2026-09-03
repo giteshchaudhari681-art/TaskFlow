@@ -8,7 +8,13 @@ import {
   AlertTriangle,
   BarChart3,
 } from 'lucide-react';
-import { MilestoneListItem, MilestoneDetail, MilestoneStatus, UpdateMilestonePayload, ProjectRole } from '@taskflow/shared';
+import {
+  MilestoneListItem,
+  MilestoneDetail,
+  MilestoneStatus,
+  UpdateMilestonePayload,
+  ProjectRole,
+} from '@taskflow/shared';
 import { milestoneApi } from '../../lib/api';
 import { MilestoneCard } from './MilestoneCard';
 import { CreateMilestoneModal } from './CreateMilestoneModal';
@@ -67,7 +73,14 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
     }
   };
 
-  const handleCreate = async (data: { title: string; description?: string | null; startDate?: string | null; dueDate?: string | null; status?: MilestoneStatus; displayOrder?: number }) => {
+  const handleCreate = async (data: {
+    title: string;
+    description?: string | null;
+    startDate?: string | null;
+    dueDate?: string | null;
+    status?: MilestoneStatus;
+    displayOrder?: number;
+  }) => {
     const newMs = await milestoneApi.create(organizationId, projectId, data);
     setMilestones(prev => [newMs, ...prev]);
   };
@@ -75,7 +88,7 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
   const handleUpdate = async (data: UpdateMilestonePayload) => {
     if (!selectedMilestoneId) return;
     const updated = await milestoneApi.update(organizationId, projectId, selectedMilestoneId, data);
-    setMilestones(prev => prev.map(m => m.id === selectedMilestoneId ? updated : m));
+    setMilestones(prev => prev.map(m => (m.id === selectedMilestoneId ? updated : m)));
     const detail = await milestoneApi.get(organizationId, projectId, selectedMilestoneId);
     setDetailData(detail);
   };
@@ -90,16 +103,19 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
 
   const handleStatusChange = async (milestoneId: string, status: MilestoneStatus) => {
     const updated = await milestoneApi.update(organizationId, projectId, milestoneId, { status });
-    setMilestones(prev => prev.map(m => m.id === milestoneId ? updated : m));
+    setMilestones(prev => prev.map(m => (m.id === milestoneId ? updated : m)));
     if (selectedMilestoneId === milestoneId && detailData) {
-      setDetailData({ ...detailData, status: updated.status, health: updated.health, progress: updated.progress });
+      setDetailData({
+        ...detailData,
+        status: updated.status,
+        health: updated.health,
+        progress: updated.progress,
+      });
     }
   };
 
   const filteredMilestones =
-    filterHealth === 'ALL'
-      ? milestones
-      : milestones.filter(m => m.health === filterHealth);
+    filterHealth === 'ALL' ? milestones : milestones.filter(m => m.health === filterHealth);
 
   const stats = {
     total: milestones.length,
@@ -135,7 +151,9 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
         <div>
           <h2 className="text-sm font-bold text-white">Project Milestones</h2>
           <p className="text-xs text-taskflow-muted mt-0.5">
-            {stats.total === 0 ? 'No milestones yet' : `${stats.total} milestone${stats.total !== 1 ? 's' : ''} · ${stats.completed} completed`}
+            {stats.total === 0
+              ? 'No milestones yet'
+              : `${stats.total} milestone${stats.total !== 1 ? 's' : ''} · ${stats.completed} completed`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -162,7 +180,10 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2" role="alert">
+        <div
+          className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
+          role="alert"
+        >
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -231,7 +252,9 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
           </div>
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white">
-              {filterHealth !== 'ALL' ? `No ${filterHealth.toLowerCase().replace('_', ' ')} milestones` : 'No milestones yet'}
+              {filterHealth !== 'ALL'
+                ? `No ${filterHealth.toLowerCase().replace('_', ' ')} milestones`
+                : 'No milestones yet'}
             </h3>
             <p className="text-xs text-taskflow-muted leading-relaxed max-w-xs mx-auto">
               {filterHealth !== 'ALL'
@@ -280,7 +303,10 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
       {selectedMilestoneId && detailData && (
         <MilestoneDetailPanel
           milestone={detailData}
-          onClose={() => { setSelectedMilestoneId(null); setDetailData(null); }}
+          onClose={() => {
+            setSelectedMilestoneId(null);
+            setDetailData(null);
+          }}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           canEdit={canEdit}

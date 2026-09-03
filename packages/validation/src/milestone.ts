@@ -25,11 +25,7 @@ export const createMilestoneSchema = z
     status: z
       .nativeEnum(MilestoneStatus, { errorMap: () => ({ message: 'Invalid milestone status' }) })
       .optional(),
-    displayOrder: z
-      .number()
-      .int({ message: 'Display order must be an integer' })
-      .min(0)
-      .optional(),
+    displayOrder: z.number().int({ message: 'Display order must be an integer' }).min(0).optional(),
   })
   .refine(
     data => {
@@ -62,11 +58,7 @@ export const updateMilestoneSchema = z
     status: z
       .nativeEnum(MilestoneStatus, { errorMap: () => ({ message: 'Invalid milestone status' }) })
       .optional(),
-    displayOrder: z
-      .number()
-      .int({ message: 'Display order must be an integer' })
-      .min(0)
-      .optional(),
+    displayOrder: z.number().int({ message: 'Display order must be an integer' }).min(0).optional(),
   })
   .refine(
     data =>

@@ -7,7 +7,10 @@ interface CreateMilestoneModalProps {
   onSubmit: (data: CreateMilestonePayload) => Promise<void>;
 }
 
-export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({ onClose, onSubmit }) => {
+export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
+  onClose,
+  onSubmit,
+}) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -53,7 +56,9 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({ onCl
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-white">Create Milestone</h2>
-            <p className="text-xs text-taskflow-muted mt-0.5">Define a project checkpoint or delivery target</p>
+            <p className="text-xs text-taskflow-muted mt-0.5">
+              Define a project checkpoint or delivery target
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -65,7 +70,10 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({ onCl
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2" role="alert">
+          <div
+            className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
+            role="alert"
+          >
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -91,7 +99,10 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({ onCl
 
           {/* Description */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-taskflow-text flex items-center gap-1.5" htmlFor="ms-desc">
+            <label
+              className="text-xs font-semibold text-taskflow-text flex items-center gap-1.5"
+              htmlFor="ms-desc"
+            >
               <AlignLeft className="w-3.5 h-3.5" aria-hidden="true" />
               Description
             </label>
@@ -109,7 +120,10 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({ onCl
           {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-taskflow-text flex items-center gap-1.5" htmlFor="ms-start">
+              <label
+                className="text-xs font-semibold text-taskflow-text flex items-center gap-1.5"
+                htmlFor="ms-start"
+              >
                 <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
                 Start Date
               </label>
@@ -122,7 +136,10 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({ onCl
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-taskflow-text flex items-center gap-1.5" htmlFor="ms-due">
+              <label
+                className="text-xs font-semibold text-taskflow-text flex items-center gap-1.5"
+                htmlFor="ms-due"
+              >
                 <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
                 Due Date
               </label>

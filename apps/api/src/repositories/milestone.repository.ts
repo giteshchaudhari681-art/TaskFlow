@@ -19,11 +19,7 @@ function computeProgress(totalCount: number, cancelledCount: number, doneCount: 
  *  ON_TRACK   → has a dueDate and not any of the above
  *  NO_DATE    → no dueDate
  */
-function computeHealth(
-  status: MilestoneStatus,
-  dueDate: Date | null,
-  progress: number
-): string {
+function computeHealth(status: MilestoneStatus, dueDate: Date | null, progress: number): string {
   if (status === MilestoneStatus.COMPLETED) return 'COMPLETED';
   if (!dueDate) return 'NO_DATE';
 
@@ -50,8 +46,7 @@ export class MilestoneRepository extends BaseRepository {
     });
 
     const totalCount = counts.reduce((sum, r) => sum + r._count.status, 0);
-    const cancelledCount =
-      counts.find(r => r.status === TaskStatus.CANCELLED)?._count.status ?? 0;
+    const cancelledCount = counts.find(r => r.status === TaskStatus.CANCELLED)?._count.status ?? 0;
     const doneCount = counts.find(r => r.status === TaskStatus.DONE)?._count.status ?? 0;
     return { totalCount, cancelledCount, doneCount };
   }

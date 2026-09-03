@@ -528,10 +528,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               userRole={project.userRole}
             />
           ) : (
-            <TimelineView
-              organizationId={organizationId}
-              projectId={projectId}
-            />
+            <TimelineView organizationId={organizationId} projectId={projectId} />
           )}
         </div>
       )}

@@ -18,7 +18,10 @@ interface MilestoneCardProps {
   canEdit: boolean;
 }
 
-const HEALTH_CONFIG: Record<string, { icon: React.ElementType; label: string; color: string; bg: string; border: string }> = {
+const HEALTH_CONFIG: Record<
+  string,
+  { icon: React.ElementType; label: string; color: string; bg: string; border: string }
+> = {
   COMPLETED: {
     icon: CheckCircle2,
     label: 'Completed',
@@ -58,7 +61,11 @@ const HEALTH_CONFIG: Record<string, { icon: React.ElementType; label: string; co
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function daysLabel(dueDate: string | null): string {
@@ -127,18 +134,31 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
             <button
               onClick={handleStatusToggle}
               disabled={statusLoading}
-              title={milestone.status === MilestoneStatus.COMPLETED ? 'Reopen milestone' : 'Mark complete'}
+              title={
+                milestone.status === MilestoneStatus.COMPLETED
+                  ? 'Reopen milestone'
+                  : 'Mark complete'
+              }
               className="p-1 rounded-lg text-taskflow-muted hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              aria-label={milestone.status === MilestoneStatus.COMPLETED ? 'Reopen milestone' : 'Mark milestone as complete'}
+              aria-label={
+                milestone.status === MilestoneStatus.COMPLETED
+                  ? 'Reopen milestone'
+                  : 'Mark milestone as complete'
+              }
             >
               {statusLoading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <CheckCircle2 className={`w-3.5 h-3.5 ${milestone.status === MilestoneStatus.COMPLETED ? 'text-emerald-400' : ''}`} />
+                <CheckCircle2
+                  className={`w-3.5 h-3.5 ${milestone.status === MilestoneStatus.COMPLETED ? 'text-emerald-400' : ''}`}
+                />
               )}
             </button>
           )}
-          <ChevronRight className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-white transition-colors" aria-hidden="true" />
+          <ChevronRight
+            className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-white transition-colors"
+            aria-hidden="true"
+          />
         </div>
       </div>
 
@@ -159,10 +179,19 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-1.5 mb-3" role="progressbar" aria-valuenow={milestone.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Progress: ${milestone.progress}%`}>
+      <div
+        className="space-y-1.5 mb-3"
+        role="progressbar"
+        aria-valuenow={milestone.progress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Progress: ${milestone.progress}%`}
+      >
         <div className="flex items-center justify-between text-[11px]">
           <span className="text-taskflow-muted">Progress</span>
-          <span className={`font-bold ${milestone.progress === 100 ? 'text-emerald-400' : 'text-white'}`}>
+          <span
+            className={`font-bold ${milestone.progress === 100 ? 'text-emerald-400' : 'text-white'}`}
+          >
             {milestone.progress}%
           </span>
         </div>
@@ -172,10 +201,10 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
               milestone.progress === 100
                 ? 'bg-emerald-500'
                 : healthKey === 'OVERDUE'
-                ? 'bg-rose-500'
-                : healthKey === 'AT_RISK'
-                ? 'bg-amber-500'
-                : 'bg-gradient-to-r from-cyan-500 to-indigo-500'
+                  ? 'bg-rose-500'
+                  : healthKey === 'AT_RISK'
+                    ? 'bg-amber-500'
+                    : 'bg-gradient-to-r from-cyan-500 to-indigo-500'
             }`}
             style={{ width: `${milestone.progress}%` }}
           />
@@ -186,10 +215,20 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
       <div className="flex items-center justify-between text-[11px] text-taskflow-muted pt-2 border-t border-taskflow-border/40">
         <span>
           {milestone.completedTaskCount}/{milestone.taskCount} tasks done
-          {milestone.taskCount === 0 && <span className="ml-1 text-taskflow-muted/60">(no tasks)</span>}
+          {milestone.taskCount === 0 && (
+            <span className="ml-1 text-taskflow-muted/60">(no tasks)</span>
+          )}
         </span>
         {milestone.dueDate && (
-          <span className={healthKey === 'OVERDUE' ? 'text-rose-400 font-semibold' : healthKey === 'AT_RISK' ? 'text-amber-400' : ''}>
+          <span
+            className={
+              healthKey === 'OVERDUE'
+                ? 'text-rose-400 font-semibold'
+                : healthKey === 'AT_RISK'
+                  ? 'text-amber-400'
+                  : ''
+            }
+          >
             {daysLabel(milestone.dueDate)}
           </span>
         )}
