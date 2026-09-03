@@ -190,6 +190,28 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
 ---
 
+## 📖 API Documentation & OpenAPI Contracts
+
+TaskFlow provides formal OpenAPI 3.1.0 specifications and interactive Swagger UI explorers for both its public application backend and its internal AI subsystem.
+
+### 1. Public Application REST API (Node.js / Express)
+
+The public API manages all user sessions, organizations, projects, Kanban tasks, milestones, comments, notifications, search, and dashboard telemetry.
+
+- **Interactive Swagger UI**: [http://localhost:5000/docs](http://localhost:5000/docs) (or `http://localhost:5000/api/docs`)
+- **Raw OpenAPI 3.1 JSON**: [http://localhost:5000/openapi.json](http://localhost:5000/openapi.json) (or `http://localhost:5000/api/openapi.json`)
+- **Authentication**: Bearer JWT (`Authorization: Bearer <access_token>`). Refresh tokens are transmitted strictly via secure HTTP-only cookies.
+
+### 2. Internal AI Processing Subsystem (Python / FastAPI)
+
+> ⚠️ **INTERNAL SERVICE ONLY**: This API is strictly an internal service. Public clients and frontend applications must use the Node.js TaskFlow API. Protected AI analysis operations require the internal `X-TaskFlow-Service-Token` header.
+
+- **Internal Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **Internal OpenAPI JSON**: [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json)
+- **ReDoc Explorer**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+
+---
+
 ## 🧪 Verification & Quality Checks
 
 Run the following scripts from the monorepo root:

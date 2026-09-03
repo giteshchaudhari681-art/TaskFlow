@@ -13,12 +13,25 @@ import workRoutes from './routes/work.routes.js';
 import searchRoutes from './routes/search.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFound.js';
+import { docsRouter } from './docs/swagger.js';
+import { openApiSpec } from './docs/openapi.js';
 
 export const createServer = (): Express => {
   const app = express();
 
-  // Security Headers
-  app.use(helmet());
+  // Security Headers with Swagger UI compatibility
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
+      },
+    })
+  );
 
   // Cookie Parser
   app.use(cookieParser(env.COOKIE_SECRET));
@@ -55,6 +68,15 @@ export const createServer = (): Express => {
 
   // Root Health Probe (useful for container / cloud platform probes)
   app.use('/health', healthRoutes);
+
+  // OpenAPI Specification & Swagger UI Documentation Endpoints
+  app.get(['/openapi.json', '/api/openapi.json', `${env.API_PREFIX}/openapi.json`], (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.json(openApiSpec);
+  });
+  app.use('/docs', docsRouter);
+  app.use('/api/docs', docsRouter);
+  app.use(`${env.API_PREFIX}/docs`, docsRouter);
 
   // Versioned API Routes
   app.use(`${env.API_PREFIX}/health`, healthRoutes);
