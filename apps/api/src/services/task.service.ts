@@ -14,6 +14,8 @@ import { organizationRepository } from '../repositories/organization.repository.
 import { activityRepository } from '../repositories/activity.repository.js';
 import { auditService } from './audit.service.js';
 import { notificationService } from './notification.service.js';
+import { entitlementService } from './entitlement.service.js';
+import { LimitKey } from '@taskflow/shared';
 import { AppError } from '../middleware/errorHandler.js';
 
 const RANK_SUPER = 5;
@@ -120,6 +122,17 @@ export class TaskService {
 
     await this.validateAssignee(projectId, data.assigneeId);
 
+    // Entitlement enforcement: Verify organization active task limit if task is active
+    if (data.status !== TaskStatus.CANCELLED) {
+      await entitlementService.requireCapacity(
+        organizationId,
+        LimitKey.MAX_ACTIVE_TASKS,
+        1,
+        actorUserId
+      );
+    }
+    const planInfo = await entitlementService.getOrganizationPlan(organizationId, true);
+
     const task = await taskRepository.create(
       projectId,
       {
@@ -131,7 +144,9 @@ export class TaskService {
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
         estimateHours: data.estimateHours,
       },
-      actorUserId
+      actorUserId,
+      organizationId,
+      planInfo.limits.maxActiveTasks
     );
 
     // Record activity

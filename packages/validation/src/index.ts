@@ -16,3 +16,4 @@ export * from './projectDashboard.js';
 export * from './ai.js';
 export * from './audit.js';
 export * from './job.js';
+export * from './entitlement.js';

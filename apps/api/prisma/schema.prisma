@@ -186,6 +186,23 @@ enum AuditAction {
   AI_ACTION_PROPOSED
   AI_ACTION_APPLIED
   AI_ACTION_REJECTED
+
+  // SaaS Entitlements & Subscription Management
+  SUBSCRIPTION_PLAN_CHANGED
+  ENTITLEMENT_LIMIT_REACHED
+}
+
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
 }
 
 // ------------------------------------------------------------
@@ -245,19 +262,38 @@ model Session {
 }
 
 model Organization {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  slug      String   @unique
-  logoUrl   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String             @id @default(uuid()) @db.Uuid
+  name               String
+  slug               String             @unique
+  logoUrl            String?
+  plan               Plan               @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
-  members     OrganizationMember[]
-  projects    Project[]
-  auditEvents AuditEvent[]
-  jobs        Job[]
+  members        OrganizationMember[]
+  projects       Project[]
+  auditEvents    AuditEvent[]
+  jobs           Job[]
+  aiUsageRecords AIUsageRecord[]
 
   @@map("organizations")
+}
+
+model AIUsageRecord {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  operation      String
+  requestId      String?
+  status         String   @default("SUCCESS")
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@map("ai_usage_records")
 }
 
 model OrganizationMember {

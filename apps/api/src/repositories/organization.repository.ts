@@ -1,5 +1,7 @@
 import { OrganizationMember, UserRole } from '@prisma/client';
 import { BaseRepository } from './base.repository.js';
+import { EntitlementLimitError } from '../entitlements/errors.js';
+import { LimitKey } from '@taskflow/shared';
 
 export class OrganizationRepository extends BaseRepository {
   async findMember(organizationId: string, userId: string): Promise<OrganizationMember | null> {
@@ -131,7 +133,53 @@ export class OrganizationRepository extends BaseRepository {
     });
   }
 
-  async addMember(organizationId: string, userId: string, role: UserRole) {
+  async addMember(
+    organizationId: string,
+    userId: string,
+    role: UserRole,
+    maxAllowedMembers?: number
+  ) {
+    if (maxAllowedMembers !== undefined) {
+      return this.db.$transaction(async tx => {
+        const orgRows = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT id FROM organizations WHERE id = ${organizationId}::uuid FOR UPDATE;
+        `;
+        if (orgRows && orgRows.length > 0) {
+          const count = await tx.organizationMember.count({
+            where: { organizationId },
+          });
+          if (count >= maxAllowedMembers) {
+            throw new EntitlementLimitError(
+              `Organization member limit reached (${count}/${maxAllowedMembers}). Upgrade your plan to add more members.`,
+              {
+                feature: LimitKey.MAX_MEMBERS,
+                limit: maxAllowedMembers,
+                current: count,
+                remaining: 0,
+              }
+            );
+          }
+        }
+        return tx.organizationMember.create({
+          data: {
+            organizationId,
+            userId,
+            role,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        });
+      });
+    }
+
     return this.db.organizationMember.create({
       data: {
         organizationId,

@@ -83,6 +83,10 @@ export const openApiSpec = {
       name: 'Operations',
       description: 'Operational resilience and background job monitoring endpoints',
     },
+    {
+      name: 'Entitlements',
+      description: 'Organization subscription plans, resource limits, and capacity monitoring',
+    },
   ],
   components: {
     securitySchemes: {
@@ -288,6 +292,30 @@ export const openApiSpec = {
           },
         },
       },
+      EntitlementLimitReached: {
+        description:
+          'Organization entitlement limit reached or feature not included in current plan',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+            example: {
+              success: false,
+              error: {
+                code: 'ENTITLEMENT_LIMIT_REACHED',
+                message:
+                  'Organization project limit reached (3/3). Upgrade your plan to create more projects.',
+                meta: {
+                  feature: 'MAX_PROJECTS',
+                  limit: 3,
+                  current: 3,
+                  remaining: 0,
+                  plan: 'FREE',
+                },
+              },
+            },
+          },
+        },
+      },
     },
     schemas: {
       ErrorDetail: {
@@ -307,6 +335,106 @@ export const openApiSpec = {
         properties: {
           success: { type: 'boolean', example: false },
           error: { $ref: '#/components/schemas/ErrorDetail' },
+        },
+      },
+      Plan: {
+        type: 'string',
+        enum: ['FREE', 'PRO', 'BUSINESS'],
+        example: 'FREE',
+        description: 'Canonical subscription plan tier',
+      },
+      SubscriptionStatus: {
+        type: 'string',
+        enum: ['ACTIVE', 'TRIALING', 'PAST_DUE', 'CANCELED'],
+        example: 'ACTIVE',
+        description: 'Internal subscription status lifecycle state',
+      },
+      UsageMetric: {
+        type: 'object',
+        required: ['current', 'limit', 'remaining'],
+        properties: {
+          current: { type: 'integer', example: 2, description: 'Current authoritative count' },
+          limit: {
+            type: 'integer',
+            example: 3,
+            description: 'Maximum allowed capacity on current plan',
+          },
+          remaining: {
+            type: 'integer',
+            example: 1,
+            description: 'Remaining available capacity before rejection',
+          },
+        },
+      },
+      OrganizationUsage: {
+        type: 'object',
+        required: [
+          'organizationId',
+          'plan',
+          'subscriptionStatus',
+          'members',
+          'projects',
+          'activeTasks',
+          'aiRequests',
+          'features',
+        ],
+        properties: {
+          organizationId: {
+            type: 'string',
+            format: 'uuid',
+            example: 'd3b07384-d113-4944-9cfa-e0874e0f19c6',
+          },
+          plan: { $ref: '#/components/schemas/Plan' },
+          subscriptionStatus: { $ref: '#/components/schemas/SubscriptionStatus' },
+          currentPeriodStart: { type: 'string', format: 'date-time', nullable: true },
+          currentPeriodEnd: { type: 'string', format: 'date-time', nullable: true },
+          members: { $ref: '#/components/schemas/UsageMetric' },
+          projects: { $ref: '#/components/schemas/UsageMetric' },
+          activeTasks: { $ref: '#/components/schemas/UsageMetric' },
+          aiRequests: { $ref: '#/components/schemas/UsageMetric' },
+          features: {
+            type: 'object',
+            additionalProperties: { type: 'boolean' },
+            example: {
+              AI_PROJECT_INSIGHTS: true,
+              AI_TASK_INTELLIGENCE: true,
+              AI_TASK_DECOMPOSITION: true,
+              AI_TASK_ACTIONS: false,
+              AUDIT_LOG: true,
+              BACKGROUND_JOBS: true,
+            },
+          },
+        },
+      },
+      UpdatePlanPayload: {
+        type: 'object',
+        required: ['plan'],
+        properties: {
+          plan: { $ref: '#/components/schemas/Plan' },
+        },
+      },
+      UsageResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: { $ref: '#/components/schemas/OrganizationUsage' },
+        },
+      },
+      UpdatePlanResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            required: ['organizationId', 'plan', 'updatedAt'],
+            properties: {
+              organizationId: { type: 'string', format: 'uuid' },
+              plan: { $ref: '#/components/schemas/Plan' },
+              updatedAt: { type: 'string', format: 'date-time' },
+            },
+          },
         },
       },
       PaginationMeta: {
@@ -2102,6 +2230,61 @@ export const openApiSpec = {
               },
             },
           },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' },
+        },
+      },
+    },
+    '/api/v1/organizations/{organizationId}/usage': {
+      get: {
+        tags: ['Entitlements', 'Organizations'],
+        summary: 'Get organization subscription plan, resource utilization, and remaining limits',
+        description:
+          'Retrieves authoritative resource usage (members, projects, active tasks, AI requests) and plan limit capacities for an organization. Restricted to Organization OWNER and ADMIN roles.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: '#/components/parameters/organizationIdParam' }],
+        responses: {
+          200: {
+            description: 'Organization usage metrics and entitlement capacities',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/UsageResponse' },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' },
+        },
+      },
+    },
+    '/api/v1/organizations/{organizationId}/plan': {
+      patch: {
+        tags: ['Entitlements', 'Organizations'],
+        summary: 'Update organization subscription plan (Internal administration)',
+        description:
+          'Internal administrative endpoint to change subscription plan tier. Strictly restricted to Organization OWNER.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: '#/components/parameters/organizationIdParam' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/UpdatePlanPayload' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Subscription plan updated successfully',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/UpdatePlanResponse' },
+              },
+            },
+          },
+          400: { $ref: '#/components/responses/ValidationError' },
           401: { $ref: '#/components/responses/Unauthorized' },
           403: { $ref: '#/components/responses/Forbidden' },
           404: { $ref: '#/components/responses/NotFound' },

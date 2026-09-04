@@ -20,14 +20,16 @@ export const sendError = (
   code: string,
   message: string,
   statusCode: number = 400,
-  details?: unknown
+  details?: unknown,
+  meta?: unknown
 ): Response => {
-  const payload: ApiErrorResponse = {
+  const payload: ApiErrorResponse & { error: { meta?: unknown } } = {
     success: false,
     error: {
       code,
       message,
       ...(details !== undefined ? { details } : {}),
+      ...(meta !== undefined ? { meta } : {}),
     },
   };
   return res.status(statusCode).json(payload);

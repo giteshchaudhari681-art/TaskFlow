@@ -8,10 +8,12 @@ import {
   CreateProjectPayload,
   UpdateProjectPayload,
   AddProjectMemberPayload,
+  LimitKey,
 } from '@taskflow/shared';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { auditService } from './audit.service.js';
+import { entitlementService } from './entitlement.service.js';
 import { AuditAction, ActorType, AuditSource } from '@prisma/client';
 import { AppError } from '../middleware/errorHandler.js';
 
@@ -127,6 +129,10 @@ export class ProjectService {
       );
     }
 
+    // Entitlement enforcement: Verify organization has not exceeded MAX_PROJECTS quota
+    await entitlementService.requireCapacity(organizationId, LimitKey.MAX_PROJECTS, 1, actorUserId);
+    const planInfo = await entitlementService.getOrganizationPlan(organizationId, true);
+
     const normalizedKey = payload.key.trim().toUpperCase();
 
     // Verify key uniqueness within organization
@@ -149,7 +155,8 @@ export class ProjectService {
         color: payload.color ?? null,
         icon: payload.icon ?? null,
       },
-      actorUserId
+      actorUserId,
+      planInfo.limits.maxProjects
     );
 
     await auditService.record({

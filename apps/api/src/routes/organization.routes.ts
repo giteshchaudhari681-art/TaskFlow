@@ -3,6 +3,7 @@ import { UserRole } from '@taskflow/shared';
 import * as orgController from '../controllers/organization.controller.js';
 import * as auditController from '../controllers/audit.controller.js';
 import * as jobController from '../controllers/job.controller.js';
+import * as usageController from '../controllers/usage.controller.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireOrgRole } from '../middleware/requireOrgRole.js';
 
@@ -61,4 +62,18 @@ organizationRoutes.get(
   '/:organizationId/jobs/summary',
   requireOrgRole(UserRole.OWNER, UserRole.ADMIN),
   jobController.getJobSummary
+);
+
+// SaaS Entitlements and Usage controls (OWNER and ADMIN only)
+organizationRoutes.get(
+  '/:organizationId/usage',
+  requireOrgRole(UserRole.OWNER, UserRole.ADMIN),
+  usageController.getOrganizationUsage
+);
+
+// Subscription plan administration (OWNER only)
+organizationRoutes.patch(
+  '/:organizationId/plan',
+  requireOrgRole(UserRole.OWNER),
+  usageController.updateOrganizationPlan
 );
