@@ -18,12 +18,18 @@ import {
   PlusCircle,
   X,
   Loader2,
+  SlidersHorizontal,
+  ArrowRight,
+  Check,
 } from 'lucide-react';
 import {
   AIAnalysisResponse,
   RecommendationPriority,
   RecommendationCategory,
   AIDecomposedSubtask,
+  AITaskActionProposal,
+  TaskStatus,
+  TaskPriority,
 } from '@taskflow/shared';
 import { taskApi } from '../../lib/api';
 
@@ -32,16 +38,40 @@ interface AITaskIntelligenceProps {
   projectId: string;
   taskId: string;
   taskKey?: string;
+  currentStatus?: TaskStatus;
+  currentPriority?: TaskPriority;
+  currentDueDate?: string | null;
+  currentAssigneeId?: string | null;
+  currentAssigneeName?: string | null;
   existingSubtaskTitles?: string[];
   onSubtasksCreated?: () => void;
+  onTaskUpdated?: () => void;
 }
 
-type TabMode = 'intelligence' | 'decomposition';
+type TabMode = 'intelligence' | 'decomposition' | 'actions';
 
 interface EditableProposedSubtask extends AIDecomposedSubtask {
   selected: boolean;
   isDuplicate: boolean;
 }
+
+const CONFIDENCE_BADGES: Record<string, { bg: string; border: string; text: string }> = {
+  HIGH: {
+    bg: 'bg-emerald-950/50',
+    border: 'border-emerald-500/30',
+    text: 'text-emerald-300',
+  },
+  MEDIUM: {
+    bg: 'bg-amber-950/50',
+    border: 'border-amber-500/30',
+    text: 'text-amber-300',
+  },
+  LOW: {
+    bg: 'bg-slate-800/60',
+    border: 'border-slate-700/50',
+    text: 'text-slate-400',
+  },
+};
 
 const PRIORITY_BADGES: Record<
   RecommendationPriority,
@@ -105,8 +135,14 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
   projectId,
   taskId,
   taskKey,
+  currentStatus,
+  currentPriority,
+  currentDueDate,
+  currentAssigneeId,
+  currentAssigneeName,
   existingSubtaskTitles = [],
   onSubtasksCreated,
+  onTaskUpdated,
 }) => {
   const [activeTab, setActiveTab] = useState<TabMode>('intelligence');
 
@@ -131,6 +167,152 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
+
+  // Actions State
+  const [actionsData, setActionsData] = useState<AIAnalysisResponse | null>(null);
+  const [actionsLoading, setActionsLoading] = useState(false);
+  const [actionsError, setActionsError] = useState<string | null>(null);
+  const [actionsHasRun, setActionsHasRun] = useState(false);
+  const [actionsPrompt, setActionsPrompt] = useState('');
+  const [showActionsPrompt, setShowActionsPrompt] = useState(false);
+  const [actionStatusMap, setActionStatusMap] = useState<
+    Record<string, 'proposed' | 'applying' | 'applied' | 'dismissed' | 'failed'>
+  >({});
+  const [actionErrorMap, setActionErrorMap] = useState<Record<string, string>>({});
+  const [actionSuccessMap, setActionSuccessMap] = useState<Record<string, string>>({});
+
+  // Run Actions Proposal
+  const runActions = useCallback(
+    async (customPrompt?: string) => {
+      if (actionsLoading) return;
+      setActionsLoading(true);
+      setActionsError(null);
+
+      try {
+        const promptToUse = customPrompt !== undefined ? customPrompt : actionsPrompt;
+        const response = await taskApi.proposeActions(organizationId, projectId, taskId, {
+          user_prompt: promptToUse.trim() || undefined,
+        });
+        setActionsData(response);
+        setActionsHasRun(true);
+        setActionStatusMap({});
+        setActionErrorMap({});
+        setActionSuccessMap({});
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : 'AI task actions are temporarily unavailable.';
+        setActionsError(message);
+      } finally {
+        setActionsLoading(false);
+      }
+    },
+    [organizationId, projectId, taskId, actionsPrompt, actionsLoading]
+  );
+
+  // Stale check
+  const isActionStale = useCallback(
+    (action: AITaskActionProposal): boolean => {
+      const exp = action.expectedCurrentState;
+      if (!exp) return false;
+
+      if (action.type === 'UPDATE_STATUS') {
+        if (exp.status && currentStatus && exp.status !== currentStatus) {
+          return true;
+        }
+      } else if (action.type === 'UPDATE_PRIORITY') {
+        if (exp.priority && currentPriority && exp.priority !== currentPriority) {
+          return true;
+        }
+      } else if (action.type === 'UPDATE_DUE_DATE') {
+        if (exp.dueDate !== undefined && currentDueDate !== undefined) {
+          const expDate = exp.dueDate ? new Date(exp.dueDate).toISOString().split('T')[0] : null;
+          const curDate = currentDueDate
+            ? new Date(currentDueDate).toISOString().split('T')[0]
+            : null;
+          if (expDate !== curDate) {
+            return true;
+          }
+        }
+      } else if (action.type === 'ASSIGN_TASK') {
+        if (exp.assigneeId !== undefined && currentAssigneeId !== undefined) {
+          if ((exp.assigneeId || null) !== (currentAssigneeId || null)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    },
+    [currentStatus, currentPriority, currentDueDate, currentAssigneeId]
+  );
+
+  // Apply Action
+  const handleApplyAction = async (action: AITaskActionProposal) => {
+    if (isActionStale(action)) {
+      setActionErrorMap(prev => ({
+        ...prev,
+        [action.actionId]: 'This recommendation was generated from an older version of the task.',
+      }));
+      return;
+    }
+
+    setActionStatusMap(prev => ({ ...prev, [action.actionId]: 'applying' }));
+    setActionErrorMap(prev => {
+      const next = { ...prev };
+      delete next[action.actionId];
+      return next;
+    });
+
+    try {
+      const payload: Record<string, unknown> = {
+        expectedCurrentState: action.expectedCurrentState,
+      };
+
+      if (action.type === 'UPDATE_STATUS') {
+        payload.status = action.parameters.status;
+      } else if (action.type === 'UPDATE_PRIORITY') {
+        payload.priority = action.parameters.priority;
+      } else if (action.type === 'UPDATE_DUE_DATE') {
+        payload.dueDate = action.parameters.dueDate;
+      } else if (action.type === 'ASSIGN_TASK') {
+        payload.assigneeId = action.parameters.assigneeId ?? action.parameters.assigneeUserId;
+      }
+
+      await taskApi.updateTask(organizationId, projectId, taskId, payload);
+
+      setActionStatusMap(prev => ({ ...prev, [action.actionId]: 'applied' }));
+      setActionSuccessMap(prev => ({
+        ...prev,
+        [action.actionId]: `${action.title} applied successfully.`,
+      }));
+      onTaskUpdated?.();
+    } catch (err: unknown) {
+      const isStaleErr =
+        (err &&
+          typeof err === 'object' &&
+          'code' in err &&
+          (err as { code: string }).code === 'STALE_TASK_STATE') ||
+        (err instanceof Error &&
+          (err.message.includes('409') || err.message.toLowerCase().includes('stale')));
+
+      const message = isStaleErr
+        ? 'This recommendation was generated from an older version of the task.'
+        : err instanceof Error
+          ? err.message
+          : 'Could not apply this action.';
+
+      setActionStatusMap(prev => ({ ...prev, [action.actionId]: 'failed' }));
+      setActionErrorMap(prev => ({
+        ...prev,
+        [action.actionId]: message,
+      }));
+    }
+  };
+
+  // Dismiss Action
+  const handleDismissAction = (actionId: string) => {
+    setActionStatusMap(prev => ({ ...prev, [actionId]: 'dismissed' }));
+  };
 
   // Normalize existing titles for duplicate checking
   const normalizedExistingTitles = useMemo(() => {
@@ -325,6 +507,19 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           >
             <ListTree className="w-3 h-3" />
             <span>Breakdown</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('actions')}
+            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 ${
+              activeTab === 'actions'
+                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            data-testid="ai-tab-actions"
+          >
+            <SlidersHorizontal className="w-3 h-3" />
+            <span>Actions</span>
           </button>
         </div>
       </div>
@@ -891,6 +1086,396 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                   <span>Model: {String(decompData.metadata.model || 'OpenAI')}</span>
                   {decompData.metadata.total_tokens ? (
                     <span>Tokens: {String(decompData.metadata.total_tokens)}</span>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* Tab 3: AI Actions                                         */}
+      {/* ========================================================= */}
+      {activeTab === 'actions' && (
+        <div className="space-y-4" data-testid="ai-task-actions-section">
+          {/* Controls Bar */}
+          {actionsHasRun && !actionsLoading && (
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span className="text-xs text-slate-400">
+                AI Action Proposals &bull; Explicit Human Approval Required
+              </span>
+              <button
+                type="button"
+                onClick={() => runActions()}
+                disabled={actionsLoading}
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 px-2.5 py-1 rounded-md transition-colors"
+                data-testid="ai-task-actions-regenerate-btn"
+                title="Regenerate action proposals"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Regenerate</span>
+              </button>
+            </div>
+          )}
+
+          {/* Idle State */}
+          {!actionsHasRun && !actionsLoading && !actionsError && (
+            <div className="text-center py-5 px-4 relative z-10" data-testid="ai-task-actions-idle">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3">
+                <SlidersHorizontal className="w-5 h-5" />
+              </div>
+              <p className="text-xs text-slate-300 max-w-sm mx-auto mb-4">
+                Analyze the task state to propose safe, structured changes such as updating
+                priority, status, due date, or project member assignment.
+              </p>
+
+              <div className="mb-4 text-left max-w-md mx-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowActionsPrompt(!showActionsPrompt)}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 mb-1.5 transition-colors"
+                  data-testid="ai-task-actions-prompt-toggle"
+                >
+                  {showActionsPrompt ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
+                  {showActionsPrompt
+                    ? 'Hide guidance prompt'
+                    : 'Add guidance or focus area (optional)'}
+                </button>
+                {showActionsPrompt && (
+                  <div className="flex gap-2 mt-1.5">
+                    <input
+                      type="text"
+                      value={actionsPrompt}
+                      onChange={e => setActionsPrompt(e.target.value)}
+                      placeholder="e.g. Focus on priority adjustment and assignment"
+                      className="flex-1 bg-slate-800/80 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                      data-testid="ai-task-actions-prompt-input"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => runActions()}
+                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-md shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30"
+                data-testid="ai-task-actions-btn"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Suggest Actions</span>
+              </button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {actionsLoading && (
+            <div className="space-y-3.5 py-3" data-testid="ai-task-actions-loading">
+              <div className="flex items-center gap-2 text-xs text-indigo-400 animate-pulse mb-2">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Evaluating task risk, dependencies, and generating action proposals...</span>
+              </div>
+              <div className="h-4 bg-slate-800/80 rounded animate-pulse w-3/4" />
+              <div className="space-y-2">
+                <div className="h-16 bg-slate-800/50 rounded-lg animate-pulse" />
+                <div className="h-16 bg-slate-800/50 rounded-lg animate-pulse" />
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {actionsError && !actionsLoading && (
+            <div
+              className="bg-rose-950/20 border border-rose-500/20 rounded-lg p-3.5 text-center"
+              data-testid="ai-task-actions-error"
+            >
+              <AlertTriangle className="w-5 h-5 text-rose-400 mx-auto mb-1.5" />
+              <p className="text-xs text-rose-300 mb-3">{actionsError}</p>
+              <button
+                type="button"
+                onClick={() => runActions()}
+                className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-1.5 rounded-md border border-slate-700 transition-colors"
+                data-testid="ai-task-actions-retry-btn"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Retry Actions</span>
+              </button>
+            </div>
+          )}
+
+          {/* Success / Proposals State */}
+          {actionsData && !actionsLoading && !actionsError && (
+            <div className="space-y-4" data-testid="ai-task-actions-success">
+              {/* Advisory Disclaimer Banner */}
+              <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-lg px-3 py-2 text-[11px] text-indigo-300/80 flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span>
+                  AI proposals are strictly advisory. No changes occur until you explicitly approve
+                  an action.
+                </span>
+              </div>
+
+              {/* Summary */}
+              {actionsData.summary && (
+                <div className="bg-slate-800/40 border border-slate-800/80 rounded-lg p-3">
+                  <h5 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                    Analysis Rationale
+                  </h5>
+                  <p
+                    className="text-xs text-slate-200 leading-relaxed"
+                    data-testid="ai-actions-summary"
+                  >
+                    {actionsData.summary}
+                  </p>
+                </div>
+              )}
+
+              {/* Action Proposals List */}
+              {!actionsData.actions || actionsData.actions.length === 0 ? (
+                <div
+                  className="bg-slate-800/30 border border-slate-800/60 rounded-lg p-4 text-center"
+                  data-testid="ai-actions-empty"
+                >
+                  <CheckCircle2 className="w-6 h-6 text-emerald-400/80 mx-auto mb-2" />
+                  <p className="text-xs text-slate-300 font-medium">
+                    No safe, high-confidence task actions were identified.
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Current task configuration appears consistent with current project state.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {actionsData.actions
+                    .filter(act => actionStatusMap[act.actionId] !== 'dismissed')
+                    .map(act => {
+                      const status = actionStatusMap[act.actionId] || 'proposed';
+                      const isStale = isActionStale(act);
+                      const confStyle = CONFIDENCE_BADGES[act.confidence] || CONFIDENCE_BADGES.HIGH;
+                      const errMessage = actionErrorMap[act.actionId];
+                      const successMessage = actionSuccessMap[act.actionId];
+
+                      // Determine descriptive apply label (Rule 20: Never hide mutations)
+                      let applyButtonText = 'Apply';
+                      let diffDisplay: React.ReactNode = null;
+
+                      if (act.type === 'UPDATE_STATUS') {
+                        const targetStatus = (act.parameters.status as string) || '';
+                        applyButtonText = `Move to ${targetStatus.replace('_', ' ')}`;
+                        diffDisplay = (
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="text-slate-400">Status:</span>
+                            <span className="font-mono text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded">
+                              {currentStatus || act.expectedCurrentState?.status || 'UNKNOWN'}
+                            </span>
+                            <ArrowRight className="w-3 h-3 text-slate-500" />
+                            <span className="font-mono text-cyan-300 font-semibold bg-cyan-950/60 border border-cyan-800/50 px-1.5 py-0.5 rounded">
+                              {targetStatus}
+                            </span>
+                          </div>
+                        );
+                      } else if (act.type === 'UPDATE_PRIORITY') {
+                        const targetPriority = (act.parameters.priority as string) || '';
+                        applyButtonText = `Change priority to ${targetPriority}`;
+                        diffDisplay = (
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="text-slate-400">Priority:</span>
+                            <span className="font-mono text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded">
+                              {currentPriority || act.expectedCurrentState?.priority || 'UNKNOWN'}
+                            </span>
+                            <ArrowRight className="w-3 h-3 text-slate-500" />
+                            <span className="font-mono text-amber-300 font-semibold bg-amber-950/60 border border-amber-800/50 px-1.5 py-0.5 rounded">
+                              {targetPriority}
+                            </span>
+                          </div>
+                        );
+                      } else if (act.type === 'UPDATE_DUE_DATE') {
+                        const targetDate = act.parameters.dueDate
+                          ? String(act.parameters.dueDate).split('T')[0]
+                          : 'None';
+                        applyButtonText = `Set due date to ${targetDate}`;
+                        diffDisplay = (
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="text-slate-400">Due Date:</span>
+                            <span className="font-mono text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded">
+                              {currentDueDate ? String(currentDueDate).split('T')[0] : 'None'}
+                            </span>
+                            <ArrowRight className="w-3 h-3 text-slate-500" />
+                            <span className="font-mono text-indigo-300 font-semibold bg-indigo-950/60 border border-indigo-800/50 px-1.5 py-0.5 rounded">
+                              {targetDate}
+                            </span>
+                          </div>
+                        );
+                      } else if (act.type === 'ASSIGN_TASK') {
+                        const assigneeName =
+                          (act.parameters.assigneeName as string) ||
+                          (act.parameters.assigneeUserId as string) ||
+                          'member';
+                        applyButtonText = `Assign to ${assigneeName}`;
+                        diffDisplay = (
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="text-slate-400">Assignee:</span>
+                            <span className="font-mono text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded">
+                              {currentAssigneeName || 'Unassigned'}
+                            </span>
+                            <ArrowRight className="w-3 h-3 text-slate-500" />
+                            <span className="font-mono text-emerald-300 font-semibold bg-emerald-950/60 border border-emerald-800/50 px-1.5 py-0.5 rounded">
+                              {assigneeName}
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={act.actionId}
+                          className={`bg-slate-950/60 border rounded-xl p-4 transition-all duration-200 ${
+                            isStale
+                              ? 'border-amber-500/40 bg-amber-950/10'
+                              : status === 'applied'
+                                ? 'border-emerald-500/30 bg-emerald-950/10'
+                                : 'border-slate-800 hover:border-slate-700'
+                          }`}
+                          data-testid={`ai-action-card-${act.actionId}`}
+                        >
+                          {/* Card Header */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="text-xs font-semibold text-slate-100"
+                                data-testid="ai-action-title"
+                              >
+                                {act.title}
+                              </span>
+                              <span
+                                className={`text-[10px] px-1.5 py-0.5 rounded border ${confStyle.bg} ${confStyle.border} ${confStyle.text}`}
+                                data-testid="ai-action-confidence"
+                              >
+                                {act.confidence}
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDismissAction(act.actionId)}
+                              className="text-slate-500 hover:text-slate-300 p-1 rounded transition-colors"
+                              data-testid="ai-action-dismiss-btn"
+                              title="Dismiss proposal"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          {/* Diff */}
+                          <div className="mb-2" data-testid="ai-action-diff">
+                            {diffDisplay}
+                          </div>
+
+                          {/* Rationale / Reason */}
+                          <p
+                            className="text-xs text-slate-300 leading-relaxed mb-3"
+                            data-testid="ai-action-reason"
+                          >
+                            {act.reason}
+                          </p>
+
+                          {/* Stale Warning */}
+                          {isStale && (
+                            <div
+                              className="mb-3 p-2.5 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between"
+                              data-testid="ai-action-stale"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                                <span>
+                                  This recommendation was generated from an older version of the
+                                  task.
+                                </span>
+                              </div>
+                              {onTaskUpdated && (
+                                <button
+                                  type="button"
+                                  onClick={() => onTaskUpdated()}
+                                  className="text-[11px] underline text-amber-200 hover:text-white"
+                                  data-testid="ai-action-refresh-task-btn"
+                                >
+                                  Refresh Task
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Error State */}
+                          {errMessage && (
+                            <div
+                              className="mb-3 p-2 rounded-lg bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-1.5"
+                              data-testid="ai-action-error"
+                            >
+                              <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                              <span>{errMessage}</span>
+                            </div>
+                          )}
+
+                          {/* Success State */}
+                          {status === 'applied' && (
+                            <div
+                              className="p-2 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-1.5 font-medium"
+                              data-testid="ai-action-applied"
+                            >
+                              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                              <span>{successMessage || 'Applied successfully'}</span>
+                            </div>
+                          )}
+
+                          {/* Footer Actions */}
+                          {status !== 'applied' && (
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/60">
+                              <button
+                                type="button"
+                                onClick={() => handleDismissAction(act.actionId)}
+                                disabled={status === 'applying'}
+                                className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800/60 transition-colors"
+                              >
+                                Dismiss
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleApplyAction(act)}
+                                disabled={status === 'applying' || isStale}
+                                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30"
+                                data-testid="ai-action-apply-btn"
+                              >
+                                {status === 'applying' ? (
+                                  <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <span>Applying...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" />
+                                    <span>{applyButtonText}</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+
+              {/* Telemetry Footer */}
+              {actionsData.metadata && (
+                <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                  <span>Model: {String(actionsData.metadata.model || 'OpenAI')}</span>
+                  {actionsData.metadata.total_tokens ? (
+                    <span>Tokens: {String(actionsData.metadata.total_tokens)}</span>
                   ) : null}
                 </div>
               )}

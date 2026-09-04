@@ -62,21 +62,26 @@ export class AIService {
 
     // 2. Build sanitized, deterministic AI context from Prisma
     let context;
-    if ((operation === 'TASK_SUMMARY' || operation === 'TASK_DECOMPOSITION') && taskId) {
+    if (
+      (operation === 'TASK_SUMMARY' ||
+        operation === 'TASK_DECOMPOSITION' ||
+        operation === 'TASK_ACTIONS') &&
+      taskId
+    ) {
       const task = await taskRepository.findById(taskId, projectId);
       if (!task) {
         throw new AppError('NOT_FOUND', 'Task not found in this project', 404);
       }
       context = await aiContextBuilder.buildTaskContext(projectId, taskId);
-    } else if (operation === 'TASK_DECOMPOSITION' && !taskId) {
-      throw new AppError('VALIDATION_ERROR', 'taskId is required for TASK_DECOMPOSITION', 400);
+    } else if ((operation === 'TASK_DECOMPOSITION' || operation === 'TASK_ACTIONS') && !taskId) {
+      throw new AppError('VALIDATION_ERROR', `taskId is required for ${operation}`, 400);
     } else {
       context = await aiContextBuilder.buildProjectContext(projectId);
     }
 
     // 3. Delegate to internal Python AI service
     try {
-      return await this.client.analyze(
+      const response = await this.client.analyze(
         {
           operation,
           context,
@@ -84,6 +89,25 @@ export class AIService {
         },
         requestId
       );
+
+      // 4. Runtime sanitization for TASK_ACTIONS
+      if (operation === 'TASK_ACTIONS' && response.actions && response.actions.length > 0) {
+        const members = await projectRepository.listMembers(projectId);
+        const validMemberIds = new Set((members || []).map(m => m.user.id));
+
+        // Filter out any ASSIGN_TASK actions proposing users not in the project
+        response.actions = response.actions.filter(action => {
+          if (action.type === 'ASSIGN_TASK') {
+            const proposedAssigneeId = action.parameters?.assigneeId as string | undefined;
+            if (proposedAssigneeId && !validMemberIds.has(proposedAssigneeId)) {
+              return false;
+            }
+          }
+          return true;
+        });
+      }
+
+      return response;
     } catch (err: unknown) {
       if (err instanceof AppError) {
         throw err;

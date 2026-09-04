@@ -14,6 +14,14 @@ class AIOperation(str, Enum):
     TASK_SUMMARY = "TASK_SUMMARY"
     PROJECT_INSIGHT = "PROJECT_INSIGHT"
     TASK_DECOMPOSITION = "TASK_DECOMPOSITION"
+    TASK_ACTIONS = "TASK_ACTIONS"
+
+
+class EligibleAssigneeContext(BaseModel):
+    """Eligible project member candidate for assignment."""
+
+    id: str = Field(..., description="User UUID")
+    display_name: str = Field(..., description="User display name")
 
 
 class ProjectContext(BaseModel):
@@ -133,6 +141,9 @@ class TaskDetailContext(BaseModel):
     )
     recent_comments: List[TaskCommentContext] = Field(
         default_factory=list, description="Recent bounded comments"
+    )
+    eligible_assignees: List[EligibleAssigneeContext] = Field(
+        default_factory=list, description="Bounded list of eligible project members for assignment"
     )
     parent_project: Optional[ProjectContext] = Field(
         default=None, description="Parent project overview"

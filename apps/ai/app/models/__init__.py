@@ -5,6 +5,7 @@ from app.models.requests import (
     AIAnalysisRequest,
     AIOperation,
     DeliveryRiskContext,
+    EligibleAssigneeContext,
     MilestoneContext,
     ProjectContext,
     ProjectHealthContext,
@@ -16,11 +17,15 @@ from app.models.requests import (
     TaskDetailContext,
 )
 from app.models.responses import (
+    ActionConfidence,
+    ActionTarget,
+    ActionType,
     AIAnalysisResponse,
     AIAttentionArea,
     AIDecomposedSubtask,
     AIDependencyImpact,
     AIRecommendation,
+    AITaskActionProposal,
     ErrorDetail,
     ErrorResponse,
     RecommendationCategory,
@@ -29,6 +34,7 @@ from app.models.responses import (
 
 __all__ = [
     "AIOperation",
+    "EligibleAssigneeContext",
     "ProjectContext",
     "TaskContext",
     "TaskDependencyContext",
@@ -47,6 +53,10 @@ __all__ = [
     "AIDecomposedSubtask",
     "AIDependencyImpact",
     "AIRecommendation",
+    "ActionType",
+    "ActionConfidence",
+    "ActionTarget",
+    "AITaskActionProposal",
     "AIAnalysisResponse",
     "ErrorDetail",
     "ErrorResponse",

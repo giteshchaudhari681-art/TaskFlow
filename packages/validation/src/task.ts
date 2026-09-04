@@ -70,6 +70,18 @@ export const updateTaskSchema = z
       .nullable()
       .optional(),
     milestoneId: z.string().uuid({ message: 'Invalid milestone ID' }).nullable().optional(),
+    expectedCurrentState: z
+      .object({
+        status: z.nativeEnum(TaskStatus).optional(),
+        priority: z.nativeEnum(TaskPriority).optional(),
+        dueDate: z
+          .string()
+          .datetime({ message: 'Invalid ISO due date format' })
+          .nullable()
+          .optional(),
+        assigneeId: z.string().uuid({ message: 'Invalid assignee ID' }).nullable().optional(),
+      })
+      .optional(),
   })
   .refine(
     data =>
