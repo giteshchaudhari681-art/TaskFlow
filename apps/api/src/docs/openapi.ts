@@ -79,6 +79,10 @@ export const openApiSpec = {
       name: 'Audit',
       description: 'Append-only audit trail and security events for workspace administration',
     },
+    {
+      name: 'Operations',
+      description: 'Operational resilience and background job monitoring endpoints',
+    },
   ],
   components: {
     securitySchemes: {
@@ -1397,6 +1401,34 @@ export const openApiSpec = {
           },
         },
       },
+      JobSummaryCounts: {
+        type: 'object',
+        required: ['pending', 'processing', 'completed', 'failed'],
+        properties: {
+          pending: { type: 'integer', minimum: 0, example: 0 },
+          processing: { type: 'integer', minimum: 0, example: 0 },
+          completed: { type: 'integer', minimum: 0, example: 12 },
+          failed: { type: 'integer', minimum: 0, example: 0 },
+        },
+      },
+      JobSummary: {
+        type: 'object',
+        required: ['counts', 'oldestPendingAt', 'recentFailedCount'],
+        properties: {
+          organizationId: { type: 'string', format: 'uuid', nullable: true },
+          counts: { $ref: '#/components/schemas/JobSummaryCounts' },
+          oldestPendingAt: { type: 'string', format: 'date-time', nullable: true },
+          recentFailedCount: { type: 'integer', minimum: 0, example: 0 },
+        },
+      },
+      JobSummaryResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: { $ref: '#/components/schemas/JobSummary' },
+        },
+      },
     },
   },
   paths: {
@@ -2047,6 +2079,29 @@ export const openApiSpec = {
             },
           },
           400: { $ref: '#/components/responses/ValidationError' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' },
+        },
+      },
+    },
+    '/api/v1/organizations/{organizationId}/jobs/summary': {
+      get: {
+        tags: ['Operations', 'Organizations'],
+        summary: 'Get background job operational health summary',
+        description:
+          'Query background job subsystem health metrics including pending, processing, completed, and failed job counts. Requires Organization OWNER or ADMIN permissions.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: '#/components/parameters/organizationIdParam' }],
+        responses: {
+          200: {
+            description: 'Operational background job health summary',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/JobSummaryResponse' },
+              },
+            },
+          },
           401: { $ref: '#/components/responses/Unauthorized' },
           403: { $ref: '#/components/responses/Forbidden' },
           404: { $ref: '#/components/responses/NotFound' },

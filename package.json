@@ -11,6 +11,8 @@
     "build:packages": "npm run build --workspace=@taskflow/shared && npm run build --workspace=@taskflow/validation",
     "build": "npm run build:packages && npm run build --workspace=@taskflow/api && npm run build --workspace=@taskflow/web",
     "dev:api": "npm run dev --workspace=@taskflow/api",
+    "dev:worker": "npm run dev:worker --workspace=@taskflow/api",
+    "worker": "npm run worker --workspace=@taskflow/api",
     "dev:web": "npm run dev --workspace=@taskflow/web",
     "lint": "npm run lint --workspaces --if-present",
     "type-check": "npm run build:packages && npm run type-check --workspaces --if-present",

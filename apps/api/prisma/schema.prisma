@@ -126,6 +126,13 @@ enum NotificationType {
   SYSTEM
 }
 
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 enum ActorType {
   USER
   SYSTEM
@@ -248,6 +255,7 @@ model Organization {
   members     OrganizationMember[]
   projects    Project[]
   auditEvents AuditEvent[]
+  jobs        Job[]
 
   @@map("organizations")
 }
@@ -665,4 +673,35 @@ model AuditEvent {
   @@index([action, createdAt])
   @@index([resourceType, resourceId, createdAt])
   @@map("audit_events")
+}
+
+// ------------------------------------------------------------
+// Background Job Models
+// ------------------------------------------------------------
+
+model Job {
+  id               String    @id @default(uuid()) @db.Uuid
+  type             String
+  status           JobStatus @default(PENDING)
+  organizationId   String?   @db.Uuid
+  payload          Json
+  idempotencyKey   String?   @unique
+  attempts         Int       @default(0)
+  maxAttempts      Int       @default(3)
+  availableAt      DateTime  @default(now())
+  startedAt        DateTime?
+  completedAt      DateTime?
+  failedAt         DateTime?
+  lastErrorCode    String?
+  lastErrorMessage String?
+  lockedAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, availableAt])
+  @@index([status, lockedAt])
+  @@index([organizationId, createdAt])
+  @@map("jobs")
 }
