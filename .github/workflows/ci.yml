@@ -72,6 +72,30 @@ jobs:
       - name: Run automated test suite
         run: npm run test
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python AI dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "./apps/ai[dev]"
+
+      - name: Lint and format check Python AI service
+        run: |
+          ruff check apps/ai
+          ruff format --check apps/ai
+
+      - name: Run Python AI unit test suite
+        run: |
+          pytest apps/ai
+
+      - name: Run deterministic AI evaluation suite
+        run: |
+          python apps/ai/evals/runner.py
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
