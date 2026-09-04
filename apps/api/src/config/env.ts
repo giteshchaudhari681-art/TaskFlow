@@ -24,6 +24,12 @@ const envSchema = z.object({
   SENTRY_DSN: z.string().optional(),
   SENTRY_ENVIRONMENT: z.string().optional(),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),
+  WORKER_POLLING_INTERVAL_MS: z.coerce.number().min(50).default(1000),
+  WORKER_MAX_ATTEMPTS: z.coerce.number().min(1).default(3),
+  WORKER_RETRY_BASE_DELAY_MS: z.coerce.number().min(100).default(1000),
+  WORKER_RETRY_MAX_DELAY_MS: z.coerce.number().min(1000).default(60000),
+  WORKER_PROCESSING_TIMEOUT_MS: z.coerce.number().min(1000).default(30000),
+  WORKER_SHUTDOWN_GRACE_PERIOD_MS: z.coerce.number().min(1000).default(10000),
 });
 
 const parseEnv = () => {

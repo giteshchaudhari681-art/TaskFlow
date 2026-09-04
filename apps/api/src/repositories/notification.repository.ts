@@ -1,5 +1,7 @@
 import { NotificationType, Prisma } from '@prisma/client';
+import { JobType } from '@taskflow/shared';
 import { BaseRepository } from './base.repository.js';
+import { jobRepository } from './job.repository.js';
 
 export class NotificationRepository extends BaseRepository {
   private readonly defaultInclude = {
@@ -24,6 +26,7 @@ export class NotificationRepository extends BaseRepository {
         id: true,
         name: true,
         key: true,
+        organizationId: true,
       },
     },
   };
@@ -39,7 +42,7 @@ export class NotificationRepository extends BaseRepository {
     actorId?: string | null;
     metadata?: Record<string, any> | null;
   }) {
-    return this.db.notification.create({
+    const notification = await this.db.notification.create({
       data: {
         userId: data.userId,
         type: data.type,
@@ -53,6 +56,25 @@ export class NotificationRepository extends BaseRepository {
       },
       include: this.defaultInclude,
     });
+
+    try {
+      await jobRepository.enqueue({
+        type: JobType.NOTIFICATION_DELIVERY,
+        organizationId: notification.project?.organizationId ?? null,
+        idempotencyKey: `notification-delivery-${notification.id}`,
+        payload: {
+          notificationId: notification.id,
+          userId: notification.userId,
+          organizationId: notification.project?.organizationId ?? null,
+          projectId: notification.projectId,
+          channel: 'IN_APP',
+        },
+      });
+    } catch {
+      // Secondary delivery enqueue failure must not abort authoritative notification creation
+    }
+
+    return notification;
   }
 
   async listByUser(

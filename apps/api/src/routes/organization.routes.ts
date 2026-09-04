@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { UserRole } from '@taskflow/shared';
 import * as orgController from '../controllers/organization.controller.js';
 import * as auditController from '../controllers/audit.controller.js';
+import * as jobController from '../controllers/job.controller.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireOrgRole } from '../middleware/requireOrgRole.js';
 
@@ -53,4 +54,11 @@ organizationRoutes.get(
   '/:organizationId/audit-events',
   requireOrgRole(),
   auditController.getAuditEvents
+);
+
+// Operational background jobs summary endpoint (OWNER and ADMIN only)
+organizationRoutes.get(
+  '/:organizationId/jobs/summary',
+  requireOrgRole(UserRole.OWNER, UserRole.ADMIN),
+  jobController.getJobSummary
 );

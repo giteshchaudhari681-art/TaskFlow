@@ -94,6 +94,32 @@ services:
     networks:
       - taskflow-network
 
+  taskflow-worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: taskflow-worker
+    restart: unless-stopped
+    command: ["node", "apps/api/dist/worker.js"]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-taskflow_dev}?schema=public
+      AI_SERVICE_URL: http://taskflow-ai:8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-taskflow-internal-dev-token}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
+      WORKER_POLLING_INTERVAL_MS: 1000
+      WORKER_MAX_ATTEMPTS: 3
+      WORKER_RETRY_BASE_DELAY_MS: 1000
+      WORKER_RETRY_MAX_DELAY_MS: 60000
+      WORKER_PROCESSING_TIMEOUT_MS: 30000
+      WORKER_SHUTDOWN_GRACE_PERIOD_MS: 10000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - taskflow-network
+
 networks:
   taskflow-network:
     name: taskflow-network
