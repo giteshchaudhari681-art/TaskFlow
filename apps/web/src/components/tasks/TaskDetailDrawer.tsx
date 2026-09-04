@@ -97,9 +97,9 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     }
   };
 
-  const loadTask = async () => {
+  const loadTask = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const data = await taskApi.getTask(organizationId, projectId, taskId);
       setTask(data);
@@ -113,7 +113,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       const apiErr = err as { message?: string };
       setError(apiErr.message || 'Failed to load task');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -168,7 +168,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
       onUpdated();
     } catch (err: unknown) {
       // Revert on error
-      loadTask();
+      loadTask(true);
       const apiErr = err as { message?: string };
       setError(apiErr.message || 'Failed to update subtask');
     }
@@ -652,19 +652,24 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 taskId={taskId}
                 canManage={true}
                 onDependenciesChanged={() => {
-                  loadTask();
+                  loadTask(true);
                   onUpdated();
                 }}
               />
             </div>
 
-            {/* AI Task Intelligence Section */}
+            {/* AI Task Intelligence & Decomposition Section */}
             <div className="pt-4 border-t border-slate-800">
               <AITaskIntelligence
                 organizationId={organizationId}
                 projectId={projectId}
                 taskId={taskId}
                 taskKey={task ? task.issueKey || `TASK-${task.taskNumber}` : undefined}
+                existingSubtaskTitles={task?.subtasks?.map(st => st.title) || []}
+                onSubtasksCreated={() => {
+                  loadTask(true);
+                  onUpdated();
+                }}
               />
             </div>
 
