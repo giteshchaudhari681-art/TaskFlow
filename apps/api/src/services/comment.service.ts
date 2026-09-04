@@ -1,4 +1,11 @@
-import { UserRole, ProjectRole, ActivityActionType, AuditAction, ActorType, AuditSource } from '@prisma/client';
+import {
+  UserRole,
+  ProjectRole,
+  ActivityActionType,
+  AuditAction,
+  ActorType,
+  AuditSource,
+} from '@prisma/client';
 import { commentRepository } from '../repositories/comment.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
 import { notificationService } from './notification.service.js';

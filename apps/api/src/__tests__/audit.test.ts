@@ -128,7 +128,7 @@ describe('PR25: AuditService.sanitizeMetadata', () => {
     const result = auditService.sanitizeMetadata({
       requestContext: {
         internalToken: 'nested-token', // 'token' in key → redacted
-        userId: 'user-abc',            // safe → preserved
+        userId: 'user-abc', // safe → preserved
       },
     }) as any;
     expect(result.requestContext.internalToken).toBe('[REDACTED]');
@@ -164,7 +164,9 @@ describe('PR25: AuditService.record', () => {
   });
 
   it('calls auditRepository.create with sanitized metadata', async () => {
-    const createSpy = vi.spyOn(auditRepository, 'create').mockResolvedValue(MOCK_AUDIT_EVENT as any);
+    const createSpy = vi
+      .spyOn(auditRepository, 'create')
+      .mockResolvedValue(MOCK_AUDIT_EVENT as any);
 
     await auditService.record({
       organizationId: ORG_ID,
@@ -199,7 +201,9 @@ describe('PR25: AuditService.record', () => {
   });
 
   it('defaults actorType to USER and source to USER when not provided', async () => {
-    const createSpy = vi.spyOn(auditRepository, 'create').mockResolvedValue(MOCK_AUDIT_EVENT as any);
+    const createSpy = vi
+      .spyOn(auditRepository, 'create')
+      .mockResolvedValue(MOCK_AUDIT_EVENT as any);
 
     await auditService.record({
       organizationId: ORG_ID,
@@ -368,9 +372,7 @@ describe('PR25: Task Mutation Audit Events', () => {
       priority: TaskPriority.HIGH,
     });
 
-    const updateCall = auditSpy.mock.calls.find(
-      c => c[0].action === AuditAction.TASK_UPDATED
-    );
+    const updateCall = auditSpy.mock.calls.find(c => c[0].action === AuditAction.TASK_UPDATED);
     expect(updateCall).toBeDefined();
     const meta = updateCall![0].metadata as any;
     expect(meta.changes).toBeDefined();
@@ -396,12 +398,10 @@ describe('PR25: Task Mutation Audit Events', () => {
       expectedCurrentState: { priority: TaskPriority.MEDIUM },
     });
 
-    const aiCall = auditSpy.mock.calls.find(
-      c => c[0].action === AuditAction.AI_ACTION_APPLIED
-    );
+    const aiCall = auditSpy.mock.calls.find(c => c[0].action === AuditAction.AI_ACTION_APPLIED);
     expect(aiCall).toBeDefined();
-    expect(aiCall![0].actorUserId).toBe(OWNER_ID);         // human actor
-    expect(aiCall![0].actorType).toBe(ActorType.USER);     // not AI
+    expect(aiCall![0].actorUserId).toBe(OWNER_ID); // human actor
+    expect(aiCall![0].actorType).toBe(ActorType.USER); // not AI
     expect(aiCall![0].source).toBe(AuditSource.AI_ASSISTED);
   });
 

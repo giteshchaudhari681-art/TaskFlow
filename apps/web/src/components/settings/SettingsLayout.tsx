@@ -8,12 +8,7 @@ import { NotificationSettings } from './NotificationSettings';
 import { AuditLogSettings } from './AuditLogSettings';
 
 export type SettingsTab =
-  | 'profile'
-  | 'security'
-  | 'workspace'
-  | 'members'
-  | 'notifications'
-  | 'audit';
+  'profile' | 'security' | 'workspace' | 'members' | 'notifications' | 'audit';
 
 interface SettingsLayoutProps {
   onBackToDashboard: () => void;

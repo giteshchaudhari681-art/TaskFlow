@@ -90,7 +90,8 @@ export const AuditLogSettings: React.FC = () => {
 
   // Helper to derive human-readable summaries from structured fields (PR25 Req 17)
   const formatEventSummary = (event: AuditEvent): string => {
-    const actorName = event.actorUser?.name || (event.actorType === 'AI' ? 'AI Assistant' : 'System');
+    const actorName =
+      event.actorUser?.name || (event.actorType === 'AI' ? 'AI Assistant' : 'System');
     const meta = (event.metadata as Record<string, any>) || {};
 
     switch (event.action) {
@@ -209,9 +210,12 @@ export const AuditLogSettings: React.FC = () => {
               <ShieldAlert className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white tracking-tight">Security & Audit Log</h2>
+              <h2 className="text-base font-semibold text-white tracking-tight">
+                Security & Audit Log
+              </h2>
               <p className="text-xs text-taskflow-muted">
-                Immutable, append-only historical audit trail of domain mutations and security events.
+                Immutable, append-only historical audit trail of domain mutations and security
+                events.
               </p>
             </div>
           </div>
@@ -235,10 +239,15 @@ export const AuditLogSettings: React.FC = () => {
           <Filter className="w-3.5 h-3.5 text-cyan-400" />
           <span>Filter Audit Trail</span>
         </div>
-        <form onSubmit={handleApplyDateFilters} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <form
+          onSubmit={handleApplyDateFilters}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+        >
           {/* Action Filter */}
           <div>
-            <label className="block text-[11px] font-medium text-taskflow-muted mb-1">Action Type</label>
+            <label className="block text-[11px] font-medium text-taskflow-muted mb-1">
+              Action Type
+            </label>
             <select
               value={selectedAction}
               onChange={e => {
@@ -252,7 +261,9 @@ export const AuditLogSettings: React.FC = () => {
                 <option value={AuditAction.AUTH_LOGIN}>Login</option>
                 <option value={AuditAction.AUTH_LOGOUT}>Logout</option>
                 <option value={AuditAction.AUTH_PASSWORD_CHANGED}>Password Changed</option>
-                <option value={AuditAction.AUTH_REFRESH_REUSE_DETECTED}>Token Reuse Detected</option>
+                <option value={AuditAction.AUTH_REFRESH_REUSE_DETECTED}>
+                  Token Reuse Detected
+                </option>
               </optgroup>
               <optgroup label="AI Actions">
                 <option value={AuditAction.AI_ACTION_PROPOSED}>AI Proposed</option>
@@ -269,7 +280,9 @@ export const AuditLogSettings: React.FC = () => {
               </optgroup>
               <optgroup label="Workspace & Projects">
                 <option value={AuditAction.ORGANIZATION_MEMBER_INVITED}>Member Invited</option>
-                <option value={AuditAction.ORGANIZATION_MEMBER_ROLE_CHANGED}>Member Role Changed</option>
+                <option value={AuditAction.ORGANIZATION_MEMBER_ROLE_CHANGED}>
+                  Member Role Changed
+                </option>
                 <option value={AuditAction.PROJECT_CREATED}>Project Created</option>
                 <option value={AuditAction.PROJECT_UPDATED}>Project Updated</option>
                 <option value={AuditAction.PROJECT_ARCHIVED}>Project Archived</option>
@@ -279,7 +292,9 @@ export const AuditLogSettings: React.FC = () => {
 
           {/* Project Filter */}
           <div>
-            <label className="block text-[11px] font-medium text-taskflow-muted mb-1">Project</label>
+            <label className="block text-[11px] font-medium text-taskflow-muted mb-1">
+              Project
+            </label>
             <select
               value={selectedProjectId}
               onChange={e => {
@@ -359,7 +374,8 @@ export const AuditLogSettings: React.FC = () => {
             <ShieldAlert className="w-8 h-8 text-taskflow-muted opacity-40 mb-1" />
             <span className="font-medium text-white">No audit events found</span>
             <p className="text-[11px] max-w-sm">
-              No audit events matched the selected filters. All workspace mutations and security events are logged here in real time.
+              No audit events matched the selected filters. All workspace mutations and security
+              events are logged here in real time.
             </p>
           </div>
         ) : (
@@ -410,7 +426,8 @@ export const AuditLogSettings: React.FC = () => {
                               </div>
                             )}
                             <span className="font-medium text-white">
-                              {event.actorUser?.name || (event.actorType === ActorType.AI ? 'AI Service' : 'System')}
+                              {event.actorUser?.name ||
+                                (event.actorType === ActorType.AI ? 'AI Service' : 'System')}
                             </span>
                           </div>
                         </td>
@@ -432,7 +449,9 @@ export const AuditLogSettings: React.FC = () => {
                             )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 whitespace-nowrap">{renderSourceBadge(event.source)}</td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          {renderSourceBadge(event.source)}
+                        </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
                           {event.metadata ? (
                             <button
@@ -453,7 +472,9 @@ export const AuditLogSettings: React.FC = () => {
                             <div className="glass-card p-3 rounded-lg border border-taskflow-border text-left font-mono text-[11px] text-slate-300 max-h-48 overflow-y-auto">
                               <div className="text-taskflow-muted text-[10px] mb-1 flex items-center justify-between">
                                 <span>SANITIZED AUDIT METADATA</span>
-                                {event.requestId && <span>Correlation Request ID: {event.requestId}</span>}
+                                {event.requestId && (
+                                  <span>Correlation Request ID: {event.requestId}</span>
+                                )}
                               </div>
                               <pre>{JSON.stringify(event.metadata, null, 2)}</pre>
                             </div>
@@ -482,7 +503,9 @@ export const AuditLogSettings: React.FC = () => {
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-2 font-mono text-[11px]">{page} / {totalPages}</span>
+            <span className="px-2 font-mono text-[11px]">
+              {page} / {totalPages}
+            </span>
             <button
               type="button"
               onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}

@@ -7,14 +7,14 @@
 TaskFlow implements an **append-only audit trail** stored in PostgreSQL that answers the six
 fundamental auditability questions for every significant event in the system:
 
-| Dimension | Column / Field |
-|-----------|---------------|
-| **WHO** | `actorUserId`, `actorType` (`USER` \| `SYSTEM` \| `AI`) |
-| **WHAT** | `action` (from `AuditAction` enum) |
-| **WHERE** | `organizationId`, `projectId`, `resourceType`, `resourceId` |
-| **WHEN** | `createdAt` (server-side, immutable, set by DB default) |
-| **WHAT CHANGED** | `metadata.changes` (structured diff of before/after field values) |
-| **HOW** | `source` (`USER` \| `SYSTEM` \| `AI` \| `AI_ASSISTED`) + `requestId` |
+| Dimension        | Column / Field                                                       |
+| ---------------- | -------------------------------------------------------------------- |
+| **WHO**          | `actorUserId`, `actorType` (`USER` \| `SYSTEM` \| `AI`)              |
+| **WHAT**         | `action` (from `AuditAction` enum)                                   |
+| **WHERE**        | `organizationId`, `projectId`, `resourceType`, `resourceId`          |
+| **WHEN**         | `createdAt` (server-side, immutable, set by DB default)              |
+| **WHAT CHANGED** | `metadata.changes` (structured diff of before/after field values)    |
+| **HOW**          | `source` (`USER` \| `SYSTEM` \| `AI` \| `AI_ASSISTED`) + `requestId` |
 
 ---
 
@@ -44,25 +44,26 @@ audit_events table (append-only)
 
 ### ActorType
 
-| Value | Meaning |
-|-------|---------|
-| `USER` | A human user authenticated via JWT |
+| Value    | Meaning                                            |
+| -------- | -------------------------------------------------- |
+| `USER`   | A human user authenticated via JWT                 |
 | `SYSTEM` | Internal system process (background jobs, startup) |
-| `AI` | The AI inference engine acting autonomously |
+| `AI`     | The AI inference engine acting autonomously        |
 
 ### AuditSource
 
-| Value | Meaning |
-|-------|---------|
-| `USER` | Direct human action via the API |
-| `SYSTEM` | Automated system process |
-| `AI` | AI model is the sole originator (proposals, analysis) |
+| Value         | Meaning                                                          |
+| ------------- | ---------------------------------------------------------------- |
+| `USER`        | Direct human action via the API                                  |
+| `SYSTEM`      | Automated system process                                         |
+| `AI`          | AI model is the sole originator (proposals, analysis)            |
 | `AI_ASSISTED` | Human applied an AI recommendation (human actor + AI suggestion) |
 
 ### Key Rule: AI cannot be a mutation actor
 
 > The AI engine **never** appears as the `actorType` for database-mutating events.
 > When a human approves and applies an AI recommendation, the audit record uses:
+>
 > - `actorType: USER` (the approving human)
 > - `actorUserId: <human user ID>`
 > - `source: AI_ASSISTED`
@@ -120,13 +121,13 @@ All audit queries are **strictly scoped to the authenticated user's organization
 Cross-tenant queries are impossible — the service layer enforces this before passing
 to the repository.
 
-| Role | Can Query |
-|------|-----------|
-| Org `OWNER` | All events in organization (optionally filtered by project) |
-| Org `ADMIN` | All events in organization (optionally filtered by project) |
-| Project `ADMIN` or `LEAD` | Only events within their administered project(s) |
-| Org `MEMBER` / `GUEST` | ❌ 403 Forbidden |
-| Non-member | ❌ 403 Forbidden (tenant isolation) |
+| Role                      | Can Query                                                   |
+| ------------------------- | ----------------------------------------------------------- |
+| Org `OWNER`               | All events in organization (optionally filtered by project) |
+| Org `ADMIN`               | All events in organization (optionally filtered by project) |
+| Project `ADMIN` or `LEAD` | Only events within their administered project(s)            |
+| Org `MEMBER` / `GUEST`    | ❌ 403 Forbidden                                            |
+| Non-member                | ❌ 403 Forbidden (tenant isolation)                         |
 
 Implementation: `AuditService.list()` enforces this matrix before calling the repository.
 The repository query always includes the `organizationId` in its `WHERE` clause.
@@ -200,16 +201,16 @@ GET /api/v1/organizations/:organizationId/audit-events
 
 ### Query Parameters
 
-| Parameter | Type | Default | Constraint |
-|-----------|------|---------|-----------|
-| `page` | integer | 1 | ≥ 1 |
-| `limit` | integer | 25 | 1–100 |
-| `action` | string | — | Valid `AuditAction` enum value |
-| `actorUserId` | UUID | — | — |
-| `projectId` | UUID | — | Must be in same org |
-| `resourceType` | string | — | — |
-| `startDate` | ISO 8601 | — | — |
-| `endDate` | ISO 8601 | — | Must be ≥ `startDate` |
+| Parameter      | Type     | Default | Constraint                     |
+| -------------- | -------- | ------- | ------------------------------ |
+| `page`         | integer  | 1       | ≥ 1                            |
+| `limit`        | integer  | 25      | 1–100                          |
+| `action`       | string   | —       | Valid `AuditAction` enum value |
+| `actorUserId`  | UUID     | —       | —                              |
+| `projectId`    | UUID     | —       | Must be in same org            |
+| `resourceType` | string   | —       | —                              |
+| `startDate`    | ISO 8601 | —       | —                              |
+| `endDate`      | ISO 8601 | —       | Must be ≥ `startDate`          |
 
 ### Response Shape
 
@@ -276,54 +277,60 @@ CREATE INDEX ON audit_events (resource_type, resource_id, created_at DESC);
 ## Instrumented Actions
 
 ### Authentication & Session Security
-| Action | Actor | Trigger |
-|--------|-------|---------|
-| `AUTH_LOGIN` | USER | Successful login |
-| `AUTH_LOGOUT` | USER | Session revocation on logout |
+
+| Action                        | Actor  | Trigger                                               |
+| ----------------------------- | ------ | ----------------------------------------------------- |
+| `AUTH_LOGIN`                  | USER   | Successful login                                      |
+| `AUTH_LOGOUT`                 | USER   | Session revocation on logout                          |
 | `AUTH_REFRESH_REUSE_DETECTED` | SYSTEM | Suspicious refresh token reuse (all sessions revoked) |
-| `AUTH_PASSWORD_CHANGED` | USER | Password change and all other sessions invalidated |
+| `AUTH_PASSWORD_CHANGED`       | USER   | Password change and all other sessions invalidated    |
 
 ### Organization Administration
-| Action | Actor | Trigger |
-|--------|-------|---------|
-| `ORGANIZATION_CREATED` | USER | New organization provisioned on registration |
-| `ORGANIZATION_MEMBER_INVITED` | USER | Admin invites a new member |
-| `ORGANIZATION_MEMBER_ROLE_CHANGED` | USER | Admin changes member role |
-| `ORGANIZATION_MEMBER_REMOVED` | USER | Admin removes a member |
+
+| Action                             | Actor | Trigger                                      |
+| ---------------------------------- | ----- | -------------------------------------------- |
+| `ORGANIZATION_CREATED`             | USER  | New organization provisioned on registration |
+| `ORGANIZATION_MEMBER_INVITED`      | USER  | Admin invites a new member                   |
+| `ORGANIZATION_MEMBER_ROLE_CHANGED` | USER  | Admin changes member role                    |
+| `ORGANIZATION_MEMBER_REMOVED`      | USER  | Admin removes a member                       |
 
 ### Project Governance
-| Action | Actor | Trigger |
-|--------|-------|---------|
-| `PROJECT_CREATED` | USER | Project created |
-| `PROJECT_UPDATED` | USER | Project settings updated |
-| `PROJECT_ARCHIVED` | USER | Project archived |
-| `PROJECT_MEMBER_ADDED` | USER | Member added to project |
-| `PROJECT_MEMBER_ROLE_CHANGED` | USER | Project member role changed |
-| `PROJECT_MEMBER_REMOVED` | USER | Member removed from project |
+
+| Action                        | Actor | Trigger                     |
+| ----------------------------- | ----- | --------------------------- |
+| `PROJECT_CREATED`             | USER  | Project created             |
+| `PROJECT_UPDATED`             | USER  | Project settings updated    |
+| `PROJECT_ARCHIVED`            | USER  | Project archived            |
+| `PROJECT_MEMBER_ADDED`        | USER  | Member added to project     |
+| `PROJECT_MEMBER_ROLE_CHANGED` | USER  | Project member role changed |
+| `PROJECT_MEMBER_REMOVED`      | USER  | Member removed from project |
 
 ### Task Operations
-| Action | Actor | Source | Trigger |
-|--------|-------|--------|---------|
-| `TASK_CREATED` | USER | USER | Task creation |
-| `TASK_UPDATED` | USER | USER/AI_ASSISTED | Field change (with diff) |
-| `TASK_STATUS_CHANGED` | USER | USER/AI_ASSISTED | Status transition |
-| `TASK_ASSIGNED` | USER | USER/AI_ASSISTED | Assignee set |
-| `TASK_UNASSIGNED` | USER | USER | Assignee removed |
-| `TASK_ARCHIVED` | USER | USER | Task archived |
+
+| Action                | Actor | Source           | Trigger                  |
+| --------------------- | ----- | ---------------- | ------------------------ |
+| `TASK_CREATED`        | USER  | USER             | Task creation            |
+| `TASK_UPDATED`        | USER  | USER/AI_ASSISTED | Field change (with diff) |
+| `TASK_STATUS_CHANGED` | USER  | USER/AI_ASSISTED | Status transition        |
+| `TASK_ASSIGNED`       | USER  | USER/AI_ASSISTED | Assignee set             |
+| `TASK_UNASSIGNED`     | USER  | USER             | Assignee removed         |
+| `TASK_ARCHIVED`       | USER  | USER             | Task archived            |
 
 ### Collaboration
-| Action | Actor | Trigger |
-|--------|-------|---------|
-| `COMMENT_CREATED` | USER | Comment added (no message body logged) |
-| `COMMENT_UPDATED` | USER | Comment edited (no message body logged) |
-| `COMMENT_DELETED` | USER | Comment deleted |
+
+| Action            | Actor | Trigger                                 |
+| ----------------- | ----- | --------------------------------------- |
+| `COMMENT_CREATED` | USER  | Comment added (no message body logged)  |
+| `COMMENT_UPDATED` | USER  | Comment edited (no message body logged) |
+| `COMMENT_DELETED` | USER  | Comment deleted                         |
 
 ### AI Action Lifecycle
-| Action | Actor | Source | Trigger |
-|--------|-------|--------|---------|
-| `AI_ACTION_PROPOSED` | AI | AI | AI analysis returns action proposals |
-| `AI_ACTION_APPLIED` | USER | AI_ASSISTED | Human approves and applies AI recommendation |
-| `AI_ACTION_REJECTED` | USER | AI_ASSISTED | Stale state detected (409) |
+
+| Action               | Actor | Source      | Trigger                                      |
+| -------------------- | ----- | ----------- | -------------------------------------------- |
+| `AI_ACTION_PROPOSED` | AI    | AI          | AI analysis returns action proposals         |
+| `AI_ACTION_APPLIED`  | USER  | AI_ASSISTED | Human approves and applies AI recommendation |
+| `AI_ACTION_REJECTED` | USER  | AI_ASSISTED | Stale state detected (409)                   |
 
 ---
 
@@ -345,31 +352,31 @@ considerations for production deployments:
 
 ## Files Changed in PR-25
 
-| Layer | File | Change |
-|-------|------|--------|
-| DB Schema | `apps/api/prisma/schema.prisma` | Added `ActorType`, `AuditSource`, `AuditAction` enums + `AuditEvent` model |
-| Migration | `apps/api/prisma/migrations/20260904143000_add_audit_event_model/migration.sql` | DDL for `audit_events` table + indexes |
-| Shared Types | `packages/shared/src/types/audit.ts` | TypeScript enums and interfaces |
-| Validation | `packages/validation/src/audit.ts` | `auditEventsQuerySchema` with bounded pagination |
-| Repository | `apps/api/src/repositories/audit.repository.ts` | `create` and `findMany` |
-| Repository | `apps/api/src/repositories/project.repository.ts` | Added `findUserMemberships` |
-| Service | `apps/api/src/services/audit.service.ts` | `sanitizeMetadata`, `record`, `list` with RBAC |
-| Controller | `apps/api/src/controllers/audit.controller.ts` | `getAuditEvents` handler |
-| Routes | `apps/api/src/routes/organization.routes.ts` | Mounted GET audit-events endpoint |
-| Domain | `apps/api/src/services/auth.service.ts` | AUTH event instrumentation |
-| Domain | `apps/api/src/controllers/auth.controller.ts` | AUTH event propagation |
-| Domain | `apps/api/src/services/user.service.ts` | AUTH_PASSWORD_CHANGED |
-| Domain | `apps/api/src/services/task.service.ts` | TASK_* and AI_ACTION_* events |
-| Domain | `apps/api/src/services/ai.service.ts` | AI_ACTION_PROPOSED |
-| Domain | `apps/api/src/services/organization.service.ts` | ORGANIZATION_* events |
-| Domain | `apps/api/src/services/project.service.ts` | PROJECT_* events |
-| Domain | `apps/api/src/services/comment.service.ts` | COMMENT_* events |
-| API Docs | `apps/api/src/docs/openapi.ts` | Audit tag, schemas, endpoint |
-| Tests | `apps/api/src/__tests__/openapi_docs.test.ts` | Updated endpoint count assertions |
-| Tests | `apps/api/src/__tests__/audit.test.ts` | 27 dedicated audit unit tests |
-| Tests | `apps/api/src/__tests__/ai_task_actions.test.ts` | Added `auditRepository` mock |
-| Tests | `apps/api/src/__tests__/ai_evaluation_reliability.test.ts` | Added `auditRepository` mock |
-| Frontend | `apps/web/src/lib/api.ts` | `auditApi.listAuditEvents` |
-| Frontend | `apps/web/src/components/settings/SettingsLayout.tsx` | `audit` tab with ShieldCheck icon |
-| Frontend | `apps/web/src/components/settings/AuditLogSettings.tsx` | Full audit log UI |
-| Docs | `docs/architecture/auditability-security-events.md` | This document |
+| Layer        | File                                                                            | Change                                                                     |
+| ------------ | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| DB Schema    | `apps/api/prisma/schema.prisma`                                                 | Added `ActorType`, `AuditSource`, `AuditAction` enums + `AuditEvent` model |
+| Migration    | `apps/api/prisma/migrations/20260904143000_add_audit_event_model/migration.sql` | DDL for `audit_events` table + indexes                                     |
+| Shared Types | `packages/shared/src/types/audit.ts`                                            | TypeScript enums and interfaces                                            |
+| Validation   | `packages/validation/src/audit.ts`                                              | `auditEventsQuerySchema` with bounded pagination                           |
+| Repository   | `apps/api/src/repositories/audit.repository.ts`                                 | `create` and `findMany`                                                    |
+| Repository   | `apps/api/src/repositories/project.repository.ts`                               | Added `findUserMemberships`                                                |
+| Service      | `apps/api/src/services/audit.service.ts`                                        | `sanitizeMetadata`, `record`, `list` with RBAC                             |
+| Controller   | `apps/api/src/controllers/audit.controller.ts`                                  | `getAuditEvents` handler                                                   |
+| Routes       | `apps/api/src/routes/organization.routes.ts`                                    | Mounted GET audit-events endpoint                                          |
+| Domain       | `apps/api/src/services/auth.service.ts`                                         | AUTH event instrumentation                                                 |
+| Domain       | `apps/api/src/controllers/auth.controller.ts`                                   | AUTH event propagation                                                     |
+| Domain       | `apps/api/src/services/user.service.ts`                                         | AUTH_PASSWORD_CHANGED                                                      |
+| Domain       | `apps/api/src/services/task.service.ts`                                         | TASK_* and AI_ACTION_* events                                              |
+| Domain       | `apps/api/src/services/ai.service.ts`                                           | AI_ACTION_PROPOSED                                                         |
+| Domain       | `apps/api/src/services/organization.service.ts`                                 | ORGANIZATION_* events                                                      |
+| Domain       | `apps/api/src/services/project.service.ts`                                      | PROJECT_* events                                                           |
+| Domain       | `apps/api/src/services/comment.service.ts`                                      | COMMENT_* events                                                           |
+| API Docs     | `apps/api/src/docs/openapi.ts`                                                  | Audit tag, schemas, endpoint                                               |
+| Tests        | `apps/api/src/__tests__/openapi_docs.test.ts`                                   | Updated endpoint count assertions                                          |
+| Tests        | `apps/api/src/__tests__/audit.test.ts`                                          | 27 dedicated audit unit tests                                              |
+| Tests        | `apps/api/src/__tests__/ai_task_actions.test.ts`                                | Added `auditRepository` mock                                               |
+| Tests        | `apps/api/src/__tests__/ai_evaluation_reliability.test.ts`                      | Added `auditRepository` mock                                               |
+| Frontend     | `apps/web/src/lib/api.ts`                                                       | `auditApi.listAuditEvents`                                                 |
+| Frontend     | `apps/web/src/components/settings/SettingsLayout.tsx`                           | `audit` tab with ShieldCheck icon                                          |
+| Frontend     | `apps/web/src/components/settings/AuditLogSettings.tsx`                         | Full audit log UI                                                          |
+| Docs         | `docs/architecture/auditability-security-events.md`                             | This document                                                              |
