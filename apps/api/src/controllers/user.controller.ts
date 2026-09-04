@@ -61,6 +61,7 @@ export const changePassword = async (
     const meta = {
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip || req.socket.remoteAddress,
+      requestId: req.id,
     };
 
     const { accessToken, rawRefreshToken } = await userService.changePassword(

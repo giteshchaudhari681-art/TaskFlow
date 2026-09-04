@@ -6,10 +6,13 @@ import { comparePassword, hashPassword } from '../lib/auth/password.js';
 import { signAccessToken } from '../lib/auth/jwt.js';
 import { generateRefreshToken, hashRefreshToken } from '../lib/auth/session.js';
 import { env } from '../config/env.js';
+import { auditService } from './audit.service.js';
+import { AuditAction, ActorType, AuditSource } from '@prisma/client';
 
 export interface RequestMeta {
   userAgent?: string;
   ipAddress?: string;
+  requestId?: string;
 }
 
 export class UserService {
@@ -124,6 +127,23 @@ export class UserService {
       email: user.email,
       defaultOrgId: primaryMembership?.organization.id,
     });
+
+    if (primaryMembership?.organization.id) {
+      await auditService.record({
+        organizationId: primaryMembership.organization.id,
+        actorUserId: user.id,
+        actorType: ActorType.USER,
+        action: AuditAction.AUTH_PASSWORD_CHANGED,
+        resourceType: 'User',
+        resourceId: user.id,
+        requestId: meta?.requestId,
+        source: AuditSource.USER,
+        metadata: {
+          userId: user.id,
+          email: user.email,
+        },
+      });
+    }
 
     return {
       accessToken,

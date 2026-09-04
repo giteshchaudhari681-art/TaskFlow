@@ -1,10 +1,18 @@
-import { UserRole, ProjectRole, ActivityActionType } from '@prisma/client';
+import {
+  UserRole,
+  ProjectRole,
+  ActivityActionType,
+  AuditAction,
+  ActorType,
+  AuditSource,
+} from '@prisma/client';
 import { commentRepository } from '../repositories/comment.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
 import { notificationService } from './notification.service.js';
 import { taskRepository } from '../repositories/task.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
+import { auditService } from './audit.service.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { CommentItem } from '@taskflow/shared';
 
@@ -143,6 +151,21 @@ export class CommentService {
       commentSnippet: data.content.slice(0, 100),
     });
 
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.COMMENT_CREATED,
+      resourceType: 'Comment',
+      resourceId: comment.id,
+      source: AuditSource.USER,
+      metadata: {
+        commentId: comment.id,
+        taskId,
+      },
+    });
+
     return this.formatComment(comment);
   }
 
@@ -189,6 +212,22 @@ export class CommentService {
     }
 
     const updated = await commentRepository.update(commentId, data.content);
+
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.COMMENT_UPDATED,
+      resourceType: 'Comment',
+      resourceId: commentId,
+      source: AuditSource.USER,
+      metadata: {
+        commentId,
+        taskId,
+      },
+    });
+
     return this.formatComment(updated);
   }
 
@@ -237,6 +276,21 @@ export class CommentService {
         taskNumber: task.taskNumber,
         issueKey: task.issueKey,
         taskTitle: task.title,
+      },
+    });
+
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.COMMENT_DELETED,
+      resourceType: 'Comment',
+      resourceId: commentId,
+      source: AuditSource.USER,
+      metadata: {
+        commentId,
+        taskId,
       },
     });
 

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { User, Lock, Building2, Users, ArrowLeft, Bell } from 'lucide-react';
+import { User, Lock, Building2, Users, ArrowLeft, Bell, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from './ProfileSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { WorkspaceSettings } from './WorkspaceSettings';
 import { MembersSettings } from './MembersSettings';
 import { NotificationSettings } from './NotificationSettings';
+import { AuditLogSettings } from './AuditLogSettings';
 
-export type SettingsTab = 'profile' | 'security' | 'workspace' | 'members' | 'notifications';
+export type SettingsTab =
+  'profile' | 'security' | 'workspace' | 'members' | 'notifications' | 'audit';
 
 interface SettingsLayoutProps {
   onBackToDashboard: () => void;
@@ -25,6 +27,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
     { id: 'notifications' as SettingsTab, label: 'Notifications', icon: Bell },
     { id: 'workspace' as SettingsTab, label: 'Workspace Settings', icon: Building2 },
     { id: 'members' as SettingsTab, label: 'Workspace Members', icon: Users },
+    { id: 'audit' as SettingsTab, label: 'Audit & Security Log', icon: ShieldCheck },
   ];
 
   return (
@@ -79,6 +82,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
             {activeTab === 'notifications' && <NotificationSettings />}
             {activeTab === 'workspace' && <WorkspaceSettings />}
             {activeTab === 'members' && <MembersSettings />}
+            {activeTab === 'audit' && <AuditLogSettings />}
           </div>
         </div>
       </div>

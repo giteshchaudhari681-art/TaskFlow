@@ -54,6 +54,9 @@ import {
   ProjectDashboardResponse,
   AIAnalysisResponse,
   AIOperation,
+  AuditEvent,
+  AuditEventsFilter,
+  ApiResponseMeta,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -1021,5 +1024,31 @@ export const searchApi = {
       }
     );
     return res.data;
+  },
+};
+
+export const auditApi = {
+  listAuditEvents: async (
+    organizationId: string,
+    filter?: AuditEventsFilter
+  ): Promise<{ items: AuditEvent[]; meta?: ApiResponseMeta }> => {
+    const params = new URLSearchParams();
+    if (filter?.action) params.set('action', filter.action);
+    if (filter?.actorUserId) params.set('actorUserId', filter.actorUserId);
+    if (filter?.projectId) params.set('projectId', filter.projectId);
+    if (filter?.resourceType) params.set('resourceType', filter.resourceType);
+    if (filter?.from) params.set('from', filter.from);
+    if (filter?.to) params.set('to', filter.to);
+    if (filter?.page) params.set('page', String(filter.page));
+    if (filter?.limit) params.set('limit', String(filter.limit));
+    const query = params.toString() ? `?${params.toString()}` : '';
+
+    const res = await apiFetch<AuditEvent[]>(
+      `/organizations/${organizationId}/audit-events${query}`
+    );
+    return {
+      items: res.data,
+      meta: res.meta,
+    };
   },
 };

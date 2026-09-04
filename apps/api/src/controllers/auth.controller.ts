@@ -28,6 +28,7 @@ export const register = async (
     const meta = {
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip || req.socket.remoteAddress,
+      requestId: req.id,
     };
 
     const { data, rawRefreshToken } = await authService.register(parseResult.data, meta);
@@ -63,6 +64,7 @@ export const login = async (
     const meta = {
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip || req.socket.remoteAddress,
+      requestId: req.id,
     };
 
     const { data, rawRefreshToken } = await authService.login(parseResult.data, meta);
@@ -92,6 +94,7 @@ export const refresh = async (
     const meta = {
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip || req.socket.remoteAddress,
+      requestId: req.id,
     };
 
     const { data, rawRefreshToken: newRefreshToken } = await authService.refresh(
@@ -118,8 +121,13 @@ export const logout = async (
 ): Promise<Response | void> => {
   try {
     const rawRefreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+    const meta = {
+      userAgent: req.headers['user-agent'],
+      ipAddress: req.ip || req.socket.remoteAddress,
+      requestId: req.id,
+    };
     if (rawRefreshToken) {
-      await authService.logout(rawRefreshToken);
+      await authService.logout(rawRefreshToken, meta);
     }
 
     res.clearCookie(REFRESH_COOKIE_NAME, getClearCookieOptions());

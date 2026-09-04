@@ -7,10 +7,13 @@ import { hashPassword, comparePassword } from '../lib/auth/password.js';
 import { signAccessToken } from '../lib/auth/jwt.js';
 import { generateRefreshToken, hashRefreshToken } from '../lib/auth/session.js';
 import { env } from '../config/env.js';
+import { auditService } from './audit.service.js';
+import { AuditAction, ActorType, AuditSource } from '@prisma/client';
 
 export interface RequestMeta {
   userAgent?: string;
   ipAddress?: string;
+  requestId?: string;
 }
 
 export interface AuthServiceResult {
@@ -75,6 +78,23 @@ export class AuthService {
       avatarUrl: user.avatarUrl,
     };
 
+    // Audit record for organization provisioning
+    await auditService.record({
+      organizationId: organization.id,
+      actorUserId: user.id,
+      actorType: ActorType.USER,
+      action: AuditAction.ORGANIZATION_CREATED,
+      resourceType: 'Organization',
+      resourceId: organization.id,
+      requestId: meta?.requestId,
+      source: AuditSource.USER,
+      metadata: {
+        organizationId: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+      },
+    });
+
     return {
       data: {
         user: authUser,
@@ -138,6 +158,25 @@ export class AuthService {
       avatarUrl: user.avatarUrl,
     };
 
+    if (primaryMembership?.organization.id) {
+      await auditService.record({
+        organizationId: primaryMembership.organization.id,
+        actorUserId: user.id,
+        actorType: ActorType.USER,
+        action: AuditAction.AUTH_LOGIN,
+        resourceType: 'User',
+        resourceId: user.id,
+        requestId: meta?.requestId,
+        source: AuditSource.USER,
+        metadata: {
+          userId: user.id,
+          email: user.email,
+          ipAddress: meta?.ipAddress,
+          userAgent: meta?.userAgent,
+        },
+      });
+    }
+
     return {
       data: {
         user: authUser,
@@ -183,6 +222,29 @@ export class AuthService {
         `🚨 Suspicious refresh token reuse detected for user ${session.userId}. Revoking all sessions.`
       );
       await sessionRepository.revokeAllForUser(session.userId);
+
+      const memberships = await organizationRepository.getUserMemberships(session.userId);
+      const primaryOrgId = memberships[0]?.organization.id;
+      if (primaryOrgId) {
+        await auditService.record({
+          organizationId: primaryOrgId,
+          actorUserId: session.userId,
+          actorType: ActorType.SYSTEM,
+          action: AuditAction.AUTH_REFRESH_REUSE_DETECTED,
+          resourceType: 'Session',
+          resourceId: session.id,
+          requestId: meta?.requestId,
+          source: AuditSource.SYSTEM,
+          metadata: {
+            userId: session.userId,
+            sessionId: session.id,
+            detectedAt: new Date().toISOString(),
+            ipAddress: meta?.ipAddress,
+            userAgent: meta?.userAgent,
+          },
+        });
+      }
+
       const err = new Error('Suspicious session activity detected. Please log in again.');
       (err as unknown as { statusCode: number }).statusCode = 401;
       throw err;
@@ -253,13 +315,32 @@ export class AuthService {
   /**
    * Revoke the session matching the presented refresh token.
    */
-  async logout(rawRefreshToken?: string): Promise<void> {
+  async logout(rawRefreshToken?: string, meta?: RequestMeta): Promise<void> {
     if (!rawRefreshToken) return;
     try {
       const tokenHash = hashRefreshToken(rawRefreshToken);
       const session = await sessionRepository.findByHash(tokenHash);
       if (session && !session.revokedAt) {
         await sessionRepository.revoke(session.id);
+
+        const memberships = await organizationRepository.getUserMemberships(session.userId);
+        const primaryOrgId = memberships[0]?.organization.id;
+        if (primaryOrgId) {
+          await auditService.record({
+            organizationId: primaryOrgId,
+            actorUserId: session.userId,
+            actorType: ActorType.USER,
+            action: AuditAction.AUTH_LOGOUT,
+            resourceType: 'Session',
+            resourceId: session.id,
+            requestId: meta?.requestId,
+            source: AuditSource.USER,
+            metadata: {
+              userId: session.userId,
+              sessionId: session.id,
+            },
+          });
+        }
       }
     } catch {
       // Logout is idempotent and safe against invalid inputs

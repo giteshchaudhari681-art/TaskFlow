@@ -10,6 +10,7 @@ import { commentRepository } from '../repositories/comment.repository.js';
 import { projectDashboardRepository } from '../repositories/projectDashboard.repository.js';
 import { taskService } from '../services/task.service.js';
 import { activityRepository } from '../repositories/activity.repository.js';
+import { auditRepository } from '../repositories/audit.repository.js';
 import { TaskStatus, TaskPriority } from '@taskflow/shared';
 
 describe('TaskFlow PR 23: Human-Approved AI Task Actions Suite', () => {
@@ -23,6 +24,7 @@ describe('TaskFlow PR 23: Human-Approved AI Task Actions Suite', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(activityRepository, 'create').mockResolvedValue({} as any);
+    vi.spyOn(auditRepository, 'create').mockResolvedValue({} as any);
   });
 
   const mockTask = {

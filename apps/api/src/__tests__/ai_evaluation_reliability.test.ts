@@ -5,6 +5,7 @@ import { aiContextBuilder } from '../services/aiContext.builder.js';
 import { taskRepository } from '../repositories/task.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
+import { auditRepository } from '../repositories/audit.repository.js';
 import { taskService } from '../services/task.service.js';
 import { TaskPriority, TaskStatus } from '@taskflow/shared';
 import { AppError } from '../middleware/errorHandler.js';
@@ -20,18 +21,18 @@ describe('PR24: AI Evaluation, Reliability & Safety Invariant Suite', () => {
   const mockTask = {
     id: taskId,
     projectId: projId,
-    taskNumber: 101,
-    issueKey: 'TF-101',
-    title: 'Payment webhook handler implementation',
-    status: TaskStatus.TODO,
-    priority: TaskPriority.HIGH,
+    taskNumber: 24,
+    issueKey: 'PROJ-24',
+    title: 'Deploy microservice architecture to production',
+    status: TaskStatus.IN_PROGRESS,
+    priority: TaskPriority.MEDIUM,
     dueDate: new Date(Date.now() + 86400000),
     createdAt: new Date(),
     updatedAt: new Date(),
-    description: 'Implement signature verification and ledger records.',
+    description: 'Initial deployment task',
     assigneeId: null,
     assignee: null,
-    project: { id: projId, key: 'TF', name: 'TaskFlow Core' },
+    project: { id: projId, key: 'PROJ', name: 'Project Safe' },
     subtasks: [],
     labels: [],
   };
@@ -57,6 +58,7 @@ describe('PR24: AI Evaluation, Reliability & Safety Invariant Suite', () => {
     vi.clearAllMocks();
     vi.spyOn(aiService as any, 'checkProjectAccess').mockResolvedValue(undefined);
     vi.spyOn(activityRepository, 'create').mockResolvedValue({} as any);
+    vi.spyOn(auditRepository, 'create').mockResolvedValue({} as any);
   });
 
   // ============================================================================
