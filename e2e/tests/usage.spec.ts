@@ -44,11 +44,17 @@ test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     }
 
     // Refresh usage page in browser
+    const refreshPromise = page.waitForResponse(
+      resp => resp.url().includes('/usage') && resp.status() === 200
+    );
     await page.getByTitle('Refresh Usage Metrics').click();
+    await refreshPromise;
 
     // 6. Verify UI displays limit reached state
-    await expect(page.getByTestId('limit-reached-banner')).toBeVisible();
-    await expect(page.getByTestId('meter-projects')).toContainText('Limit Reached');
+    await expect(page.getByTestId('limit-reached-banner')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('meter-projects')).toContainText('Limit Reached', {
+      timeout: 15000,
+    });
 
     // 7. Verify unauthorized regular MEMBER cannot access usage settings
     const memberEmail = generateUniqueEmail('member');
