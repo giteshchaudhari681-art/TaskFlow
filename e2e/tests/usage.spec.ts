@@ -35,12 +35,15 @@ test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     await expect(page.getByTestId('meter-ai')).toBeVisible();
 
     // 5. Reach project limit: create projects until FREE quota (10 projects) is full
-    // Already has 1 default project created at signup. Create 9 more.
-    for (let i = 2; i <= 10; i++) {
-      await request.post(`/api/v1/organizations/${owner.organizationId}/projects`, {
-        headers: { Authorization: `Bearer ${owner.accessToken}` },
-        data: { name: `Limit Project ${i}`, key: `LIM${i}` },
-      });
+    for (let i = 1; i <= 10; i++) {
+      const createRes = await request.post(
+        `/api/v1/organizations/${owner.organizationId}/projects`,
+        {
+          headers: { Authorization: `Bearer ${owner.accessToken}` },
+          data: { name: `Limit Project ${i}`, key: `LIM${i}` },
+        }
+      );
+      expect(createRes.ok()).toBeTruthy();
     }
 
     // Refresh usage page in browser
