@@ -390,7 +390,21 @@ export const openApiSpec = {
       },
       AIOperationEnum: {
         type: 'string',
-        enum: ['PROJECT_SUMMARY', 'TASK_SUMMARY', 'PROJECT_INSIGHT', 'TASK_DECOMPOSITION'],
+        enum: [
+          'PROJECT_SUMMARY',
+          'TASK_SUMMARY',
+          'PROJECT_INSIGHT',
+          'TASK_DECOMPOSITION',
+          'TASK_ACTIONS',
+        ],
+      },
+      AITaskActionTypeEnum: {
+        type: 'string',
+        enum: ['UPDATE_STATUS', 'UPDATE_PRIORITY', 'UPDATE_DUE_DATE', 'ASSIGN_TASK'],
+      },
+      AIActionConfidenceEnum: {
+        type: 'string',
+        enum: ['HIGH', 'MEDIUM', 'LOW'],
       },
       RecommendationPriorityEnum: {
         type: 'string',
@@ -662,6 +676,7 @@ export const openApiSpec = {
           dueDate: { type: 'string', format: 'date-time', nullable: true },
           milestoneId: { type: 'string', format: 'uuid', nullable: true },
           order: { type: 'number' },
+          expectedCurrentState: { $ref: '#/components/schemas/AITaskActionExpectedState' },
         },
       },
       UpdateTaskStatusRequest: {
@@ -1188,6 +1203,42 @@ export const openApiSpec = {
           },
         },
       },
+      AITaskActionExpectedState: {
+        type: 'object',
+        properties: {
+          status: { $ref: '#/components/schemas/TaskStatusEnum' },
+          priority: { $ref: '#/components/schemas/TaskPriorityEnum' },
+          dueDate: { type: 'string', format: 'date-time', nullable: true },
+          assigneeId: { type: 'string', format: 'uuid', nullable: true },
+          assigneeName: { type: 'string', nullable: true },
+        },
+      },
+      AITaskActionProposal: {
+        type: 'object',
+        required: ['actionId', 'type', 'title', 'reason', 'confidence', 'target', 'parameters'],
+        properties: {
+          actionId: { type: 'string', example: 'action-1-update-priority' },
+          type: { $ref: '#/components/schemas/AITaskActionTypeEnum' },
+          title: { type: 'string', example: 'Increase priority to High' },
+          reason: {
+            type: 'string',
+            example: 'Task is overdue and blocks 2 downstream integration items.',
+          },
+          confidence: { $ref: '#/components/schemas/AIActionConfidenceEnum' },
+          target: {
+            type: 'object',
+            required: ['taskId'],
+            properties: {
+              taskId: { type: 'string', format: 'uuid' },
+            },
+          },
+          expectedCurrentState: { $ref: '#/components/schemas/AITaskActionExpectedState' },
+          parameters: {
+            type: 'object',
+            description: 'Action parameters mapping to domain fields',
+          },
+        },
+      },
       AIAnalysisResponse: {
         type: 'object',
         required: ['request_id', 'operation', 'summary', 'recommendations', 'metadata'],
@@ -1213,6 +1264,10 @@ export const openApiSpec = {
           subtasks: {
             type: 'array',
             items: { $ref: '#/components/schemas/AIDecomposedSubtask' },
+          },
+          actions: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/AITaskActionProposal' },
           },
           notes: {
             type: 'array',

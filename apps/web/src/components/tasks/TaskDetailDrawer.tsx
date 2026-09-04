@@ -387,6 +387,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   value={status}
                   onChange={e => setStatus(e.target.value as TaskStatus)}
                   className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
+                  data-testid="task-status-select"
                 >
                   <option value={TaskStatus.TODO}>To Do</option>
                   <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
@@ -407,6 +408,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   value={priority}
                   onChange={e => setPriority(e.target.value as TaskPriority)}
                   className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
+                  data-testid="task-priority-select"
                 >
                   <option value={TaskPriority.LOW}>Low</option>
                   <option value={TaskPriority.MEDIUM}>Medium</option>
@@ -665,8 +667,17 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 projectId={projectId}
                 taskId={taskId}
                 taskKey={task ? task.issueKey || `TASK-${task.taskNumber}` : undefined}
+                currentStatus={task?.status}
+                currentPriority={task?.priority}
+                currentDueDate={task?.dueDate ? new Date(task.dueDate).toISOString() : null}
+                currentAssigneeId={task?.assigneeId || null}
+                currentAssigneeName={task?.assignee?.name || null}
                 existingSubtaskTitles={task?.subtasks?.map(st => st.title) || []}
                 onSubtasksCreated={() => {
+                  loadTask(true);
+                  onUpdated();
+                }}
+                onTaskUpdated={() => {
                   loadTask(true);
                   onUpdated();
                 }}

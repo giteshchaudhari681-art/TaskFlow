@@ -97,6 +97,12 @@ export interface UpdateTaskPayload {
   dueDate?: string | null;
   estimateHours?: number | null;
   milestoneId?: string | null;
+  expectedCurrentState?: {
+    status?: TaskStatus;
+    priority?: TaskPriority;
+    dueDate?: string | null;
+    assigneeId?: string | null;
+  };
 }
 
 export interface CreateSubtaskPayload {

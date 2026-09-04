@@ -646,6 +646,26 @@ export const taskApi = {
     );
     return res.data;
   },
+
+  proposeActions: async (
+    organizationId: string,
+    projectId: string,
+    taskId: string,
+    options?: { user_prompt?: string }
+  ): Promise<AIAnalysisResponse> => {
+    const res = await apiFetch<AIAnalysisResponse>(
+      `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          operation: 'TASK_ACTIONS',
+          taskId,
+          user_prompt: options?.user_prompt,
+        }),
+      }
+    );
+    return res.data;
+  },
 };
 
 export const labelApi = {

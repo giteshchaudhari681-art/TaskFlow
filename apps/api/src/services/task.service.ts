@@ -212,6 +212,12 @@ export class TaskService {
       dueDate?: string | null;
       estimateHours?: number | null;
       milestoneId?: string | null;
+      expectedCurrentState?: {
+        status?: TaskStatus;
+        priority?: TaskPriority;
+        dueDate?: string | null;
+        assigneeId?: string | null;
+      };
     }
   ) {
     const { rank } = await this.getActorProjectPermissions(organizationId, projectId, actorUserId);
@@ -223,6 +229,35 @@ export class TaskService {
     const task = await taskRepository.findById(taskId, projectId);
     if (!task) {
       throw new AppError('TASK_NOT_FOUND', 'Task not found in this project', 404);
+    }
+
+    // Guard against stale updates if expectedCurrentState was provided
+    if (data.expectedCurrentState) {
+      const exp = data.expectedCurrentState;
+      if (exp.status !== undefined && task.status !== exp.status) {
+        throw new AppError(
+          'STALE_TASK_STATE',
+          `Task status has changed from ${exp.status} to ${task.status}. Please refresh.`,
+          409
+        );
+      }
+      if (exp.priority !== undefined && task.priority !== exp.priority) {
+        throw new AppError(
+          'STALE_TASK_STATE',
+          `Task priority has changed from ${exp.priority} to ${task.priority}. Please refresh.`,
+          409
+        );
+      }
+      if (exp.assigneeId !== undefined && task.assigneeId !== exp.assigneeId) {
+        throw new AppError('STALE_TASK_STATE', 'Task assignee has changed. Please refresh.', 409);
+      }
+      if (exp.dueDate !== undefined) {
+        const taskDueIso = task.dueDate ? new Date(task.dueDate).toISOString() : null;
+        const expDueIso = exp.dueDate ? new Date(exp.dueDate).toISOString() : null;
+        if (taskDueIso !== expDueIso) {
+          throw new AppError('STALE_TASK_STATE', 'Task due date has changed. Please refresh.', 409);
+        }
+      }
     }
 
     if (data.assigneeId !== undefined) {

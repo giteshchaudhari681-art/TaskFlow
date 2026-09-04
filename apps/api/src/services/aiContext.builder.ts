@@ -1,4 +1,5 @@
 import { projectDashboardRepository } from '../repositories/projectDashboard.repository.js';
+import { projectRepository } from '../repositories/project.repository.js';
 import { taskRepository } from '../repositories/task.repository.js';
 import { dependencyRepository } from '../repositories/dependency.repository.js';
 import { commentRepository } from '../repositories/comment.repository.js';
@@ -214,7 +215,14 @@ export class AIContextBuilder {
     // 4. Labels
     const labels = (task.labels || []).map(l => l.name);
 
-    // 5. Parent project context and health snapshot
+    // 5. Eligible assignees for task assignment (up to 20 project members)
+    const members = await projectRepository.listMembers(projectId);
+    const eligibleAssignees = (members || []).slice(0, 20).map(m => ({
+      id: m.user.id,
+      display_name: m.user.name,
+    }));
+
+    // 6. Parent project context and health snapshot
     const projectData = await projectDashboardRepository.getProjectDashboardData(projectId);
     const parentProject = projectData.project
       ? {
@@ -289,6 +297,7 @@ export class AIContextBuilder {
         subtasks: sanitizedSubtasks,
         dependencies: sanitizedDeps,
         recent_comments: sanitizedComments,
+        eligible_assignees: eligibleAssignees,
         parent_project: parentProject,
       },
       health: {

@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.requests import AIOperation
 
@@ -85,6 +85,59 @@ class AIDecomposedSubtask(BaseModel):
     order: int = Field(default=1, ge=1, le=50, description="Sequential execution order")
 
 
+class ActionType(str, Enum):
+    """Supported task mutation action types."""
+
+    UPDATE_STATUS = "UPDATE_STATUS"
+    UPDATE_PRIORITY = "UPDATE_PRIORITY"
+    UPDATE_DUE_DATE = "UPDATE_DUE_DATE"
+    ASSIGN_TASK = "ASSIGN_TASK"
+
+
+class ActionConfidence(str, Enum):
+    """Categorical confidence level for proposed actions."""
+
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class ActionTarget(BaseModel):
+    """Target entity reference for the proposed action."""
+
+    model_config = ConfigDict(populate_by_name=True)
+    task_id: str = Field(..., alias="taskId", description="Target task UUID")
+
+
+class AITaskActionProposal(BaseModel):
+    """Structured, human-reviewed task action proposal."""
+
+    model_config = ConfigDict(populate_by_name=True)
+    action_id: str = Field(
+        ..., alias="actionId", description="Stable deterministic or UUID identifier for proposal"
+    )
+    type: ActionType = Field(..., description="Action classification type")
+    title: str = Field(
+        ..., min_length=1, max_length=200, description="Explicit human-readable action description"
+    )
+    reason: str = Field(
+        ..., min_length=1, max_length=1000, description="Fact-grounded rationale for the proposal"
+    )
+    confidence: ActionConfidence = Field(
+        default=ActionConfidence.HIGH, description="Confidence level (HIGH, MEDIUM, LOW)"
+    )
+    target: ActionTarget = Field(..., description="Target entity being proposed for mutation")
+    expected_current_state: Dict[str, Any] = Field(
+        default_factory=dict,
+        alias="expectedCurrentState",
+        description="Expected task state before applying action to guard against stale updates",
+    )
+    parameters: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Typed parameters required to execute the mutation upon approval",
+    )
+
+
 class AIAnalysisResponse(BaseModel):
     """Structured response payload returned by POST /ai/analyze."""
 
@@ -102,6 +155,9 @@ class AIAnalysisResponse(BaseModel):
     )
     subtasks: List[AIDecomposedSubtask] = Field(
         default_factory=list, description="Proposed decomposed subtask items"
+    )
+    actions: List[AITaskActionProposal] = Field(
+        default_factory=list, description="Proposed human-approved task actions"
     )
     notes: List[str] = Field(default_factory=list, description="Advisory decomposition notes")
     metadata: Dict[str, Any] = Field(

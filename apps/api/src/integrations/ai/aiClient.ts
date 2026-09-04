@@ -64,6 +64,10 @@ export interface AIAnalysisContextPayload {
       content: string;
       created_at?: string | null;
     }>;
+    eligible_assignees?: Array<{
+      id: string;
+      display_name: string;
+    }>;
     parent_project?: {
       project_id: string;
       project_key: string;
