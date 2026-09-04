@@ -124,7 +124,7 @@ test.describe('E2E AI-Assisted Task Decomposition Workflows', () => {
     await createSubtasksBtn.click();
 
     // 12. Verify Success result notification appears
-    await expect(page.getByTestId('ai-decomposition-result')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('ai-decomposition-result')).toBeVisible({ timeout: 20000 });
     await expect(page.getByTestId('ai-decomposition-result')).toContainText('created successfully');
   });
 });

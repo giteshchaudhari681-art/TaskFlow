@@ -252,10 +252,6 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
 
     setCreatingSubtasks(false);
 
-    if (createdCount > 0) {
-      onSubtasksCreated?.();
-    }
-
     if (failedCount === 0) {
       setCreationResult({
         success: true,
@@ -272,6 +268,10 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
       });
       // Remove successfully created items from the review list
       setProposedSubtasks(prev => prev.filter(st => !st.selected));
+    }
+
+    if (createdCount > 0) {
+      onSubtasksCreated?.();
     }
   };
 
@@ -328,6 +328,34 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Creation notification */}
+      {creationResult && (
+        <div
+          className={`mb-4 p-3 rounded-lg border text-xs flex items-center justify-between relative z-10 ${
+            creationResult.success
+              ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300'
+              : 'bg-amber-950/30 border-amber-500/30 text-amber-300'
+          }`}
+          data-testid="ai-decomposition-result"
+        >
+          <div className="flex items-center gap-2">
+            {creationResult.success ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            )}
+            <span>{creationResult.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCreationResult(null)}
+            className="text-slate-400 hover:text-slate-200"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* TAB 1: TASK INTELLIGENCE & ASSESSMENT                                     */}
@@ -586,34 +614,6 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'decomposition' && (
         <div className="relative z-10 space-y-4">
-          {/* Creation notification */}
-          {creationResult && (
-            <div
-              className={`p-3 rounded-lg border text-xs flex items-center justify-between ${
-                creationResult.success
-                  ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300'
-                  : 'bg-amber-950/30 border-amber-500/30 text-amber-300'
-              }`}
-              data-testid="ai-decomposition-result"
-            >
-              <div className="flex items-center gap-2">
-                {creationResult.success ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                ) : (
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                )}
-                <span>{creationResult.message}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCreationResult(null)}
-                className="text-slate-400 hover:text-slate-200"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-
           {/* Idle State */}
           {!decompHasRun && !decompLoading && !decompError && (
             <div className="text-center py-5 px-4" data-testid="ai-task-decomposition-idle">
