@@ -16,4 +16,5 @@ export * from './types/search.js';
 export * from './types/command.js';
 export * from './types/projectDashboard.js';
 export * from './types/ai.js';
+export * from './types/audit.js';
 export * from './constants/index.js';

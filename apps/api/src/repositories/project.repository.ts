@@ -321,6 +321,20 @@ export class ProjectRepository extends BaseRepository {
       },
     });
   }
+
+  async findUserMemberships(organizationId: string, userId: string) {
+    return this.db.projectMember.findMany({
+      where: {
+        userId,
+        project: {
+          organizationId,
+        },
+      },
+      include: {
+        project: true,
+      },
+    });
+  }
 }
 
 export const projectRepository = new ProjectRepository();

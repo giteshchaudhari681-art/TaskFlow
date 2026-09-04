@@ -97,7 +97,8 @@ export const addMember = async (
     const member = await organizationService.addMember(
       organizationId,
       req.orgMember!.role,
-      parseResult.data
+      parseResult.data,
+      req.user?.id
     );
 
     return sendSuccess(res, member, 201);

@@ -1,9 +1,10 @@
-import { ProjectRole, UserRole } from '@prisma/client';
+import { ProjectRole, UserRole, AuditAction, ActorType, AuditSource } from '@prisma/client';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { taskRepository } from '../repositories/task.repository.js';
 import { aiContextBuilder } from './aiContext.builder.js';
 import { aiClient, type IAIClient } from '../integrations/ai/aiClient.js';
+import { auditService } from './audit.service.js';
 import { AppError } from '../middleware/errorHandler.js';
 import type { AIOperation, AIAnalysisResponse } from '@taskflow/shared';
 
@@ -105,6 +106,27 @@ export class AIService {
           }
           return true;
         });
+
+        // Audit trail: Record AI_ACTION_PROPOSED (attributed to AI, non-mutating)
+        if (response.actions.length > 0) {
+          await auditService.record({
+            organizationId,
+            projectId,
+            actorUserId: null,
+            actorType: ActorType.AI,
+            action: AuditAction.AI_ACTION_PROPOSED,
+            resourceType: 'Task',
+            resourceId: taskId ?? null,
+            requestId: requestId ?? response.request_id ?? null,
+            source: AuditSource.AI,
+            metadata: {
+              operation,
+              taskId: taskId ?? null,
+              proposedActionTypes: response.actions.map(a => a.type),
+              proposalCount: response.actions.length,
+            },
+          });
+        }
       }
 
       return response;

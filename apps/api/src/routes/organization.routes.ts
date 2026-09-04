@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { UserRole } from '@taskflow/shared';
 import * as orgController from '../controllers/organization.controller.js';
+import * as auditController from '../controllers/audit.controller.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireOrgRole } from '../middleware/requireOrgRole.js';
 
@@ -45,4 +46,11 @@ organizationRoutes.delete(
   '/:organizationId/members/:userId',
   requireOrgRole(UserRole.OWNER, UserRole.ADMIN),
   orgController.removeMember
+);
+
+// Audit events query endpoint (Tenant and RBAC enforced in service)
+organizationRoutes.get(
+  '/:organizationId/audit-events',
+  requireOrgRole(),
+  auditController.getAuditEvents
 );

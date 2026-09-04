@@ -4,11 +4,15 @@ import {
   UserRole,
   ProjectRole,
   ActivityActionType,
+  AuditAction,
+  ActorType,
+  AuditSource,
 } from '@prisma/client';
 import { taskRepository } from '../repositories/task.repository.js';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { activityRepository } from '../repositories/activity.repository.js';
+import { auditService } from './audit.service.js';
 import { notificationService } from './notification.service.js';
 import { AppError } from '../middleware/errorHandler.js';
 
@@ -156,6 +160,27 @@ export class TaskService {
       });
     }
 
+    // Record audit event
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.TASK_CREATED,
+      resourceType: 'Task',
+      resourceId: task.id,
+      source: AuditSource.USER,
+      metadata: {
+        taskId: task.id,
+        taskNumber: task.taskNumber,
+        issueKey: task.issueKey,
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        assigneeId: task.assigneeId,
+      },
+    });
+
     return task;
   }
 
@@ -212,6 +237,7 @@ export class TaskService {
       dueDate?: string | null;
       estimateHours?: number | null;
       milestoneId?: string | null;
+      source?: 'USER' | 'SYSTEM' | 'AI' | 'AI_ASSISTED';
       expectedCurrentState?: {
         status?: TaskStatus;
         priority?: TaskPriority;
@@ -234,29 +260,44 @@ export class TaskService {
     // Guard against stale updates if expectedCurrentState was provided
     if (data.expectedCurrentState) {
       const exp = data.expectedCurrentState;
+      let isStale = false;
+      let staleReason = '';
+
       if (exp.status !== undefined && task.status !== exp.status) {
-        throw new AppError(
-          'STALE_TASK_STATE',
-          `Task status has changed from ${exp.status} to ${task.status}. Please refresh.`,
-          409
-        );
-      }
-      if (exp.priority !== undefined && task.priority !== exp.priority) {
-        throw new AppError(
-          'STALE_TASK_STATE',
-          `Task priority has changed from ${exp.priority} to ${task.priority}. Please refresh.`,
-          409
-        );
-      }
-      if (exp.assigneeId !== undefined && task.assigneeId !== exp.assigneeId) {
-        throw new AppError('STALE_TASK_STATE', 'Task assignee has changed. Please refresh.', 409);
-      }
-      if (exp.dueDate !== undefined) {
+        isStale = true;
+        staleReason = `Task status has changed from ${exp.status} to ${task.status}. Please refresh.`;
+      } else if (exp.priority !== undefined && task.priority !== exp.priority) {
+        isStale = true;
+        staleReason = `Task priority has changed from ${exp.priority} to ${task.priority}. Please refresh.`;
+      } else if (exp.assigneeId !== undefined && task.assigneeId !== exp.assigneeId) {
+        isStale = true;
+        staleReason = 'Task assignee has changed. Please refresh.';
+      } else if (exp.dueDate !== undefined) {
         const taskDueIso = task.dueDate ? new Date(task.dueDate).toISOString() : null;
         const expDueIso = exp.dueDate ? new Date(exp.dueDate).toISOString() : null;
         if (taskDueIso !== expDueIso) {
-          throw new AppError('STALE_TASK_STATE', 'Task due date has changed. Please refresh.', 409);
+          isStale = true;
+          staleReason = 'Task due date has changed. Please refresh.';
         }
+      }
+
+      if (isStale) {
+        await auditService.record({
+          organizationId,
+          projectId,
+          actorUserId,
+          actorType: ActorType.USER,
+          action: AuditAction.AI_ACTION_REJECTED,
+          resourceType: 'Task',
+          resourceId: taskId,
+          source: AuditSource.AI_ASSISTED,
+          metadata: {
+            taskId,
+            reasonCode: 'STALE_TASK_STATE',
+          },
+        });
+
+        throw new AppError('STALE_TASK_STATE', staleReason, 409);
       }
     }
 
@@ -418,6 +459,71 @@ export class TaskService {
       });
     }
 
+    // Compute change delta for audit trail
+    const changes: Record<string, { from: unknown; to: unknown }> = {};
+    if (data.status && data.status !== task.status) {
+      changes.status = { from: task.status, to: data.status };
+    }
+    if (data.priority && data.priority !== task.priority) {
+      changes.priority = { from: task.priority, to: data.priority };
+    }
+    if (data.assigneeId !== undefined && data.assigneeId !== task.assigneeId) {
+      changes.assigneeId = { from: task.assigneeId, to: data.assigneeId };
+    }
+    if (data.title && data.title !== task.title) {
+      changes.title = { from: task.title, to: data.title };
+    }
+    if (data.dueDate !== undefined) {
+      const oldDue = task.dueDate ? new Date(task.dueDate).toISOString() : null;
+      const newDue = data.dueDate ? new Date(data.dueDate).toISOString() : null;
+      if (oldDue !== newDue) {
+        changes.dueDate = { from: oldDue, to: newDue };
+      }
+    }
+    if (data.estimateHours !== undefined && data.estimateHours !== task.estimateHours) {
+      changes.estimateHours = { from: task.estimateHours, to: data.estimateHours };
+    }
+
+    const isAiAssisted = data.source === 'AI_ASSISTED' || !!data.expectedCurrentState;
+    if (isAiAssisted) {
+      await auditService.record({
+        organizationId,
+        projectId,
+        actorUserId,
+        actorType: ActorType.USER,
+        action: AuditAction.AI_ACTION_APPLIED,
+        resourceType: 'Task',
+        resourceId: taskId,
+        source: AuditSource.AI_ASSISTED,
+        metadata: {
+          taskId,
+          changes,
+        },
+      });
+    } else if (Object.keys(changes).length > 0) {
+      let action: AuditAction = AuditAction.TASK_UPDATED;
+      if (changes.status && Object.keys(changes).length === 1) {
+        action = AuditAction.TASK_STATUS_CHANGED;
+      } else if (changes.assigneeId && Object.keys(changes).length === 1) {
+        action = !data.assigneeId ? AuditAction.TASK_UNASSIGNED : AuditAction.TASK_ASSIGNED;
+      }
+
+      await auditService.record({
+        organizationId,
+        projectId,
+        actorUserId,
+        actorType: ActorType.USER,
+        action,
+        resourceType: 'Task',
+        resourceId: taskId,
+        source: AuditSource.USER,
+        metadata: {
+          taskId,
+          changes,
+        },
+      });
+    }
+
     return updated;
   }
 
@@ -471,6 +577,23 @@ export class TaskService {
         assigneeId: task.assigneeId,
         actorId: actorUserId,
       });
+
+      await auditService.record({
+        organizationId,
+        projectId,
+        actorUserId,
+        actorType: ActorType.USER,
+        action: AuditAction.TASK_STATUS_CHANGED,
+        resourceType: 'Task',
+        resourceId: taskId,
+        source: AuditSource.USER,
+        metadata: {
+          taskId,
+          changes: {
+            status: { from: task.status, to: status },
+          },
+        },
+      });
     }
 
     return updated;
@@ -497,7 +620,23 @@ export class TaskService {
       throw new AppError('TASK_NOT_FOUND', 'Task not found in this project', 404);
     }
 
-    return taskRepository.archive(taskId, projectId);
+    const archived = await taskRepository.archive(taskId, projectId);
+
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.TASK_ARCHIVED,
+      resourceType: 'Task',
+      resourceId: taskId,
+      source: AuditSource.USER,
+      metadata: {
+        taskId,
+      },
+    });
+
+    return archived;
   }
 
   async unarchiveTask(

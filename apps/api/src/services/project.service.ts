@@ -11,6 +11,8 @@ import {
 } from '@taskflow/shared';
 import { projectRepository } from '../repositories/project.repository.js';
 import { organizationRepository } from '../repositories/organization.repository.js';
+import { auditService } from './audit.service.js';
+import { AuditAction, ActorType, AuditSource } from '@prisma/client';
 import { AppError } from '../middleware/errorHandler.js';
 
 const createError = (message: string, code: string, statusCode: number) => {
@@ -150,6 +152,22 @@ export class ProjectService {
       actorUserId
     );
 
+    await auditService.record({
+      organizationId,
+      projectId: project.id,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.PROJECT_CREATED,
+      resourceType: 'Project',
+      resourceId: project.id,
+      source: AuditSource.USER,
+      metadata: {
+        projectId: project.id,
+        name: project.name,
+        key: project.key,
+      },
+    });
+
     return {
       id: project.id,
       organizationId: project.organizationId,
@@ -253,6 +271,24 @@ export class ProjectService {
       ...(payload.icon !== undefined ? { icon: payload.icon } : {}),
     });
 
+    await auditService.record({
+      organizationId,
+      projectId: updated.id,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.PROJECT_UPDATED,
+      resourceType: 'Project',
+      resourceId: updated.id,
+      source: AuditSource.USER,
+      metadata: {
+        projectId: updated.id,
+        changes: {
+          ...(payload.name ? { name: { to: payload.name.trim() } } : {}),
+          ...(payload.status ? { status: { to: payload.status } } : {}),
+        },
+      },
+    });
+
     return {
       id: updated.id,
       organizationId: updated.organizationId,
@@ -292,6 +328,20 @@ export class ProjectService {
 
     const archived = await projectRepository.archive(projectId);
     const project = await projectRepository.findById(projectId);
+
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.PROJECT_ARCHIVED,
+      resourceType: 'Project',
+      resourceId: projectId,
+      source: AuditSource.USER,
+      metadata: {
+        projectId,
+      },
+    });
 
     return {
       id: archived.id,
@@ -431,6 +481,21 @@ export class ProjectService {
 
     const created = await projectRepository.addMember(projectId, payload.userId, roleToAdd);
 
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.PROJECT_MEMBER_ADDED,
+      resourceType: 'ProjectMember',
+      resourceId: created.id,
+      source: AuditSource.USER,
+      metadata: {
+        userId: created.userId,
+        role: created.role,
+      },
+    });
+
     return {
       id: created.id,
       projectId: created.projectId,
@@ -501,6 +566,22 @@ export class ProjectService {
 
     const updated = await projectRepository.updateMemberRole(projectId, targetUserId, newRole);
 
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.PROJECT_MEMBER_ROLE_CHANGED,
+      resourceType: 'ProjectMember',
+      resourceId: updated.id,
+      source: AuditSource.USER,
+      metadata: {
+        userId: targetUserId,
+        previousRole: targetMember.role,
+        newRole,
+      },
+    });
+
     return {
       id: updated.id,
       projectId: updated.projectId,
@@ -566,6 +647,21 @@ export class ProjectService {
     }
 
     await projectRepository.removeMember(projectId, targetUserId);
+
+    await auditService.record({
+      organizationId,
+      projectId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.PROJECT_MEMBER_REMOVED,
+      resourceType: 'ProjectMember',
+      resourceId: targetMember.id,
+      source: AuditSource.USER,
+      metadata: {
+        userId: targetUserId,
+        role: targetMember.role,
+      },
+    });
   }
 }
 

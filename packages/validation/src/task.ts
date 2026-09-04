@@ -70,6 +70,7 @@ export const updateTaskSchema = z
       .nullable()
       .optional(),
     milestoneId: z.string().uuid({ message: 'Invalid milestone ID' }).nullable().optional(),
+    source: z.enum(['USER', 'SYSTEM', 'AI', 'AI_ASSISTED']).optional(),
     expectedCurrentState: z
       .object({
         status: z.nativeEnum(TaskStatus).optional(),

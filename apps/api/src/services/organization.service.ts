@@ -7,6 +7,8 @@ import {
 } from '@taskflow/shared';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
+import { auditService } from './audit.service.js';
+import { AuditAction, ActorType, AuditSource } from '@prisma/client';
 
 export class OrganizationService {
   /**
@@ -123,7 +125,8 @@ export class OrganizationService {
   async addMember(
     organizationId: string,
     actorRole: UserRole,
-    data: AddMemberPayload
+    data: AddMemberPayload,
+    actorUserId?: string
   ): Promise<OrganizationMemberItem> {
     const targetUser = await userRepository.findByEmail(data.email);
     if (!targetUser) {
@@ -154,6 +157,21 @@ export class OrganizationService {
       targetUser.id,
       data.role
     );
+
+    await auditService.record({
+      organizationId,
+      actorUserId: actorUserId ?? null,
+      actorType: ActorType.USER,
+      action: AuditAction.ORGANIZATION_MEMBER_INVITED,
+      resourceType: 'OrganizationMember',
+      resourceId: created.id,
+      source: AuditSource.USER,
+      metadata: {
+        userId: created.userId,
+        role: created.role,
+        email: data.email,
+      },
+    });
 
     return {
       id: created.id,
@@ -234,6 +252,21 @@ export class OrganizationService {
       newRole
     );
 
+    await auditService.record({
+      organizationId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.ORGANIZATION_MEMBER_ROLE_CHANGED,
+      resourceType: 'OrganizationMember',
+      resourceId: updated.id,
+      source: AuditSource.USER,
+      metadata: {
+        userId: targetUserId,
+        previousRole: targetMember.role,
+        newRole,
+      },
+    });
+
     return {
       id: updated.id,
       organizationId: updated.organizationId,
@@ -297,6 +330,20 @@ export class OrganizationService {
     }
 
     await organizationRepository.removeMember(organizationId, targetUserId);
+
+    await auditService.record({
+      organizationId,
+      actorUserId,
+      actorType: ActorType.USER,
+      action: AuditAction.ORGANIZATION_MEMBER_REMOVED,
+      resourceType: 'OrganizationMember',
+      resourceId: targetMember.id,
+      source: AuditSource.USER,
+      metadata: {
+        userId: targetUserId,
+        role: targetMember.role,
+      },
+    });
   }
 }
 

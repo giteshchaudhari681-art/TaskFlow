@@ -14,3 +14,4 @@ export * from './notification.js';
 export * from './search.js';
 export * from './projectDashboard.js';
 export * from './ai.js';
+export * from './audit.js';

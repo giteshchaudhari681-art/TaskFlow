@@ -238,6 +238,7 @@ describe('TaskFlow PR 17: OpenAPI / Swagger API Documentation & Contract Hardeni
       expect(paths).toHaveProperty('/api/v1/organizations/{organizationId}/members');
       expect(paths).toHaveProperty('/api/v1/organizations/{organizationId}/members/{userId}');
       expect(paths).toHaveProperty('/api/v1/organizations/{organizationId}/search');
+      expect(paths).toHaveProperty('/api/v1/organizations/{organizationId}/audit-events');
     });
 
     it('documents project lifecycle, members, dashboard, and AI analysis endpoints', () => {
@@ -339,9 +340,9 @@ describe('TaskFlow PR 17: OpenAPI / Swagger API Documentation & Contract Hardeni
       expect(paths).toHaveProperty('/api/v1/search');
     });
 
-    it('verifies total documented paths count equals 51 unique path endpoints', () => {
+    it('verifies total documented paths count equals 52 unique path endpoints', () => {
       const pathCount = Object.keys(paths).length;
-      expect(pathCount).toBe(51);
+      expect(pathCount).toBe(52);
     });
 
     it('ensures all path parameters in route keys are formally declared in parameters array', () => {
