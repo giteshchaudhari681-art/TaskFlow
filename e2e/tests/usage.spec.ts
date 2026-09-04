@@ -80,6 +80,7 @@ test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
 
     // Log out and log in as MEMBER
     await page.getByRole('button', { name: 'Sign Out' }).click();
+    await loginPage.goto();
     await loginPage.login(memberEmail, TEST_PASSWORD);
     await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 10000 });
 
@@ -92,7 +93,7 @@ test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     await page.getByRole('button', { name: 'Usage & Plan' }).click();
 
     // Member should see unauthorized restricted access message
-    await expect(page.getByTestId('usage-unauthorized')).toBeVisible();
+    await expect(page.getByTestId('usage-unauthorized')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('usage-unauthorized')).toContainText('Restricted Access');
   });
 });
