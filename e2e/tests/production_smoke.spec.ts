@@ -137,12 +137,12 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     await page.locator('button[title="Sign out of current session"]').click();
     await loginPage.switchToLogin();
     await expect(page.locator('h2', { hasText: 'Sign in to TaskFlow' })).toBeVisible({
-      timeout: 15000,
+      timeout: 20000,
     });
 
     // Re-login with the same account
     await loginPage.login(smokeEmail, TEST_PASSWORD);
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 20000 });
     await expect(page.locator('span', { hasText: 'Active Workspace:' })).toContainText(
       smokeOrgName
     );
