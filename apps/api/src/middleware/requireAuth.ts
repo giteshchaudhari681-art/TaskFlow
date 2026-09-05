@@ -23,6 +23,10 @@ export const requireAuth = async (
   try {
     const claims = verifyAccessToken(token);
 
+    if (!claims || typeof claims.sub !== 'string' || !claims.sub.trim()) {
+      return sendError(res, 'UNAUTHORIZED', 'Invalid authentication token claims', 401);
+    }
+
     const user = await userRepository.findById(claims.sub);
     if (!user) {
       return sendError(res, 'UNAUTHORIZED', 'User account not found or deactivated', 401);

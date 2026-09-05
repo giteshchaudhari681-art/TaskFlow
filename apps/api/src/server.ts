@@ -50,7 +50,8 @@ export const createServer = (): Express => {
       origin: env.CORS_ORIGIN,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-Organization-ID'],
+      exposedHeaders: ['X-Request-ID'],
     })
   );
 
