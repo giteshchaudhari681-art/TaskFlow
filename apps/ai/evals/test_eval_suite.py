@@ -412,4 +412,3 @@ def test_adversarial_self_approval_bypass_guard():
     results = evaluate_action_invariants(resp, ctx)
     failed = [r for r in results if not r.passed]
     assert any("stale_state_guard_present" in r.check_name for r in failed)
-
