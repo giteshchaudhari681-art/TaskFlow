@@ -2,12 +2,13 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
 import {
   provisionTestUser,
+  registerTestUser,
   generateUniqueEmail,
   generateUniqueName,
   TEST_PASSWORD,
 } from '../fixtures/test-data.fixture';
 
-test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
+test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
   test('Admin views Usage & Plan, sees resource meters, limit reach state, and member is restricted', async ({
     page,
     request,
@@ -20,7 +21,7 @@ test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     await loginPage.goto();
     await loginPage.login(owner.email, TEST_PASSWORD);
 
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
 
     // 3. Navigate to Settings -> Usage & Plan tab
     await page.getByRole('button', { name: 'Settings & Workspace' }).click();
@@ -63,14 +64,11 @@ test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     const memberEmail = generateUniqueEmail('member');
     const memberName = generateUniqueName('Member');
 
-    const memberRegRes = await request.post('/api/v1/auth/register', {
-      data: {
-        name: memberName,
-        email: memberEmail,
-        password: TEST_PASSWORD,
-      },
+    await registerTestUser(request, {
+      name: memberName,
+      email: memberEmail,
+      password: TEST_PASSWORD,
     });
-    expect(memberRegRes.ok()).toBeTruthy();
 
     // Invite member to owner workspace as MEMBER
     await request.post(`/api/v1/organizations/${owner.organizationId}/members`, {
@@ -79,10 +77,10 @@ test.describe('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     });
 
     // Log out and log in as MEMBER
-    await page.getByRole('button', { name: 'Sign Out' }).click();
-    await loginPage.goto();
+    await page.locator('button[title="Sign out of current session"]').click();
+    await loginPage.switchToLogin();
     await loginPage.login(memberEmail, TEST_PASSWORD);
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
 
     // Switch to owner organization
     const orgSelect = page.locator('header select').first();

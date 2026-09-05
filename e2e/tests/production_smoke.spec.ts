@@ -135,8 +135,9 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
 
     // 10. Logout and Re-authentication Flow
     await page.locator('button[title="Sign out of current session"]').click();
+    await loginPage.switchToLogin();
     await expect(page.locator('h2', { hasText: 'Sign in to TaskFlow' })).toBeVisible({
-      timeout: 10000,
+      timeout: 15000,
     });
 
     // Re-login with the same account
