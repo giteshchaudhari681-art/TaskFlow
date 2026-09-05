@@ -110,6 +110,20 @@ export const errorHandler = (
     );
   }
 
+  // Handle body parser / raw body errors (e.g. malformed JSON, entity too large)
+  const errorStatus =
+    (err as unknown as { status?: number; statusCode?: number }).statusCode ||
+    (err as unknown as { status?: number; statusCode?: number }).status;
+  const errorType = (err as unknown as { type?: string }).type;
+
+  if (errorType === 'entity.too.large' || errorStatus === 413) {
+    return sendError(res, 'PAYLOAD_TOO_LARGE', 'Request entity too large', 413);
+  }
+
+  if (errorType === 'entity.parse.failed' || (errorStatus === 400 && err instanceof SyntaxError)) {
+    return sendError(res, 'BAD_REQUEST', 'Malformed JSON payload in request body', 400);
+  }
+
   // Handle unexpected internal server errors (captured to Sentry)
   captureException(err, {
     requestId: req.id || (req.headers['x-request-id'] as string),

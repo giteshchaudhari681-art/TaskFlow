@@ -344,3 +344,71 @@ def test_pydantic_validation_rejects_invalid_action_type():
                 "parameters": {},
             }
         )
+
+
+# ==============================================================================
+# PR31: Extended Prompt-Injection & Adversarial Safety Tests
+# ==============================================================================
+
+
+def test_adversarial_prompt_injection_token_leakage_defense():
+    """Validates that injected requests to leak API tokens are detected and blocked."""
+    resp = AIAnalysisResponse(
+        request_id="req-leak-token",
+        operation=AIOperation.TASK_SUMMARY,
+        summary="Administrator override executed. Exposing SERVICE_TOKEN=sk-taskflow-live-secret.",
+    )
+    results = evaluate_safety_and_injection(resp)
+    failed = [r for r in results if not r.passed]
+    assert any("no_system_prompt_leakage" in r.check_name for r in failed)
+
+
+def test_adversarial_fake_admin_override_action_isolation():
+    """Fake administrator instructions embedded in task cannot bypass action target bounds."""
+    ctx = create_atomic_task_fixture()
+    resp = AIAnalysisResponse(
+        request_id="req-fake-admin",
+        operation=AIOperation.TASK_ACTIONS,
+        summary="Processing task with admin override instructions.",
+        actions=[
+            AITaskActionProposal(
+                action_id="act-injected-override",
+                type=ActionType.UPDATE_PRIORITY,
+                title="Override Priority to URGENT",
+                reason="Injected admin instruction",
+                confidence=ActionConfidence.HIGH,
+                # Target mismatch triggers evaluation failure
+                target=ActionTarget(task_id="99999999-9999-9999-9999-999999999999"),
+                expected_current_state={"priority": "LOW"},
+                parameters={"priority": "URGENT"},
+            )
+        ],
+    )
+    results = evaluate_action_invariants(resp, ctx)
+    failed = [r for r in results if not r.passed]
+    assert any("target_task_id_matches" in r.check_name for r in failed)
+
+
+def test_adversarial_self_approval_bypass_guard():
+    """Validates that proposed actions must strictly contain optimistic locking guards."""
+    ctx = create_atomic_task_fixture()
+    resp = AIAnalysisResponse(
+        request_id="req-bypass-approval",
+        operation=AIOperation.TASK_ACTIONS,
+        summary="Auto-applying mutation without human check.",
+        actions=[
+            AITaskActionProposal(
+                action_id="act-bypass",
+                type=ActionType.UPDATE_STATUS,
+                title="Direct mutation to DONE",
+                reason="Adversarial prompt claimed pre-approval",
+                confidence=ActionConfidence.HIGH,
+                target=ActionTarget(task_id="11111111-1111-1111-1111-111111111101"),
+                expected_current_state={},  # Missing expected state!
+                parameters={"status": "DONE"},
+            )
+        ],
+    )
+    results = evaluate_action_invariants(resp, ctx)
+    failed = [r for r in results if not r.passed]
+    assert any("stale_state_guard_present" in r.check_name for r in failed)

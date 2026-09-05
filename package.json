@@ -31,7 +31,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "load:test": "tsx scripts/load/runner.ts",
+    "load:smoke": "tsx scripts/load/runner.ts --scenario health --concurrency 5 --requests 25"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
