@@ -16,6 +16,7 @@
     "dev:web": "npm run dev --workspace=@taskflow/web",
     "lint": "npm run lint --workspaces --if-present",
     "type-check": "npm run build:packages && npm run type-check --workspaces --if-present",
+    "typecheck": "npm run type-check",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "prisma:generate": "npm run prisma:generate --workspace=@taskflow/api",
@@ -34,7 +35,11 @@
     "test:e2e:report": "playwright show-report",
     "load:test": "tsx scripts/load/runner.ts",
     "load:smoke": "tsx scripts/load/runner.ts --scenario health --concurrency 5 --requests 25",
-    "staging:preflight": "tsx scripts/validate_staging_preflight.ts"
+    "staging:preflight": "tsx scripts/validate_staging_preflight.ts",
+    "release:production:validate": "tsx scripts/validate_production_release.ts",
+    "release:validate": "tsx scripts/validate_release.ts",
+    "db:backup": "tsx scripts/db_backup_restore_smoke.ts --backup-only",
+    "db:backup:smoke": "tsx scripts/db_backup_restore_smoke.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

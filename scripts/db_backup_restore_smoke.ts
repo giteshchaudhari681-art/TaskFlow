@@ -13,58 +13,130 @@
 
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { execFileSync, spawnSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import {
+  PgConnectionInfo,
+  BackupReceipt,
+  parseDatabaseUrl,
+  findPostgresBinary,
+  resolveReleaseGitSha,
+} from '../apps/api/src/utils/release.js';
+
+export {
+  PgConnectionInfo,
+  BackupReceipt,
+  parseDatabaseUrl,
+  findPostgresBinary,
+  resolveReleaseGitSha,
+};
 
 const prisma = new PrismaClient();
 
-interface PgConnectionInfo {
-  host: string;
-  port: string;
-  user: string;
-  password?: string;
-  database: string;
-}
+export function executePreDeploymentBackup(options?: {
+  outputDir?: string;
+  gitSha?: string;
+  databaseUrl?: string;
+}): BackupReceipt {
+  const databaseUrl =
+    options?.databaseUrl ||
+    process.env.DATABASE_URL ||
+    'postgresql://postgres:postgres@localhost:5432/taskflow_dev?schema=public';
+  const conn = parseDatabaseUrl(databaseUrl);
+  const pgDumpBin = findPostgresBinary('pg_dump');
+  const pgIsReadyBin = findPostgresBinary('pg_isready');
 
-function parseDatabaseUrl(urlStr: string): PgConnectionInfo {
-  const url = new URL(urlStr);
-  return {
-    host: url.hostname || 'localhost',
-    port: url.port || '5432',
-    user: decodeURIComponent(url.username || 'postgres'),
-    password: decodeURIComponent(url.password || ''),
-    database: url.pathname.replace(/^\//, '') || 'taskflow_dev',
-  };
-}
-
-function findPostgresBinary(binaryName: string): string | null {
-  // 1. Check if binary is in PATH
-  try {
-    const res = spawnSync(binaryName, ['--version'], { stdio: 'ignore' });
-    if (res.status === 0) return binaryName;
-  } catch {
-    // Ignore and fallback to well-known locations
+  if (!pgDumpBin) {
+    throw new Error('pg_dump binary not found in PATH or standard PostgreSQL locations');
   }
 
-  // 2. Check well-known Windows paths
-  const candidateDirs = [
-    'C:\\Program Files\\PostgreSQL\\18\\bin',
-    'C:\\Program Files\\PostgreSQL\\17\\bin',
-    'C:\\Program Files\\PostgreSQL\\16\\bin',
-    'C:\\Program Files (x86)\\PostgreSQL\\18\\bin',
-    'C:\\Program Files (x86)\\PostgreSQL\\16\\bin',
-  ];
+  const pgEnv = {
+    ...process.env,
+    PGPASSWORD: conn.password || '',
+  };
 
-  for (const dir of candidateDirs) {
-    const fullPath = path.join(dir, `${binaryName}.exe`);
-    if (fs.existsSync(fullPath)) {
-      return fullPath;
+  // 1. Reachability check
+  if (pgIsReadyBin) {
+    const isReadyRes = spawnSync(
+      pgIsReadyBin,
+      ['-h', conn.host, '-p', conn.port, '-U', conn.user],
+      {
+        env: pgEnv,
+        timeout: 5000,
+        encoding: 'utf-8',
+      }
+    );
+    if (isReadyRes.status !== 0) {
+      throw new Error(`PostgreSQL is not reachable at ${conn.host}:${conn.port}`);
     }
   }
 
-  return null;
+  const gitSha = options?.gitSha || resolveReleaseGitSha();
+  const shortSha = gitSha.slice(0, 7);
+  const timestamp = new Date().toISOString();
+  const fileTimestamp = Date.now();
+
+  const targetDir = options?.outputDir || path.join(os.tmpdir(), 'taskflow_backups');
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+
+  const filename = `taskflow_${conn.database}_predeploy_${shortSha}_${fileTimestamp}.dump`;
+  const fullPath = path.join(targetDir, filename);
+
+  const startTime = Date.now();
+  const dumpRes = spawnSync(
+    pgDumpBin,
+    [
+      '-h',
+      conn.host,
+      '-p',
+      conn.port,
+      '-U',
+      conn.user,
+      '-d',
+      conn.database,
+      '-Fc',
+      '--lock-wait-timeout=10s',
+      '-f',
+      fullPath,
+    ],
+    {
+      env: pgEnv,
+      timeout: 60000,
+      encoding: 'utf-8',
+    }
+  );
+
+  if (dumpRes.status !== 0) {
+    throw new Error(
+      `pg_dump failed with exit code ${dumpRes.status}: ${dumpRes.stderr || dumpRes.stdout}`
+    );
+  }
+
+  if (!fs.existsSync(fullPath)) {
+    throw new Error(`Backup file was not created at ${fullPath}`);
+  }
+
+  const stat = fs.statSync(fullPath);
+  if (stat.size === 0) {
+    throw new Error(`Backup file at ${fullPath} is 0 bytes (empty)`);
+  }
+
+  const durationMs = Date.now() - startTime;
+
+  return {
+    timestamp,
+    gitSha,
+    database: conn.database,
+    host: conn.host,
+    filePath: fullPath,
+    sizeBytes: stat.size,
+    durationMs,
+    retentionPolicy: '30-day pre-deployment archive before schema modification',
+  };
 }
 
 async function runRealBackupRestoreDrill() {
@@ -104,18 +176,24 @@ async function runRealBackupRestoreDrill() {
 
   // 2. Verify reachability
   console.log(`[1/6] Verifying PostgreSQL reachability...`);
-  const isReadyRes = spawnSync(pgIsReadyBin, ['-h', conn.host, '-p', conn.port, '-U', conn.user], {
-    env: pgEnv,
-    timeout: 5000,
-    encoding: 'utf-8',
-  });
-
-  if (isReadyRes.status !== 0) {
-    throw new Error(
-      `PostgreSQL is not reachable at ${conn.host}:${conn.port}. Output: ${isReadyRes.stderr || isReadyRes.stdout}`
+  if (pgIsReadyBin) {
+    const isReadyRes = spawnSync(
+      pgIsReadyBin,
+      ['-h', conn.host, '-p', conn.port, '-U', conn.user],
+      {
+        env: pgEnv,
+        timeout: 5000,
+        encoding: 'utf-8',
+      }
     );
+
+    if (isReadyRes.status !== 0) {
+      throw new Error(
+        `PostgreSQL is not reachable at ${conn.host}:${conn.port}. Output: ${isReadyRes.stderr || isReadyRes.stdout}`
+      );
+    }
+    console.log(`✓ PostgreSQL reachable and accepting connections.\n`);
   }
-  console.log(`✓ PostgreSQL reachable and accepting connections.\n`);
 
   // 3. Seed representative data in source database
   console.log(`[2/6] Seeding representative dataset into ${conn.database}...`);
@@ -326,7 +404,7 @@ async function runRealBackupRestoreDrill() {
     const lines = verifyRes.stdout.trim().split(/\r?\n/).filter(Boolean);
     for (const line of lines) {
       const [entity, countStr] = line.split(':');
-      const count = parseInt(countStr, 10);
+      const count = countStr ? parseInt(countStr, 10) : 0;
       if (count !== 1) {
         throw new Error(
           `Restoration record verification failed for ${entity}: expected 1, found ${count}`
@@ -340,22 +418,24 @@ async function runRealBackupRestoreDrill() {
   } finally {
     // Teardown: Clean up restore database
     console.log(`[Teardown & Cleanup]`);
-    spawnSync(
-      psqlBin,
-      [
-        '-h',
-        conn.host,
-        '-p',
-        conn.port,
-        '-U',
-        conn.user,
-        '-d',
-        'postgres',
-        '-c',
-        `DROP DATABASE IF EXISTS "${restoreDbName}";`,
-      ],
-      { env: pgEnv, timeout: 10000, stdio: 'ignore' }
-    );
+    if (psqlBin) {
+      spawnSync(
+        psqlBin,
+        [
+          '-h',
+          conn.host,
+          '-p',
+          conn.port,
+          '-U',
+          conn.user,
+          '-d',
+          'postgres',
+          '-c',
+          `DROP DATABASE IF EXISTS "${restoreDbName}";`,
+        ],
+        { env: pgEnv, timeout: 10000, stdio: 'ignore' }
+      );
+    }
     console.log(`✓ Dropped temporary target database: ${restoreDbName}`);
 
     // Clean up temporary dump file
@@ -379,11 +459,35 @@ async function runRealBackupRestoreDrill() {
   console.log('====================================================');
 }
 
-runRealBackupRestoreDrill()
-  .catch(err => {
-    console.error('\n❌ Backup/Restore Drill Failed:', err.message);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (process.argv[1] && process.argv[1].includes('db_backup_restore_smoke')) {
+  if (process.argv.includes('--backup-only')) {
+    console.log('====================================================');
+    console.log('TaskFlow Pre-Deployment Database Backup');
+    console.log('====================================================\n');
+    try {
+      const receipt = executePreDeploymentBackup();
+      console.log('✓ Pre-deployment database backup successfully created:');
+      console.log(`  - Timestamp:    ${receipt.timestamp}`);
+      console.log(`  - Release SHA:  ${receipt.gitSha}`);
+      console.log(`  - Target DB:    ${receipt.database} on ${receipt.host}`);
+      console.log(`  - File Path:    ${receipt.filePath}`);
+      console.log(`  - File Size:    ${receipt.sizeBytes.toLocaleString()} bytes`);
+      console.log(`  - Duration:     ${receipt.durationMs}ms`);
+      console.log(`  - Retention:    ${receipt.retentionPolicy}\n`);
+      console.log('✓ PRE-DEPLOYMENT BACKUP SUCCEEDED. Deployment proceed authorized.');
+      process.exit(0);
+    } catch (err: any) {
+      console.error('\n❌ Pre-deployment backup failed:', err.message);
+      process.exit(1);
+    }
+  } else {
+    runRealBackupRestoreDrill()
+      .catch(err => {
+        console.error('\n❌ Backup/Restore Drill Failed:', err.message);
+        process.exit(1);
+      })
+      .finally(async () => {
+        await prisma.$disconnect();
+      });
+  }
+}

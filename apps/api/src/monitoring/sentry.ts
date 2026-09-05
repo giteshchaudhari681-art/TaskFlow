@@ -108,10 +108,14 @@ export const initSentry = (force = false, dsnOverride?: string): boolean => {
     return false;
   }
 
+  const releaseTag = env.GIT_SHA
+    ? `taskflow-api@${env.RELEASE_VERSION}-${env.GIT_SHA}`
+    : `taskflow-api@${env.RELEASE_VERSION}`;
+
   Sentry.init({
     dsn,
     environment: env.SENTRY_ENVIRONMENT || env.NODE_ENV || 'development',
-    release: 'taskflow-api@0.1.0',
+    release: releaseTag,
     tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE || 0,
     beforeSend(event) {
       // Scrub sensitive HTTP request headers
