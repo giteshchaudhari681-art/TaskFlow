@@ -20,11 +20,48 @@ export const requireOrgRole = (...allowedRoles: UserRole[]) => {
       return sendError(res, 'UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const orgId =
-      (req.headers['x-organization-id'] as string) ||
-      req.params.organizationId ||
-      req.body?.organizationId ||
-      (req.query?.organizationId as string);
+    const paramOrgId = req.params.organizationId as string | undefined;
+    const rawHeader = req.headers['x-organization-id'];
+    const headerOrgId =
+      typeof rawHeader === 'string'
+        ? rawHeader
+        : Array.isArray(rawHeader)
+          ? rawHeader[0]
+          : undefined;
+    const bodyOrgId = req.body?.organizationId as string | undefined;
+    const queryOrgId = req.query?.organizationId as string | undefined;
+
+    // Parameter precedence and context integrity validation:
+    // If route specifies organizationId in params, that target is authoritative.
+    // Conflicting context from header, body, or query is rejected to prevent context-spoofing attacks.
+    if (paramOrgId) {
+      if (headerOrgId && headerOrgId !== paramOrgId) {
+        return sendError(
+          res,
+          'CONFLICTING_ORGANIZATION_CONTEXT',
+          'Route organization parameter does not match x-organization-id header',
+          400
+        );
+      }
+      if (bodyOrgId && bodyOrgId !== paramOrgId) {
+        return sendError(
+          res,
+          'CONFLICTING_ORGANIZATION_CONTEXT',
+          'Route organization parameter does not match body organizationId',
+          400
+        );
+      }
+      if (queryOrgId && queryOrgId !== paramOrgId) {
+        return sendError(
+          res,
+          'CONFLICTING_ORGANIZATION_CONTEXT',
+          'Route organization parameter does not match query organizationId',
+          400
+        );
+      }
+    }
+
+    const orgId = paramOrgId || headerOrgId || bodyOrgId || queryOrgId;
 
     if (!orgId) {
       return sendError(

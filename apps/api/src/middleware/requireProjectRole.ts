@@ -20,8 +20,33 @@ export const requireProjectRole = (...allowedRoles: ProjectRole[]) => {
       return sendError(res, 'UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const projectId =
-      req.params.projectId || req.body?.projectId || (req.query?.projectId as string);
+    const paramProjectId = req.params.projectId as string | undefined;
+    const bodyProjectId = req.body?.projectId as string | undefined;
+    const queryProjectId = req.query?.projectId as string | undefined;
+
+    // Parameter precedence and context integrity validation:
+    // If route specifies projectId in params, that target is authoritative.
+    // Conflicting context from body or query is rejected to prevent context-spoofing attacks.
+    if (paramProjectId) {
+      if (bodyProjectId && bodyProjectId !== paramProjectId) {
+        return sendError(
+          res,
+          'CONFLICTING_PROJECT_CONTEXT',
+          'Route project parameter does not match body projectId',
+          400
+        );
+      }
+      if (queryProjectId && queryProjectId !== paramProjectId) {
+        return sendError(
+          res,
+          'CONFLICTING_PROJECT_CONTEXT',
+          'Route project parameter does not match query projectId',
+          400
+        );
+      }
+    }
+
+    const projectId = paramProjectId || bodyProjectId || queryProjectId;
 
     if (!projectId) {
       return sendError(
@@ -38,7 +63,25 @@ export const requireProjectRole = (...allowedRoles: ProjectRole[]) => {
     }
 
     // Tenant boundary check: if organization context is present, ensure project belongs to it
-    const orgId = req.params.organizationId || (req.headers['x-organization-id'] as string);
+    const paramOrgId = req.params.organizationId as string | undefined;
+    const rawHeader = req.headers['x-organization-id'];
+    const headerOrgId =
+      typeof rawHeader === 'string'
+        ? rawHeader
+        : Array.isArray(rawHeader)
+          ? rawHeader[0]
+          : undefined;
+
+    if (paramOrgId && headerOrgId && paramOrgId !== headerOrgId) {
+      return sendError(
+        res,
+        'CONFLICTING_ORGANIZATION_CONTEXT',
+        'Route organization parameter does not match x-organization-id header',
+        400
+      );
+    }
+
+    const orgId = paramOrgId || headerOrgId;
     if (orgId && membership.project.organizationId !== orgId) {
       return sendError(
         res,

@@ -41,6 +41,10 @@ const STRING_SCRUB_PATTERNS: Array<{ regex: RegExp; replacement: string }> = [
     replacement: 'postgresql://[REDACTED]@[REDACTED]',
   },
   { regex: /refreshToken=[A-Za-z0-9._~+/-]+/gi, replacement: 'refreshToken=[REDACTED]' },
+  {
+    regex: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,
+    replacement: '[JWT_REDACTED]',
+  },
 ];
 
 /**

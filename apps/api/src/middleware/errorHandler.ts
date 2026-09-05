@@ -135,7 +135,8 @@ export const errorHandler = (
   });
 
   console.error('[Unhandled Error]', err);
-  const message = env.NODE_ENV === 'production' ? 'Internal server error' : err.message;
+  const isHardenedEnv = env.NODE_ENV === 'production' || env.NODE_ENV === 'staging';
+  const message = isHardenedEnv ? 'Internal server error' : err.message;
 
   return sendError(
     res,
