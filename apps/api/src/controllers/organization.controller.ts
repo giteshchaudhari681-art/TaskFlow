@@ -6,6 +6,7 @@ import {
 } from '@taskflow/validation';
 import { organizationService } from '../services/organization.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
+import { AppError } from '../middleware/errorHandler.js';
 
 export const getOrganizations = async (
   req: Request,
@@ -103,6 +104,9 @@ export const addMember = async (
 
     return sendSuccess(res, member, 201);
   } catch (err: unknown) {
+    if (err instanceof AppError) {
+      return next(err);
+    }
     if (err instanceof Error) {
       const statusCode = (err as unknown as { statusCode?: number }).statusCode || 400;
       const code = (err as unknown as { code?: string }).code || 'BAD_REQUEST';

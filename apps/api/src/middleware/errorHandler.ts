@@ -36,7 +36,9 @@ export const errorHandler = (
         statusCode: err.statusCode,
       });
     }
-    return sendError(res, err.code, err.message, err.statusCode, err.details);
+    const meta =
+      (err as unknown as { entitlementDetails?: unknown }).entitlementDetails ?? err.details;
+    return sendError(res, err.code, err.message, err.statusCode, err.details, meta);
   }
 
   // Handle Zod validation errors (expected 400 operational error, filtered from Sentry)

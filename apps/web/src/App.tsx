@@ -78,6 +78,14 @@ const MainApp: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentView('dashboard');
+      setSelectedProjectId(null);
+      setDeepLinkTaskId(null);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();

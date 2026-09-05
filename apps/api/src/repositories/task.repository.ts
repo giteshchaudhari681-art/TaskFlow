@@ -1,5 +1,7 @@
 import { TaskStatus, TaskPriority, Prisma } from '@prisma/client';
 import { BaseRepository } from './base.repository.js';
+import { EntitlementLimitError } from '../entitlements/errors.js';
+import { LimitKey } from '@taskflow/shared';
 
 export class TaskRepository extends BaseRepository {
   /**
@@ -18,9 +20,42 @@ export class TaskRepository extends BaseRepository {
       dueDate?: Date | null;
       estimateHours?: number | null;
     },
-    reporterUserId: string
+    reporterUserId: string,
+    organizationId?: string,
+    maxAllowedActiveTasks?: number
   ) {
     return this.db.$transaction(async tx => {
+      // If active task limit is enforced, lock organization and check count atomically
+      if (
+        maxAllowedActiveTasks !== undefined &&
+        organizationId &&
+        data.status !== TaskStatus.CANCELLED
+      ) {
+        const orgRows = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT id FROM organizations WHERE id = ${organizationId}::uuid FOR UPDATE;
+        `;
+        if (orgRows && orgRows.length > 0) {
+          const activeCount = await tx.task.count({
+            where: {
+              project: { organizationId },
+              archivedAt: null,
+              status: { notIn: [TaskStatus.CANCELLED] },
+            },
+          });
+          if (activeCount >= maxAllowedActiveTasks) {
+            throw new EntitlementLimitError(
+              `Organization active task limit reached (${activeCount}/${maxAllowedActiveTasks}). Upgrade your plan to create more tasks.`,
+              {
+                feature: LimitKey.MAX_ACTIVE_TASKS,
+                limit: maxAllowedActiveTasks,
+                current: activeCount,
+                remaining: 0,
+              }
+            );
+          }
+        }
+      }
+
       // 1. Lock the project row for update to serialize task creation within this project
       const projectRows = await tx.$queryRaw<Array<{ id: string; key: string }>>`
         SELECT id, key FROM projects WHERE id = ${projectId}::uuid FOR UPDATE

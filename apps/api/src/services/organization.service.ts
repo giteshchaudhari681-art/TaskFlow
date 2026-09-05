@@ -4,10 +4,12 @@ import {
   OrganizationMemberItem,
   UpdateOrganizationPayload,
   AddMemberPayload,
+  LimitKey,
 } from '@taskflow/shared';
 import { organizationRepository } from '../repositories/organization.repository.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { auditService } from './audit.service.js';
+import { entitlementService } from './entitlement.service.js';
 import { AuditAction, ActorType, AuditSource } from '@prisma/client';
 
 export class OrganizationService {
@@ -152,10 +154,15 @@ export class OrganizationService {
       throw err;
     }
 
+    // Entitlement enforcement: Verify organization has not exceeded MAX_MEMBERS quota
+    await entitlementService.requireCapacity(organizationId, LimitKey.MAX_MEMBERS, 1, actorUserId);
+    const planInfo = await entitlementService.getOrganizationPlan(organizationId, true);
+
     const created = await organizationRepository.addMember(
       organizationId,
       targetUser.id,
-      data.role
+      data.role,
+      planInfo.limits.maxMembers
     );
 
     await auditService.record({

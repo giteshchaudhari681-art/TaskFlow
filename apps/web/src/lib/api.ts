@@ -57,6 +57,8 @@ import {
   AuditEvent,
   AuditEventsFilter,
   ApiResponseMeta,
+  OrganizationUsage,
+  Plan,
 } from '@taskflow/shared';
 import { LoginInput, RegisterInput } from '@taskflow/validation';
 
@@ -1050,5 +1052,25 @@ export const auditApi = {
       items: res.data,
       meta: res.meta,
     };
+  },
+};
+
+export const usageApi = {
+  getUsage: async (organizationId: string): Promise<OrganizationUsage> => {
+    const res = await apiFetch<OrganizationUsage>(`/organizations/${organizationId}/usage`);
+    return res.data;
+  },
+  updatePlan: async (
+    organizationId: string,
+    plan: Plan
+  ): Promise<{ organizationId: string; plan: Plan; updatedAt: string }> => {
+    const res = await apiFetch<{ organizationId: string; plan: Plan; updatedAt: string }>(
+      `/organizations/${organizationId}/plan`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ plan }),
+      }
+    );
+    return res.data;
   },
 };

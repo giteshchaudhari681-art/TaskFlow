@@ -1,5 +1,7 @@
 import { ProjectStatus, ProjectRole } from '@prisma/client';
 import { BaseRepository } from './base.repository.js';
+import { EntitlementLimitError } from '../entitlements/errors.js';
+import { LimitKey } from '@taskflow/shared';
 
 export class ProjectRepository extends BaseRepository {
   async create(
@@ -12,9 +14,31 @@ export class ProjectRepository extends BaseRepository {
       color?: string | null;
       icon?: string | null;
     },
-    creatorUserId: string
+    creatorUserId: string,
+    maxAllowedProjects?: number
   ) {
     return this.db.$transaction(async tx => {
+      if (maxAllowedProjects !== undefined) {
+        const orgRows = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT id FROM organizations WHERE id = ${organizationId}::uuid FOR UPDATE;
+        `;
+        if (orgRows && orgRows.length > 0) {
+          const count = await tx.project.count({
+            where: { organizationId },
+          });
+          if (count >= maxAllowedProjects) {
+            throw new EntitlementLimitError(
+              `Organization project limit reached (${count}/${maxAllowedProjects}). Upgrade your plan to create more projects.`,
+              {
+                feature: LimitKey.MAX_PROJECTS,
+                limit: maxAllowedProjects,
+                current: count,
+                remaining: 0,
+              }
+            );
+          }
+        }
+      }
       const project = await tx.project.create({
         data: {
           organizationId,

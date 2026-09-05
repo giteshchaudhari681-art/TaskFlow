@@ -5,6 +5,7 @@ import { taskRepository } from '../repositories/task.repository.js';
 import { aiContextBuilder } from './aiContext.builder.js';
 import { aiClient, type IAIClient } from '../integrations/ai/aiClient.js';
 import { auditService } from './audit.service.js';
+import { entitlementService } from './entitlement.service.js';
 import { AppError } from '../middleware/errorHandler.js';
 import type { AIOperation, AIAnalysisResponse } from '@taskflow/shared';
 
@@ -61,27 +62,35 @@ export class AIService {
     // 1. Authorize tenant, project, and RBAC boundary
     await this.checkProjectAccess(organizationId, projectId, userId);
 
-    // 2. Build sanitized, deterministic AI context from Prisma
-    let context;
-    if (
-      (operation === 'TASK_SUMMARY' ||
-        operation === 'TASK_DECOMPOSITION' ||
-        operation === 'TASK_ACTIONS') &&
-      taskId
-    ) {
-      const task = await taskRepository.findById(taskId, projectId);
-      if (!task) {
-        throw new AppError('NOT_FOUND', 'Task not found in this project', 404);
-      }
-      context = await aiContextBuilder.buildTaskContext(projectId, taskId);
-    } else if ((operation === 'TASK_DECOMPOSITION' || operation === 'TASK_ACTIONS') && !taskId) {
-      throw new AppError('VALIDATION_ERROR', `taskId is required for ${operation}`, 400);
-    } else {
-      context = await aiContextBuilder.buildProjectContext(projectId);
-    }
+    // 2. Entitlement verification & atomic quota reservation
+    const { usageRecordId } = await entitlementService.reserveAIQuota(
+      organizationId,
+      operation,
+      userId,
+      requestId
+    );
 
-    // 3. Delegate to internal Python AI service
+    // 3. Build sanitized, deterministic AI context from Prisma
+    let context;
     try {
+      if (
+        (operation === 'TASK_SUMMARY' ||
+          operation === 'TASK_DECOMPOSITION' ||
+          operation === 'TASK_ACTIONS') &&
+        taskId
+      ) {
+        const task = await taskRepository.findById(taskId, projectId);
+        if (!task) {
+          throw new AppError('NOT_FOUND', 'Task not found in this project', 404);
+        }
+        context = await aiContextBuilder.buildTaskContext(projectId, taskId);
+      } else if ((operation === 'TASK_DECOMPOSITION' || operation === 'TASK_ACTIONS') && !taskId) {
+        throw new AppError('VALIDATION_ERROR', `taskId is required for ${operation}`, 400);
+      } else {
+        context = await aiContextBuilder.buildProjectContext(projectId);
+      }
+
+      // 4. Delegate to internal Python AI service
       const response = await this.client.analyze(
         {
           operation,
@@ -91,7 +100,7 @@ export class AIService {
         requestId
       );
 
-      // 4. Runtime sanitization for TASK_ACTIONS
+      // 5. Runtime sanitization for TASK_ACTIONS
       if (operation === 'TASK_ACTIONS' && response.actions && response.actions.length > 0) {
         const members = await projectRepository.listMembers(projectId);
         const validMemberIds = new Set((members || []).map(m => m.user.id));
@@ -131,6 +140,9 @@ export class AIService {
 
       return response;
     } catch (err: unknown) {
+      // Revert quota reservation on failure so tenants are not penalized for upstream errors
+      await entitlementService.revertAIQuota(usageRecordId);
+
       if (err instanceof AppError) {
         throw err;
       }
