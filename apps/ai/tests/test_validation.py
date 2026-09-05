@@ -149,3 +149,18 @@ def test_settings_production_validation_rejects_insecure_defaults() -> None:
     )
     # Should not raise
     prod_valid.validate_production()
+
+
+def test_settings_staging_validation_rejects_insecure_defaults() -> None:
+    """Staging mode must reject default dev token or tokens shorter than 16 chars."""
+    staging_default = Settings(app_env="staging", ai_service_token="taskflow-internal-dev-token")
+    with pytest.raises(ValueError, match="Production AI_SERVICE_TOKEN must be explicitly set"):
+        staging_default.validate_production()
+
+    staging_short = Settings(app_env="staging", ai_service_token="too-short")
+    with pytest.raises(ValueError, match="Production AI_SERVICE_TOKEN must be explicitly set"):
+        staging_short.validate_production()
+
+    staging_valid = Settings(app_env="staging", ai_service_token="super-secret-staging-token-16")
+    # Should not raise
+    staging_valid.validate_production()

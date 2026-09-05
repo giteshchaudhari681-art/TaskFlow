@@ -1,13 +1,13 @@
 # TaskFlow Staging Deployment, Disaster Recovery & Release Runbook
 
-This operational runbook provides step-by-step instructions for staging releases, disaster recovery drills, failure testing, and production cutover for the TaskFlow platform.
+This operational runbook provides step-by-step procedures for staging deployments, environment preparation, migrations, disaster recovery drills, observability verification, failure triage, and production promotion prerequisites for the TaskFlow platform.
 
 Every operational step is explicitly labeled with its validation scope:
 
-- **`[LOCAL]`**: Validated on local development workstations with developer tooling.
-- **`[CONTAINER]`**: Validated inside isolated Docker containers / Compose environments.
-- **`[STAGING]`**: Applicable to the production-like staging environment (`docker-compose.staging.yml`).
-- **`[PRODUCTION]`**: Production-only operations that have not yet been executed in production.
+- **`[LOCAL]`**: Validated on local development workstations using developer tooling.
+- **`[CONTAINER]`**: Validated inside isolated Docker containers or Compose test environments.
+- **`[STAGING]`**: Applicable to the production-like staging deployment (`docker-compose.staging.yml`).
+- **`[PRODUCTION]`**: Production-only release procedures that remain to be exercised in live production.
 
 ---
 
@@ -15,353 +15,387 @@ Every operational step is explicitly labeled with its validation scope:
 
 - **`[LOCAL]` `[CONTAINER]`**:
   - Docker 24.0+ and Docker Compose v2.20+ installed.
-  - Node.js 20+ and npm 10+.
-  - PostgreSQL 16+ CLI utilities (`pg_dump`, `pg_restore`, `psql`, `pg_isready`).
-  - Python 3.13+ (for AI service local testing).
+  - Node.js 20+ and npm 10+ installed.
+  - PostgreSQL 16+ client utilities installed (`pg_dump`, `pg_restore`, `psql`, `pg_isready`).
+  - Python 3.13+ with uv or virtual environment (`apps/ai/.venv`).
 - **`[STAGING]` `[PRODUCTION]`**:
-  - Dedicated virtual network / VPC with internal DNS resolution.
-  - Host server with minimum 4 vCPUs and 8GB RAM.
-  - Secret injection mechanism (Environment variables, Docker secrets, or Cloud Secret Manager).
-  - External egress for Sentry telemetry and OpenAI API endpoints.
+  - Dedicated virtual network / VPC with internal DNS resolution (`taskflow-staging-network`).
+  - Host server with minimum 4 vCPUs, 8GB RAM, and 50GB NVMe storage.
+  - Secure secret injection mechanism (environment file, container secrets, or cloud secret manager).
+  - Outbound HTTPS network egress allowed for Sentry telemetry and OpenAI API endpoints.
+  - Public DNS record pointing `staging.taskflow.dev` (or configured hostname) to API host ingress on port 5000.
 
 ---
 
-## 2. Environment Variables
+## 2. Environment Setup
 
-Secrets must **never** be hardcoded in repository files or committed to Git. All variables must be injected at runtime.
-
-### Critical Secrets Matrix
-
-| Variable            | Target Service  | Minimum Length | Allowed Format / Constraints                                                               |
-| :------------------ | :-------------- | :------------- | :----------------------------------------------------------------------------------------- |
-| `DATABASE_URL`      | API, Worker     | N/A            | Valid PostgreSQL connection string. Must not use dev default credentials.                  |
-| `POSTGRES_PASSWORD` | PostgreSQL      | 16 chars       | Alphanumeric + symbols. Required in staging/prod.                                          |
-| `JWT_SECRET`        | API             | 32 chars       | Cryptographically secure random hex or base64. Dev defaults fail fast.                     |
-| `COOKIE_SECRET`     | API             | 32 chars       | Cryptographically secure random string. Dev defaults fail fast.                            |
-| `AI_SERVICE_TOKEN`  | API, AI, Worker | 16 chars       | Shared secret for internal service-to-service authentication.                              |
-| `CORS_ORIGIN`       | API             | N/A            | Fully qualified URL (e.g. `https://staging.taskflow.dev`). Wildcard `*` strictly rejected. |
-| `OPENAI_API_KEY`    | Python AI       | N/A            | Required for live LLM operations. Kept strictly on the AI service.                         |
-| `SENTRY_DSN`        | API, AI, Web    | N/A            | Project DSN for error telemetry.                                                           |
-
-- **`[LOCAL]`**: Loaded via local `.env` files (gitignored).
-- **`[CONTAINER]` `[STAGING]`**: Injected via `docker-compose.staging.yml` from environment or secret files.
-- **`[PRODUCTION]`**: Injected via cloud key vault / secret store into orchestrator task definitions.
-
----
-
-## 3. Startup Order
-
-The services have strict dependency and readiness ordering.
-
-```
-PostgreSQL (Healthy)
-      │
-      ├──> TaskFlow API (Reads DB readiness via /health/ready)
-      │
-      ├──> TaskFlow Worker (Polls DB via SKIP LOCKED)
-      │
-Python AI (Healthy via /health) <── [API communicates via internal network]
-```
-
-### Execution Steps:
-
-1. **`[CONTAINER]` `[STAGING]`**: Start PostgreSQL first and wait for healthy state:
-   ```bash
-   docker compose -f docker-compose.staging.yml up -d postgres
-   docker compose -f docker-compose.staging.yml exec postgres pg_isready -U taskflow_admin -d taskflow_staging
-   ```
-2. **`[CONTAINER]` `[STAGING]`**: Start Python AI service independently:
-   ```bash
-   docker compose -f docker-compose.staging.yml up -d taskflow-ai
-   ```
-3. **`[CONTAINER]` `[STAGING]`**: Start Core API (waits on PostgreSQL health check):
-   ```bash
-   docker compose -f docker-compose.staging.yml up -d taskflow-api
-   ```
-4. **`[CONTAINER]` `[STAGING]`**: Start Background Worker (waits on PostgreSQL health check):
-   ```bash
-   docker compose -f docker-compose.staging.yml up -d taskflow-worker
-   ```
-
----
-
-## 4. Migration Procedure
-
-Database migrations must follow a non-destructive forward strategy.
-
-> [!CAUTION]
-> Never run `prisma migrate reset` or destructive schema modifications on staging or production databases.
-
-### Deployment Path:
-
-1. **`[LOCAL]`**: Pre-release migration validation:
-   ```bash
-   npx tsx scripts/validate_migrations.ts
-   ```
-   _Validates clean installation on empty database AND idempotent upgrade on existing representative data._
-2. **`[CONTAINER]` `[STAGING]` `[PRODUCTION]`**: Apply pending migrations to target database:
-   ```bash
-   npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
-   ```
-3. **`[CONTAINER]` `[STAGING]`**: Verify migration status:
-   ```bash
-   npx prisma migrate status --schema apps/api/prisma/schema.prisma
-   ```
-
----
-
-## 5. Readiness Verification
-
-TaskFlow differentiates between liveness and readiness probes.
-
-- **`/health/live` (Liveness)**: Verifies that the Node.js event loop is running and accepting HTTP requests. Returns HTTP 200.
-- **`/health/ready` (Readiness)**: Verifies that the database connection pool is active and queries succeed. Returns HTTP 200 when ready, HTTP 503 when the database is unavailable.
-- **AI Decoupling Invariant**: `/health/ready` does **not** fail if the external AI service or OpenAI is down. Core project and task CRUD operations remain fully functional.
-
-### Commands:
-
-- **`[LOCAL]` `[CONTAINER]` `[STAGING]`**:
+- **`[LOCAL]`**: Copy development template:
   ```bash
-  curl -i http://localhost:5000/health/live
-  curl -i http://localhost:5000/health/ready
+  cp .env.example .env
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Create staging environment file from contract template:
+  ```bash
+  cp .env.staging.example .env.staging
+  ```
+- **`[STAGING]`**: Ensure environment file permissions are strictly restricted to the deployment runner user:
+  ```bash
+  chmod 600 .env.staging
+  ```
+- **`[STAGING]` `[PRODUCTION]`**: Separate variable domains into:
+  1. Public application configuration (`PORT`, `NODE_ENV`, `CORS_ORIGIN`)
+  2. API cryptographic secrets (`JWT_SECRET`, `COOKIE_SECRET`)
+  3. Database credentials (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `DATABASE_URL`)
+  4. Internal service tokens (`AI_SERVICE_TOKEN`)
+  5. Sentry error monitoring (`SENTRY_DSN`, `SENTRY_ENVIRONMENT`)
+  6. OpenAI provider keys (`OPENAI_API_KEY`, `OPENAI_MODEL`)
+  7. Worker tuning parameters (`WORKER_*`)
+
+---
+
+## 3. Secret Configuration
+
+Secrets must **never** be committed to git or printed in logs. Staging enforces fail-closed validation on startup.
+
+### Secret Strength Requirements:
+
+| Variable            | Target Services | Minimum Requirement  | Staging Fail-Closed Rule                    |
+| :------------------ | :-------------- | :------------------- | :------------------------------------------ |
+| `JWT_SECRET`        | API             | >= 32 characters     | Rejects default dev secret; aborts startup  |
+| `COOKIE_SECRET`     | API             | >= 32 characters     | Rejects default dev secret; aborts startup  |
+| `AI_SERVICE_TOKEN`  | API, AI, Worker | >= 16 characters     | Rejects default dev token; aborts startup   |
+| `DATABASE_URL`      | API, Worker     | Valid PostgreSQL URL | Rejects `postgres:postgres` default dev URL |
+| `CORS_ORIGIN`       | API             | Fully-qualified URL  | Rejects wildcard `*`                        |
+| `POSTGRES_PASSWORD` | PostgreSQL      | >= 16 characters     | Required by `docker-compose.staging.yml`    |
+| `OPENAI_API_KEY`    | Python AI       | Valid OpenAI key     | Optional (mock provider used when absent)   |
+| `SENTRY_DSN`        | API, AI, Web    | Valid Sentry DSN     | Optional (telemetry disabled when absent)   |
+
+### Secret Generation Commands:
+
+- **`[LOCAL]` `[STAGING]`**: Generate cryptographically secure secrets:
+  ```bash
+  # JWT & Cookie secrets (32+ chars)
+  openssl rand -base64 32
+  # PostgreSQL password (16+ chars)
+  openssl rand -base64 24
+  # Internal AI service token (16+ chars)
+  openssl rand -hex 16
   ```
 
 ---
 
-## 6. Smoke Test
+## 4. Docker Deployment
 
-A deterministic, automated Playwright smoke test validates the full release journey.
+### Backend Services Orchestration:
 
-- **`[LOCAL]` `[CONTAINER]`**: Run release validation script:
+The backend stack consists of 4 containerized services managed by `docker-compose.staging.yml`:
+
+1. `postgres` (PostgreSQL 16 Alpine, internal-only, port 5432 exposed to staging network)
+2. `taskflow-ai` (Python FastAPI AI subsystem, internal-only, port 8000 exposed to network)
+3. `taskflow-api` (Express REST API, public ingress on port 5000:5000, runs as `USER taskflow`)
+4. `taskflow-worker` (Background job processor, internal-only, runs as `USER taskflow`)
+
+- **`[LOCAL]` `[CONTAINER]`**: Run deployment preflight check:
+  ```bash
+  npm run staging:preflight
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Build and start the staging composition:
+  ```bash
+  docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Verify container running status and non-root execution:
+  ```bash
+  docker compose -f docker-compose.staging.yml ps
+  docker compose -f docker-compose.staging.yml exec taskflow-api id
+  # Expected: uid=10001(taskflow) gid=10001(taskflow)
+  ```
+
+### Staging Frontend Deployment Procedure:
+
+TaskFlow frontend (`apps/web`) is a static single-page application (SPA) built via Vite.
+
+- **`[LOCAL]` `[STAGING]`**: Build the production static distribution:
+  ```bash
+  npm run build --workspace=@taskflow/web
+  ```
+  _Artifacts generated in `apps/web/dist/`._
+- **`[STAGING]`**: Deploy frontend static distribution to web server / reverse proxy (e.g. Nginx or Cloudflare Pages):
+  ```nginx
+  server {
+      listen 80;
+      server_name staging.taskflow.dev;
+      root /var/www/taskflow-staging/apps/web/dist;
+      index index.html;
+
+      location / {
+          try_files $uri $uri/ /index.html;
+      }
+
+      location /api/ {
+          proxy_pass http://taskflow-staging-api:5000;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+  }
+  ```
+
+---
+
+## 5. Migration Procedure
+
+Database migrations follow a strict forward-only, expand-and-contract policy.
+
+> [!CAUTION]
+> Never execute `prisma migrate reset` in staging or production. Destructive schema operations are strictly prohibited.
+
+- **`[LOCAL]`**: Verify migration history consistency:
+  ```bash
+  npx tsx scripts/validate_migrations.ts
+  ```
+- **`[CONTAINER]` `[STAGING]` `[PRODUCTION]`**: Apply forward migrations to target database:
+  ```bash
+  npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+  ```
+- **`[CONTAINER]` `[STAGING]` `[PRODUCTION]`**: Verify migration synchronization status:
+  ```bash
+  npx prisma migrate status --schema apps/api/prisma/schema.prisma
+  ```
+  _Expected: "Database schema is up to date!"_
+
+---
+
+## 6. Health Validation
+
+TaskFlow decouples process vitality (liveness) from database connection responsiveness (readiness).
+
+- **`[CONTAINER]` `[STAGING]`**: Check process liveness:
+  ```bash
+  curl -i http://localhost:5000/health/live
+  # Expected: HTTP 200 OK {"success": true, "data": {"status": "live", "service": "taskflow-api"}}
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Check database readiness:
+  ```bash
+  curl -i http://localhost:5000/health/ready
+  # Expected: HTTP 200 OK {"success": true, "data": {"status": "ready", "checks": {"database": {"status": "up"}}}}
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Check internal AI service health:
+  ```bash
+  docker compose -f docker-compose.staging.yml exec taskflow-ai python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/health').read().decode())"
+  # Expected: {"status": "ok", "service": "taskflow-ai"}
+  ```
+
+---
+
+## 7. Smoke Test
+
+- **`[LOCAL]` `[CONTAINER]`**: Run automated release checks (13 architectural and configuration gates):
   ```bash
   npx tsx scripts/validate_release.ts
   ```
-- **`[LOCAL]` `[CONTAINER]`**: Run full Playwright production smoke test:
+- **`[LOCAL]` `[CONTAINER]`**: Run load smoke test (25 requests across 5 workers):
+  ```bash
+  npm run load:smoke
+  ```
+- **`[LOCAL]` `[CONTAINER]` `[STAGING]`**: Run targeted Playwright smoke journey:
   ```bash
   npx playwright test e2e/tests/production_smoke.spec.ts
   ```
-  _Journey includes: API health check, registration, login, workspace creation, project creation, task creation, dashboard KPIs, audit log review, usage metrics, AI degradation fallback, logout, and re-login persistent state verification._
+  _Verifies: User login, authenticated session, project CRUD, task creation, dashboard KPIs, audit log, usage view, logout, re-authentication, and persistent data reload._
 
 ---
 
-## 7. Sentry Verification
+## 8. Sentry Verification
 
-- **`[LOCAL]` `[CONTAINER]`**: Automated test suite validates Sentry secret scrubbing and correlation IDs:
+- **`[LOCAL]`**: Run automated Sentry redaction and correlation suite:
   ```bash
-  npm test --workspace=@taskflow/api -- src/__tests__/sentry_observability.test.ts --run
+  npm test --workspace=@taskflow/api -- src/__tests__/pr32_staging_dependency_observability.test.ts --run
   ```
-- **`[STAGING]`**: Trigger a controlled test exception to verify ingestion:
+- **`[STAGING]`**: Trigger a safe diagnostic 404 to verify absence of Sentry noise:
   ```bash
-  curl -i -H "X-Request-ID: test-sentry-trace-1" http://localhost:5000/api/v1/projects/invalid-id
+  curl -i -H "X-Request-ID: test-sentry-noise-check" http://localhost:5000/api/v1/non-existent-diagnostic
   ```
-- **`[STAGING]` `[PRODUCTION]`**: Verify in Sentry dashboard that:
-  - Event arrives with environment tag `staging` or `production`.
-  - Sensitive parameters (`password`, `token`, `cookie`, `apiKey`, `DATABASE_URL`) are redacted as `[REDACTED]`.
-  - Correlation header `X-Request-ID` is preserved on the event tag.
+  _Expected: HTTP 404; Sentry dashboard receives zero events (4xx operational errors are filtered)._
+- **`[STAGING]`**: In Sentry web console, verify:
+  - Environment is tagged `staging`.
+  - Service identity tag is `api`, `ai`, or `worker`.
+  - RequestId tag matches `X-Request-ID`.
+  - Zero Bearer tokens, cookies, passwords, or database credentials appear in event payloads.
 
 ---
 
-## 8. AI Outage Test
+## 9. Worker Verification
 
-Validates graceful degradation when the Python AI service is completely unavailable.
+- **`[CONTAINER]` `[STAGING]`**: Inspect background worker logs:
+  ```bash
+  docker compose -f docker-compose.staging.yml logs --tail 100 -f taskflow-worker
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Verify worker lifecycle invariants:
+  - Jobs transition: `PENDING` $\rightarrow$ `PROCESSING` $\rightarrow$ `COMPLETED`.
+  - No continuous connection errors during normal PostgreSQL operation.
+  - Consecutive error counter resets to 0 upon healthy database poll.
+- **`[CONTAINER]` `[STAGING]`**: Trigger worker restart and verify durable recovery:
+  ```bash
+  docker compose -f docker-compose.staging.yml restart taskflow-worker
+  docker compose -f docker-compose.staging.yml logs --tail 50 taskflow-worker
+  # Expected: Clean graceful shutdown, restart, and resumption of job polling
+  ```
 
-### Test Procedure:
+---
 
-1. **`[CONTAINER]` `[STAGING]`**: Stop the Python AI container:
+## 10. AI Verification
+
+- **`[CONTAINER]` `[STAGING]`**: Validate all 4 AI operations against staging API using mock or test account:
+  ```bash
+  # 1. Project Summary / Insight
+  curl -i -X POST http://localhost:5000/api/v1/organizations/$ORG_ID/projects/$PROJECT_ID/ai/analyze \
+       -H "Authorization: Bearer $TOKEN" \
+       -H "Content-Type: application/json" \
+       -d '{"operation": "PROJECT_INSIGHT"}'
+  ```
+- Verify:
+  - Returns HTTP 200 with structured analysis.
+  - Quota is reserved atomically and decremented upon success.
+  - Invariant: `TASK_ACTIONS` returns suggestions only; database records are **never** mutated without human review and explicit HTTP `PATCH`.
+
+---
+
+## 11. Backup & Restore Drill
+
+- **`[LOCAL]`**: Execute automated backup & restore drill into isolated database:
+  ```bash
+  npx tsx scripts/db_backup_restore_smoke.ts
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Run manual PostgreSQL staging backup:
+  ```bash
+  BACKUP_FILE="staging_backup_$(date +%Y%m%d_%H%M%S).dump"
+  docker compose -f docker-compose.staging.yml exec -T postgres pg_dump -U taskflow_admin -d taskflow_staging -Fc --lock-wait-timeout=10s > $BACKUP_FILE
+  test -s $BACKUP_FILE && echo "Staging backup created successfully: $BACKUP_FILE"
+  ```
+- **`[CONTAINER]` `[STAGING]`**: Restore into an isolated validation database (never over live staging):
+  ```bash
+  docker compose -f docker-compose.staging.yml exec -T postgres createdb -U taskflow_admin taskflow_restore_drill
+  docker compose -f docker-compose.staging.yml exec -T postgres pg_restore -U taskflow_admin -d taskflow_restore_drill --no-owner --clean --if-exists < $BACKUP_FILE
+  docker compose -f docker-compose.staging.yml exec -T postgres psql -U taskflow_admin -d taskflow_restore_drill -c "SELECT count(*) FROM users; SELECT count(*) FROM tasks;"
+  docker compose -f docker-compose.staging.yml exec -T postgres dropdb -U taskflow_admin taskflow_restore_drill
+  rm -f $BACKUP_FILE
+  ```
+
+---
+
+## 12. Rollback Procedure
+
+### Application Rollback (Code Only):
+
+When migrations are forward-compatible, rollback requires only reverting container images:
+
+1. **`[CONTAINER]` `[STAGING]`**: Re-deploy the previous container image tag:
+   ```bash
+   docker compose -f docker-compose.staging.yml up -d --no-deps taskflow-api taskflow-worker
+   ```
+2. **`[CONTAINER]` `[STAGING]`**: Verify readiness probe recovers:
+   ```bash
+   curl -i http://localhost:5000/health/ready
+   ```
+
+### Schema Rollback (Emergency Forward Patch):
+
+- **`[STAGING]` `[PRODUCTION]`**: Do not roll back migrations in reverse. Create and deploy a corrective forward migration:
+  ```bash
+  # Create forward fix migration
+  npx prisma migrate dev --name emergency_hotfix
+  # Deploy forward fix
+  npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+  ```
+
+---
+
+## 13. Failure Scenarios
+
+### Scenario A: PostgreSQL Outage
+
+1. **`[CONTAINER]` `[STAGING]`**: Stop PostgreSQL:
+   ```bash
+   docker compose -f docker-compose.staging.yml stop postgres
+   ```
+2. **`[CONTAINER]` `[STAGING]`**: Verify `/health/ready` immediately returns HTTP 503 `not_ready`.
+3. **`[CONTAINER]` `[STAGING]`**: Verify worker enters exponential backoff with jitter.
+4. **`[CONTAINER]` `[STAGING]`**: Restart PostgreSQL:
+   ```bash
+   docker compose -f docker-compose.staging.yml start postgres
+   ```
+5. **`[CONTAINER]` `[STAGING]`**: Verify `/health/ready` recovers to HTTP 200 without API restart.
+
+### Scenario B: Python AI Outage
+
+1. **`[CONTAINER]` `[STAGING]`**: Stop AI service:
    ```bash
    docker compose -f docker-compose.staging.yml stop taskflow-ai
    ```
-2. **`[CONTAINER]` `[STAGING]`**: Verify API readiness remains HTTP 200:
-   ```bash
-   curl -i http://localhost:5000/health/ready
-   # Must return HTTP 200 with data.status = "ready"
-   ```
-3. **`[CONTAINER]` `[STAGING]`**: Verify project/task CRUD operations continue without error.
-4. **`[CONTAINER]` `[STAGING]`**: Trigger an AI analysis endpoint (e.g. `POST /api/v1/projects/:id/ai/analyze`):
-   - Returns controlled HTTP 503 with error code `AI_SERVICE_UNAVAILABLE`.
-   - Any reserved token quota is automatically reverted.
-   - Zero domain state mutation occurs.
-5. **`[CONTAINER]` `[STAGING]`**: Restart AI container:
+2. **`[CONTAINER]` `[STAGING]`**: Verify `/health/ready` remains HTTP 200 `ready`.
+3. **`[CONTAINER]` `[STAGING]`**: Trigger AI endpoint: returns controlled HTTP 503 `AI_SERVICE_UNAVAILABLE`; reserved tokens compensated.
+4. **`[CONTAINER]` `[STAGING]`**: Restart AI service:
    ```bash
    docker compose -f docker-compose.staging.yml start taskflow-ai
    ```
 
 ---
 
-## 9. Database Outage Test
+## 14. Troubleshooting
 
-Validates system behavior when PostgreSQL becomes unreachable.
-
-### Test Procedure:
-
-1. **`[CONTAINER]` `[STAGING]`**: Pause or stop the PostgreSQL service:
-   ```bash
-   docker compose -f docker-compose.staging.yml stop postgres
-   ```
-2. **`[CONTAINER]` `[STAGING]`**: Verify API readiness immediately reports HTTP 503:
-   ```bash
-   curl -i http://localhost:5000/health/ready
-   # Expected: HTTP 503 with code "SERVICE_UNAVAILABLE"
-   ```
-3. **`[CONTAINER]` `[STAGING]`**: Verify worker logs:
-   - Worker catches connection errors and engages exponential backoff with jitter.
-   - Worker does not hot-spin or crash.
-4. **`[CONTAINER]` `[STAGING]`**: Restart PostgreSQL:
-   ```bash
-   docker compose -f docker-compose.staging.yml start postgres
-   ```
-5. **`[CONTAINER]` `[STAGING]`**: Verify API readiness automatically recovers to HTTP 200 without restarting the API process.
+| Symptom                                    | Diagnostic Step                                                    | Remediation                                                                                               |
+| :----------------------------------------- | :----------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| **API fails to start with exit code 1**    | Inspect `docker compose logs taskflow-api`                         | Secret length rule failed in `env.ts`. Ensure `JWT_SECRET` >= 32 chars and `DATABASE_URL` is non-default. |
+| **`/health/ready` returns 503**            | Run `docker compose exec postgres pg_isready`                      | PostgreSQL is unreachable or connection pool exhausted. Check PostgreSQL container status.                |
+| **Worker claims no jobs**                  | Check table: `SELECT count(*) FROM jobs WHERE status = 'PENDING';` | If pending jobs exist, check worker error backoff logs for DB connection timeouts.                        |
+| **AI requests return 504 Gateway Timeout** | Check AI container latency and OpenAI egress                       | Upstream AI took > 30s. Verify network connectivity to OpenAI from `taskflow-ai` container.               |
 
 ---
 
-## 10. Worker Outage Test
+## 15. Evidence Collection
 
-Validates that background jobs remain persisted in PostgreSQL and process upon worker restart.
+In the event of an operational anomaly, gather diagnostic logs before restarting:
 
-### Test Procedure:
-
-1. **`[CONTAINER]` `[STAGING]`**: Stop the background worker container:
-   ```bash
-   docker compose -f docker-compose.staging.yml stop taskflow-worker
-   ```
-2. **`[CONTAINER]` `[STAGING]`**: Perform operations in the API that enqueue jobs (e.g. creating notification events or background tasks).
-3. **`[CONTAINER]` `[STAGING]`**: Inspect the `jobs` table in PostgreSQL:
-   - Jobs remain durable with status `PENDING`.
-4. **`[CONTAINER]` `[STAGING]`**: Restart the worker container:
-   ```bash
-   docker compose -f docker-compose.staging.yml start taskflow-worker
-   ```
-5. **`[CONTAINER]` `[STAGING]`**: Verify that pending jobs are claimed and transitioned to `COMPLETED`.
-
----
-
-## 11. Backup Procedure
-
-A real PostgreSQL backup drill uses `pg_dump` with custom compressed format (`-Fc`), explicit lock timeout (`--lock-wait-timeout=10s`), and non-interactive password injection via `PGPASSWORD`.
-
-### Execution:
-
-- **`[LOCAL]`**: Execute automated backup & restore drill:
+- **`[CONTAINER]` `[STAGING]`**: Export container logs:
   ```bash
-  npx tsx scripts/db_backup_restore_smoke.ts
+  docker compose -f docker-compose.staging.yml logs --tail 500 taskflow-api > api_anomaly.log
+  docker compose -f docker-compose.staging.yml logs --tail 500 taskflow-worker > worker_anomaly.log
+  docker compose -f docker-compose.staging.yml logs --tail 500 taskflow-ai > ai_anomaly.log
   ```
-- **`[CONTAINER]` `[STAGING]` `[PRODUCTION]`**: Production backup command:
+- **`[CONTAINER]` `[STAGING]`**: Export database connection and lock states:
   ```bash
-  BACKUP_FILE="backup_taskflow_$(date +%Y%m%d_%H%M%S).dump"
-  pg_dump -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -Fc --lock-wait-timeout=10s -f $BACKUP_FILE
-  ```
-- Verify backup is non-empty and readable:
-  ```bash
-  test -s $BACKUP_FILE && echo "Backup file verified"
+  docker compose -f docker-compose.staging.yml exec postgres psql -U taskflow_admin -d taskflow_staging -c "SELECT pid, state, query, age(clock_timestamp(), query_start) FROM pg_stat_activity WHERE state != 'idle';" > db_locks.log
   ```
 
 ---
 
-## 12. Restore Procedure
+## 16. Cleanup
 
-> [!IMPORTANT]
-> Never restore a backup directly over an active database without creating an immediate pre-restore snapshot. Prefer restoring into an isolated target database.
-
-### Execution Steps:
-
-1. **`[STAGING]` `[PRODUCTION]`**: Create a clean target database:
-   ```bash
-   createdb -h $PGHOST -p $PGPORT -U $PGUSER taskflow_restore_target
-   ```
-2. **`[STAGING]` `[PRODUCTION]`**: Restore using `pg_restore`:
-   ```bash
-   pg_restore -h $PGHOST -p $PGPORT -U $PGUSER -d taskflow_restore_target --no-owner --clean --if-exists $BACKUP_FILE
-   ```
-3. **`[STAGING]` `[PRODUCTION]`**: Verify table and record integrity on restored database:
-   ```bash
-   psql -h $PGHOST -p $PGPORT -U $PGUSER -d taskflow_restore_target -c "SELECT 'users' as t, count(*) FROM users UNION ALL SELECT 'tasks', count(*) FROM tasks;"
-   ```
-
----
-
-## 13. Rollback Procedure
-
-When an incident requires rolling back a release, distinguish between **Application Rollback** and **Database Rollback**.
-
-### A. Application Rollback (Code / Containers Only)
-
-If migrations are backward-compatible (the standard TaskFlow policy), rolling back is purely an application image change:
-
-1. **`[CONTAINER]` `[STAGING]` `[PRODUCTION]`**: Re-tag and deploy the previous known-good container image for API, Worker, and Web:
-   ```bash
-   docker compose -f docker-compose.staging.yml up -d --no-deps taskflow-api taskflow-worker
-   ```
-2. **`[CONTAINER]` `[STAGING]` `[PRODUCTION]`**: Verify API readiness returns HTTP 200.
-
-### B. Database Rollback (Expand-and-Contract & Forward Migrations)
-
-- **Do NOT blindly roll migrations backward in production.** Rolling backward risks data loss for new columns or modified constraints.
-- If a schema issue occurs:
-  1. Prefer applying an emergency forward migration that patches the issue.
-  2. If data corruption occurred, restore from the pre-release backup into an isolated database, verify tenant data, and perform a controlled data migration.
-
----
-
-## 14. Incident Evidence Collection
-
-During an outage or operational anomaly, collect evidence before restarting containers:
-
-### Commands:
-
-- **`[CONTAINER]` `[STAGING]`**: Container logs:
+- **`[CONTAINER]` `[STAGING]`**: Graceful stack teardown preserving database volumes:
   ```bash
-  docker compose -f docker-compose.staging.yml logs --tail 500 taskflow-api > api_incident.log
-  docker compose -f docker-compose.staging.yml logs --tail 500 taskflow-worker > worker_incident.log
-  docker compose -f docker-compose.staging.yml logs --tail 500 taskflow-ai > ai_incident.log
+  docker compose -f docker-compose.staging.yml stop -t 15 taskflow-api taskflow-worker
+  docker compose -f docker-compose.staging.yml stop taskflow-ai
+  docker compose -f docker-compose.staging.yml stop postgres
   ```
-- **`[CONTAINER]` `[STAGING]`**: Database connection and lock state:
+- **`[CONTAINER]` `[STAGING]`**: Complete stack teardown with container removal:
   ```bash
-  psql -h localhost -U taskflow_admin -d taskflow_staging -c "SELECT pid, usename, state, query, age(clock_timestamp(), query_start) FROM pg_stat_activity WHERE state != 'idle';"
+  docker compose -f docker-compose.staging.yml down
   ```
-- **`[CONTAINER]` `[STAGING]`**: Job queue health:
+- **`[LOCAL]`**: Remove ephemeral test artifacts and scratch files:
   ```bash
-  psql -h localhost -U taskflow_admin -d taskflow_staging -c "SELECT status, count(*) FROM jobs GROUP BY status;"
+  rm -f *.dump *.log
   ```
 
 ---
 
-## 15. Shutdown Procedure
+## 17. Production Promotion Prerequisites
 
-Graceful shutdown ensures in-flight requests and background jobs complete without corruption.
+Before promoting the TaskFlow build to production:
 
-1. **`[CONTAINER]` `[STAGING]`**: Stop API and Worker with 15-second grace period (API drains in-flight requests; worker drains current job):
-   ```bash
-   docker compose -f docker-compose.staging.yml stop -t 15 taskflow-api taskflow-worker
-   ```
-2. **`[CONTAINER]` `[STAGING]`**: Stop AI service:
-   ```bash
-   docker compose -f docker-compose.staging.yml stop taskflow-ai
-   ```
-3. **`[CONTAINER]` `[STAGING]`**: Stop PostgreSQL last:
-   ```bash
-   docker compose -f docker-compose.staging.yml stop postgres
-   ```
-
----
-
-## 16. Post-Release Validation
-
-Immediately following release cutover:
-
-1. **`[STAGING]` `[PRODUCTION]`**: Check liveness probe: `GET /health/live` -> 200.
-2. **`[STAGING]` `[PRODUCTION]`**: Check readiness probe: `GET /health/ready` -> 200 (database up).
-3. **`[STAGING]` `[PRODUCTION]`**: Verify OpenAPI docs accessible at `/docs` (if enabled in environment).
-4. **`[STAGING]` `[PRODUCTION]`**: Verify background worker is actively claiming jobs without logging connection errors.
-5. **`[STAGING]` `[PRODUCTION]`**: Run deterministic release validation script:
-   ```bash
-   npx tsx scripts/validate_release.ts
-   ```
-
----
-
-## 17. Known Limitations
-
-1. **Single-Cluster PostgreSQL**: The system relies on a single authoritative PostgreSQL database with row-level transactional locking. Cross-region multi-master replication is not configured.
-2. **Real Cloud Secret Injection**: In local and container environments, secrets are validated via environment variables; live cloud key vault integrations (e.g. AWS Secrets Manager or HashiCorp Vault) must be configured in production infrastructure.
-3. **Live Sentry Delivery**: Tested and verified via mock scopes and SDK configuration; live event arrival in Sentry UI requires outbound network egress from the production environment.
-4. **OpenAI Upstream Rate Limits**: Handled gracefully with fallback toasts and retry headers, but dependent on external provider availability and account quota.
+1. **`[LOCAL]` Monorepo Gates**: `npm run type-check`, `npm run build`, `npm run format:check`, and `npm test` must all exit with code 0.
+2. **`[LOCAL]` Python AI Gates**: `pytest apps/ai`, `ruff check apps/ai`, and `ruff format --check apps/ai` must pass with 0 errors.
+3. **`[CONTAINER]` Preflight**: `npm run staging:preflight` must pass 15/15 checks.
+4. **`[CONTAINER]` Migrations**: `npx prisma migrate status` must confirm all forward migrations are applied.
+5. **`[STAGING]` Smoke Test**: End-to-end journey in staging completes with 0 errors.
+6. **`[PRODUCTION]` Secret Audit**: Production secrets injected via external secret manager; zero default credentials configured.
+7. **`[PRODUCTION]` Backup Schedule**: Automated recurring snapshot / WAL archiving active on production database instance.

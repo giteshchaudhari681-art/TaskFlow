@@ -27,8 +27,8 @@ class Settings(BaseSettings):
     )
 
     def validate_production(self) -> None:
-        """Explicit validation method for production environments."""
-        if self.app_env == "production":
+        """Explicit validation method for production and staging environments."""
+        if self.app_env in ("production", "staging"):
             if (
                 not self.ai_service_token
                 or self.ai_service_token == "taskflow-internal-dev-token"
@@ -44,6 +44,6 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Returns cached singleton Settings instance."""
     settings = Settings()
-    if settings.app_env == "production":
+    if settings.app_env in ("production", "staging"):
         settings.validate_production()
     return settings
