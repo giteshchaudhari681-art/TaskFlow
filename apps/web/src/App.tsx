@@ -82,6 +82,7 @@ const MainApp: React.FC = () => {
       setCurrentView('dashboard');
       setSelectedProjectId(null);
       setDeepLinkTaskId(null);
+      setAuthView('login');
     }
   }, [isAuthenticated]);
 
@@ -317,8 +318,13 @@ const MainApp: React.FC = () => {
 
                 {/* Sign Out Button */}
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    setAuthView('login');
+                    setCurrentView('dashboard');
+                    logout();
+                  }}
                   title="Sign out of current session"
+                  aria-label="Sign Out"
                   className="p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />

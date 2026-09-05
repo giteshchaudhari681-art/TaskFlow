@@ -1,0 +1,130 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: taskflow-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-taskflow_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be provided for staging}
+      POSTGRES_DB: ${POSTGRES_DB:-taskflow_staging}
+    # Security: In staging/production, PostgreSQL port is NOT exposed to host network
+    expose:
+      - '5432'
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-taskflow_admin} -d ${POSTGRES_DB:-taskflow_staging}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - taskflow-staging-network
+
+  taskflow-ai:
+    build:
+      context: ./apps/ai
+      dockerfile: Dockerfile
+    container_name: taskflow-staging-ai
+    restart: unless-stopped
+    environment:
+      APP_ENV: staging
+      AI_SERVICE_HOST: 0.0.0.0
+      AI_SERVICE_PORT: 8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:?AI_SERVICE_TOKEN must be provided for staging}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      AI_REQUEST_TIMEOUT_SECONDS: 30.0
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: staging
+    # Security: Internal AI service is only accessible to API/worker on internal network
+    expose:
+      - '8000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health').getcode() == 200 else 1)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - taskflow-staging-network
+
+  taskflow-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: taskflow-staging-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 5000
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-taskflow_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-taskflow_staging}?schema=public}
+      AI_SERVICE_URL: http://taskflow-ai:8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:?AI_SERVICE_TOKEN must be provided for staging}
+      AI_SERVICE_TIMEOUT_MS: 30000
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be provided for staging}
+      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET must be provided for staging}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://staging.taskflow.dev}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: staging
+    ports:
+      - '5000:5000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://127.0.0.1:5000/health/ready', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1));",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - taskflow-staging-network
+
+  taskflow-worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: taskflow-staging-worker
+    restart: unless-stopped
+    command: ["node", "apps/api/dist/worker.js"]
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-taskflow_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-taskflow_staging}?schema=public}
+      AI_SERVICE_URL: http://taskflow-ai:8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:?AI_SERVICE_TOKEN must be provided for staging}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: staging
+      WORKER_POLLING_INTERVAL_MS: 1000
+      WORKER_MAX_ATTEMPTS: 3
+      WORKER_RETRY_BASE_DELAY_MS: 1000
+      WORKER_RETRY_MAX_DELAY_MS: 60000
+      WORKER_PROCESSING_TIMEOUT_MS: 30000
+      WORKER_SHUTDOWN_GRACE_PERIOD_MS: 10000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - taskflow-staging-network
+
+networks:
+  taskflow-staging-network:
+    name: taskflow-staging-network
+    driver: bridge
+
+volumes:
+  postgres_staging_data:
+    name: taskflow-postgres-staging-data
+    driver: local

@@ -55,6 +55,12 @@ export class LoginPage {
     await this.switchToRegisterButton.click();
   }
 
+  async switchToLogin() {
+    if (await this.switchToLoginButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await this.switchToLoginButton.click();
+    }
+  }
+
   async register(name: string, email: string, password: string, organizationName?: string) {
     await this.registerNameInput.fill(name);
     await this.registerEmailInput.fill(email);
