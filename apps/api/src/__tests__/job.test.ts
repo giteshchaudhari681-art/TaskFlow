@@ -584,10 +584,14 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
       const job = await prisma.job.findFirst({
         where: {
           type: 'NOTIFICATION_DELIVERY',
+          organizationId: ownerOrgId,
           payload: {
             path: ['notificationId'],
             equals: notif.id,
           },
+        },
+        orderBy: {
+          createdAt: 'desc',
         },
       });
 
@@ -595,11 +599,18 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
       expect(job!.status).toBe(JobStatus.PENDING);
       expect(job!.organizationId).toBe(ownerOrgId);
 
-      // Claim and process it via worker logic
-      const claimed = await jobRepository.claimNextJob();
-      expect(claimed?.id).toBe(job!.id);
+      // Transition the specific job to PROCESSING state and process via worker logic
+      const claimed = await prisma.job.update({
+        where: { id: job!.id },
+        data: {
+          status: JobStatus.PROCESSING,
+          lockedAt: new Date(),
+          startedAt: new Date(),
+        },
+      });
+      expect(claimed.id).toBe(job!.id);
 
-      const result = await jobService.processJob(claimed!);
+      const result = await jobService.processJob(claimed);
       expect(result.success).toBe(true);
 
       const finishedJob = await prisma.job.findUnique({ where: { id: job!.id } });

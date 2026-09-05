@@ -44,6 +44,11 @@ describe('PR29: Concurrency, Contention & Race Condition Validation Suite', () =
   });
 
   afterAll(async () => {
+    if (testUser?.orgId) {
+      await prisma.job.deleteMany({
+        where: { organizationId: testUser.orgId },
+      });
+    }
     if (testUser?.email) {
       await prisma.user.deleteMany({
         where: { email: testUser.email },
@@ -197,9 +202,9 @@ describe('PR29: Concurrency, Contention & Race Condition Validation Suite', () =
     const uniqueClaimedIds = new Set(claimedIds);
     expect(uniqueClaimedIds.size).toBe(claimedJobs.length);
 
-    // Cleanup claimed jobs
+    // Cleanup enqueued and claimed jobs
     await prisma.job.deleteMany({
-      where: { id: { in: claimedIds } },
+      where: { id: { in: enqueuedJobs.map(j => j.id) } },
     });
   });
 
