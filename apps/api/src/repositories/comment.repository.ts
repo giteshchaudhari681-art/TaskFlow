@@ -44,7 +44,7 @@ export class CommentRepository extends BaseRepository {
   }
 
   async listByTask(taskId: string, options?: { limit?: number }) {
-    const limit = options?.limit ?? 100;
+    const limit = Math.min(Math.max(options?.limit ?? 100, 1), 200);
     return this.db.comment.findMany({
       where: {
         taskId,

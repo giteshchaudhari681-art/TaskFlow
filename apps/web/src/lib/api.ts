@@ -335,13 +335,15 @@ export const projectApi = {
     projectId: string,
     body: { operation: AIOperation; taskId?: string; user_prompt?: string } = {
       operation: 'PROJECT_INSIGHT',
-    }
+    },
+    signal?: AbortSignal
   ): Promise<AIAnalysisResponse> => {
     const res = await apiFetch<AIAnalysisResponse>(
       `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
       {
         method: 'POST',
         body: JSON.stringify(body),
+        signal,
       }
     );
     return res.data;
@@ -616,7 +618,7 @@ export const taskApi = {
     organizationId: string,
     projectId: string,
     taskId: string,
-    options?: { user_prompt?: string }
+    options?: { user_prompt?: string; signal?: AbortSignal }
   ): Promise<AIAnalysisResponse> => {
     const res = await apiFetch<AIAnalysisResponse>(
       `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
@@ -627,6 +629,7 @@ export const taskApi = {
           taskId,
           user_prompt: options?.user_prompt,
         }),
+        signal: options?.signal,
       }
     );
     return res.data;
@@ -636,7 +639,7 @@ export const taskApi = {
     organizationId: string,
     projectId: string,
     taskId: string,
-    options?: { user_prompt?: string }
+    options?: { user_prompt?: string; signal?: AbortSignal }
   ): Promise<AIAnalysisResponse> => {
     const res = await apiFetch<AIAnalysisResponse>(
       `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
@@ -647,6 +650,7 @@ export const taskApi = {
           taskId,
           user_prompt: options?.user_prompt,
         }),
+        signal: options?.signal,
       }
     );
     return res.data;
@@ -656,7 +660,7 @@ export const taskApi = {
     organizationId: string,
     projectId: string,
     taskId: string,
-    options?: { user_prompt?: string }
+    options?: { user_prompt?: string; signal?: AbortSignal }
   ): Promise<AIAnalysisResponse> => {
     const res = await apiFetch<AIAnalysisResponse>(
       `/organizations/${organizationId}/projects/${projectId}/ai/analyze`,
@@ -667,6 +671,7 @@ export const taskApi = {
           taskId,
           user_prompt: options?.user_prompt,
         }),
+        signal: options?.signal,
       }
     );
     return res.data;

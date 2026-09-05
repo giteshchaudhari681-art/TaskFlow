@@ -88,6 +88,8 @@ export class ProjectRepository extends BaseRepository {
     filter?: {
       status?: ProjectStatus;
       search?: string;
+      limit?: number;
+      skip?: number;
     }
   ) {
     const where: any = { organizationId };
@@ -105,8 +107,13 @@ export class ProjectRepository extends BaseRepository {
       ];
     }
 
+    const limit = Math.min(Math.max(filter?.limit ?? 200, 1), 200);
+    const skip = filter?.skip && filter.skip > 0 ? filter.skip : undefined;
+
     return this.db.project.findMany({
       where,
+      take: limit,
+      skip,
       include: {
         _count: {
           select: { members: true },

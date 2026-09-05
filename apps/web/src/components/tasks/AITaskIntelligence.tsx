@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   Sparkles,
   RefreshCw,
@@ -181,10 +181,26 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
   const [actionErrorMap, setActionErrorMap] = useState<Record<string, string>>({});
   const [actionSuccessMap, setActionSuccessMap] = useState<Record<string, string>>({});
 
+  const actionsAbortRef = useRef<AbortController | null>(null);
+  const intelAbortRef = useRef<AbortController | null>(null);
+  const decompAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      actionsAbortRef.current?.abort();
+      intelAbortRef.current?.abort();
+      decompAbortRef.current?.abort();
+    };
+  }, []);
+
   // Run Actions Proposal
   const runActions = useCallback(
     async (customPrompt?: string) => {
       if (actionsLoading) return;
+      actionsAbortRef.current?.abort();
+      const controller = new AbortController();
+      actionsAbortRef.current = controller;
+
       setActionsLoading(true);
       setActionsError(null);
 
@@ -192,6 +208,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
         const promptToUse = customPrompt !== undefined ? customPrompt : actionsPrompt;
         const response = await taskApi.proposeActions(organizationId, projectId, taskId, {
           user_prompt: promptToUse.trim() || undefined,
+          signal: controller.signal,
         });
         setActionsData(response);
         setActionsHasRun(true);
@@ -199,11 +216,16 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
         setActionErrorMap({});
         setActionSuccessMap({});
       } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
         const message =
           err instanceof Error ? err.message : 'AI task actions are temporarily unavailable.';
         setActionsError(message);
       } finally {
-        setActionsLoading(false);
+        if (actionsAbortRef.current === controller) {
+          setActionsLoading(false);
+        }
       }
     },
     [organizationId, projectId, taskId, actionsPrompt, actionsLoading]
@@ -323,6 +345,10 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
   const runIntelligence = useCallback(
     async (customPrompt?: string) => {
       if (intelLoading) return;
+      intelAbortRef.current?.abort();
+      const controller = new AbortController();
+      intelAbortRef.current = controller;
+
       setIntelLoading(true);
       setIntelError(null);
 
@@ -330,15 +356,21 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
         const promptToUse = customPrompt !== undefined ? customPrompt : intelPrompt;
         const response = await taskApi.analyzeTask(organizationId, projectId, taskId, {
           user_prompt: promptToUse.trim() || undefined,
+          signal: controller.signal,
         });
         setIntelData(response);
         setIntelHasRun(true);
       } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
         const message =
           err instanceof Error ? err.message : 'AI task analysis is temporarily unavailable.';
         setIntelError(message);
       } finally {
-        setIntelLoading(false);
+        if (intelAbortRef.current === controller) {
+          setIntelLoading(false);
+        }
       }
     },
     [organizationId, projectId, taskId, intelPrompt, intelLoading]
@@ -348,6 +380,10 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
   const runDecomposition = useCallback(
     async (customPrompt?: string) => {
       if (decompLoading) return;
+      decompAbortRef.current?.abort();
+      const controller = new AbortController();
+      decompAbortRef.current = controller;
+
       setDecompLoading(true);
       setDecompError(null);
       setCreationResult(null);
@@ -356,6 +392,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
         const promptToUse = customPrompt !== undefined ? customPrompt : decompPrompt;
         const response = await taskApi.decomposeTask(organizationId, projectId, taskId, {
           user_prompt: promptToUse.trim() || undefined,
+          signal: controller.signal,
         });
         setDecompData(response);
         setDecompHasRun(true);
@@ -371,11 +408,16 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
         });
         setProposedSubtasks(mapped);
       } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
         const message =
           err instanceof Error ? err.message : 'AI task decomposition is temporarily unavailable.';
         setDecompError(message);
       } finally {
-        setDecompLoading(false);
+        if (decompAbortRef.current === controller) {
+          setDecompLoading(false);
+        }
       }
     },
     [organizationId, projectId, taskId, decompPrompt, decompLoading, normalizedExistingTitles]

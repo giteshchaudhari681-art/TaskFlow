@@ -11,6 +11,8 @@ export class WorkRepository extends BaseRepository {
     options?: {
       projectId?: string;
       search?: string;
+      limit?: number;
+      skip?: number;
     }
   ) {
     const where: Prisma.TaskWhereInput = {
@@ -42,8 +44,13 @@ export class WorkRepository extends BaseRepository {
         : {}),
     };
 
+    const limit = Math.min(Math.max(options?.limit ?? 200, 1), 200);
+    const skip = options?.skip && options.skip > 0 ? options.skip : undefined;
+
     return this.db.task.findMany({
       where,
+      take: limit,
+      skip,
       include: {
         project: {
           select: {

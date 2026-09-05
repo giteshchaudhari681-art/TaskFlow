@@ -36,7 +36,7 @@ export class SearchService {
     const rawQuery = filter.q.trim();
     const queryLower = rawQuery.toLowerCase();
     const typeFilter = filter.type || 'all';
-    const limit = filter.limit || 20;
+    const limit = Math.min(Math.max(filter.limit || 20, 1), 100);
 
     // Fetch accessible project IDs for the user in this organization
     let accessibleProjectIds = await this.getAccessibleProjectIds(organizationId, userId);
@@ -69,8 +69,8 @@ export class SearchService {
     const shouldFetchUsers = fetchAll || typeFilter === 'user';
     const shouldFetchLabels = fetchAll || typeFilter === 'label';
 
-    // Per-entity fetch limits (fetch extra to compute hasMore)
-    const entityLimit = Math.max(limit, 10);
+    // Per-entity fetch limits (fetch extra to compute hasMore, capped at 100)
+    const entityLimit = Math.min(Math.max(limit, 10), 100);
 
     const [projects, tasks, milestones, users, labels] = await Promise.all([
       shouldFetchProjects

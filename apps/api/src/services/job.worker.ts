@@ -29,6 +29,8 @@ export class JobWorker {
     this.staleRecoveryIntervalMs = options?.staleRecoveryIntervalMs ?? 60000;
   }
 
+  private consecutiveErrors = 0;
+
   /**
    * Starts the polling and execution loop.
    */
@@ -49,6 +51,9 @@ export class JobWorker {
         // 2. Claim next available job using SKIP LOCKED
         const job = await jobRepository.claimNextJob();
 
+        // Successful database interaction resets backoff counter
+        this.consecutiveErrors = 0;
+
         if (job) {
           // Process claimed job
           this.activeJobPromise = jobService.processJob(job);
@@ -62,9 +67,18 @@ export class JobWorker {
           await this.sleep(this.pollingIntervalMs);
         }
       } catch (err: unknown) {
-        console.error('Unexpected error in worker loop:', err);
-        // Prevent hot spin on unexpected error
-        await this.sleep(this.pollingIntervalMs);
+        this.consecutiveErrors++;
+        const multiplier = Math.pow(2, Math.min(this.consecutiveErrors - 1, 5));
+        const baseBackoff = Math.min(this.pollingIntervalMs * multiplier, 30000);
+        const jitter = Math.floor(Math.random() * 200);
+        const backoffMs = baseBackoff + jitter;
+
+        console.error(
+          `[JobWorker] Error in worker loop (consecutive errors: ${this.consecutiveErrors}). Backing off for ${backoffMs}ms:`,
+          err instanceof Error ? err.message : err
+        );
+        // Prevent hot spin or hammering database during outages
+        await this.sleep(backoffMs);
       }
     }
 
@@ -108,6 +122,10 @@ export class JobWorker {
 
   isAcceptingJobs(): boolean {
     return this.isRunning && !this.shouldStop;
+  }
+
+  getConsecutiveErrors(): number {
+    return this.consecutiveErrors;
   }
 
   /**

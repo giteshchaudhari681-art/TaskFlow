@@ -276,6 +276,21 @@ export const openApiSpec = {
           },
         },
       },
+      ServiceUnavailable: {
+        description: 'Underlying infrastructure service temporarily unavailable',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+            example: {
+              success: false,
+              error: {
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'Database service temporarily unavailable',
+              },
+            },
+          },
+        },
+      },
       RateLimitExceeded: {
         description: 'Rate limit exceeded for client/workspace',
         content: {
@@ -463,6 +478,53 @@ export const openApiSpec = {
               uptime: { type: 'number', example: 1245.8 },
               environment: { type: 'string', example: 'development' },
               service: { type: 'string', example: 'taskflow-api' },
+            },
+          },
+        },
+      },
+      LivenessResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            required: ['status', 'service', 'uptimeSeconds', 'timestamp'],
+            properties: {
+              status: { type: 'string', example: 'live' },
+              service: { type: 'string', example: 'taskflow-api' },
+              uptimeSeconds: { type: 'integer', example: 42 },
+              timestamp: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+      },
+      ReadinessResponse: {
+        type: 'object',
+        required: ['success', 'data'],
+        properties: {
+          success: { type: 'boolean', example: true },
+          data: {
+            type: 'object',
+            required: ['status', 'service', 'timestamp', 'checks'],
+            properties: {
+              status: { type: 'string', example: 'ready' },
+              service: { type: 'string', example: 'taskflow-api' },
+              timestamp: { type: 'string', format: 'date-time' },
+              checks: {
+                type: 'object',
+                required: ['database'],
+                properties: {
+                  database: {
+                    type: 'object',
+                    required: ['status'],
+                    properties: {
+                      status: { type: 'string', example: 'up' },
+                      latencyMs: { type: 'number', example: 1.5 },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -1586,6 +1648,80 @@ export const openApiSpec = {
             description: 'API runtime is operational',
             content: {
               'application/json': { schema: { $ref: '#/components/schemas/HealthResponse' } },
+            },
+          },
+        },
+      },
+    },
+    '/health/live': {
+      get: {
+        tags: ['Health'],
+        summary: 'Liveness probe',
+        description: 'Lightweight liveness probe checking if the Node.js API process is alive.',
+        responses: {
+          200: {
+            description: 'Process is alive',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/LivenessResponse' } },
+            },
+          },
+        },
+      },
+    },
+    '/api/v1/health/live': {
+      get: {
+        tags: ['Health'],
+        summary: 'Versioned API liveness probe',
+        description: 'Lightweight liveness probe checking if the Node.js API process is alive.',
+        responses: {
+          200: {
+            description: 'Process is alive',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/LivenessResponse' } },
+            },
+          },
+        },
+      },
+    },
+    '/health/ready': {
+      get: {
+        tags: ['Health'],
+        summary: 'Readiness probe',
+        description:
+          'Verifies whether the API can serve traffic by checking database connectivity. Does not depend on external AI availability.',
+        responses: {
+          200: {
+            description: 'Service is ready to accept traffic',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ReadinessResponse' } },
+            },
+          },
+          503: {
+            description: 'Service is not ready (database unreachable)',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } },
+            },
+          },
+        },
+      },
+    },
+    '/api/v1/health/ready': {
+      get: {
+        tags: ['Health'],
+        summary: 'Versioned API readiness probe',
+        description:
+          'Verifies whether the API can serve traffic by checking database connectivity. Does not depend on external AI availability.',
+        responses: {
+          200: {
+            description: 'Service is ready to accept traffic',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ReadinessResponse' } },
+            },
+          },
+          503: {
+            description: 'Service is not ready (database unreachable)',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } },
             },
           },
         },

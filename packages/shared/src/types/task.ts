@@ -125,4 +125,6 @@ export interface TaskFilterParams {
   labelIds?: string[];
   labelMatch?: 'ANY' | 'ALL';
   milestoneId?: string | 'none';
+  limit?: number;
+  skip?: number;
 }

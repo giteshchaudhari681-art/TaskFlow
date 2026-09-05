@@ -17,6 +17,7 @@ export interface CreateAuditData {
 
 export interface AuditFindManyOptions extends AuditEventsFilter {
   projectIds?: string[];
+  includeMetadata?: boolean;
 }
 
 export class AuditRepository extends BaseRepository {
@@ -93,17 +94,44 @@ export class AuditRepository extends BaseRepository {
       }
     }
 
+    const selectFields =
+      options.includeMetadata === false
+        ? {
+            id: true,
+            organizationId: true,
+            projectId: true,
+            actorUserId: true,
+            actorType: true,
+            action: true,
+            resourceType: true,
+            resourceId: true,
+            requestId: true,
+            source: true,
+            createdAt: true,
+            actorUser: { select: this.actorSelect },
+            project: { select: this.projectSelect },
+          }
+        : undefined;
+
     const [items, total] = await Promise.all([
-      this.db.auditEvent.findMany({
-        where,
-        include: {
-          actorUser: { select: this.actorSelect },
-          project: { select: this.projectSelect },
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
+      selectFields
+        ? this.db.auditEvent.findMany({
+            where,
+            select: selectFields,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit,
+          })
+        : this.db.auditEvent.findMany({
+            where,
+            include: {
+              actorUser: { select: this.actorSelect },
+              project: { select: this.projectSelect },
+            },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit,
+          }),
       this.db.auditEvent.count({ where }),
     ]);
 

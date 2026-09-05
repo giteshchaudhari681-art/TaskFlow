@@ -17,6 +17,37 @@ export class AppError extends Error {
   }
 }
 
+/**
+ * Detects Prisma and PostgreSQL infrastructure connection/pool failures.
+ */
+export const isDatabaseConnectionError = (err: unknown): boolean => {
+  if (!err || typeof err !== 'object') return false;
+  const errorObj = err as Record<string, unknown>;
+  const name = typeof errorObj.name === 'string' ? errorObj.name : '';
+  const code = typeof errorObj.code === 'string' ? errorObj.code : '';
+
+  if (name === 'PrismaClientInitializationError' || name === 'PrismaClientRustPanicError') {
+    return true;
+  }
+
+  // P1000 to P1017: Prisma database connection/authentication/unreachable codes
+  // P2024: Connection pool timeout
+  if (code.startsWith('P10') || code === 'P2024') {
+    return true;
+  }
+
+  const message = typeof errorObj.message === 'string' ? errorObj.message : '';
+  if (
+    message.includes("Can't reach database server") ||
+    message.includes('Connection to database failed') ||
+    message.includes('timed out fetching a new connection from the connection pool')
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export const errorHandler = (
   err: Error,
   req: Request,
@@ -54,6 +85,28 @@ export const errorHandler = (
       'Request validation failed',
       HTTP_STATUS.BAD_REQUEST,
       issues
+    );
+  }
+
+  // Handle database infrastructure failures gracefully without leaking credentials/internals
+  if (isDatabaseConnectionError(err)) {
+    captureException(err, {
+      requestId: req.id || (req.headers['x-request-id'] as string),
+      userId: req.user?.id,
+      organizationId: req.orgMember?.organizationId,
+      route: req.path,
+      method: req.method,
+      statusCode: HTTP_STATUS.SERVICE_UNAVAILABLE,
+      extra: { infrastructure: 'database' },
+    });
+
+    console.error('[Database Infrastructure Error]', err.name || 'DatabaseError');
+
+    return sendError(
+      res,
+      ERROR_CODES.SERVICE_UNAVAILABLE,
+      'Database service temporarily unavailable',
+      HTTP_STATUS.SERVICE_UNAVAILABLE
     );
   }
 
