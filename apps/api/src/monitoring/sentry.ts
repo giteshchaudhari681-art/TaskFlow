@@ -33,6 +33,27 @@ const SENSITIVE_FIELD_PATTERNS = [
   /credit[_-]?card/i,
 ];
 
+const STRING_SCRUB_PATTERNS: Array<{ regex: RegExp; replacement: string }> = [
+  { regex: /Bearer\s+[A-Za-z0-9._~+/-]+=*/gi, replacement: 'Bearer [REDACTED]' },
+  { regex: /sk-[A-Za-z0-9_-]{20,}/g, replacement: 'sk-[REDACTED]' },
+  {
+    regex: /postgres(ql)?:\/\/[^@\s]+@[^\s/]+/gi,
+    replacement: 'postgresql://[REDACTED]@[REDACTED]',
+  },
+  { regex: /refreshToken=[A-Za-z0-9._~+/-]+/gi, replacement: 'refreshToken=[REDACTED]' },
+];
+
+/**
+ * Scrubs known sensitive string patterns (Bearer tokens, OpenAI keys, DB URLs, refresh cookies).
+ */
+export const scrubString = (str: string): string => {
+  let result = str;
+  for (const { regex, replacement } of STRING_SCRUB_PATTERNS) {
+    result = result.replace(regex, replacement);
+  }
+  return result;
+};
+
 /**
  * Recursively redacts sensitive keys in objects or JSON payloads.
  */
@@ -42,7 +63,7 @@ export const redactSensitiveData = (data: unknown, depth = 0): unknown => {
   }
 
   if (typeof data === 'string') {
-    return data;
+    return scrubString(data);
   }
 
   if (Array.isArray(data)) {
@@ -57,6 +78,8 @@ export const redactSensitiveData = (data: unknown, depth = 0): unknown => {
         sanitized[key] = '[REDACTED]';
       } else if (typeof value === 'object' && value !== null) {
         sanitized[key] = redactSensitiveData(value, depth + 1);
+      } else if (typeof value === 'string') {
+        sanitized[key] = scrubString(value);
       } else {
         sanitized[key] = value;
       }
@@ -104,6 +127,20 @@ export const initSentry = (force = false, dsnOverride?: string): boolean => {
       // Scrub request body data if present
       if (event.request?.data) {
         event.request.data = redactSensitiveData(event.request.data);
+      }
+
+      // Scrub top-level message if present
+      if (event.message && typeof event.message === 'string') {
+        event.message = scrubString(event.message);
+      }
+
+      // Scrub exception values if present
+      if (event.exception?.values) {
+        for (const exc of event.exception.values) {
+          if (exc.value && typeof exc.value === 'string') {
+            exc.value = scrubString(exc.value);
+          }
+        }
       }
 
       // Ensure service tag is explicitly set

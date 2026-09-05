@@ -1,6 +1,7 @@
 """Sentry error monitoring and observability module for TaskFlow AI service."""
 
 import logging
+import re
 from typing import Any, Dict, Optional
 
 import sentry_sdk
@@ -20,6 +21,16 @@ SENSITIVE_HEADERS = {
     "x-api-key",
     "proxy-authorization",
 }
+
+OPENAI_KEY_PATTERN = re.compile(r"sk-[A-Za-z0-9_-]{20,}")
+BEARER_PATTERN = re.compile(r"Bearer\s+[A-Za-z0-9._~+/-]+", re.IGNORECASE)
+
+
+def _scrub_string(val: str) -> str:
+    """Scrub known sensitive patterns like OpenAI keys and bearer tokens from raw strings."""
+    val = OPENAI_KEY_PATTERN.sub("sk-[REDACTED]", val)
+    val = BEARER_PATTERN.sub("Bearer [REDACTED]", val)
+    return val
 
 
 def _scrub_event(event: Event, hint: Hint) -> Optional[Event]:
@@ -50,6 +61,19 @@ def _scrub_event(event: Event, hint: Hint) -> Optional[Event]:
             for sensitive_key in sensitive_keys:
                 if sensitive_key in body:
                     body[sensitive_key] = "[REDACTED]"
+
+    # Scrub event message if present
+    if "message" in event and isinstance(event["message"], str):
+        event["message"] = _scrub_string(event["message"])
+
+    # Scrub exception values if present
+    exception_data = event.get("exception")
+    if exception_data and isinstance(exception_data, dict):
+        values = exception_data.get("values")
+        if isinstance(values, list):
+            for exc in values:
+                if isinstance(exc, dict) and "value" in exc and isinstance(exc["value"], str):
+                    exc["value"] = _scrub_string(exc["value"])
 
     # Ensure service tag is always present
     tags = event.setdefault("tags", {})
