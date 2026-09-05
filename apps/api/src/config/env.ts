@@ -11,7 +11,7 @@ const DEFAULT_DEV_DB_URL =
 
 export const envSchema = z
   .object({
-    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
     PORT: z.coerce.number().default(5000),
     API_PREFIX: z.string().default('/api/v1'),
     CORS_ORIGIN: z.string().default('http://localhost:5173'),
@@ -39,8 +39,8 @@ export const envSchema = z
     WORKER_SHUTDOWN_GRACE_PERIOD_MS: z.coerce.number().min(1000).default(10000),
   })
   .superRefine((data, ctx) => {
-    if (data.NODE_ENV === 'production') {
-      // 1. JWT_SECRET production requirement (min 32 characters, no dev default)
+    if (data.NODE_ENV === 'production' || data.NODE_ENV === 'staging') {
+      // 1. JWT_SECRET production/staging requirement (min 32 characters, no dev default)
       if (data.JWT_SECRET === DEFAULT_DEV_JWT_SECRET || data.JWT_SECRET.length < 32) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
