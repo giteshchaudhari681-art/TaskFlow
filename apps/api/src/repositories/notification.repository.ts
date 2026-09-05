@@ -84,7 +84,7 @@ export class NotificationRepository extends BaseRepository {
       unreadOnly?: boolean;
     }
   ) {
-    const limit = options?.limit ?? 30;
+    const limit = Math.min(Math.max(options?.limit ?? 30, 1), 100);
     const where: Prisma.NotificationWhereInput = {
       userId,
       ...(options?.unreadOnly ? { isRead: false } : {}),

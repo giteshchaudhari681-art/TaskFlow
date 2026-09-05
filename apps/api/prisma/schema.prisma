@@ -344,6 +344,7 @@ model Project {
 
   @@unique([organizationId, key])
   @@index([organizationId, status])
+  @@index([organizationId, archivedAt])
   @@map("projects")
 }
 
@@ -440,7 +441,9 @@ model Task {
 
   @@unique([projectId, taskNumber])
   @@index([projectId, status])
+  @@index([projectId, archivedAt])
   @@index([assigneeId])
+  @@index([assigneeId, archivedAt])
   @@index([dueDate])
   @@index([issueKey])
   @@index([milestoneId])

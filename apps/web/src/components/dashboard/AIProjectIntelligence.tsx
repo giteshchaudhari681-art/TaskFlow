@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Sparkles,
   RefreshCw,
@@ -95,24 +95,49 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasRun, setHasRun] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const runAnalysis = useCallback(async () => {
     if (loading) return; // Prevent concurrent requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setLoading(true);
     setError(null);
 
     try {
-      const response = await projectApi.analyzeProject(organizationId, projectId, {
-        operation: 'PROJECT_INSIGHT',
-      });
+      const response = await projectApi.analyzeProject(
+        organizationId,
+        projectId,
+        {
+          operation: 'PROJECT_INSIGHT',
+        },
+        controller.signal
+      );
       setData(response);
       setHasRun(true);
     } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
       const message =
         err instanceof Error ? err.message : 'AI analysis is temporarily unavailable.';
       setError(message);
     } finally {
-      setLoading(false);
+      if (abortControllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   }, [organizationId, projectId, loading]);
 

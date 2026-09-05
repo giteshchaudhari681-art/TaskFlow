@@ -208,6 +208,8 @@ export class TaskRepository extends BaseRepository {
       labelIds?: string[];
       labelMatch?: 'ANY' | 'ALL';
       milestoneId?: string | 'none';
+      limit?: number;
+      skip?: number;
     }
   ) {
     const where: Prisma.TaskWhereInput = {
@@ -267,9 +269,14 @@ export class TaskRepository extends BaseRepository {
       }
     }
 
+    const limit = Math.min(Math.max(filter?.limit ?? 500, 1), 500);
+    const skip = filter?.skip && filter.skip > 0 ? filter.skip : undefined;
+
     const tasks = await this.db.task.findMany({
       where,
       orderBy: [{ taskNumber: 'desc' }],
+      take: limit,
+      skip,
       include: {
         assignee: {
           select: { id: true, name: true, email: true, avatarUrl: true },

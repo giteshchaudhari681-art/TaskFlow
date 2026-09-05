@@ -219,7 +219,11 @@ describe('TaskFlow PR 17: OpenAPI / Swagger API Documentation & Contract Hardeni
 
     it('documents all essential health and authentication endpoints', () => {
       expect(paths).toHaveProperty('/health');
+      expect(paths).toHaveProperty('/health/live');
+      expect(paths).toHaveProperty('/health/ready');
       expect(paths).toHaveProperty('/api/v1/health');
+      expect(paths).toHaveProperty('/api/v1/health/live');
+      expect(paths).toHaveProperty('/api/v1/health/ready');
       expect(paths).toHaveProperty('/api/v1/auth/register');
       expect(paths).toHaveProperty('/api/v1/auth/login');
       expect(paths).toHaveProperty('/api/v1/auth/refresh');
@@ -344,9 +348,9 @@ describe('TaskFlow PR 17: OpenAPI / Swagger API Documentation & Contract Hardeni
       expect(paths).toHaveProperty('/api/v1/search');
     });
 
-    it('verifies total documented paths count equals 55 unique path endpoints', () => {
+    it('verifies total documented paths count equals 59 unique path endpoints', () => {
       const pathCount = Object.keys(paths).length;
-      expect(pathCount).toBe(55);
+      expect(pathCount).toBe(59);
     });
 
     it('ensures all path parameters in route keys are formally declared in parameters array', () => {

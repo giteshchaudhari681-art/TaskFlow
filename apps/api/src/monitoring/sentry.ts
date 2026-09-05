@@ -177,6 +177,48 @@ export const captureException = (
 };
 
 /**
+ * Wraps an asynchronous operation to capture execution timing safely.
+ * Adds sanitized performance breadcrumbs without high-cardinality noise or sensitive payloads.
+ */
+export const measureTiming = async <T>(
+  name: string,
+  operation: () => Promise<T>,
+  metadata?: Record<string, string | number | boolean>
+): Promise<T> => {
+  const start = Date.now();
+  try {
+    const result = await operation();
+    const durationMs = Date.now() - start;
+    if (initialized) {
+      Sentry.addBreadcrumb({
+        category: 'performance',
+        message: `${name} completed in ${durationMs}ms`,
+        level: 'info',
+        data: {
+          durationMs,
+          ...metadata,
+        },
+      });
+    }
+    return result;
+  } catch (err) {
+    const durationMs = Date.now() - start;
+    if (initialized) {
+      Sentry.addBreadcrumb({
+        category: 'performance',
+        message: `${name} failed after ${durationMs}ms`,
+        level: 'warning',
+        data: {
+          durationMs,
+          ...metadata,
+        },
+      });
+    }
+    throw err;
+  }
+};
+
+/**
  * Returns whether Sentry is currently active and initialized.
  */
 export const isSentryEnabled = (): boolean => initialized;
