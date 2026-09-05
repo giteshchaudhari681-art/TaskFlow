@@ -12,10 +12,16 @@ const startTime = Date.now();
 export const getHealth = async (_req: Request, res: Response): Promise<Response> => {
   const dbHealth = await healthRepository.pingDatabase();
 
+  const releaseTag = env.GIT_SHA
+    ? `taskflow-api@${env.RELEASE_VERSION}-${env.GIT_SHA}`
+    : `taskflow-api@${env.RELEASE_VERSION}`;
+
   const healthData: HealthCheckData = {
     status: dbHealth.isHealthy ? 'healthy' : 'degraded',
     service: 'taskflow-api',
-    version: '0.1.0',
+    version: env.RELEASE_VERSION,
+    release: releaseTag,
+    ...(env.GIT_SHA ? { commitSha: env.GIT_SHA } : {}),
     environment: env.NODE_ENV,
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor((Date.now() - startTime) / 1000),
@@ -33,9 +39,16 @@ export const getHealth = async (_req: Request, res: Response): Promise<Response>
  * Returns 200 if the Node.js event loop is operational.
  */
 export const getLiveness = async (_req: Request, res: Response): Promise<Response> => {
+  const releaseTag = env.GIT_SHA
+    ? `taskflow-api@${env.RELEASE_VERSION}-${env.GIT_SHA}`
+    : `taskflow-api@${env.RELEASE_VERSION}`;
+
   return sendSuccess(res, {
     status: 'live',
     service: 'taskflow-api',
+    version: env.RELEASE_VERSION,
+    release: releaseTag,
+    ...(env.GIT_SHA ? { commitSha: env.GIT_SHA } : {}),
     uptimeSeconds: Math.floor((Date.now() - startTime) / 1000),
     timestamp: new Date().toISOString(),
   });
@@ -50,9 +63,16 @@ export const getReadiness = async (_req: Request, res: Response): Promise<Respon
   const dbHealth = await healthRepository.pingDatabase();
   const isReady = dbHealth.isHealthy;
 
+  const releaseTag = env.GIT_SHA
+    ? `taskflow-api@${env.RELEASE_VERSION}-${env.GIT_SHA}`
+    : `taskflow-api@${env.RELEASE_VERSION}`;
+
   const data = {
     status: isReady ? 'ready' : 'not_ready',
     service: 'taskflow-api',
+    version: env.RELEASE_VERSION,
+    release: releaseTag,
+    ...(env.GIT_SHA ? { commitSha: env.GIT_SHA } : {}),
     timestamp: new Date().toISOString(),
     checks: {
       database: {

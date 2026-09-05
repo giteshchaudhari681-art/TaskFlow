@@ -42,6 +42,8 @@ export interface HealthCheckData {
   status: 'healthy' | 'degraded' | 'unhealthy';
   service: string;
   version: string;
+  release?: string;
+  commitSha?: string;
   environment: string;
   timestamp: string;
   uptimeSeconds: number;
