@@ -8,7 +8,8 @@ import { signAccessToken } from '../lib/auth/jwt.js';
 import { generateRefreshToken, hashRefreshToken } from '../lib/auth/session.js';
 import { env } from '../config/env.js';
 import { auditService } from './audit.service.js';
-import { AuditAction, ActorType, AuditSource } from '@prisma/client';
+import { AuditAction, ActorType, AuditSource, Prisma } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 
 export interface RequestMeta {
   userAgent?: string;
@@ -208,36 +209,98 @@ export class AuthService {
     }
 
     const tokenHash = hashRefreshToken(rawRefreshToken);
-    const session = await sessionRepository.findByHash(tokenHash);
+    const newRawRefreshToken = generateRefreshToken();
+    const newRefreshTokenHash = hashRefreshToken(newRawRefreshToken);
+    const newExpiresAt = new Date(
+      Date.now() + env.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60 * 1000
+    );
 
-    if (!session) {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      const rows = await tx.$queryRaw<
+        Array<{ id: string; revokedAt: Date | null; userId: string; expiresAt: Date }>
+      >`
+        SELECT id, "revokedAt", "userId", "expiresAt"
+        FROM sessions
+        WHERE "refreshTokenHash" = ${tokenHash}
+        FOR UPDATE
+      `;
+      const s = rows[0];
+
+      if (!s) {
+        return { notFound: true as const };
+      }
+
+      // Reuse detection: token has already been revoked
+      if (s.revokedAt) {
+        await tx.session.updateMany({
+          where: { userId: s.userId, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+        return { isReuse: true as const, userId: s.userId, sessionId: s.id };
+      }
+
+      // Expiration check
+      if (s.expiresAt.getTime() < Date.now()) {
+        await tx.session.update({
+          where: { id: s.id },
+          data: { revokedAt: new Date() },
+        });
+        return { isExpired: true as const };
+      }
+
+      // 1. Revoke the old session
+      await tx.session.update({
+        where: { id: s.id },
+        data: { revokedAt: new Date() },
+      });
+
+      // 2. Generate replacement session
+      await tx.session.create({
+        data: {
+          userId: s.userId,
+          refreshTokenHash: newRefreshTokenHash,
+          expiresAt: newExpiresAt,
+          rotatedFromSessionId: s.id,
+          userAgent: meta?.userAgent,
+          ipAddress: meta?.ipAddress,
+        },
+      });
+
+      const user = await tx.user.findUnique({
+        where: { id: s.userId },
+      });
+      if (!user) {
+        return { notFound: true as const };
+      }
+
+      return { session: { ...s, user } };
+    });
+
+    if ('notFound' in result) {
       const err = new Error('Invalid or expired refresh session');
       (err as unknown as { statusCode: number }).statusCode = 401;
       throw err;
     }
 
-    // Reuse detection: token has already been revoked
-    if (session.revokedAt) {
+    if ('isReuse' in result && result.userId) {
       console.warn(
-        `🚨 Suspicious refresh token reuse detected for user ${session.userId}. Revoking all sessions.`
+        `🚨 Suspicious refresh token reuse detected for user ${result.userId}. Revoking all sessions.`
       );
-      await sessionRepository.revokeAllForUser(session.userId);
-
-      const memberships = await organizationRepository.getUserMemberships(session.userId);
+      const memberships = await organizationRepository.getUserMemberships(result.userId);
       const primaryOrgId = memberships[0]?.organization.id;
       if (primaryOrgId) {
         await auditService.record({
           organizationId: primaryOrgId,
-          actorUserId: session.userId,
+          actorUserId: result.userId,
           actorType: ActorType.SYSTEM,
           action: AuditAction.AUTH_REFRESH_REUSE_DETECTED,
           resourceType: 'Session',
-          resourceId: session.id,
+          resourceId: result.sessionId,
           requestId: meta?.requestId,
           source: AuditSource.SYSTEM,
           metadata: {
-            userId: session.userId,
-            sessionId: session.id,
+            userId: result.userId,
+            sessionId: result.sessionId,
             detectedAt: new Date().toISOString(),
             ipAddress: meta?.ipAddress,
             userAgent: meta?.userAgent,
@@ -250,33 +313,19 @@ export class AuthService {
       throw err;
     }
 
-    // Expiration check
-    if (session.expiresAt.getTime() < Date.now()) {
-      await sessionRepository.revoke(session.id);
+    if ('isExpired' in result) {
       const err = new Error('Refresh session has expired. Please log in again.');
       (err as unknown as { statusCode: number }).statusCode = 401;
       throw err;
     }
 
-    // 1. Revoke the old session
-    await sessionRepository.revoke(session.id);
+    if (!('session' in result) || !result.session) {
+      const err = new Error('Invalid session state');
+      (err as unknown as { statusCode: number }).statusCode = 401;
+      throw err;
+    }
 
-    // 2. Generate replacement session
-    const newRawRefreshToken = generateRefreshToken();
-    const newRefreshTokenHash = hashRefreshToken(newRawRefreshToken);
-    const newExpiresAt = new Date(
-      Date.now() + env.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60 * 1000
-    );
-
-    await sessionRepository.create({
-      userId: session.userId,
-      refreshTokenHash: newRefreshTokenHash,
-      expiresAt: newExpiresAt,
-      rotatedFromSessionId: session.id,
-      userAgent: meta?.userAgent,
-      ipAddress: meta?.ipAddress,
-    });
-
+    const { session } = result;
     const memberships = await organizationRepository.getUserMemberships(session.userId);
     const primaryMembership = memberships[0];
 

@@ -26,8 +26,24 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    def validate_production(self) -> None:
+        """Explicit validation method for production environments."""
+        if self.app_env == "production":
+            if (
+                not self.ai_service_token
+                or self.ai_service_token == "taskflow-internal-dev-token"
+                or len(self.ai_service_token) < 16
+            ):
+                raise ValueError(
+                    "Production AI_SERVICE_TOKEN must be explicitly set "
+                    "and at least 16 characters long."
+                )
+
 
 @lru_cache()
 def get_settings() -> Settings:
     """Returns cached singleton Settings instance."""
-    return Settings()
+    settings = Settings()
+    if settings.app_env == "production":
+        settings.validate_production()
+    return settings

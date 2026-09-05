@@ -132,3 +132,20 @@ def test_settings_configuration_defaults() -> None:
     assert cfg.app_env == "development"
     assert cfg.openai_model == "gpt-4o-mini"
     assert cfg.ai_request_timeout_seconds == 30.0
+
+
+def test_settings_production_validation_rejects_insecure_defaults() -> None:
+    """Production mode must reject default dev token or tokens shorter than 16 chars."""
+    prod_default = Settings(app_env="production", ai_service_token="taskflow-internal-dev-token")
+    with pytest.raises(ValueError, match="Production AI_SERVICE_TOKEN must be explicitly set"):
+        prod_default.validate_production()
+
+    prod_short = Settings(app_env="production", ai_service_token="too-short")
+    with pytest.raises(ValueError, match="Production AI_SERVICE_TOKEN must be explicitly set"):
+        prod_short.validate_production()
+
+    prod_valid = Settings(
+        app_env="production", ai_service_token="super-secret-prod-token-minimum-16"
+    )
+    # Should not raise
+    prod_valid.validate_production()

@@ -180,3 +180,33 @@ def test_api_route_captures_502_upstream_ai_provider_error():
             _, kwargs = mock_capture.call_args
             assert kwargs["request_id"] == "corr-req-502"
             assert kwargs["operation"] == "PROJECT_INSIGHT"
+
+
+def test_sentry_event_scrubbing_redacts_messages_and_exceptions():
+    """Verify Sentry scrubber strips OpenAI keys and Bearer tokens in messages and exceptions."""
+    dummy_key_1 = "sk-" + "1234567890abcdef1234567890"
+    dummy_key_2 = "sk-" + "abcdef9876543210zyxwvutsrq"
+    raw_event = {
+        "message": f"Error occurred using OpenAI key {dummy_key_1} for auth",
+        "exception": {
+            "values": [
+                {
+                    "type": "ValueError",
+                    "value": (
+                        "Failed with token Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 "
+                        f"and {dummy_key_2}"
+                    ),
+                }
+            ]
+        },
+        "tags": {},
+    }
+
+    scrubbed = _scrub_event(raw_event, {})
+    assert "sk-[REDACTED]" in scrubbed["message"]
+    assert dummy_key_1 not in scrubbed["message"]
+
+    exc_val = scrubbed["exception"]["values"][0]["value"]
+    assert "Bearer [REDACTED]" in exc_val
+    assert "sk-[REDACTED]" in exc_val
+    assert "eyJhbGci" not in exc_val
