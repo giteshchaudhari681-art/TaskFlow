@@ -132,5 +132,24 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     await expect(page.getByRole('button', { name: 'View Projects' })).toBeVisible({
       timeout: 10000,
     });
+
+    // 10. Logout and Re-authentication Flow
+    await page.locator('button[title="Sign out of current session"]').click();
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await loginPage.switchToLogin();
+    await expect(page.locator('h2', { hasText: 'Sign in to TaskFlow' })).toBeVisible({
+      timeout: 20000,
+    });
+
+    // Re-login with the same account
+    await loginPage.login(smokeEmail, TEST_PASSWORD);
+    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 20000 });
+    await expect(page.locator('span', { hasText: 'Active Workspace:' })).toContainText(
+      smokeOrgName
+    );
+
+    // 11. Verify Persistent State (Project and Task survive session lifecycle)
+    await projectsPage.goto();
+    await expect(page.locator(`text=${projectName}`).first()).toBeVisible({ timeout: 10000 });
   });
 });

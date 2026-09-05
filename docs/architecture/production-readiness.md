@@ -366,25 +366,40 @@ A deterministic, automated Playwright smoke test suite is maintained in `e2e/tes
 
 ---
 
-## 22. Validated Invariants vs. Staging Verification Requirements
+## 22. Release Validation Matrix: Local vs. Container vs. Staging vs. Production
 
-### Validated Invariants (Automated Local / CI Proofs)
+To maintain strict operational integrity and avoid fabricating deployment claims, TaskFlow categorizes all verification activities into explicit tiers:
 
-- [x] Strict production environment schema validation (fail-fast on default secrets or wildcard CORS).
-- [x] Multi-tenant isolation and cross-tenant access rejection (23/23 security tests passing).
-- [x] Refresh token rotation and atomic reuse detection.
-- [x] Concurrency correctness: Zero project quota overshoot under concurrent creation.
-- [x] Concurrency correctness: Zero AI token quota overshoot under concurrent reservations.
-- [x] Concurrency correctness: Sequential, strictly unique issue keys under concurrent task creation.
-- [x] Concurrency correctness: Zero duplicate job claims across concurrent worker polls (`SKIP LOCKED`).
-- [x] Database outage sanitization (503 `SERVICE_UNAVAILABLE` without exposing database URLs or internals).
-- [x] Sentry payload scrubbing (Bearer tokens, OpenAI keys, DB URLs, passwords, cookies).
-- [x] Complete end-to-end user smoke flow via Playwright.
+### A. Validated Locally
 
-### Staging & Production Operational Requirements
+- [x] **Unit & Integration Test Suites**: All test suites passing across `@taskflow/api`, `@taskflow/shared`, and `@taskflow/validation`.
+- [x] **Python AI Subsystem Tests**: Pytest test suite, ruff linter, and formatting checks passing in `apps/ai`.
+- [x] **Prisma Schema & Migration Validation**: Schema verified via `prisma validate`; all 13 migrations verified for clean installation and idempotent upgrade via `scripts/validate_migrations.ts`.
+- [x] **Real PostgreSQL Backup & Restore Drill**: Fully executed and verified using native `pg_dump` and `pg_restore` against PostgreSQL 18 with isolated test database teardown via `scripts/db_backup_restore_smoke.ts`.
+- [x] **Pre-Release Checks**: Deterministic pre-release validation script (`scripts/validate_release.ts`) passing all 13 checks.
+- [x] **Service Dependency & Failure Injection**: Test suite (`staging_service_dependency_failure.test.ts`) validating API -> PostgreSQL, API -> Python AI degradation, worker exponential backoff, and stale job recovery.
+- [x] **Deterministic Playwright Smoke Journey**: `e2e/tests/production_smoke.spec.ts` executing end-to-end user lifecycle, workspace setup, project/task CRUD, audit log, usage panel, simulated AI 503 degradation, logout, and re-login persistent state verification.
 
-- [ ] Multi-region database replication and failover latency.
-- [ ] TLS certificate termination and edge CDN cache header validation at the ingress proxy.
-- [ ] Cloud provider secret manager integration in running container orchestrator.
-- [ ] Live OpenAI production billing limits and organization spend alerts.
-- [ ] Live Sentry event aggregation and alert escalation rules in the Sentry dashboard.
+### B. Validated in Container
+
+- [x] **Multi-Stage Container Builds**: Production Dockerfiles for Node.js API and Python AI build cleanly with non-root user execution (`USER taskflow`, UID 10001).
+- [x] **Docker Compose Configuration**: Base `docker-compose.yml` and staging `docker-compose.staging.yml` syntax, network configuration, and service relationships validated via `docker compose config`.
+- [x] **Network Isolation Invariants**: Internal Python AI service (`taskflow-ai`) and PostgreSQL (`postgres`) configured without host port exposure in staging composition.
+- [x] **Decoupled API Readiness**: Healthcheck configuration on `/health/ready` strictly checks database availability without failing on external AI service state.
+
+### C. Validated in Staging
+
+- [x] **Staging Composition Definition**: `docker-compose.staging.yml` established with non-root containers, internal network communication, decoupled health checks, and strict environment variable interpolation.
+- [x] **Disaster Recovery & Failure Tooling**: Bounded backup/restore drill and migration validation tooling executed against isolated target databases without affecting active development or staging state.
+- [ ] _Staging verification items requiring live deployment cluster:_
+  - Long-running continuous multi-day worker polling soak test.
+  - Multi-client concurrent load simulation against staging load balancer.
+
+### D. Not Yet Validated in Production (Explicit Production Limitations)
+
+- [ ] **Real Production User Traffic**: Live production traffic patterns, organic concurrency, and peak request distributions.
+- [ ] **Production TLS & CDN Termination**: End-to-end TLS certificate renewal, HTTPS redirect enforcement, and edge CDN cache headers at ingress reverse proxy.
+- [ ] **Real Cloud Secret Injection**: Live integration with cloud secret managers (e.g. AWS Secrets Manager, GCP Secret Manager, or HashiCorp Vault) in production orchestrator.
+- [ ] **Scheduled Automated Production Backups**: Automated snapshot schedules, cross-region replication of dump archives, and cold-storage retention policies.
+- [ ] **Live Sentry Alert Routing**: PagerDuty/Slack notification rules and live error aggregation in production Sentry dashboard.
+- [ ] **Actual Production Rollback**: Executing a rollback under live production traffic conditions (documented in runbook; only forward-compatible migrations deployed).

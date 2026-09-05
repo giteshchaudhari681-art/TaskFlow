@@ -53,6 +53,45 @@ export interface ProvisionedTask {
 }
 
 /**
+ * Registers a user with automatic exponential backoff retry on HTTP 429 (Rate Limit).
+ */
+export async function registerTestUser(
+  request: APIRequestContext,
+  data: { name: string; email: string; password?: string; organizationName?: string }
+): Promise<any> {
+  const maxRetries = 4;
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const res = await request.post('/api/v1/auth/register', {
+      data: {
+        name: data.name,
+        email: data.email,
+        password: data.password || TEST_PASSWORD,
+        ...(data.organizationName ? { organizationName: data.organizationName } : {}),
+      },
+    });
+
+    if (res.ok()) {
+      return res.json();
+    }
+
+    const status = res.status();
+    if (status === 429) {
+      const waitTime = Math.pow(2, attempt) * 1500; // 1.5s, 3s, 6s, 12s
+      lastError = new Error(`Rate limited (HTTP 429), retrying in ${waitTime}ms...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      continue;
+    }
+
+    const errText = await res.text();
+    throw new Error(`Failed to register test user: HTTP ${status} - ${errText}`);
+  }
+
+  throw lastError || new Error('Failed to register test user after retries');
+}
+
+/**
  * Provisions a fresh, isolated user and organization using the public application API.
  */
 export async function provisionTestUser(
@@ -64,21 +103,13 @@ export async function provisionTestUser(
   const organizationName = overrides.organizationName || generateUniqueOrg();
   const password = TEST_PASSWORD;
 
-  const res = await request.post('/api/v1/auth/register', {
-    data: {
-      name,
-      email,
-      password,
-      organizationName,
-    },
+  const json = await registerTestUser(request, {
+    name,
+    email,
+    password,
+    organizationName,
   });
 
-  if (!res.ok()) {
-    const errText = await res.text();
-    throw new Error(`Failed to provision test user: HTTP ${res.status()} - ${errText}`);
-  }
-
-  const json = await res.json();
   const user = json.data.user;
   const organization = json.data.defaultOrganization || json.data.organization;
   const accessToken = json.data.accessToken;
