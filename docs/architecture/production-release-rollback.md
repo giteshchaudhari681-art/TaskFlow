@@ -31,7 +31,7 @@ TaskFlow uses immutable, deterministic release identifiers. Every build artifact
 | **Core API**  | `taskflow-api:<git-sha>` (e.g., `taskflow-api:09fa79b`)       | `taskflow-api:latest`, `taskflow-api:production`       |
 | **Python AI** | `taskflow-ai:<git-sha>` (e.g., `taskflow-ai:09fa79b`)         | `taskflow-ai:latest`, `taskflow-ai:production`         |
 | **Worker**    | `taskflow-worker:<git-sha>` (e.g., `taskflow-worker:09fa79b`) | `taskflow-worker:latest`, `taskflow-worker:production` |
-| **Sentry**    | `taskflow-api@0.1.0-<git-sha>`                                | N/A                                                    |
+| **Sentry**    | `taskflow-api@1.0.0-<git-sha>`                                | N/A                                                    |
 
 ### Invariants:
 

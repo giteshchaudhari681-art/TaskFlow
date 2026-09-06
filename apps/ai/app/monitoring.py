@@ -98,7 +98,7 @@ def init_sentry(settings: Optional[Settings] = None, force: bool = False) -> boo
     sentry_sdk.init(
         dsn=cfg.sentry_dsn,
         environment=cfg.sentry_environment or cfg.app_env,
-        release="taskflow-ai@0.1.0",
+        release="taskflow-ai@1.0.0",
         traces_sample_rate=cfg.sentry_traces_sample_rate,
         before_send=_scrub_event,
     )

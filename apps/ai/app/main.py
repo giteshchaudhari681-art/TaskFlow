@@ -38,7 +38,7 @@ app = FastAPI(
         "Dedicated Python + Pydantic AI subsystem for TaskFlow project intelligence. "
         "This API is an internal service. Public clients must use the Node.js TaskFlow API."
     ),
-    version="0.1.0",
+    version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,

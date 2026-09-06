@@ -10,7 +10,7 @@ export const openApiSpec = {
   openapi: '3.1.0',
   info: {
     title: 'TaskFlow API',
-    version: '0.1.0',
+    version: '1.0.0',
     description:
       'REST API for the TaskFlow AI-Powered Project Operations Platform. Authoritative backend managing multi-tenant workspaces, projects, Kanban tasks, subtasks, dependencies, milestones, real-time collaboration, notification streams, deterministic project health, and secure internal AI orchestration.',
     contact: {

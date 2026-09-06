@@ -14,7 +14,7 @@ def test_health_returns_ok_and_correct_structure(client: TestClient) -> None:
     data = response.json()
     assert data["status"] == "ok"
     assert data["service"] == "taskflow-ai"
-    assert data["version"] == "0.1.0"
+    assert data["version"] == "1.0.0"
     assert data["environment"] == "testing"
 
 

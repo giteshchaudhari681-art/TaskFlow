@@ -1,8 +1,8 @@
-# TaskFlow Final Application Security Audit & Hardening
+# TaskFlow v1.0 Final Application Security Audit & Posture
 
-**PR**: PR33 — Final Security Audit & Hardening  
-**Target Branch**: `feat/pr-33-final-security-hardening`  
-**Classification**: Security Architecture & Quality Gate
+**Version**: TaskFlow v1.0.0 (Release Freeze)  
+**Branch**: `feat/pr-35-final-qa-v1`  
+**Classification**: Final Security Architecture & Quality Gate
 
 ---
 
@@ -254,12 +254,65 @@ The following items must be verified by the operations / devops team in the prod
 
 ---
 
-## 7. Verification Summary
+## 7. Verification Summary (v1.0 Live Results)
 
-- **Automated Security Tests**: 29 dedicated PR33 tests in `apps/api/src/__tests__/pr33_final_security.test.ts` (100% pass).
-- **Full API Regression Suite**: 35 test files, 647 total tests (100% pass).
-- **Deterministic AI Evaluations**: 100% pass across all 4 evaluation categories.
+- **Dedicated Final Security Tests**: 29 PR33 tests in `apps/api/src/__tests__/pr33_final_security.test.ts` (100% pass).
+- **Full API Regression Suite**: 36 test files, 675 total tests (100% pass).
+- **Python AI Security & Route Suite**: 9 test files, 76 total tests (100% pass).
+- **Deterministic AI Evaluations**: 12/12 pass assertions across all 4 evaluation categories.
+- **Full Playwright E2E Suite**: 13 test files, 22 total tests (100% pass).
 - **Staging Preflight Validation**: 15/15 checks passed (`scripts/validate_staging_preflight.ts`).
+- **Production Preflight Validation**: 24/24 checks passed (`scripts/validate_production_release.ts`).
 - **Deterministic Release Validation**: 13/13 checks passed (`scripts/validate_release.ts`).
-- **Playwright Production Smoke**: 2/2 tests passed (`e2e/tests/production_smoke.spec.ts`).
 - **Database Migrations & Backup/Restore**: Verified clean deployment and real `pg_dump`/`pg_restore` verification.
+
+---
+
+## 8. Explicit Security Assurance Classification
+
+To maintain absolute transparency, all security controls are classified into four operational states:
+
+### [IMPLEMENTED]
+
+- HS256 JWT access token verification with subject validation and 15-minute expiration.
+- SHA-256 hashed refresh token storage in PostgreSQL.
+- Opaque cryptographic refresh token rotation and family revocation on reuse detection.
+- Concurrent refresh race-condition mitigation.
+- Multi-tenant query isolation scoping all entity operations to `organizationId`.
+- Dual-tier RBAC (`UserRole` and `ProjectRole`) enforced server-side.
+- Parameter precedence guards preventing context hijacking via conflicting headers/route params.
+- Zod schema validation stripping unknown fields and enforcing bounds on all inputs.
+- Markdown/XML prompt injection fences in AI prompt assembly.
+- Compare-and-swap stale state guards on AI task actions (`expectedCurrentState`).
+- Helmet HTTP security headers (X-Frame-Options, X-Content-Type-Options, HSTS).
+- Request body limits (100KB default, 10MB upload).
+- Sentry PII and secret scrubbing in `@sentry/node`, `@sentry/react`, and Python `sentry-sdk`.
+- Bounded query clamping on search, audit, notifications, and tasks.
+- Non-root container user configuration (`USER taskflow`).
+
+### [VALIDATED LOCALLY]
+
+- All 675 API Vitest automated tests passing cleanly without regression.
+- All 76 Python AI Pytest automated tests passing cleanly.
+- Full 22-test Playwright browser automation suite passing end-to-end.
+- Deterministic AI evaluation runner passing across all 4 operations.
+- Clean and upgrade database migration drill passing on real PostgreSQL.
+- Real `pg_dump` and `pg_restore` backup and restore drill passing on real PostgreSQL 18.
+- Base and staging Docker Compose syntax, schema, and port isolation validated via Docker CLI.
+- Zero secrets committed (verified via automated secret scanning).
+
+### [REQUIRES STAGING]
+
+- Deployment onto a shared multi-service staging environment.
+- Live verification of service-to-service latency over a cloud virtual network.
+- Live verification of reverse proxy TLS certificate termination.
+- Staging change management drill and deployment validation smoke execution.
+
+### [REQUIRES PRODUCTION]
+
+- Injection of high-entropy secrets via cloud secret manager (AWS Secrets Manager / GCP Secret Manager / Vault).
+- Edge WAF configuration (Cloudflare / AWS WAF) for distributed Layer 7 DDoS and IP rate limiting.
+- Deployment of PostgreSQL onto private VPC subnets with zero public IP addresses.
+- Automated daily backup snapshots and WAL archiving for Point-In-Time Recovery (PITR).
+- Production domain DNS cutover and SSL certificate issuance.
+- Formal operational sign-off by cloud infrastructure administrator.
