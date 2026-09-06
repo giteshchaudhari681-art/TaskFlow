@@ -37,7 +37,7 @@ export const envSchema = z
     WORKER_RETRY_MAX_DELAY_MS: z.coerce.number().min(1000).default(60000),
     WORKER_PROCESSING_TIMEOUT_MS: z.coerce.number().min(1000).default(30000),
     WORKER_SHUTDOWN_GRACE_PERIOD_MS: z.coerce.number().min(1000).default(10000),
-    RELEASE_VERSION: z.string().default('0.1.0'),
+    RELEASE_VERSION: z.string().default('1.0.0'),
     GIT_SHA: z.string().optional(),
   })
   .superRefine((data, ctx) => {

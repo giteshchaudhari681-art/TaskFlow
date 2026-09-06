@@ -7,7 +7,7 @@ import { env } from '../config/env.js';
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: env.NODE_ENV === 'test' ? 10000 : 30, // 30 attempts per 15 minutes in non-test
+  max: env.NODE_ENV === 'production' || env.NODE_ENV === 'staging' ? 30 : 10000, // 30 attempts per 15 minutes in staging/production
   standardHeaders: true,
   legacyHeaders: false,
   message: {

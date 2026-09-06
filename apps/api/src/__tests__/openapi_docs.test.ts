@@ -15,7 +15,7 @@ describe('TaskFlow PR 17: OpenAPI / Swagger API Documentation & Contract Hardeni
       expect(res.headers['content-type']).toMatch(/json/);
       expect(res.body.openapi).toBe('3.1.0');
       expect(res.body.info.title).toBe('TaskFlow API');
-      expect(res.body.info.version).toBe('0.1.0');
+      expect(res.body.info.version).toBe('1.0.0');
     });
 
     it('passes formal OpenAPI schema validation via SwaggerParser', async () => {
@@ -68,7 +68,7 @@ describe('TaskFlow PR 17: OpenAPI / Swagger API Documentation & Contract Hardeni
       expect(openApiSpec.info.description).toContain(
         'TaskFlow AI-Powered Project Operations Platform'
       );
-      expect(openApiSpec.info.version).toBe('0.1.0');
+      expect(openApiSpec.info.version).toBe('1.0.0');
       expect(openApiSpec.servers.length).toBeGreaterThanOrEqual(1);
     });
 

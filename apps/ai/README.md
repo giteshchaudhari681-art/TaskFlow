@@ -126,7 +126,7 @@ Returns service status and runtime environment. Does not make external OpenAI ca
 {
   "status": "ok",
   "service": "taskflow-ai",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "environment": "development"
 }
 ```
@@ -142,6 +142,8 @@ Executes typed analysis over structured TaskFlow project/task context.
 - `PROJECT_SUMMARY`: Synthesizes an executive overview from active tasks, metrics, and milestones.
 - `TASK_SUMMARY`: Analyzes task risks, blockers, and execution priorities.
 - `PROJECT_INSIGHT`: Evaluates delivery bottlenecks and produces prioritized recommendations.
+- `TASK_DECOMPOSITION`: Decomposes large tasks into bounded, ordered actionable subtasks.
+- `TASK_ACTIONS`: Generates structured state proposals requiring explicit human review and approval.
 
 **Request Payload:**
 

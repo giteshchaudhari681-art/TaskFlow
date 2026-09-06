@@ -13,7 +13,7 @@ class HealthResponse(BaseModel):
 
     status: str = Field(..., description="Service status", examples=["ok"])
     service: str = Field(..., description="Service identifier", examples=["taskflow-ai"])
-    version: str = Field(..., description="Service semver version", examples=["0.1.0"])
+    version: str = Field(..., description="Service semver version", examples=["1.0.0"])
     environment: str = Field(..., description="Runtime environment name", examples=["development"])
 
 
@@ -27,6 +27,6 @@ async def get_health(settings: Settings = Depends(get_settings)) -> HealthRespon
     return HealthResponse(
         status="ok",
         service="taskflow-ai",
-        version="0.1.0",
+        version="1.0.0",
         environment=settings.app_env,
     )

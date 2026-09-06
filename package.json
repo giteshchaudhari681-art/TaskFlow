@@ -1,6 +1,6 @@
 {
   "name": "taskflow-monorepo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "TaskFlow — AI-Powered Project Operations Platform",
   "workspaces": [
