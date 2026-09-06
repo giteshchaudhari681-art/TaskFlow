@@ -68,7 +68,7 @@ export const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer"
+        className="btn-interactive flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer shadow-sm hover:shadow-card-hover"
         title="Quick Project Switcher"
       >
         <Layers className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
@@ -81,15 +81,15 @@ export const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
           </span>
         )}
         <ChevronDown
-          className={`w-3.5 h-3.5 text-taskflow-muted transition-transform ${
-            isOpen ? 'rotate-180' : ''
+          className={`w-3.5 h-3.5 text-taskflow-muted transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-cyan-400' : ''
           }`}
         />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-72 glass-panel rounded-xl border border-taskflow-border shadow-2xl bg-taskflow-surface text-taskflow-text p-2 z-50 animate-fadeIn">
+        <div className="absolute left-0 mt-2 w-72 glass-panel-elevated rounded-xl border border-taskflow-border shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
           {/* Search Input */}
           <div className="relative mb-2">
             <Search className="w-3.5 h-3.5 text-taskflow-muted absolute left-2.5 top-2.5" />

@@ -205,7 +205,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Filter Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 bg-taskflow-surface/60 border border-taskflow-border rounded-2xl backdrop-blur-md">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 glass-panel-elevated border border-taskflow-border/80 rounded-2xl shadow-sm">
         {/* Search input */}
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-taskflow-muted" />
@@ -214,7 +214,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={`Search ${projectKey} tasks by key or title...`}
-            className="w-full pl-10 pr-4 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+            className="w-full pl-10 pr-4 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
           />
         </div>
 
@@ -224,7 +224,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value={TaskStatus.TODO}>To Do</option>
@@ -240,7 +240,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
           >
             <option value="ALL">All Priorities</option>
             <option value={TaskPriority.URGENT}>Urgent</option>
@@ -253,7 +253,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={assigneeFilter}
             onChange={e => setAssigneeFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
           >
             <option value="ALL">All Assignees</option>
             {members.map(m => (
@@ -267,7 +267,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={labelFilter}
             onChange={e => setLabelFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
           >
             <option value="ALL">All Labels</option>
             {projectLabels.map(l => (
@@ -281,9 +281,9 @@ export const TaskList: React.FC<TaskListProps> = ({
           <button
             type="button"
             onClick={() => setShowArchived(!showArchived)}
-            className={`px-3 py-2 rounded-xl text-xs font-medium border transition-colors flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-2 rounded-xl text-xs font-medium border transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
               showArchived
-                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-glow-amber'
                 : 'bg-taskflow-surface text-taskflow-muted border-taskflow-border hover:text-white'
             }`}
           >
@@ -295,7 +295,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <button
             onClick={loadTasks}
             title="Refresh tasks"
-            className="p-2 bg-taskflow-surface border border-taskflow-border hover:border-taskflow-border-subtle text-taskflow-muted hover:text-white rounded-xl transition-colors cursor-pointer"
+            className="p-2 bg-taskflow-surface border border-taskflow-border hover:border-taskflow-border-subtle text-taskflow-muted hover:text-white rounded-xl btn-interactive transition-colors cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -336,7 +336,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           {canManageTasks && (
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-xs rounded-xl transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-glow-cyan btn-interactive-primary cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Create Task</span>
@@ -399,13 +399,13 @@ export const TaskList: React.FC<TaskListProps> = ({
 
       {/* Tasks Table / Card List */}
       {!loading && tasks.length > 0 && (
-        <div className="bg-taskflow-surface/50 border border-taskflow-border rounded-2xl overflow-hidden backdrop-blur-md shadow-xl">
+        <div className="glass-panel-elevated border border-taskflow-border/80 rounded-2xl overflow-hidden shadow-xl">
           <div className="divide-y divide-taskflow-border/60">
             {tasks.map(task => (
               <div
                 key={task.id}
                 onClick={() => setSelectedTaskId(task.id)}
-                className="group flex flex-col md:flex-row items-start md:items-center justify-between p-4 hover:bg-taskflow-card-hover/80 cursor-pointer transition-all gap-3"
+                className="group flex flex-col md:flex-row items-start md:items-center justify-between p-4 hover:bg-taskflow-surface/90 hover:border-l-2 hover:border-l-cyan-400 cursor-pointer transition-all gap-3 card-interactive"
               >
                 {/* Left: Key & Title */}
                 <div className="flex items-start md:items-center gap-3.5 flex-1 min-w-0">

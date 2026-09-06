@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff, LogIn, AlertCircle, Sparkles, UserCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { TiltCard } from '../common/useCardTilt';
 
 interface LoginPageProps {
   onSwitchToRegister: () => void;
@@ -42,7 +43,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="glass-card rounded-2xl p-8 border border-taskflow-border shadow-2xl relative overflow-hidden">
+      <TiltCard
+        maxTilt={1.5}
+        className="glass-panel-elevated rounded-2xl p-8 border border-taskflow-border/80 shadow-elevation-4 relative overflow-hidden"
+      >
         <div className="absolute top-0 right-0 -mr-12 -mt-12 w-40 h-40 rounded-full bg-cyan-500/10 blur-2xl pointer-events-none" />
 
         <div className="text-center mb-6">
@@ -76,7 +80,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="alex.chen@taskflow.dev"
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
               />
             </div>
           </div>
@@ -93,12 +97,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-taskflow-muted hover:text-white transition-colors"
+                className="absolute right-3 top-2.5 text-taskflow-muted hover:text-white transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -108,7 +112,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-semibold shadow-glow-cyan btn-interactive-primary transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <span>Signing in...</span>
@@ -130,7 +134,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
             <button
               type="button"
               onClick={() => handleQuickFill('alex.chen@taskflow.dev')}
-              className="px-2.5 py-1.5 rounded bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-xs text-taskflow-muted hover:text-cyan-300 transition-colors flex items-center space-x-1.5 text-left"
+              className="px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-xs text-taskflow-muted hover:text-cyan-300 btn-interactive transition-colors flex items-center space-x-1.5 text-left cursor-pointer"
             >
               <UserCheck className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
               <span className="truncate">Alex (Owner)</span>
@@ -138,7 +142,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
             <button
               type="button"
               onClick={() => handleQuickFill('sam.miller@taskflow.dev')}
-              className="px-2.5 py-1.5 rounded bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-xs text-taskflow-muted hover:text-indigo-300 transition-colors flex items-center space-x-1.5 text-left"
+              className="px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-xs text-taskflow-muted hover:text-indigo-300 btn-interactive transition-colors flex items-center space-x-1.5 text-left cursor-pointer"
             >
               <UserCheck className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
               <span className="truncate">Sam (Admin)</span>
@@ -150,12 +154,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           Don&apos;t have an account?{' '}
           <button
             onClick={onSwitchToRegister}
-            className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+            className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors cursor-pointer"
           >
             Create Workspace
           </button>
         </div>
-      </div>
+      </TiltCard>
     </div>
   );
 };

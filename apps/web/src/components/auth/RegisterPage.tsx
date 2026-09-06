@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { TiltCard } from '../common/useCardTilt';
 
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
@@ -57,7 +58,10 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="glass-card rounded-2xl p-8 border border-taskflow-border shadow-2xl relative overflow-hidden">
+      <TiltCard
+        maxTilt={1.5}
+        className="glass-panel-elevated rounded-2xl p-8 border border-taskflow-border/80 shadow-elevation-4 relative overflow-hidden"
+      >
         <div className="absolute top-0 right-0 -mr-12 -mt-12 w-40 h-40 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
 
         <div className="text-center mb-6">
@@ -93,7 +97,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Elena Rostova"
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
               />
             </div>
           </div>
@@ -110,7 +114,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="elena@acme-engineering.com"
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
               />
             </div>
           </div>
@@ -126,7 +130,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
                 value={organizationName}
                 onChange={e => setOrganizationName(e.target.value)}
                 placeholder="Acme Systems"
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
               />
             </div>
           </div>
@@ -143,12 +147,12 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-9 pr-10 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-10 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-taskflow-muted hover:text-white transition-colors"
+                className="absolute right-3 top-2.5 text-taskflow-muted hover:text-white transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -158,7 +162,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
+            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white text-sm font-semibold shadow-glow-cyan btn-interactive-primary transition-all flex items-center justify-center space-x-2 disabled:opacity-50 mt-2 cursor-pointer"
           >
             {loading ? (
               <span>Creating workspace...</span>
@@ -175,12 +179,12 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
           Already have an account?{' '}
           <button
             onClick={onSwitchToLogin}
-            className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+            className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors cursor-pointer"
           >
             Sign in
           </button>
         </div>
-      </div>
+      </TiltCard>
     </div>
   );
 };

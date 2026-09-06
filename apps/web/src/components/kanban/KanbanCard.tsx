@@ -84,10 +84,10 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onClick={() => onCardClick(task)}
-      className={`group relative rounded-xl border p-3.5 bg-taskflow-surface/80 hover:bg-taskflow-surface hover:border-cyan-500/40 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-glow-cyan/20 ${
+      className={`group relative rounded-xl border p-3.5 bg-taskflow-surface/90 hover:bg-taskflow-surface hover:border-cyan-500/40 transition-all duration-200 cursor-pointer shadow-sm card-interactive ${
         isDragging
           ? 'opacity-40 scale-[0.98] border-cyan-500/60 ring-2 ring-cyan-500/30 shadow-2xl'
-          : 'border-taskflow-border'
+          : 'border-taskflow-border/80'
       }`}
     >
       {/* Top row: Issue key & priority */}
@@ -109,14 +109,14 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
                 onClick={() => setShowQuickMove(!showQuickMove)}
                 title="Move task to another column"
                 aria-label="Move task"
-                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-taskflow-surface-hover text-taskflow-muted hover:text-white transition-opacity"
+                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-taskflow-surface-hover text-taskflow-muted hover:text-white btn-interactive transition-opacity"
               >
                 <MoreHorizontal className="w-3.5 h-3.5" />
               </button>
 
               {showQuickMove && (
-                <div className="absolute right-0 top-6 z-30 w-44 rounded-xl bg-taskflow-surface border border-taskflow-border shadow-2xl p-1.5 space-y-0.5 text-xs animate-in fade-in zoom-in-95">
-                  <div className="px-2 py-1 text-[10px] font-bold text-taskflow-muted uppercase tracking-wider border-b border-taskflow-border mb-1">
+                <div className="absolute right-0 top-6 z-30 w-44 rounded-xl bg-taskflow-surface border border-taskflow-border/80 glass-panel-elevated shadow-2xl p-1.5 space-y-0.5 text-xs animate-in fade-in zoom-in-95">
+                  <div className="px-2 py-1 text-[10px] font-bold text-taskflow-muted uppercase tracking-wider border-b border-taskflow-border/60 mb-1">
                     Move to Column
                   </div>
                   {Object.values(TaskStatus).map(s => (

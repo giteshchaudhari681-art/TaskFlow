@@ -166,7 +166,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
         </div>
         <button
           onClick={fetchTimeline}
-          className="p-2 rounded-xl text-taskflow-muted hover:text-white hover:bg-taskflow-surface border border-taskflow-border transition-colors"
+          className="p-2 rounded-xl text-taskflow-muted hover:text-white hover:bg-taskflow-surface border border-taskflow-border btn-interactive transition-colors cursor-pointer"
           aria-label="Refresh timeline"
           title="Refresh"
         >
@@ -194,7 +194,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
       </div>
 
       {/* Gantt */}
-      <div className="glass-panel rounded-2xl border border-taskflow-border bg-taskflow-surface overflow-hidden">
+      <div className="glass-panel-elevated rounded-2xl border border-taskflow-border/80 bg-taskflow-surface overflow-hidden shadow-elevation-2">
         {/* Month header row */}
         <div className="relative h-8 border-b border-taskflow-border/60 bg-taskflow-bg/50 ml-48">
           {monthHeaders.map((month, i) => (
@@ -227,7 +227,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
             return (
               <div
                 key={ms.id}
-                className={`flex items-center min-h-[52px] ${idx % 2 === 0 ? 'bg-taskflow-surface' : 'bg-taskflow-bg/30'}`}
+                className={`flex items-center min-h-[52px] hover:bg-taskflow-surface/90 transition-colors ${idx % 2 === 0 ? 'bg-taskflow-surface' : 'bg-taskflow-bg/30'}`}
               >
                 {/* Left label */}
                 <div className="w-48 flex-shrink-0 px-4 py-2 border-r border-taskflow-border/30">
@@ -254,7 +254,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
 
                   {bar && (
                     <div
-                      className={`absolute h-6 top-1/2 -translate-y-1/2 rounded-lg ${barClass} opacity-90 hover:opacity-100 transition-opacity flex items-center px-2 overflow-hidden`}
+                      className={`absolute h-6 top-1/2 -translate-y-1/2 rounded-lg ${barClass} opacity-90 hover:opacity-100 hover:shadow-glow-cyan/40 hover:scale-[1.01] transition-all flex items-center px-2 overflow-hidden cursor-pointer`}
                       style={{ left: `${bar.left}%`, width: `${bar.width}%`, minWidth: '24px' }}
                       title={`${ms.title}: ${formatShort(ms.startDate)} → ${formatShort(ms.dueDate)}`}
                       role="img"

@@ -16,6 +16,7 @@ import {
 import { ProjectListItem, ProjectStatus } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
 import { CreateProjectModal } from './CreateProjectModal';
+import { TiltCard } from '../common/useCardTilt';
 
 interface ProjectsListProps {
   organizationId: string;
@@ -129,7 +130,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
 
         <button
           onClick={() => setCreateModalOpen(true)}
-          className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center justify-center space-x-2 transition-all cursor-pointer"
+          className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center justify-center space-x-2 btn-interactive-primary transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>New Project</span>
@@ -146,7 +147,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search projects by name or key..."
-            className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-taskflow-surface border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs text-white placeholder-taskflow-muted transition-all"
+            className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-taskflow-surface border border-taskflow-border focus:border-cyan-500 focus:outline-none input-interactive text-xs text-white placeholder-taskflow-muted transition-all"
           />
         </div>
 
@@ -156,7 +157,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap btn-interactive cursor-pointer ${
                 statusFilter === status
                   ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
                   : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50 border border-transparent'
@@ -201,7 +202,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
         </div>
       ) : projects.length === 0 ? (
         /* Empty State */
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30">
+        <div className="glass-panel-elevated rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto mb-4">
             <FolderPlus className="w-7 h-7" />
           </div>
@@ -213,7 +214,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
           </p>
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="mt-5 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan inline-flex items-center space-x-2 transition-all cursor-pointer"
+            className="mt-5 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan inline-flex items-center space-x-2 btn-interactive-primary transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create First Project</span>
@@ -228,10 +229,11 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
             const StatusIcon = statusConfig.icon;
 
             return (
-              <div
+              <TiltCard
                 key={project.id}
+                maxTilt={1.8}
                 onClick={() => onSelectProject(project.id)}
-                className="group glass-panel rounded-2xl border border-taskflow-border hover:border-cyan-500/50 p-5 bg-taskflow-surface hover:bg-taskflow-surface/90 transition-all cursor-pointer flex flex-col justify-between hover:shadow-glow-cyan"
+                className="group glass-panel rounded-2xl border border-taskflow-border hover:border-cyan-500/50 p-5 bg-taskflow-surface hover:bg-taskflow-surface/90 transition-all cursor-pointer flex flex-col justify-between hover:shadow-glow-cyan card-interactive"
               >
                 <div>
                   {/* Top Bar: Key & Status Pill */}
@@ -284,7 +286,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                     <ArrowRight className="w-3 h-3" />
                   </div>
                 </div>
-              </div>
+              </TiltCard>
             );
           })}
         </div>

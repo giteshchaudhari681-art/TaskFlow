@@ -188,7 +188,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className={`relative p-2 rounded-lg transition-all cursor-pointer ${
+        className={`relative p-2 rounded-xl transition-all btn-interactive cursor-pointer ${
           isOpen
             ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
             : 'bg-taskflow-surface/70 hover:bg-taskflow-surface border border-taskflow-border text-taskflow-muted hover:text-white'
@@ -205,9 +205,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
 
       {/* Popover Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 glass-panel rounded-xl border border-taskflow-border shadow-2xl z-50 overflow-hidden flex flex-col max-h-[520px]">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 glass-panel-elevated rounded-2xl border border-taskflow-border/80 shadow-elevation-4 z-50 overflow-hidden flex flex-col max-h-[520px]">
           {/* Header */}
-          <div className="p-3.5 border-b border-taskflow-border flex items-center justify-between bg-taskflow-surface/80">
+          <div className="p-3.5 border-b border-taskflow-border/80 flex items-center justify-between bg-taskflow-surface/80">
             <div className="flex items-center space-x-2">
               <span className="font-semibold text-sm text-white">Notifications</span>
               {unreadCount > 0 && (
@@ -223,7 +223,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
                   type="button"
                   onClick={handleMarkAllAsRead}
                   disabled={markingAll}
-                  className="flex items-center space-x-1 text-[11px] text-cyan-400 hover:text-cyan-300 disabled:opacity-50 transition-colors cursor-pointer"
+                  className="flex items-center space-x-1 text-[11px] text-cyan-400 hover:text-cyan-300 disabled:opacity-50 btn-interactive transition-colors cursor-pointer"
                   title="Mark all as read"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
@@ -239,7 +239,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
               <button
                 type="button"
                 onClick={() => setUnreadOnly(false)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors btn-interactive cursor-pointer ${
                   !unreadOnly
                     ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
                     : 'text-taskflow-muted hover:text-white'
@@ -250,7 +250,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
               <button
                 type="button"
                 onClick={() => setUnreadOnly(true)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors btn-interactive cursor-pointer ${
                   unreadOnly
                     ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
                     : 'text-taskflow-muted hover:text-white'
@@ -286,7 +286,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
                 <div
                   key={notif.id}
                   onClick={() => handleNotificationClick(notif)}
-                  className={`p-3.5 flex items-start space-x-3 transition-colors cursor-pointer group ${
+                  className={`p-3.5 flex items-start space-x-3 transition-colors cursor-pointer group card-interactive ${
                     !notif.isRead
                       ? 'bg-cyan-950/15 hover:bg-cyan-950/30'
                       : 'hover:bg-taskflow-surface/50'

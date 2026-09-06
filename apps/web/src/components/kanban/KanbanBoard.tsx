@@ -265,7 +265,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       )}
 
       {/* Top Toolbar: Search, Filters, Sort, View Switcher, CTA */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border border-taskflow-border bg-taskflow-surface/60 backdrop-blur-md shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border border-taskflow-border/80 glass-panel-elevated shadow-sm">
         {/* Left: Search & Filter Dropdowns */}
         <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
           {/* Search */}
@@ -276,7 +276,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search key, title..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted focus:outline-none focus:border-cyan-500 transition-colors"
+              className="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
             />
           </div>
 
@@ -285,7 +285,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <select
               value={priorityFilter}
               onChange={e => setPriorityFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+              className="px-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
             >
               <option value="ALL">All Priorities</option>
               {Object.values(TaskPriority).map(p => (
@@ -301,7 +301,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <select
               value={assigneeFilter}
               onChange={e => setAssigneeFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 cursor-pointer max-w-[150px] truncate"
+              className="px-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer max-w-[150px] truncate"
             >
               <option value="ALL">All Assignees</option>
               <option value="UNASSIGNED">Unassigned</option>
@@ -318,7 +318,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <select
               value={labelFilter}
               onChange={e => setLabelFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 cursor-pointer max-w-[150px] truncate"
+              className="px-3 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer max-w-[150px] truncate"
             >
               <option value="ALL">All Labels</option>
               {projectLabels.map(l => (
@@ -335,7 +335,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as SortOption)}
-              className="px-2.5 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-lg text-xs bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
             >
               <option value="number_desc">Key (Newest first)</option>
               <option value="number_asc">Key (Oldest first)</option>
@@ -349,7 +349,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           <button
             type="button"
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+            className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border btn-interactive transition-colors ${
               showArchived
                 ? 'bg-cyan-950/60 text-cyan-300 border-cyan-800/80 shadow-glow-cyan'
                 : 'bg-taskflow-surface text-taskflow-muted border-taskflow-border hover:text-white'
@@ -363,7 +363,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <button
               type="button"
               onClick={handleClearFilters}
-              className="text-xs text-cyan-400 hover:text-cyan-300 underline ml-1"
+              className="text-xs text-cyan-400 hover:text-cyan-300 underline ml-1 cursor-pointer"
             >
               Clear
             </button>
@@ -410,7 +410,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             onClick={fetchTasks}
             disabled={loading}
             title="Refresh board"
-            className="p-1.5 rounded-lg border border-taskflow-border bg-taskflow-surface text-taskflow-muted hover:text-white hover:bg-taskflow-surface-hover transition-colors"
+            className="p-1.5 rounded-lg border border-taskflow-border bg-taskflow-surface text-taskflow-muted hover:text-white hover:bg-taskflow-surface-hover btn-interactive transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -420,7 +420,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <button
               type="button"
               onClick={() => openCreateForStatus(TaskStatus.TODO)}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-black bg-cyan-400 hover:bg-cyan-300 transition-all shadow-glow-cyan"
+              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 transition-all shadow-glow-cyan btn-interactive-primary cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Create Task</span>

@@ -300,7 +300,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl glass-panel rounded-2xl border border-taskflow-border shadow-2xl bg-taskflow-surface text-taskflow-text overflow-hidden flex flex-col max-h-[80vh]"
+        className="w-full max-w-2xl glass-panel-elevated rounded-2xl border border-taskflow-border/80 shadow-elevation-4 bg-taskflow-surface text-taskflow-text overflow-hidden flex flex-col max-h-[80vh]"
         onClick={e => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
@@ -319,14 +319,14 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="p-1 rounded-md text-taskflow-muted hover:text-white transition-colors mr-2 cursor-pointer"
+              className="p-1 rounded-md text-taskflow-muted hover:text-white btn-interactive transition-colors mr-2 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           )}
           <button
             onClick={onClose}
-            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-taskflow-muted bg-taskflow-surface border border-taskflow-border hover:text-white transition-colors"
+            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-taskflow-muted bg-taskflow-surface border border-taskflow-border hover:text-white btn-interactive transition-colors cursor-pointer"
           >
             ESC
           </button>
@@ -349,7 +349,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 setActiveTab(tab.id);
                 setSelectedIndex(0);
               }}
-              className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg font-medium transition-all btn-interactive cursor-pointer ${
                 activeTab === tab.id
                   ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
                   : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50'
@@ -411,10 +411,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                   key={cmd.id}
                   data-index={index}
                   onClick={() => handleSelect(index)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all card-interactive ${
                     isSelected
                       ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/10 border border-cyan-500/40 text-white shadow-glow-cyan'
-                      : 'hover:bg-taskflow-surface/60 text-taskflow-text'
+                      : 'hover:bg-taskflow-surface/80 text-taskflow-text'
                   }`}
                 >
                   <div className="flex items-center space-x-3 min-w-0">
@@ -456,10 +456,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 key={`${res.type}-${res.id}`}
                 data-index={index}
                 onClick={() => handleSelect(index)}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all card-interactive ${
                   isSelected
                     ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/10 border border-cyan-500/40 text-white shadow-glow-cyan'
-                    : 'hover:bg-taskflow-surface/60 text-taskflow-text'
+                    : 'hover:bg-taskflow-surface/80 text-taskflow-text'
                 }`}
               >
                 <div className="flex items-center space-x-3 min-w-0">

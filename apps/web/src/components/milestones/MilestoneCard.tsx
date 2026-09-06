@@ -10,6 +10,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { MilestoneListItem, MilestoneStatus } from '@taskflow/shared';
+import { TiltCard } from '../common/useCardTilt';
 
 interface MilestoneCardProps {
   milestone: MilestoneListItem;
@@ -105,8 +106,9 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
   };
 
   return (
-    <div
-      className={`group glass-panel rounded-2xl border p-5 bg-taskflow-surface cursor-pointer hover:border-cyan-500/40 hover:shadow-glow-cyan transition-all duration-200 ${health.border}`}
+    <TiltCard
+      maxTilt={1.8}
+      className={`group glass-panel rounded-2xl border p-5 bg-taskflow-surface cursor-pointer hover:border-cyan-500/40 hover:shadow-glow-cyan transition-all duration-200 card-interactive ${health.border}`}
       onClick={() => onClick(milestone)}
       role="button"
       aria-label={`Milestone: ${milestone.title}, ${health.label}`}
@@ -134,12 +136,12 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
             <button
               onClick={handleStatusToggle}
               disabled={statusLoading}
+              className="p-1 rounded-lg text-taskflow-muted hover:text-white hover:bg-taskflow-surface-hover transition-colors disabled:opacity-50 btn-interactive cursor-pointer"
               title={
                 milestone.status === MilestoneStatus.COMPLETED
                   ? 'Reopen milestone'
-                  : 'Mark complete'
+                  : 'Complete milestone'
               }
-              className="p-1 rounded-lg text-taskflow-muted hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-500"
               aria-label={
                 milestone.status === MilestoneStatus.COMPLETED
                   ? 'Reopen milestone'
@@ -233,6 +235,6 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
           </span>
         )}
       </div>
-    </div>
+    </TiltCard>
   );
 };

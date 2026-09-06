@@ -503,16 +503,16 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
 
   return (
     <div
-      className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 backdrop-blur-sm relative overflow-hidden transition-all duration-200 mt-4"
+      className="glass-panel-elevated border border-indigo-500/20 rounded-2xl p-5 relative overflow-hidden transition-all duration-300 shadow-glow-purple/20 mt-4"
       data-testid="ai-task-intelligence"
     >
       {/* Decorative gradient overlay */}
-      <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header bar with Mode Tabs */}
       <div className="flex items-center justify-between mb-4 relative z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
@@ -528,9 +528,9 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('intelligence')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
               activeTab === 'intelligence'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -540,9 +540,9 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('decomposition')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
               activeTab === 'decomposition'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
             data-testid="ai-tab-decomposition"
@@ -553,9 +553,9 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('actions')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
               activeTab === 'actions'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
             data-testid="ai-tab-actions"
@@ -1375,12 +1375,12 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                       return (
                         <div
                           key={act.actionId}
-                          className={`bg-slate-950/60 border rounded-xl p-4 transition-all duration-200 ${
+                          className={`bg-slate-950/60 border rounded-xl p-4 transition-all duration-200 card-interactive ${
                             isStale
                               ? 'border-amber-500/40 bg-amber-950/10'
                               : status === 'applied'
                                 ? 'border-emerald-500/30 bg-emerald-950/10'
-                                : 'border-slate-800 hover:border-slate-700'
+                                : 'border-slate-800 hover:border-indigo-500/40'
                           }`}
                           data-testid={`ai-action-card-${act.actionId}`}
                         >
@@ -1404,7 +1404,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                             <button
                               type="button"
                               onClick={() => handleDismissAction(act.actionId)}
-                              className="text-slate-500 hover:text-slate-300 p-1 rounded transition-colors"
+                              className="text-slate-500 hover:text-slate-300 p-1 rounded transition-colors btn-interactive cursor-pointer"
                               data-testid="ai-action-dismiss-btn"
                               title="Dismiss proposal"
                             >
@@ -1442,7 +1442,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => onTaskUpdated()}
-                                  className="text-[11px] underline text-amber-200 hover:text-white"
+                                  className="text-[11px] underline text-amber-200 hover:text-white cursor-pointer"
                                   data-testid="ai-action-refresh-task-btn"
                                 >
                                   Refresh Task
@@ -1480,7 +1480,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                                 type="button"
                                 onClick={() => handleDismissAction(act.actionId)}
                                 disabled={status === 'applying'}
-                                className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800/60 transition-colors"
+                                className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800/60 btn-interactive transition-colors cursor-pointer"
                               >
                                 Dismiss
                               </button>
@@ -1489,7 +1489,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                                 type="button"
                                 onClick={() => handleApplyAction(act)}
                                 disabled={status === 'applying' || isStale}
-                                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30"
+                                className="flex items-center gap-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm shadow-indigo-500/20 btn-interactive-primary cursor-pointer"
                                 data-testid="ai-action-apply-btn"
                               >
                                 {status === 'applying' ? (

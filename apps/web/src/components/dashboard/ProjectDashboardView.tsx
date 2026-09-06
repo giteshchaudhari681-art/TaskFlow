@@ -28,6 +28,7 @@ import {
 } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
 import { AIProjectIntelligence } from './AIProjectIntelligence';
+import { TiltCard } from '../common/useCardTilt';
 
 interface ProjectDashboardViewProps {
   organizationId: string;
@@ -246,7 +247,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           <button
             onClick={() => fetchDashboard(true)}
             disabled={refreshing}
-            className="p-2 rounded-xl bg-taskflow-bg border border-taskflow-border hover:border-cyan-500/40 text-taskflow-muted hover:text-white transition-all cursor-pointer"
+            className="p-2 rounded-xl bg-taskflow-bg border border-taskflow-border hover:border-cyan-500/40 text-taskflow-muted hover:text-white btn-interactive cursor-pointer"
             title="Refresh Dashboard"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-cyan-400' : ''}`} />
@@ -255,7 +256,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           {onCreateTask && (
             <button
               onClick={onCreateTask}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center space-x-1.5 transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center space-x-1.5 btn-interactive-primary cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Task</span>
@@ -264,7 +265,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
 
           <button
             onClick={() => onNavigateTab('settings')}
-            className="p-2 rounded-xl bg-taskflow-bg border border-taskflow-border hover:border-cyan-500/40 text-taskflow-muted hover:text-white transition-all cursor-pointer"
+            className="p-2 rounded-xl bg-taskflow-bg border border-taskflow-border hover:border-cyan-500/40 text-taskflow-muted hover:text-white btn-interactive cursor-pointer"
             title="Project Settings"
           >
             <Settings className="w-4 h-4" />
@@ -273,7 +274,10 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
       </div>
 
       {/* 2. HEALTH & EXECUTIVE SUMMARY HERO */}
-      <div className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-gradient-to-br from-taskflow-surface via-taskflow-surface/90 to-taskflow-bg space-y-4">
+      <TiltCard
+        maxTilt={0.8}
+        className="glass-panel-elevated rounded-2xl border border-taskflow-border/80 p-6 bg-gradient-to-br from-taskflow-surface via-taskflow-surface/90 to-taskflow-bg space-y-4"
+      >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-taskflow-border/50">
           <div className="space-y-1.5">
             <div className="flex items-center space-x-3">
@@ -294,7 +298,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           </div>
 
           {/* Health Score Gauge */}
-          <div className="flex items-center space-x-4 bg-taskflow-bg/80 border border-taskflow-border/80 px-4 py-3 rounded-xl shrink-0">
+          <div className="flex items-center space-x-4 bg-taskflow-bg/80 border border-taskflow-border/80 px-4 py-3 rounded-xl shrink-0 card-elevated">
             <div>
               <span className="text-[10px] uppercase font-bold text-taskflow-muted">
                 Health Score
@@ -326,7 +330,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-taskflow-muted font-medium">Signals:</span>
             <span
-              className={`px-2 py-0.5 rounded-lg border font-mono ${
+              className={`px-2 py-0.5 rounded-lg border font-mono transition-colors ${
                 health.signals.overdueTasks > 0
                   ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
                   : 'bg-taskflow-bg text-taskflow-muted border-taskflow-border'
@@ -335,7 +339,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
               {health.signals.overdueTasks} Overdue
             </span>
             <span
-              className={`px-2 py-0.5 rounded-lg border font-mono ${
+              className={`px-2 py-0.5 rounded-lg border font-mono transition-colors ${
                 health.signals.blockedTasks > 0
                   ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
                   : 'bg-taskflow-bg text-taskflow-muted border-taskflow-border'
@@ -344,7 +348,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
               {health.signals.blockedTasks} Blocked
             </span>
             <span
-              className={`px-2 py-0.5 rounded-lg border font-mono ${
+              className={`px-2 py-0.5 rounded-lg border font-mono transition-colors ${
                 health.signals.atRiskMilestones > 0
                   ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
                   : 'bg-taskflow-bg text-taskflow-muted border-taskflow-border'
@@ -367,7 +371,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
             ))}
           </div>
         </div>
-      </div>
+      </TiltCard>
 
       {/* 2.5. AI PROJECT INTELLIGENCE & ADVISORY RECOMMENDATIONS */}
       <AIProjectIntelligence
@@ -380,28 +384,30 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
       {/* 3. KEY METRICS GRID (6 KPI Cards) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {/* Total Tasks */}
-        <div
+        <TiltCard
+          maxTilt={1.8}
           onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface cursor-pointer transition-all group"
+          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
         >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-cyan-400">
+          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-cyan-400 transition-colors">
             <span className="text-[10px] uppercase font-bold">Total Tasks</span>
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-xl font-bold text-white font-mono mt-1">{metrics.totalTasks}</p>
           <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
             {metrics.completedMilestones} of {metrics.totalMilestones} milestones done
           </span>
-        </div>
+        </TiltCard>
 
         {/* Completed */}
-        <div
+        <TiltCard
+          maxTilt={1.8}
           onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-emerald-500/40 bg-taskflow-surface cursor-pointer transition-all group"
+          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-emerald-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
         >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-emerald-400">
+          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-emerald-400 transition-colors">
             <span className="text-[10px] uppercase font-bold">Completed</span>
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-xl font-bold text-emerald-400 font-mono mt-1">
             {metrics.completedTasks}
@@ -409,16 +415,17 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
             Verified DONE
           </span>
-        </div>
+        </TiltCard>
 
         {/* In Progress */}
-        <div
+        <TiltCard
+          maxTilt={1.8}
           onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-blue-500/40 bg-taskflow-surface cursor-pointer transition-all group"
+          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-blue-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
         >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-blue-400">
+          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-blue-400 transition-colors">
             <span className="text-[10px] uppercase font-bold">In Flight</span>
-            <Activity className="w-3.5 h-3.5" />
+            <Activity className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-xl font-bold text-blue-400 font-mono mt-1">
             {metrics.inProgressTasks}
@@ -426,20 +433,21 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
             In progress & review
           </span>
-        </div>
+        </TiltCard>
 
         {/* Overdue */}
-        <div
+        <TiltCard
+          maxTilt={1.8}
           onClick={() => onNavigateTab('tasks')}
-          className={`glass-panel p-4 rounded-xl border transition-all cursor-pointer group ${
+          className={`glass-panel p-4 rounded-xl border transition-all cursor-pointer group card-interactive ${
             metrics.overdueTasks > 0
-              ? 'border-rose-500/40 bg-rose-950/20'
+              ? 'border-rose-500/40 bg-rose-950/20 hover:border-rose-500/60'
               : 'border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface'
           }`}
         >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-rose-400">
+          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-rose-400 transition-colors">
             <span className="text-[10px] uppercase font-bold">Overdue</span>
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
           </div>
           <p
             className={`text-xl font-bold font-mono mt-1 ${metrics.overdueTasks > 0 ? 'text-rose-400' : 'text-white'}`}
@@ -449,20 +457,21 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
             Past due deadline
           </span>
-        </div>
+        </TiltCard>
 
         {/* Blocked */}
-        <div
+        <TiltCard
+          maxTilt={1.8}
           onClick={() => onNavigateTab('dependencies')}
-          className={`glass-panel p-4 rounded-xl border transition-all cursor-pointer group ${
+          className={`glass-panel p-4 rounded-xl border transition-all cursor-pointer group card-interactive ${
             metrics.blockedTasks > 0
-              ? 'border-amber-500/40 bg-amber-950/20'
+              ? 'border-amber-500/40 bg-amber-950/20 hover:border-amber-500/60'
               : 'border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface'
           }`}
         >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-amber-400">
+          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-amber-400 transition-colors">
             <span className="text-[10px] uppercase font-bold">Blocked</span>
-            <Ban className="w-3.5 h-3.5" />
+            <Ban className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
           </div>
           <p
             className={`text-xl font-bold font-mono mt-1 ${metrics.blockedTasks > 0 ? 'text-amber-400' : 'text-white'}`}
@@ -472,16 +481,17 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
             Pending upstream work
           </span>
-        </div>
+        </TiltCard>
 
         {/* Progress % */}
-        <div
+        <TiltCard
+          maxTilt={1.8}
           onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface cursor-pointer transition-all group"
+          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
         >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-cyan-400">
+          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-cyan-400 transition-colors">
             <span className="text-[10px] uppercase font-bold">Completion</span>
-            <TrendingUp className="w-3.5 h-3.5" />
+            <TrendingUp className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-xl font-bold text-cyan-300 font-mono mt-1">
             {metrics.completionPercentage}%
@@ -489,7 +499,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
           <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
             Excl. cancelled tasks
           </span>
-        </div>
+        </TiltCard>
       </div>
 
       {/* 4. WORK DISTRIBUTIONS (Status & Priority) */}
@@ -624,7 +634,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
               return (
                 <div
                   key={risk.id}
-                  className={`p-3.5 rounded-xl border ${badge.border} ${badge.bg} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all hover:bg-taskflow-surface/80`}
+                  className={`p-3.5 rounded-xl border ${badge.border} ${badge.bg} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all hover:bg-taskflow-surface/80 card-interactive`}
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center space-x-2">
@@ -651,7 +661,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
                         onNavigateTab('dependencies');
                       }
                     }}
-                    className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border hover:border-cyan-500/40 text-xs text-cyan-300 font-semibold flex items-center space-x-1.5 shrink-0 transition-all cursor-pointer"
+                    className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border hover:border-cyan-500/40 text-xs text-cyan-300 font-semibold flex items-center space-x-1.5 shrink-0 btn-interactive cursor-pointer"
                   >
                     <span>{risk.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -693,7 +703,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
                 <div
                   key={t.id}
                   onClick={() => onOpenTask(t.id)}
-                  className="p-3 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all"
+                  className="p-3 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all card-interactive"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center space-x-2">
@@ -753,7 +763,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
                   <div
                     key={t.id}
                     onClick={() => onOpenTask(t.id)}
-                    className="p-3 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all"
+                    className="p-3 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all card-interactive"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center space-x-2">
@@ -817,7 +827,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
                   <div
                     key={ms.id}
                     onClick={() => onNavigateTab('milestones')}
-                    className="p-3.5 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 space-y-2 cursor-pointer transition-all"
+                    className="p-3.5 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 space-y-2 cursor-pointer transition-all card-interactive"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs font-bold text-white truncate">{ms.title}</p>

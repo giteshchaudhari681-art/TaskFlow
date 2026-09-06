@@ -143,16 +143,16 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
 
   return (
     <div
-      className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 backdrop-blur-sm relative overflow-hidden transition-all duration-200"
+      className="glass-panel-elevated border border-indigo-500/20 rounded-2xl p-6 relative overflow-hidden transition-all duration-300 shadow-glow-purple/20"
       data-testid="ai-project-intelligence"
     >
       {/* Decorative gradient overlay */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-taskflow-border/80">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+          <div className="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 shadow-sm">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
@@ -162,7 +162,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
                 Advisory
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-taskflow-muted mt-0.5">
               Actionable recommendations grounded in live telemetry • PR14 engine authoritative
             </p>
           </div>
@@ -173,10 +173,10 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
             type="button"
             onClick={runAnalysis}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-start sm:self-auto"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-taskflow-surface hover:bg-taskflow-surface/80 text-slate-200 border border-taskflow-border hover:border-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed btn-interactive self-start sm:self-auto cursor-pointer"
             data-testid="ai-refresh-btn"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
             <span>{loading ? 'Analyzing...' : 'Refresh Analysis'}</span>
           </button>
         )}
@@ -184,7 +184,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
 
       {/* State 1: Error Notification */}
       {error && (
-        <div className="mt-5 p-4 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-300 flex items-start gap-3">
+        <div className="mt-5 p-4 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
           <div className="flex-1 text-sm">
             <p className="font-medium text-rose-200">AI Analysis Unavailable</p>
@@ -194,7 +194,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
                 type="button"
                 onClick={runAnalysis}
                 disabled={loading}
-                className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-medium rounded border border-rose-500/40 transition-colors"
+                className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-medium rounded-lg border border-rose-500/40 btn-interactive cursor-pointer"
               >
                 Try Again
               </button>
@@ -205,8 +205,8 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
 
       {/* State 2: Idle (Unanalyzed) */}
       {!hasRun && !loading && !error && (
-        <div className="mt-5 py-6 px-4 rounded-lg bg-slate-800/40 border border-dashed border-slate-700/60 flex flex-col items-center text-center">
-          <div className="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
+        <div className="mt-5 py-8 px-4 rounded-xl bg-taskflow-bg/40 border border-dashed border-taskflow-border flex flex-col items-center text-center">
+          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
             <Sparkles className="w-6 h-6" />
           </div>
           <h4 className="text-sm font-semibold text-slate-200">
@@ -214,7 +214,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
               ? 'No Tasks Logged in Project Yet'
               : 'Synthesize Real-Time Intelligence & Recommendations'}
           </h4>
-          <p className="text-xs text-slate-400 max-w-md mt-1 mb-4">
+          <p className="text-xs text-taskflow-muted max-w-md mt-1 mb-4">
             {totalTasks === 0
               ? 'Create your first tasks and milestones to enable telemetry-backed AI project intelligence and delivery risk mitigation.'
               : 'Evaluate current blocker chains, milestone health, velocity metrics, and delivery risks to generate concrete, telemetry-backed actions.'}
@@ -223,7 +223,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
             type="button"
             onClick={runAnalysis}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white shadow-glow-purple btn-interactive-primary cursor-pointer"
             data-testid="ai-analyze-btn"
           >
             <Sparkles className="w-4 h-4" />
@@ -280,7 +280,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
                   return (
                     <div
                       key={`rec-${index}`}
-                      className="p-3.5 rounded-lg bg-slate-800/40 border border-slate-800 hover:border-slate-700/80 transition-all flex flex-col justify-between"
+                      className="p-3.5 rounded-xl bg-taskflow-surface/60 border border-taskflow-border/80 hover:border-indigo-500/40 transition-all flex flex-col justify-between card-interactive"
                       data-testid={`ai-recommendation-${index}`}
                     >
                       <div>
@@ -291,13 +291,15 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
                             <span className={`w-1.5 h-1.5 rounded-full ${prioStyle.dot}`} />
                             {rec.priority}
                           </span>
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+                          <span className="inline-flex items-center gap-1 text-[11px] text-taskflow-muted">
                             {catConfig.icon}
                             <span>{catConfig.label}</span>
                           </span>
                         </div>
                         <h5 className="text-xs font-semibold text-slate-200 mb-1">{rec.title}</h5>
-                        <p className="text-xs text-slate-400 leading-relaxed">{rec.description}</p>
+                        <p className="text-xs text-taskflow-muted leading-relaxed">
+                          {rec.description}
+                        </p>
                       </div>
                     </div>
                   );
@@ -320,7 +322,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
                   return (
                     <div
                       key={`attention-${index}`}
-                      className="p-3 rounded-lg bg-slate-800/30 border border-slate-800/80 flex items-start gap-3"
+                      className="p-3 rounded-xl bg-taskflow-surface/40 border border-taskflow-border/60 hover:border-amber-500/40 flex items-start gap-3 transition-all card-interactive"
                       data-testid={`ai-attention-${index}`}
                     >
                       <span

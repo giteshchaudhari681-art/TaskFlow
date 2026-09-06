@@ -34,6 +34,7 @@ import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { TiltCard } from './components/common/useCardTilt';
 
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
@@ -135,21 +136,23 @@ const MainApp: React.FC = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center space-x-4 lg:space-x-6 min-w-0">
             <div
-              className="flex items-center space-x-3 cursor-pointer shrink-0"
+              className="flex items-center space-x-3 cursor-pointer shrink-0 group"
               onClick={() => {
                 setCurrentView('dashboard');
                 setIsMobileMenuOpen(false);
               }}
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(56,189,248,0.45)] transition-all duration-200">
                 <div className="w-full h-full bg-taskflow-surface rounded-[10px] flex items-center justify-center">
-                  <Workflow className="w-4 h-4 text-cyan-400" />
+                  <Workflow className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform duration-200" />
                 </div>
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-bold text-base tracking-tight text-white">TaskFlow</span>
-                  <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
+                  <span className="font-bold text-base tracking-tight text-white group-hover:text-cyan-200 transition-colors">
+                    TaskFlow
+                  </span>
+                  <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md shadow-sm">
                     v1.0.0
                   </span>
                 </div>
@@ -162,10 +165,10 @@ const MainApp: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCurrentView('dashboard')}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'dashboard'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
                   }`}
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
@@ -175,10 +178,10 @@ const MainApp: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCurrentView('projects')}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'projects' || currentView === 'project-details'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5" />
@@ -191,10 +194,10 @@ const MainApp: React.FC = () => {
                     setDeepLinkTaskId(null);
                     setCurrentView('my-work');
                   }}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'my-work'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
                   }`}
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
@@ -205,10 +208,10 @@ const MainApp: React.FC = () => {
                   type="button"
                   onClick={() => openSettings('workspace')}
                   aria-label="Settings & Workspace"
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'settings'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
+                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
                   }`}
                 >
                   <Settings className="w-3.5 h-3.5" />
@@ -225,7 +228,7 @@ const MainApp: React.FC = () => {
               onClick={fetchHealth}
               disabled={healthLoading}
               title="Click to refresh system health status"
-              className="hidden 2xl:flex items-center space-x-1.5 px-2 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs hover:border-taskflow-border/80 transition-colors cursor-pointer"
+              className="btn-interactive hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs hover:border-cyan-500/40 hover:shadow-card-hover transition-all cursor-pointer"
             >
               <span className="text-taskflow-muted">API:</span>
               {healthLoading && !health ? (
@@ -253,12 +256,12 @@ const MainApp: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsSearchOpen(true)}
-                    className="flex items-center space-x-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-taskflow-muted hover:text-white transition-all cursor-pointer shadow-sm group"
+                    className="btn-interactive flex items-center space-x-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border hover:border-cyan-500/40 text-xs text-taskflow-muted hover:text-white transition-all cursor-pointer shadow-sm group hover:shadow-card-hover"
                     title={`Global Search & Commands (${platformKey}K)`}
                   >
-                    <Search className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-cyan-400 transition-colors" />
+                    <Search className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-cyan-400 transition-colors duration-150" />
                     <span className="hidden sm:inline">Search...</span>
-                    <kbd className="hidden md:inline px-1.5 py-0.2 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border group-hover:text-cyan-300 transition-colors">
+                    <kbd className="hidden md:inline px-1.5 py-0.2 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border group-hover:border-cyan-500/30 group-hover:text-cyan-300 transition-colors">
                       {platformKey}K
                     </kbd>
                   </button>
@@ -285,7 +288,7 @@ const MainApp: React.FC = () => {
 
                 {/* Organization / Workspace Selector */}
                 {organizations.length > 0 && activeOrg && (
-                  <div className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs max-w-[160px]">
+                  <div className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border hover:border-taskflow-border/80 text-xs max-w-[160px] transition-colors shadow-sm">
                     <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                     <select
                       value={activeOrg.organizationId}
@@ -316,9 +319,9 @@ const MainApp: React.FC = () => {
                   type="button"
                   onClick={() => openSettings('profile')}
                   title="Open user profile settings"
-                  className="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer"
+                  className="btn-interactive flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer shadow-sm hover:shadow-card-hover group"
                 >
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shrink-0 group-hover:ring-2 group-hover:ring-cyan-400/40 transition-all">
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -339,7 +342,7 @@ const MainApp: React.FC = () => {
                   }}
                   title="Sign out of current session"
                   aria-label="Sign Out"
-                  className="hidden sm:flex p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors"
+                  className="btn-interactive hidden sm:flex p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -350,7 +353,7 @@ const MainApp: React.FC = () => {
                   id="mobile-menu-toggle"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   aria-label="Toggle Navigation Menu"
-                  className="xl:hidden p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors"
+                  className="btn-interactive xl:hidden p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors"
                 >
                   {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
                 </button>
@@ -519,7 +522,10 @@ const MainApp: React.FC = () => {
         ) : (
           <>
             {/* Authenticated Hero Banner */}
-            <section className="relative overflow-hidden rounded-2xl glass-panel p-8 border border-taskflow-border">
+            <TiltCard
+              maxTilt={1.2}
+              className="relative overflow-hidden rounded-2xl glass-panel-elevated p-8 border border-taskflow-border/80"
+            >
               <div className="absolute top-0 right-0 -mr-16 -mt-16 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/10 to-indigo-600/10 blur-3xl pointer-events-none" />
 
               <div className="relative z-10 max-w-3xl space-y-4">
@@ -545,7 +551,7 @@ const MainApp: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setCurrentView('projects')}
-                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold flex items-center space-x-2 shadow-glow-cyan transition-all cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold flex items-center space-x-2 shadow-glow-cyan btn-interactive-primary cursor-pointer"
                   >
                     <Layers className="w-4 h-4" />
                     <span>View Projects</span>
@@ -554,7 +560,7 @@ const MainApp: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => openSettings('members')}
-                    className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center space-x-2 transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center space-x-2 btn-interactive cursor-pointer"
                   >
                     <Users className="w-4 h-4" />
                     <span>Manage Workspace Members</span>
@@ -563,19 +569,22 @@ const MainApp: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => openSettings('profile')}
-                    className="px-4 py-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-white text-xs font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-white text-xs font-medium flex items-center space-x-2 btn-interactive cursor-pointer"
                   >
                     <Settings className="w-4 h-4 text-taskflow-muted" />
                     <span>Edit Profile & Security</span>
                   </button>
                 </div>
               </div>
-            </section>
+            </TiltCard>
           </>
         )}
 
         {/* System Health Card (Always visible to inspect live PostgreSQL status) */}
-        <section className="glass-card rounded-xl p-6 border border-taskflow-border space-y-4">
+        <TiltCard
+          maxTilt={0.8}
+          className="glass-panel-elevated rounded-xl p-6 border border-taskflow-border/80 space-y-4"
+        >
           <div className="flex items-center justify-between border-b border-taskflow-border pb-4">
             <div className="flex items-center space-x-2.5">
               <Server className="w-5 h-5 text-cyan-400" />
@@ -604,20 +613,20 @@ const MainApp: React.FC = () => {
             </div>
           ) : health ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
+              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
                 <span className="text-xs text-taskflow-muted block">Service</span>
                 <span className="font-mono text-sm font-semibold text-cyan-300">
                   {health.service}
                 </span>
               </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
+              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
                 <span className="text-xs text-taskflow-muted block">API Status</span>
                 <span className="font-semibold text-sm text-emerald-400 uppercase flex items-center mt-0.5">
                   <CheckCircle2 className="w-4 h-4 mr-1 inline" />
                   {health.status}
                 </span>
               </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
+              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
                 <span className="text-xs text-taskflow-muted block">Database</span>
                 <span
                   className={`font-semibold text-sm flex items-center mt-0.5 ${
@@ -640,13 +649,13 @@ const MainApp: React.FC = () => {
                   )}
                 </span>
               </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
+              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
                 <span className="text-xs text-taskflow-muted block">Environment</span>
                 <span className="font-mono text-sm font-medium text-white capitalize">
                   {health.environment}
                 </span>
               </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
+              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
                 <span className="text-xs text-taskflow-muted block">Uptime</span>
                 <span className="font-mono text-sm font-medium text-white">
                   {health.uptimeSeconds}s
@@ -659,7 +668,7 @@ const MainApp: React.FC = () => {
               Verifying backend status...
             </div>
           )}
-        </section>
+        </TiltCard>
 
         {/* Planned Product Architecture Pillars */}
         <section className="space-y-4">
@@ -671,8 +680,11 @@ const MainApp: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-cyan-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/60 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-105 transition-transform">
+            <TiltCard
+              maxTilt={2.0}
+              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-cyan-500/40 transition-all group card-interactive"
+            >
+              <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/60 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-110 transition-transform">
                 <Boxes className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-white text-sm">Project Execution</h3>
@@ -680,10 +692,13 @@ const MainApp: React.FC = () => {
                 Multi-tier work hierarchy: Projects, Objectives, Tasks, Subtasks, and Milestones
                 with fine-grained status lifecycle.
               </p>
-            </div>
+            </TiltCard>
 
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-indigo-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/60 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-105 transition-transform">
+            <TiltCard
+              maxTilt={2.0}
+              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-indigo-500/40 transition-all group card-interactive"
+            >
+              <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/60 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition-transform">
                 <GitBranch className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-white text-sm">Dependency Graphs</h3>
@@ -691,10 +706,13 @@ const MainApp: React.FC = () => {
                 Deterministic DAG blocking dependencies, critical path detection, and cascade delay
                 warnings across timeline views.
               </p>
-            </div>
+            </TiltCard>
 
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-purple-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-800/60 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-105 transition-transform">
+            <TiltCard
+              maxTilt={2.0}
+              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-purple-500/40 transition-all group card-interactive"
+            >
+              <div className="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-800/60 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-110 transition-transform">
                 <Activity className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-white text-sm">Real-Time Operations</h3>
@@ -702,10 +720,13 @@ const MainApp: React.FC = () => {
                 Low-latency state synchronization via Socket.IO, live presence, collaborative task
                 updates, and instant notification stream.
               </p>
-            </div>
+            </TiltCard>
 
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-emerald-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400 mb-3 group-hover:scale-105 transition-transform">
+            <TiltCard
+              maxTilt={2.0}
+              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-emerald-500/40 transition-all group card-interactive"
+            >
+              <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
                 <Brain className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-white text-sm">AI Delivery Intelligence</h3>
@@ -713,7 +734,7 @@ const MainApp: React.FC = () => {
                 Automated task breakdowns, workload balancing, risk detection, schedule compression
                 recommendations, and daily digests.
               </p>
-            </div>
+            </TiltCard>
           </div>
         </section>
 

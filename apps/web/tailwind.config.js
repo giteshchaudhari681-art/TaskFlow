@@ -39,8 +39,19 @@ export default {
       boxShadow: {
         'glow-cyan': '0 0 24px -4px rgba(56, 189, 248, 0.3)',
         'glow-indigo': '0 0 24px -4px rgba(99, 102, 241, 0.3)',
+        'glow-purple': '0 0 24px -4px rgba(168, 85, 247, 0.3)',
+        'glow-emerald': '0 0 24px -4px rgba(16, 185, 129, 0.3)',
+        'glow-amber': '0 0 24px -4px rgba(245, 158, 11, 0.3)',
         'surface-elevated':
           '0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        'card-rest': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3)',
+        'card-hover':
+          '0 10px 24px -4px rgba(0, 0, 0, 0.5), 0 2px 6px -2px rgba(56, 189, 248, 0.15)',
+        'card-hover-primary':
+          '0 10px 24px -4px rgba(0, 0, 0, 0.5), 0 2px 6px -2px rgba(99, 102, 241, 0.2)',
+      },
+      transitionTimingFunction: {
+        spring: 'cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },
   },
