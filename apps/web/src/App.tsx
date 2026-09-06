@@ -18,6 +18,8 @@ import {
   Users,
   CheckSquare,
   Search,
+  Menu,
+  X,
 } from 'lucide-react';
 import type { HealthCheckData } from '@taskflow/shared';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -44,6 +46,7 @@ const MainApp: React.FC = () => {
   const [deepLinkTaskId, setDeepLinkTaskId] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
   const [healthError, setHealthError] = useState<string | null>(null);
@@ -128,38 +131,38 @@ const MainApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex flex-col">
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 glass-panel border-b border-taskflow-border px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-6">
+      <header className="sticky top-0 z-50 glass-panel border-b border-taskflow-border px-4 sm:px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center space-x-4 lg:space-x-6 min-w-0">
             <div
-              className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => setCurrentView('dashboard')}
+              className="flex items-center space-x-3 cursor-pointer shrink-0"
+              onClick={() => {
+                setCurrentView('dashboard');
+                setIsMobileMenuOpen(false);
+              }}
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center shrink-0">
                 <div className="w-full h-full bg-taskflow-surface rounded-[10px] flex items-center justify-center">
-                  <Workflow className="w-5 h-5 text-cyan-400" />
+                  <Workflow className="w-4 h-4 text-cyan-400" />
                 </div>
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-bold text-lg tracking-tight text-white">TaskFlow</span>
-                  <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
-                    v0.5.0 • PR 5
+                  <span className="font-bold text-base tracking-tight text-white">TaskFlow</span>
+                  <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
+                    v1.0.0
                   </span>
                 </div>
-                <p className="text-xs text-taskflow-muted">
-                  AI-Powered Project Operations Platform
-                </p>
               </div>
             </div>
 
-            {/* Navigation Tabs (Dashboard vs Settings) */}
+            {/* Desktop Navigation Tabs */}
             {isAuthenticated && (
-              <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-taskflow-border">
+              <nav className="hidden xl:flex items-center space-x-1 pl-4 border-l border-taskflow-border">
                 <button
                   type="button"
                   onClick={() => setCurrentView('dashboard')}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'dashboard'
                       ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
                       : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
@@ -172,7 +175,7 @@ const MainApp: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCurrentView('projects')}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'projects' || currentView === 'project-details'
                       ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
                       : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
@@ -188,7 +191,7 @@ const MainApp: React.FC = () => {
                     setDeepLinkTaskId(null);
                     setCurrentView('my-work');
                   }}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'my-work'
                       ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
                       : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
@@ -201,7 +204,8 @@ const MainApp: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => openSettings('workspace')}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  aria-label="Settings & Workspace"
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     currentView === 'settings'
                       ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
                       : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
@@ -214,9 +218,15 @@ const MainApp: React.FC = () => {
             )}
           </div>
 
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            {/* System Health Indicator Badge */}
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
+          <div className="flex items-center space-x-2 sm:space-x-2.5 shrink-0">
+            {/* System Health Indicator Badge (Clickable to refresh) */}
+            <button
+              type="button"
+              onClick={fetchHealth}
+              disabled={healthLoading}
+              title="Click to refresh system health status"
+              className="hidden 2xl:flex items-center space-x-1.5 px-2 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs hover:border-taskflow-border/80 transition-colors cursor-pointer"
+            >
               <span className="text-taskflow-muted">API:</span>
               {healthLoading && !health ? (
                 <span className="flex items-center text-amber-400">
@@ -234,21 +244,21 @@ const MainApp: React.FC = () => {
                   Offline
                 </span>
               )}
-            </div>
+            </button>
 
             {isAuthenticated && user ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 sm:space-x-2.5">
                 {/* Global Search & Command Trigger */}
                 {activeOrg && (
                   <button
                     type="button"
                     onClick={() => setIsSearchOpen(true)}
-                    className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-taskflow-muted hover:text-white transition-all cursor-pointer shadow-sm group"
+                    className="flex items-center space-x-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-taskflow-muted hover:text-white transition-all cursor-pointer shadow-sm group"
                     title={`Global Search & Commands (${platformKey}K)`}
                   >
                     <Search className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-cyan-400 transition-colors" />
                     <span className="hidden sm:inline">Search...</span>
-                    <kbd className="hidden sm:inline px-1.5 py-0.2 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border group-hover:text-cyan-300 transition-colors">
+                    <kbd className="hidden md:inline px-1.5 py-0.2 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border group-hover:text-cyan-300 transition-colors">
                       {platformKey}K
                     </kbd>
                   </button>
@@ -256,32 +266,34 @@ const MainApp: React.FC = () => {
 
                 {/* Cross-Project Quick Switcher */}
                 {activeOrg && (
-                  <ProjectSwitcher
-                    organizationId={activeOrg.organizationId}
-                    selectedProjectId={selectedProjectId}
-                    onSelectProject={id => {
-                      setSelectedProjectId(id);
-                      setDeepLinkTaskId(null);
-                      setCurrentView('project-details');
-                    }}
-                    onViewAllProjects={() => {
-                      setSelectedProjectId(null);
-                      setCurrentView('projects');
-                    }}
-                  />
+                  <div className="hidden sm:block">
+                    <ProjectSwitcher
+                      organizationId={activeOrg.organizationId}
+                      selectedProjectId={selectedProjectId}
+                      onSelectProject={id => {
+                        setSelectedProjectId(id);
+                        setDeepLinkTaskId(null);
+                        setCurrentView('project-details');
+                      }}
+                      onViewAllProjects={() => {
+                        setSelectedProjectId(null);
+                        setCurrentView('projects');
+                      }}
+                    />
+                  </div>
                 )}
 
                 {/* Organization / Workspace Selector */}
                 {organizations.length > 0 && activeOrg && (
-                  <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
-                    <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                  <div className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs max-w-[160px]">
+                    <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                     <select
                       value={activeOrg.organizationId}
                       onChange={e => {
                         const found = organizations.find(o => o.organizationId === e.target.value);
                         if (found) setActiveOrg(found);
                       }}
-                      className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
+                      className="bg-transparent text-white font-medium focus:outline-none cursor-pointer truncate w-full text-xs"
                     >
                       {organizations.map(org => (
                         <option
@@ -304,16 +316,18 @@ const MainApp: React.FC = () => {
                   type="button"
                   onClick={() => openSettings('profile')}
                   title="Open user profile settings"
-                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer"
+                  className="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer"
                 >
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shrink-0">
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                     ) : (
                       user.name.charAt(0)
                     )}
                   </div>
-                  <span className="hidden md:inline font-medium">{user.name}</span>
+                  <span className="hidden 2xl:inline font-medium max-w-[90px] truncate">
+                    {user.name}
+                  </span>
                 </button>
 
                 {/* Sign Out Button */}
@@ -325,23 +339,143 @@ const MainApp: React.FC = () => {
                   }}
                   title="Sign out of current session"
                   aria-label="Sign Out"
-                  className="p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors"
+                  className="hidden sm:flex p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
+
+                {/* Mobile Navigation Toggle */}
+                <button
+                  type="button"
+                  id="mobile-menu-toggle"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-label="Toggle Navigation Menu"
+                  className="xl:hidden p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors"
+                >
+                  {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                </button>
               </div>
             ) : null}
-
-            <button
-              onClick={fetchHealth}
-              disabled={healthLoading}
-              title="Refresh Health Status"
-              className="p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${healthLoading ? 'animate-spin' : ''}`} />
-            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown Drawer */}
+        {isMobileMenuOpen && isAuthenticated && (
+          <div className="xl:hidden max-w-7xl mx-auto border-t border-taskflow-border mt-3 pt-3 space-y-3 pb-2 animate-in fade-in slide-in-from-top-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                id="mobile-nav-dashboard"
+                onClick={() => {
+                  setCurrentView('dashboard');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  currentView === 'dashboard'
+                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
+                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Dashboard</span>
+              </button>
+
+              <button
+                type="button"
+                id="mobile-nav-projects"
+                onClick={() => {
+                  setCurrentView('projects');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  currentView === 'projects' || currentView === 'project-details'
+                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
+                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+                <span>Projects</span>
+              </button>
+
+              <button
+                type="button"
+                id="mobile-nav-my-work"
+                onClick={() => {
+                  setDeepLinkTaskId(null);
+                  setCurrentView('my-work');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  currentView === 'my-work'
+                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
+                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                }`}
+              >
+                <CheckSquare className="w-4 h-4" />
+                <span>My Work</span>
+              </button>
+
+              <button
+                type="button"
+                id="mobile-nav-settings"
+                aria-label="Settings & Workspace"
+                onClick={() => {
+                  openSettings('workspace');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  currentView === 'settings'
+                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
+                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Settings & Workspace</span>
+              </button>
+            </div>
+
+            {/* Mobile Workspace Selector & Sign Out */}
+            <div className="pt-2 border-t border-taskflow-border/50 flex flex-wrap items-center justify-between gap-2">
+              {organizations.length > 0 && activeOrg && (
+                <div className="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs flex-1 min-w-[160px]">
+                  <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <select
+                    value={activeOrg.organizationId}
+                    onChange={e => {
+                      const found = organizations.find(o => o.organizationId === e.target.value);
+                      if (found) setActiveOrg(found);
+                    }}
+                    className="bg-transparent text-white font-medium focus:outline-none cursor-pointer truncate w-full text-xs"
+                  >
+                    {organizations.map(org => (
+                      <option
+                        key={org.organizationId}
+                        value={org.organizationId}
+                        className="bg-taskflow-surface text-white"
+                      >
+                        {org.organizationName} ({org.role})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthView('login');
+                  setCurrentView('dashboard');
+                  setIsMobileMenuOpen(false);
+                  logout();
+                }}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs font-medium hover:bg-rose-950/60 transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Content Area */}
@@ -583,16 +717,18 @@ const MainApp: React.FC = () => {
           </div>
         </section>
 
-        {/* Scope Milestone Notice */}
+        {/* Platform Status Notice */}
         <section className="rounded-xl border border-taskflow-border bg-taskflow-surface/60 p-5 flex items-start space-x-3.5">
           <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
-            <span className="font-semibold text-white">PR 4 Identity & Workspace Operations</span>
+            <span className="font-semibold text-white">
+              TaskFlow Enterprise Operations Platform v1.0
+            </span>
             <p className="text-taskflow-muted leading-relaxed">
-              This milestone establishes the complete user profile and organization workspace
-              operations: Profile & avatar management, cryptographic password rotation with session
-              invalidation, workspace metadata updates, member directory with RBAC
-              promotion/demotion matrix, and multi-tenant security guards.
+              TaskFlow v1.0 delivers an integrated SaaS operations platform: Deterministic DAG
+              dependency graphs, automated critical path scheduling, AI task intelligence with human
+              approval controls, durable PostgreSQL background workers, and enterprise multi-tenant
+              isolation.
             </p>
           </div>
         </section>
@@ -600,7 +736,7 @@ const MainApp: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-taskflow-border py-4 px-6 text-center text-xs text-taskflow-muted">
-        TaskFlow Operations Platform • PR 4 Workspace Management Complete
+        TaskFlow Operations Platform • Production-Grade Engineering Platform v1.0
       </footer>
 
       {/* Global Search & Command Palette Modal */}

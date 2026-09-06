@@ -205,16 +205,16 @@ export const TaskList: React.FC<TaskListProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Filter Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 bg-slate-900/60 border border-slate-800 rounded-2xl backdrop-blur-md">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 bg-taskflow-surface/60 border border-taskflow-border rounded-2xl backdrop-blur-md">
         {/* Search input */}
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-taskflow-muted" />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={`Search ${projectKey} tasks by key or title...`}
-            className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+            className="w-full pl-10 pr-4 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
           />
         </div>
 
@@ -224,7 +224,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-medium text-slate-300 focus:outline-none focus:border-cyan-500"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value={TaskStatus.TODO}>To Do</option>
@@ -240,7 +240,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-medium text-slate-300 focus:outline-none focus:border-cyan-500"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
           >
             <option value="ALL">All Priorities</option>
             <option value={TaskPriority.URGENT}>Urgent</option>
@@ -253,7 +253,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={assigneeFilter}
             onChange={e => setAssigneeFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-medium text-slate-300 focus:outline-none focus:border-cyan-500"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
           >
             <option value="ALL">All Assignees</option>
             {members.map(m => (
@@ -267,7 +267,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={labelFilter}
             onChange={e => setLabelFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-medium text-slate-300 focus:outline-none focus:border-cyan-500"
+            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 cursor-pointer"
           >
             <option value="ALL">All Labels</option>
             {projectLabels.map(l => (
@@ -281,10 +281,10 @@ export const TaskList: React.FC<TaskListProps> = ({
           <button
             type="button"
             onClick={() => setShowArchived(!showArchived)}
-            className={`px-3 py-2 rounded-xl text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-2 rounded-xl text-xs font-medium border transition-colors flex items-center gap-1.5 cursor-pointer ${
               showArchived
                 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                : 'bg-taskflow-surface text-taskflow-muted border-taskflow-border hover:text-white'
             }`}
           >
             <Archive className="w-3.5 h-3.5" />
@@ -295,18 +295,18 @@ export const TaskList: React.FC<TaskListProps> = ({
           <button
             onClick={loadTasks}
             title="Refresh tasks"
-            className="p-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-xl transition-colors"
+            className="p-2 bg-taskflow-surface border border-taskflow-border hover:border-taskflow-border-subtle text-taskflow-muted hover:text-white rounded-xl transition-colors cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
 
           {/* View Mode Toggle */}
           {onViewModeChange && (
-            <div className="flex items-center p-0.5 rounded-xl border border-slate-800 bg-slate-950">
+            <div className="flex items-center p-0.5 rounded-xl border border-taskflow-border bg-taskflow-surface">
               <button
                 type="button"
                 onClick={() => onViewModeChange('board')}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                   viewMode === 'board'
                     ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60 shadow-sm'
                     : 'text-taskflow-muted hover:text-white'
@@ -319,7 +319,7 @@ export const TaskList: React.FC<TaskListProps> = ({
               <button
                 type="button"
                 onClick={() => onViewModeChange('list')}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                   viewMode === 'list'
                     ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60 shadow-sm'
                     : 'text-taskflow-muted hover:text-white'
@@ -336,7 +336,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           {canManageTasks && (
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-xs rounded-xl transition-all shadow-lg shadow-cyan-500/20"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-xs rounded-xl transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Create Task</span>
@@ -352,7 +352,10 @@ export const TaskList: React.FC<TaskListProps> = ({
             <AlertCircle className="w-4 h-4" />
             <span>{error}</span>
           </div>
-          <button onClick={loadTasks} className="underline hover:text-red-300 text-xs">
+          <button
+            onClick={loadTasks}
+            className="underline hover:text-red-300 text-xs cursor-pointer"
+          >
             Retry
           </button>
         </div>
@@ -364,7 +367,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           {[1, 2, 3, 4, 5].map(n => (
             <div
               key={n}
-              className="h-16 bg-slate-900/60 border border-slate-800/80 rounded-2xl animate-pulse"
+              className="h-16 bg-taskflow-surface/60 border border-taskflow-border rounded-2xl animate-pulse"
             />
           ))}
         </div>
@@ -372,12 +375,12 @@ export const TaskList: React.FC<TaskListProps> = ({
 
       {/* Empty State */}
       {!loading && tasks.length === 0 && (
-        <div className="flex flex-col items-center justify-center p-12 text-center bg-slate-900/30 border border-dashed border-slate-800 rounded-2xl">
+        <div className="flex flex-col items-center justify-center p-12 text-center bg-taskflow-surface/30 border border-dashed border-taskflow-border rounded-2xl">
           <div className="p-3 bg-cyan-500/10 rounded-2xl mb-4 border border-cyan-500/20">
             <CheckSquare className="w-8 h-8 text-cyan-400" />
           </div>
           <h3 className="text-base font-semibold text-white mb-1">No tasks found</h3>
-          <p className="text-sm text-slate-400 max-w-sm mb-6">
+          <p className="text-sm text-taskflow-muted max-w-sm mb-6">
             {search || statusFilter !== 'ALL' || priorityFilter !== 'ALL'
               ? 'No tasks match the selected filters. Try clearing your filters.'
               : 'There are no tasks in this project yet. Create the first task to start tracking work.'}
@@ -385,7 +388,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           {canManageTasks && (
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-sm rounded-xl transition-all shadow-lg shadow-cyan-500/20"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-sm rounded-xl transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Create First Task</span>
@@ -396,13 +399,13 @@ export const TaskList: React.FC<TaskListProps> = ({
 
       {/* Tasks Table / Card List */}
       {!loading && tasks.length > 0 && (
-        <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl overflow-hidden backdrop-blur-md shadow-xl">
-          <div className="divide-y divide-slate-800/60">
+        <div className="bg-taskflow-surface/50 border border-taskflow-border rounded-2xl overflow-hidden backdrop-blur-md shadow-xl">
+          <div className="divide-y divide-taskflow-border/60">
             {tasks.map(task => (
               <div
                 key={task.id}
                 onClick={() => setSelectedTaskId(task.id)}
-                className="group flex flex-col md:flex-row items-start md:items-center justify-between p-4 hover:bg-slate-850/80 cursor-pointer transition-all gap-3"
+                className="group flex flex-col md:flex-row items-start md:items-center justify-between p-4 hover:bg-taskflow-card-hover/80 cursor-pointer transition-all gap-3"
               >
                 {/* Left: Key & Title */}
                 <div className="flex items-start md:items-center gap-3.5 flex-1 min-w-0">
@@ -436,7 +439,7 @@ export const TaskList: React.FC<TaskListProps> = ({
 
                   {/* Subtask pill */}
                   {task.subtaskCount > 0 && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-slate-800/80 text-slate-300 border border-slate-700/80 rounded-md">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-taskflow-surface text-taskflow-text-dim border border-taskflow-border rounded-md">
                       <CheckSquare className="w-3 h-3 text-cyan-400" />
                       <span>
                         {task.completedSubtaskCount}/{task.subtaskCount}
@@ -450,7 +453,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                       className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-md border ${
                         task.dependencySummary.hasUnresolvedBlockers
                           ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                          : 'bg-slate-800/80 text-slate-300 border-slate-700/80'
+                          : 'bg-taskflow-surface text-taskflow-text-dim border-taskflow-border'
                       }`}
                       title={
                         task.dependencySummary.hasUnresolvedBlockers
@@ -469,25 +472,25 @@ export const TaskList: React.FC<TaskListProps> = ({
 
                   {/* Due Date */}
                   {task.dueDate && (
-                    <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+                    <span className="inline-flex items-center gap-1 text-xs text-taskflow-muted">
                       <Calendar className="w-3.5 h-3.5 text-indigo-400" />
                       <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                     </span>
                   )}
 
                   {/* Assignee */}
-                  <div className="flex items-center gap-1.5 pl-2 border-l border-slate-800">
+                  <div className="flex items-center gap-1.5 pl-2 border-l border-taskflow-border">
                     {task.assignee ? (
                       <div className="flex items-center gap-1.5">
                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center text-xs font-bold text-white uppercase">
                           {task.assignee.name.charAt(0)}
                         </div>
-                        <span className="text-xs text-slate-300 hidden sm:inline">
+                        <span className="text-xs text-taskflow-text-dim hidden sm:inline">
                           {task.assignee.name}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-xs text-slate-500 italic">Unassigned</span>
+                      <span className="text-xs text-taskflow-muted italic">Unassigned</span>
                     )}
                   </div>
                 </div>

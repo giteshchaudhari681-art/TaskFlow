@@ -91,18 +91,7 @@ async function main() {
     ],
   });
 
-  // 4. Labels
-  const bugLabel = await prisma.label.create({
-    data: { organizationId: org.id, name: 'Bug', colorHex: '#ef4444' },
-  });
-  const coreLabel = await prisma.label.create({
-    data: { organizationId: org.id, name: 'Core Engine', colorHex: '#6366f1' },
-  });
-  const aiLabel = await prisma.label.create({
-    data: { organizationId: org.id, name: 'AI Ops', colorHex: '#38bdf8' },
-  });
-
-  // 5. Project
+  // 4. Project
   const project = await prisma.project.create({
     data: {
       organizationId: org.id,
@@ -114,6 +103,22 @@ async function main() {
     },
   });
   console.log(`✅ Seeded Project: ${project.name} [${project.key}]`);
+
+  // 5. Labels (Project-scoped)
+  const bugLabel = await prisma.label.create({
+    data: { projectId: project.id, name: 'Bug', normalizedName: 'bug', color: 'red' },
+  });
+  const coreLabel = await prisma.label.create({
+    data: {
+      projectId: project.id,
+      name: 'Core Engine',
+      normalizedName: 'core engine',
+      color: 'indigo',
+    },
+  });
+  const aiLabel = await prisma.label.create({
+    data: { projectId: project.id, name: 'AI Ops', normalizedName: 'ai ops', color: 'cyan' },
+  });
 
   // 6. Project Memberships
   await prisma.projectMember.createMany({
@@ -144,7 +149,6 @@ async function main() {
         'First production-grade milestone delivering deterministic dependencies and health radar.',
       dueDate: new Date('2026-11-15'),
       status: MilestoneStatus.OPEN,
-      progressPercent: 35,
     },
   });
 
@@ -153,6 +157,7 @@ async function main() {
     data: {
       projectId: project.id,
       taskNumber: 1,
+      issueKey: 'OPS-1',
       title: 'Implement Adjacency List Dependency Engine',
       description:
         'Design directed acyclic graph data structure with fast cycle detection heuristics.',
@@ -170,6 +175,7 @@ async function main() {
     data: {
       projectId: project.id,
       taskNumber: 2,
+      issueKey: 'OPS-2',
       title: 'Critical Path Analyzer & Cascading Delay Forecaster',
       description:
         'Compute longest dependency chain through active milestones and alert downstream assignees.',
@@ -187,6 +193,7 @@ async function main() {
     data: {
       projectId: project.id,
       taskNumber: 3,
+      issueKey: 'OPS-3',
       title: 'Socket.IO Real-Time Presence & Event Broadcaster',
       description: 'Push dependency mutations and state changes to connected project rooms.',
       status: TaskStatus.TODO,
@@ -202,6 +209,7 @@ async function main() {
   // 9. Task Dependency (Task 2 is BLOCKED BY Task 1)
   await prisma.taskDependency.create({
     data: {
+      projectId: project.id,
       predecessorId: task1.id,
       successorId: task2.id,
       type: DependencyType.BLOCKS,

@@ -259,9 +259,9 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl h-full bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
+      <div className="w-full max-w-2xl h-full bg-taskflow-surface border-l border-taskflow-border shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
         {/* Drawer Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-taskflow-border bg-taskflow-surface/80 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 text-sm font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-lg">
               {task?.issueKey || projectKey}
@@ -275,7 +275,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              className="p-1.5 text-taskflow-muted hover:text-white rounded-lg hover:bg-taskflow-card transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -283,14 +283,14 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         </div>
 
         {/* Drawer Sub-tabs */}
-        <div className="flex items-center px-6 border-b border-slate-800 bg-slate-950/40 shrink-0">
+        <div className="flex items-center px-6 border-b border-taskflow-border bg-taskflow-bg/40 shrink-0">
           <button
             type="button"
             onClick={() => setDrawerTab('details')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
               drawerTab === 'details'
                 ? 'border-cyan-400 text-cyan-400'
-                : 'border-transparent text-slate-400 hover:text-white'
+                : 'border-transparent text-taskflow-muted hover:text-white'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -299,10 +299,10 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <button
             type="button"
             onClick={() => setDrawerTab('comments')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
               drawerTab === 'comments'
                 ? 'border-cyan-400 text-cyan-400'
-                : 'border-transparent text-slate-400 hover:text-white'
+                : 'border-transparent text-taskflow-muted hover:text-white'
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -736,11 +736,11 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         )}
 
         {/* Drawer Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-800 bg-slate-900/80 backdrop-blur-md flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 border-t border-taskflow-border bg-taskflow-surface/80 backdrop-blur-md flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium text-taskflow-muted hover:text-white transition-colors cursor-pointer"
           >
             Close
           </button>
@@ -749,7 +749,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               type="button"
               onClick={() => handleSave()}
               disabled={saving || !title.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium rounded-xl shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium rounded-xl shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all cursor-pointer"
             >
               {saving ? (
                 <>
