@@ -197,7 +197,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gradient-to-r from-rose-500 to-amber-500 text-white font-bold text-[10px] rounded-full flex items-center justify-center shadow-lg shadow-rose-500/40 border border-taskflow-bg animate-pulse">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-rose-600 text-white font-semibold text-[9px] rounded-full flex items-center justify-center border border-slate-900">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -205,13 +205,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
 
       {/* Popover Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 glass-panel-elevated rounded-2xl border border-taskflow-border/80 shadow-elevation-4 z-50 overflow-hidden flex flex-col max-h-[520px]">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-slate-800 shadow-2xl bg-[#0f172a] z-50 overflow-hidden flex flex-col max-h-[520px]">
           {/* Header */}
-          <div className="p-3.5 border-b border-taskflow-border/80 flex items-center justify-between bg-taskflow-surface/80">
+          <div className="p-3 border-b border-slate-800 flex items-center justify-between bg-[#111827]">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-sm text-white">Notifications</span>
+              <span className="font-semibold text-xs text-white">Notifications</span>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 text-[10px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 rounded-full">
+                <span className="px-1.5 py-0.2 text-[10px] font-medium bg-slate-800 text-sky-300 border border-slate-700 rounded">
                   {unreadCount} unread
                 </span>
               )}
@@ -223,7 +223,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
                   type="button"
                   onClick={handleMarkAllAsRead}
                   disabled={markingAll}
-                  className="flex items-center space-x-1 text-[11px] text-cyan-400 hover:text-cyan-300 disabled:opacity-50 btn-interactive transition-colors cursor-pointer"
+                  className="flex items-center space-x-1 text-xs text-sky-400 hover:text-sky-300 disabled:opacity-50 transition-colors cursor-pointer"
                   title="Mark all as read"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
@@ -234,15 +234,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
           </div>
 
           {/* Filter Bar */}
-          <div className="px-3 py-2 border-b border-taskflow-border/60 flex items-center justify-between text-xs bg-taskflow-bg/50">
+          <div className="px-3 py-1.5 border-b border-slate-800 flex items-center justify-between text-xs bg-[#111827]/60">
             <div className="flex items-center space-x-1">
               <button
                 type="button"
                 onClick={() => setUnreadOnly(false)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors btn-interactive cursor-pointer ${
+                className={`px-2 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
                   !unreadOnly
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
-                    : 'text-taskflow-muted hover:text-white'
+                    ? 'bg-slate-800 text-white border border-slate-700'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 All
@@ -250,34 +250,34 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
               <button
                 type="button"
                 onClick={() => setUnreadOnly(true)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors btn-interactive cursor-pointer ${
+                className={`px-2 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
                   unreadOnly
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
-                    : 'text-taskflow-muted hover:text-white'
+                    ? 'bg-slate-800 text-white border border-slate-700'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Unread only
               </button>
             </div>
-            <span className="text-[10px] text-taskflow-muted font-mono">
+            <span className="text-[10px] text-slate-500 font-mono">
               {notifications.length} items
             </span>
           </div>
 
           {/* Notification List */}
-          <div className="flex-1 overflow-y-auto divide-y divide-taskflow-border/40">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60">
             {loading ? (
-              <div className="p-8 text-center text-taskflow-muted space-y-2">
-                <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="p-8 text-center text-slate-400 space-y-2">
+                <div className="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-xs">Loading notifications...</p>
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-8 text-center text-taskflow-muted space-y-2">
-                <div className="w-10 h-10 rounded-full bg-taskflow-surface mx-auto flex items-center justify-center text-taskflow-muted">
-                  <Bell className="w-5 h-5 opacity-40" />
+              <div className="p-8 text-center text-slate-400 space-y-2">
+                <div className="w-9 h-9 rounded-full bg-slate-800 mx-auto flex items-center justify-center text-slate-500">
+                  <Bell className="w-4 h-4 opacity-60" />
                 </div>
                 <p className="text-xs font-medium text-white">All caught up!</p>
-                <p className="text-[11px] text-taskflow-muted">
+                <p className="text-[11px] text-slate-400">
                   {unreadOnly ? 'No unread notifications' : 'You have no notifications yet'}
                 </p>
               </div>
@@ -286,10 +286,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onOpenTa
                 <div
                   key={notif.id}
                   onClick={() => handleNotificationClick(notif)}
-                  className={`p-3.5 flex items-start space-x-3 transition-colors cursor-pointer group card-interactive ${
-                    !notif.isRead
-                      ? 'bg-cyan-950/15 hover:bg-cyan-950/30'
-                      : 'hover:bg-taskflow-surface/50'
+                  className={`p-3 flex items-start space-x-2.5 transition-colors cursor-pointer group ${
+                    !notif.isRead ? 'bg-sky-950/20 hover:bg-sky-950/30' : 'hover:bg-slate-850'
                   }`}
                 >
                   {/* Icon */}

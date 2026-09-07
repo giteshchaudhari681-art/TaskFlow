@@ -132,20 +132,18 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`flex flex-col flex-shrink-0 w-80 max-w-[85vw] rounded-2xl border transition-all duration-200 bg-taskflow-surface/40 backdrop-blur-md min-h-[500px] ${
-        isDragOver
-          ? `border-cyan-400 ring-2 ring-cyan-500/30 bg-cyan-950/20 ${config.glowColor}`
-          : 'border-taskflow-border'
+      className={`flex flex-col flex-shrink-0 w-72 max-w-[85vw] rounded-lg border transition-colors bg-[#111827]/80 min-h-[500px] ${
+        isDragOver ? 'border-sky-500 ring-1 ring-sky-500/50 bg-sky-950/20' : 'border-slate-800'
       }`}
     >
       {/* Column Header */}
-      <div className="flex items-center justify-between p-3.5 border-b border-taskflow-border/80">
+      <div className="flex items-center justify-between p-3 border-b border-slate-800">
         <div className="flex items-center space-x-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${config.dotColor}`} />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-white">{config.label}</h3>
-          <span
-            className={`px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold ${config.badgeBg} ${config.badgeText} border ${config.borderColor}`}
-          >
+          <span className={`w-2 h-2 rounded-full ${config.dotColor}`} />
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+            {config.label}
+          </h3>
+          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-800 text-slate-400 border border-slate-700">
             {tasks.length}
           </span>
         </div>
@@ -155,15 +153,15 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
             type="button"
             onClick={() => onAddTask(status)}
             title={`Add task to ${config.label}`}
-            className="p-1 rounded-lg hover:bg-taskflow-surface-hover text-taskflow-muted hover:text-white transition-colors"
+            className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
 
       {/* Cards Container */}
-      <div className="flex-1 p-2.5 space-y-2.5 overflow-y-auto max-h-[calc(100vh-320px)] scrollbar-thin">
+      <div className="flex-1 p-2 space-y-2 overflow-y-auto max-h-[calc(100vh-300px)] scrollbar-thin">
         {tasks.map(task => (
           <KanbanCard
             key={task.id}
@@ -176,21 +174,21 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
         {tasks.length === 0 && (
           <div
-            className={`h-36 rounded-xl border border-dashed flex flex-col items-center justify-center p-4 text-center transition-colors ${
+            className={`h-28 rounded-md border border-dashed flex flex-col items-center justify-center p-3 text-center transition-colors ${
               isDragOver
-                ? 'border-cyan-500 bg-cyan-950/30 text-cyan-300'
-                : 'border-taskflow-border/60 text-taskflow-muted/80'
+                ? 'border-sky-500 bg-sky-950/30 text-sky-300'
+                : 'border-slate-800/80 text-slate-500'
             }`}
           >
-            <p className="text-xs font-medium">No tasks in {config.label.toLowerCase()}</p>
+            <p className="text-xs">No tasks in {config.label.toLowerCase()}</p>
             {canCreate && (
               <button
                 type="button"
                 onClick={() => onAddTask(status)}
-                className="mt-2 text-[11px] text-cyan-400 hover:text-cyan-300 hover:underline inline-flex items-center"
+                className="mt-1.5 text-[11px] text-sky-400 hover:text-sky-300 hover:underline inline-flex items-center cursor-pointer"
               >
                 <Plus className="w-3 h-3 mr-1" />
-                Add a task
+                Add task
               </button>
             )}
           </div>

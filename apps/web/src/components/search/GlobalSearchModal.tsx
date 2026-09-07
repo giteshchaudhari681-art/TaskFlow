@@ -296,44 +296,44 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/75 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/75 backdrop-blur-sm animate-fadeIn"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl glass-panel-elevated rounded-2xl border border-taskflow-border/80 shadow-elevation-4 bg-taskflow-surface text-taskflow-text overflow-hidden flex flex-col max-h-[80vh]"
+        className="w-full max-w-2xl rounded-xl border border-slate-800 shadow-2xl bg-[#0f172a] text-slate-100 overflow-hidden flex flex-col max-h-[80vh]"
         onClick={e => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Search Header Bar */}
-        <div className="relative flex items-center px-4 py-3.5 border-b border-taskflow-border/70 bg-taskflow-bg/50">
-          <Search className="w-5 h-5 text-taskflow-muted mr-3 flex-shrink-0" />
+        <div className="relative flex items-center px-4 py-3 border-b border-slate-800 bg-[#111827]">
+          <Search className="w-4 h-4 text-slate-500 mr-2.5 flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search tasks, projects, milestones, or run commands..."
-            className="w-full bg-transparent text-sm text-white placeholder-taskflow-muted focus:outline-none"
+            className="w-full bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none"
           />
-          {loading && <Loader2 className="w-4 h-4 text-cyan-400 animate-spin mr-2" />}
+          {loading && <Loader2 className="w-3.5 h-3.5 text-sky-400 animate-spin mr-2" />}
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="p-1 rounded-md text-taskflow-muted hover:text-white btn-interactive transition-colors mr-2 cursor-pointer"
+              className="p-1 rounded text-slate-500 hover:text-white transition-colors mr-1.5 cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
           <button
             onClick={onClose}
-            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-taskflow-muted bg-taskflow-surface border border-taskflow-border hover:text-white btn-interactive transition-colors cursor-pointer"
+            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-slate-400 bg-slate-800 border border-slate-700 hover:text-white transition-colors cursor-pointer"
           >
             ESC
           </button>
         </div>
 
         {/* Tab Filters */}
-        <div className="flex items-center space-x-1 px-4 py-2 border-b border-taskflow-border/40 bg-taskflow-bg/30 text-xs overflow-x-auto">
+        <div className="flex items-center space-x-1 px-4 py-1.5 border-b border-slate-800 bg-[#111827]/60 text-xs overflow-x-auto">
           {(
             [
               { id: 'all', label: 'All' },
@@ -349,10 +349,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 setActiveTab(tab.id);
                 setSelectedIndex(0);
               }}
-              className={`px-3 py-1 rounded-lg font-medium transition-all btn-interactive cursor-pointer ${
+              className={`px-2.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                  : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50'
+                  ? 'bg-slate-800 text-white border border-slate-700 shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
               }`}
             >
               {tab.label}
@@ -363,7 +363,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         {/* Results / Commands List */}
         <div
           ref={listRef}
-          className="flex-1 overflow-y-auto p-2 divide-y divide-taskflow-border/30 max-h-[55vh]"
+          className="flex-1 overflow-y-auto p-2 divide-y divide-slate-800/40 max-h-[55vh]"
         >
           {error && (
             <div className="p-4 text-center text-xs text-rose-400 flex items-center justify-center space-x-2">
@@ -375,9 +375,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {/* Idle Guidance when query is empty and no results */}
           {query.trim().length === 0 && combinedItems.length === 0 && (
             <div className="p-8 text-center space-y-2">
-              <Compass className="w-8 h-8 text-cyan-400/60 mx-auto" />
+              <Compass className="w-7 h-7 text-sky-400/60 mx-auto" />
               <p className="text-xs font-semibold text-white">Quick Cross-Project Navigator</p>
-              <p className="text-[11px] text-taskflow-muted max-w-sm mx-auto">
+              <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
                 Type at least 2 characters to search across projects, task issue keys (e.g.
                 ALPHA-1), milestones, and team members.
               </p>
@@ -387,11 +387,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {/* Empty State when query returned nothing */}
           {query.trim().length >= 2 && !loading && combinedItems.length === 0 && (
             <div className="p-8 text-center space-y-2">
-              <Search className="w-8 h-8 text-taskflow-muted mx-auto" />
+              <Search className="w-7 h-7 text-slate-500 mx-auto" />
               <p className="text-xs font-semibold text-white">
                 No results found for &ldquo;{query}&rdquo;
               </p>
-              <div className="text-[11px] text-taskflow-muted max-w-xs mx-auto space-y-1 pt-1 text-left">
+              <div className="text-[11px] text-slate-400 max-w-xs mx-auto space-y-1 pt-1 text-left">
                 <p>Suggestions:</p>
                 <p>• Verify the spelling of the search term</p>
                 <p>• Search by exact issue key (e.g. ALPHA-1)</p>
@@ -411,25 +411,25 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                   key={cmd.id}
                   data-index={index}
                   onClick={() => handleSelect(index)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all card-interactive ${
+                  className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors ${
                     isSelected
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/10 border border-cyan-500/40 text-white shadow-glow-cyan'
-                      : 'hover:bg-taskflow-surface/80 text-taskflow-text'
+                      ? 'bg-slate-800 text-white border border-slate-700'
+                      : 'hover:bg-slate-850 text-slate-300'
                   }`}
                 >
-                  <div className="flex items-center space-x-3 min-w-0">
-                    <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex-shrink-0">
-                      <Zap className="w-4 h-4" />
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className="p-1 rounded bg-amber-950/40 text-amber-300 border border-amber-800/60 flex-shrink-0">
+                      <Zap className="w-3.5 h-3.5" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center space-x-2">
-                        <p className="text-xs font-semibold text-white truncate">{cmd.label}</p>
-                        <span className="px-1.5 py-0.2 rounded text-[9px] uppercase font-mono font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                        <p className="text-xs font-medium text-white truncate">{cmd.label}</p>
+                        <span className="px-1.5 py-0.2 rounded text-[9px] uppercase font-mono font-medium bg-slate-800 text-amber-300 border border-slate-700">
                           {cmd.category}
                         </span>
                       </div>
                       {cmd.description && (
-                        <p className="text-[11px] text-taskflow-muted truncate mt-0.5">
+                        <p className="text-[11px] text-slate-400 truncate mt-0.5">
                           {cmd.description}
                         </p>
                       )}
@@ -438,13 +438,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
                   <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
                     {cmd.shortcut && (
-                      <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border">
+                      <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-700">
                         {cmd.shortcut}
                       </kbd>
                     )}
-                    {isSelected && (
-                      <CornerDownLeft className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                    )}
+                    {isSelected && <CornerDownLeft className="w-3.5 h-3.5 text-sky-400" />}
                   </div>
                 </div>
               );
@@ -456,50 +454,48 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 key={`${res.type}-${res.id}`}
                 data-index={index}
                 onClick={() => handleSelect(index)}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all card-interactive ${
+                className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors ${
                   isSelected
-                    ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/10 border border-cyan-500/40 text-white shadow-glow-cyan'
-                    : 'hover:bg-taskflow-surface/80 text-taskflow-text'
+                    ? 'bg-slate-800 text-white border border-slate-700'
+                    : 'hover:bg-slate-850 text-slate-300'
                 }`}
               >
-                <div className="flex items-center space-x-3 min-w-0">
-                  <div className="p-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border flex-shrink-0">
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className="p-1 rounded bg-slate-800 border border-slate-700 flex-shrink-0">
                     {getEntityIcon(res.type)}
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center space-x-2">
-                      <p className="text-xs font-semibold text-white truncate">{res.title}</p>
+                      <p className="text-xs font-medium text-white truncate">{res.title}</p>
                       {res.metadata.issueKey && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-800/60">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-medium bg-slate-800 text-sky-300 border border-slate-700">
                           {res.metadata.issueKey}
                         </span>
                       )}
                       {res.metadata.priority && (
-                        <span className="text-[9px] uppercase font-mono px-1 rounded bg-taskflow-surface border border-taskflow-border text-taskflow-muted">
+                        <span className="text-[9px] uppercase font-mono px-1 rounded bg-slate-800 border border-slate-700 text-slate-400">
                           {res.metadata.priority}
                         </span>
                       )}
                     </div>
 
                     {res.subtitle && (
-                      <p className="text-[11px] text-taskflow-muted truncate mt-0.5">
-                        {res.subtitle}
-                      </p>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{res.subtitle}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
                   {res.metadata.status && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-taskflow-bg border border-taskflow-border text-taskflow-muted">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-slate-900 border border-slate-800 text-slate-400">
                       {res.metadata.status}
                     </span>
                   )}
                   {isSelected ? (
-                    <CornerDownLeft className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                    <CornerDownLeft className="w-3.5 h-3.5 text-sky-400" />
                   ) : (
-                    <ArrowRight className="w-3.5 h-3.5 text-taskflow-muted/50" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-600" />
                   )}
                 </div>
               </div>
@@ -508,33 +504,33 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         </div>
 
         {/* Footer Shortcut Guide */}
-        <div className="px-4 py-2.5 border-t border-taskflow-border/50 bg-taskflow-bg/70 flex items-center justify-between text-[11px] text-taskflow-muted">
+        <div className="px-4 py-2 border-t border-slate-800 bg-[#111827] flex items-center justify-between text-[11px] text-slate-500">
           <div className="flex items-center space-x-3">
             <span>
-              <kbd className="px-1 py-0.5 rounded bg-taskflow-surface border border-taskflow-border font-mono text-[10px] mr-1">
+              <kbd className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] mr-1 text-slate-300">
                 ↑
               </kbd>
-              <kbd className="px-1 py-0.5 rounded bg-taskflow-surface border border-taskflow-border font-mono text-[10px] mr-1">
+              <kbd className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] mr-1 text-slate-300">
                 ↓
               </kbd>
               Navigate
             </span>
             <span>
-              <kbd className="px-1.5 py-0.5 rounded bg-taskflow-surface border border-taskflow-border font-mono text-[10px] mr-1">
+              <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] mr-1 text-slate-300">
                 ↵
               </kbd>
               Select
             </span>
             <span>
-              <kbd className="px-1 py-0.5 rounded bg-taskflow-surface border border-taskflow-border font-mono text-[10px] mr-1">
+              <kbd className="px-1 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] mr-1 text-slate-300">
                 esc
               </kbd>
               Close
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center space-x-1 font-mono text-[10px]">
-            <span>TaskFlow Global Search</span>
+          <div className="hidden sm:flex items-center space-x-1 font-mono text-[10px] text-slate-500">
+            <span>TaskFlow Search</span>
             <span>•</span>
             <span>{platformKey}K</span>
           </div>

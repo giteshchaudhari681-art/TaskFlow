@@ -16,7 +16,12 @@ import {
 import { ProjectListItem, ProjectStatus } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
 import { CreateProjectModal } from './CreateProjectModal';
-import { TiltCard } from '../common/useCardTilt';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Badge } from '../ui/Badge';
+import { Card } from '../ui/Card';
+import { EmptyState } from '../ui/EmptyState';
+import { Skeleton } from '../ui/Skeleton';
 
 interface ProjectsListProps {
   organizationId: string;
@@ -28,45 +33,33 @@ const STATUS_CONFIG: Record<
   ProjectStatus,
   {
     label: string;
-    bg: string;
-    text: string;
-    border: string;
+    variant: 'indigo' | 'success' | 'warning' | 'primary' | 'danger';
     icon: React.FC<{ className?: string }>;
   }
 > = {
   [ProjectStatus.PLANNING]: {
     label: 'Planning',
-    bg: 'bg-indigo-950/60',
-    text: 'text-indigo-400',
-    border: 'border-indigo-800/50',
+    variant: 'indigo',
     icon: Clock,
   },
   [ProjectStatus.ACTIVE]: {
     label: 'Active',
-    bg: 'bg-emerald-950/60',
-    text: 'text-emerald-400',
-    border: 'border-emerald-800/50',
+    variant: 'success',
     icon: Activity,
   },
   [ProjectStatus.PAUSED]: {
     label: 'Paused',
-    bg: 'bg-amber-950/60',
-    text: 'text-amber-400',
-    border: 'border-amber-800/50',
+    variant: 'warning',
     icon: PauseCircle,
   },
   [ProjectStatus.COMPLETED]: {
     label: 'Completed',
-    bg: 'bg-cyan-950/60',
-    text: 'text-cyan-400',
-    border: 'border-cyan-800/50',
+    variant: 'primary',
     icon: CheckCircle2,
   },
   [ProjectStatus.ARCHIVED]: {
     label: 'Archived',
-    bg: 'bg-rose-950/60',
-    text: 'text-rose-400',
-    border: 'border-rose-800/50',
+    variant: 'danger',
     icon: Archive,
   },
 };
@@ -104,7 +97,6 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
     fetchProjects();
   }, [organizationId, statusFilter]);
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchProjects();
@@ -115,39 +107,101 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-taskflow-border/80">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-white/[0.08]">
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-white tracking-tight">Projects</h1>
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-taskflow-surface border border-taskflow-border text-cyan-400">
+          <div className="flex items-center space-x-2.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white font-display tracking-tight">
+              Projects
+            </h1>
+            <Badge variant="primary" size="md">
               {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
-            </span>
+            </Badge>
           </div>
-          <p className="text-xs text-taskflow-muted mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Workspace initiatives, execution pipelines, and project telemetry for {organizationName}
           </p>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
           onClick={() => setCreateModalOpen(true)}
-          className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center justify-center space-x-2 btn-interactive-primary transition-all cursor-pointer"
+          leftIcon={<Plus className="w-4 h-4" />}
         >
-          <Plus className="w-4 h-4" />
-          <span>New Project</span>
-        </button>
+          New Project
+        </Button>
+      </div>
+
+      {/* Portfolio Command Telemetry Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2">
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-white/[0.08] shadow-md">
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block mb-1">
+            Total Initiatives
+          </span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl font-black text-white">{projects.length}</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400">
+              Workspace
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-white/[0.08] shadow-md">
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block mb-1">
+            Active Projects
+          </span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl font-black text-emerald-400">
+              {projects.filter(p => p.status === ProjectStatus.ACTIVE).length}
+            </span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">
+              Execution
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-white/[0.08] shadow-md">
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block mb-1">
+            Planning & Paused
+          </span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl font-black text-amber-400">
+              {
+                projects.filter(
+                  p => p.status === ProjectStatus.PLANNING || p.status === ProjectStatus.PAUSED
+                ).length
+              }
+            </span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400">
+              Queue
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-white/[0.08] shadow-md">
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest block mb-1">
+            Total Members
+          </span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl font-black text-violet-400">
+              {projects.reduce((acc, p) => acc + (p.memberCount || 0), 0)}
+            </span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400">
+              Collaborators
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-taskflow-muted" />
-          <input
+        <div className="w-full md:w-80">
+          <Input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search projects by name or key..."
-            className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-taskflow-surface border border-taskflow-border focus:border-cyan-500 focus:outline-none input-interactive text-xs text-white placeholder-taskflow-muted transition-all"
+            leftIcon={<Search className="w-4 h-4" />}
           />
         </div>
 
@@ -157,10 +211,10 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap btn-interactive cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-display transition-all whitespace-nowrap cursor-pointer ${
                 statusFilter === status
-                  ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                  : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50 border border-transparent'
+                  ? 'bg-slate-800 text-sky-400 border border-sky-500/30 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
               }`}
             >
               {status.charAt(0) + status.slice(1).toLowerCase()}
@@ -171,8 +225,8 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2.5">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
           <span>{error}</span>
         </div>
       )}
@@ -181,45 +235,35 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map(i => (
-            <div
-              key={i}
-              className="glass-panel p-5 rounded-2xl border border-taskflow-border/60 bg-taskflow-surface/50 animate-pulse space-y-4"
-            >
+            <Card key={i} className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-16 h-5 bg-taskflow-border/80 rounded-md" />
-                <div className="w-20 h-5 bg-taskflow-border/80 rounded-full" />
+                <Skeleton className="w-16 h-5" />
+                <Skeleton className="w-20 h-5" />
               </div>
               <div className="space-y-2">
-                <div className="w-3/4 h-5 bg-taskflow-border/80 rounded-md" />
-                <div className="w-full h-3 bg-taskflow-border/50 rounded-md" />
+                <Skeleton className="w-3/4 h-6" />
+                <Skeleton className="w-full h-10" />
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-taskflow-border/40">
-                <div className="w-16 h-4 bg-taskflow-border/60 rounded-md" />
-                <div className="w-20 h-4 bg-taskflow-border/60 rounded-md" />
+              <div className="flex items-center justify-between pt-3 border-t border-white/[0.08]">
+                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-12 h-4" />
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       ) : projects.length === 0 ? (
         /* Empty State */
-        <div className="glass-panel-elevated rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto mb-4">
-            <FolderPlus className="w-7 h-7" />
-          </div>
-          <h3 className="text-base font-semibold text-white">No projects found</h3>
-          <p className="text-xs text-taskflow-muted max-w-sm mx-auto mt-1.5">
-            {searchQuery || statusFilter !== 'ALL'
+        <EmptyState
+          icon={<FolderPlus className="w-6 h-6" />}
+          title="No projects found"
+          description={
+            searchQuery || statusFilter !== 'ALL'
               ? 'No projects match your current filters. Try changing your search query or status filter.'
-              : 'Get started by creating your first project workspace in this organization.'}
-          </p>
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="mt-5 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan inline-flex items-center space-x-2 btn-interactive-primary transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create First Project</span>
-          </button>
-        </div>
+              : 'Get started by creating your first project workspace in this organization.'
+          }
+          actionLabel="Create First Project"
+          onAction={() => setCreateModalOpen(true)}
+        />
       ) : (
         /* Project Cards Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -229,64 +273,63 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
             const StatusIcon = statusConfig.icon;
 
             return (
-              <TiltCard
+              <Card
                 key={project.id}
-                maxTilt={1.8}
+                variant="interactive"
+                padding="md"
                 onClick={() => onSelectProject(project.id)}
-                className="group glass-panel rounded-2xl border border-taskflow-border hover:border-cyan-500/50 p-5 bg-taskflow-surface hover:bg-taskflow-surface/90 transition-all cursor-pointer flex flex-col justify-between hover:shadow-glow-cyan card-interactive"
+                className="group flex flex-col justify-between"
               >
                 <div>
                   {/* Top Bar: Key & Status Pill */}
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center space-x-2">
                       <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: project.color || '#06b6d4' }}
+                        className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                        style={{ backgroundColor: project.color || '#38bdf8' }}
                       />
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-taskflow-bg border border-taskflow-border text-cyan-300 uppercase">
+                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 uppercase">
                         {project.key}
                       </span>
                     </div>
 
-                    <span
-                      className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
-                    >
+                    <Badge variant={statusConfig.variant} size="sm" dot>
                       <StatusIcon className="w-3 h-3" />
                       <span>{statusConfig.label}</span>
-                    </span>
+                    </Badge>
                   </div>
 
                   {/* Name & Description */}
-                  <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors tracking-tight line-clamp-1">
+                  <h3 className="text-base font-bold text-white group-hover:text-sky-300 font-display transition-colors tracking-tight line-clamp-1">
                     {project.name}
                   </h3>
-                  <p className="text-xs text-taskflow-muted mt-1.5 line-clamp-2 min-h-[2rem]">
-                    {project.description || 'No description provided.'}
+                  <p className="text-xs text-slate-400 mt-1.5 line-clamp-2 min-h-[2.25rem] leading-relaxed">
+                    {project.description || 'No description provided for this project.'}
                   </p>
                 </div>
 
                 {/* Footer Telemetry */}
-                <div className="pt-4 mt-4 border-t border-taskflow-border/60 flex items-center justify-between text-xs text-taskflow-muted">
+                <div className="pt-3.5 mt-4 border-t border-white/[0.08] flex items-center justify-between text-xs text-slate-400">
                   <div className="flex items-center space-x-3">
-                    <span className="flex items-center space-x-1" title="Active Project Members">
-                      <Users className="w-3.5 h-3.5 text-taskflow-muted" />
-                      <span>{project.memberCount}</span>
+                    <span className="flex items-center space-x-1.5" title="Active Project Members">
+                      <Users className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="font-semibold text-slate-300">{project.memberCount}</span>
                     </span>
 
                     {project.userRole && (
-                      <span className="flex items-center space-x-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-taskflow-bg border border-taskflow-border text-indigo-300">
-                        <Shield className="w-2.5 h-2.5 mr-0.5" />
+                      <span className="flex items-center space-x-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-800/80 border border-slate-700/60 text-slate-300">
+                        <Shield className="w-3 h-3 mr-0.5 text-indigo-400" />
                         {project.userRole}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-1 text-cyan-400 group-hover:translate-x-0.5 transition-transform text-[11px] font-medium">
+                  <div className="flex items-center space-x-1 text-sky-400 group-hover:text-sky-300 text-xs font-semibold font-display">
                     <span>Open</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-              </TiltCard>
+              </Card>
             );
           })}
         </div>

@@ -35,23 +35,23 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Top Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
         <button
           type="button"
           onClick={onBackToDashboard}
-          className="flex items-center space-x-2 text-xs text-taskflow-muted hover:text-white btn-interactive px-2 py-1 rounded-lg transition-colors group cursor-pointer"
+          className="flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-900 border border-white/[0.08] hover:border-slate-700 transition-colors group cursor-pointer"
         >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Operations Dashboard</span>
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Dashboard</span>
         </button>
-        <span className="text-[11px] text-taskflow-muted font-mono">Platform Settings v1.0</span>
+        <span className="text-[11px] text-slate-500 font-mono">Platform Settings v1.0</span>
       </div>
 
       {/* Main Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Navigation Sidebar */}
         <div className="md:col-span-1 space-y-1">
-          <div className="glass-panel-elevated p-2 rounded-2xl border border-taskflow-border/80 shadow-elevation-2 space-y-1">
+          <div className="p-2 rounded-xl border border-white/[0.08] bg-slate-900/80 backdrop-blur-xl shadow-sm space-y-1">
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -60,15 +60,13 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all btn-interactive cursor-pointer ${
+                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold font-display transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50'
+                      ? 'bg-slate-800 text-sky-400 border border-sky-500/30 shadow-sm'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
                   }`}
                 >
-                  <Icon
-                    className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-taskflow-muted'}`}
-                  />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-sky-400' : 'text-slate-500'}`} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -78,7 +76,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
 
         {/* Content Pane */}
         <div className="md:col-span-3">
-          <div className="glass-panel-elevated p-6 rounded-2xl border border-taskflow-border/80 shadow-elevation-2">
+          <div className="p-6 sm:p-8 rounded-xl border border-white/[0.08] bg-slate-900/80 backdrop-blur-xl shadow-elevation-2">
             {activeTab === 'profile' && <ProfileSettings />}
             {activeTab === 'security' && <SecuritySettings />}
             {activeTab === 'notifications' && <NotificationSettings />}

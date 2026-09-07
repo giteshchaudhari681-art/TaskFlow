@@ -203,28 +203,28 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Filter Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 glass-panel-elevated border border-taskflow-border/80 rounded-2xl shadow-sm">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 rounded-lg border border-slate-800 bg-[#111827] shadow-sm">
         {/* Search input */}
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-taskflow-muted" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={`Search ${projectKey} tasks by key or title...`}
-            className="w-full pl-10 pr-4 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
+            className="w-full pl-9 pr-3 py-1.5 bg-slate-900 border border-slate-700/80 rounded-md text-slate-200 placeholder-slate-500 text-xs focus:outline-none focus:border-sky-500 transition-colors"
           />
         </div>
 
         {/* Filters dropdown row */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Status filter */}
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
+            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700/80 rounded-md text-xs font-medium text-slate-300 focus:outline-none focus:border-sky-500 cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value={TaskStatus.TODO}>To Do</option>
@@ -240,7 +240,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
+            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700/80 rounded-md text-xs font-medium text-slate-300 focus:outline-none focus:border-sky-500 cursor-pointer"
           >
             <option value="ALL">All Priorities</option>
             <option value={TaskPriority.URGENT}>Urgent</option>
@@ -253,7 +253,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={assigneeFilter}
             onChange={e => setAssigneeFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
+            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700/80 rounded-md text-xs font-medium text-slate-300 focus:outline-none focus:border-sky-500 cursor-pointer max-w-[140px] truncate"
           >
             <option value="ALL">All Assignees</option>
             {members.map(m => (
@@ -267,7 +267,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <select
             value={labelFilter}
             onChange={e => setLabelFilter(e.target.value)}
-            className="px-3 py-2 bg-taskflow-surface border border-taskflow-border rounded-xl text-xs font-medium text-taskflow-text-dim focus:outline-none focus:border-cyan-500 input-interactive cursor-pointer"
+            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700/80 rounded-md text-xs font-medium text-slate-300 focus:outline-none focus:border-sky-500 cursor-pointer max-w-[140px] truncate"
           >
             <option value="ALL">All Labels</option>
             {projectLabels.map(l => (
@@ -281,13 +281,13 @@ export const TaskList: React.FC<TaskListProps> = ({
           <button
             type="button"
             onClick={() => setShowArchived(!showArchived)}
-            className={`px-3 py-2 rounded-xl text-xs font-medium border transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors flex items-center gap-1.5 cursor-pointer ${
               showArchived
-                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-glow-amber'
-                : 'bg-taskflow-surface text-taskflow-muted border-taskflow-border hover:text-white'
+                ? 'bg-slate-800 text-white border-slate-600'
+                : 'bg-slate-900 text-slate-400 border-slate-700/80 hover:text-slate-200'
             }`}
           >
-            <Archive className="w-3.5 h-3.5" />
+            <Archive className="w-3 h-3" />
             <span>Archived</span>
           </button>
 
@@ -295,21 +295,21 @@ export const TaskList: React.FC<TaskListProps> = ({
           <button
             onClick={loadTasks}
             title="Refresh tasks"
-            className="p-2 bg-taskflow-surface border border-taskflow-border hover:border-taskflow-border-subtle text-taskflow-muted hover:text-white rounded-xl btn-interactive transition-colors cursor-pointer"
+            className="p-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-md transition-colors cursor-pointer"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
 
           {/* View Mode Toggle */}
           {onViewModeChange && (
-            <div className="flex items-center p-0.5 rounded-xl border border-taskflow-border bg-taskflow-surface">
+            <div className="flex items-center p-0.5 rounded-md border border-slate-800 bg-slate-900">
               <button
                 type="button"
                 onClick={() => onViewModeChange('board')}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
                   viewMode === 'board'
-                    ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60 shadow-sm'
-                    : 'text-taskflow-muted hover:text-white'
+                    ? 'bg-slate-800 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
                 }`}
                 title="Board view"
               >
@@ -319,10 +319,10 @@ export const TaskList: React.FC<TaskListProps> = ({
               <button
                 type="button"
                 onClick={() => onViewModeChange('list')}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
                   viewMode === 'list'
-                    ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60 shadow-sm'
-                    : 'text-taskflow-muted hover:text-white'
+                    ? 'bg-slate-800 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
                 }`}
                 title="List view"
               >
@@ -336,9 +336,9 @@ export const TaskList: React.FC<TaskListProps> = ({
           {canManageTasks && (
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-glow-cyan btn-interactive-primary cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs rounded-md shadow-sm transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Create Task</span>
             </button>
           )}
@@ -347,14 +347,14 @@ export const TaskList: React.FC<TaskListProps> = ({
 
       {/* Error display */}
       {error && (
-        <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+        <div className="flex items-center justify-between p-3 bg-rose-950/30 border border-rose-800/60 rounded-md text-rose-300 text-xs">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" />
+            <AlertCircle className="w-4 h-4 text-rose-400" />
             <span>{error}</span>
           </div>
           <button
             onClick={loadTasks}
-            className="underline hover:text-red-300 text-xs cursor-pointer"
+            className="underline hover:text-rose-200 text-xs cursor-pointer"
           >
             Retry
           </button>
@@ -363,11 +363,11 @@ export const TaskList: React.FC<TaskListProps> = ({
 
       {/* Loading Skeletons */}
       {loading && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {[1, 2, 3, 4, 5].map(n => (
             <div
               key={n}
-              className="h-16 bg-taskflow-surface/60 border border-taskflow-border rounded-2xl animate-pulse"
+              className="h-12 bg-slate-900 border border-slate-800 rounded-md animate-pulse"
             />
           ))}
         </div>
@@ -375,12 +375,12 @@ export const TaskList: React.FC<TaskListProps> = ({
 
       {/* Empty State */}
       {!loading && tasks.length === 0 && (
-        <div className="flex flex-col items-center justify-center p-12 text-center bg-taskflow-surface/30 border border-dashed border-taskflow-border rounded-2xl">
-          <div className="p-3 bg-cyan-500/10 rounded-2xl mb-4 border border-cyan-500/20">
-            <CheckSquare className="w-8 h-8 text-cyan-400" />
+        <div className="flex flex-col items-center justify-center p-10 text-center bg-slate-900/30 border border-dashed border-slate-800 rounded-lg">
+          <div className="p-2.5 bg-slate-800 rounded-md mb-3 border border-slate-700">
+            <CheckSquare className="w-6 h-6 text-sky-400" />
           </div>
-          <h3 className="text-base font-semibold text-white mb-1">No tasks found</h3>
-          <p className="text-sm text-taskflow-muted max-w-sm mb-6">
+          <h3 className="text-sm font-semibold text-white mb-1">No tasks found</h3>
+          <p className="text-xs text-slate-400 max-w-sm mb-4">
             {search || statusFilter !== 'ALL' || priorityFilter !== 'ALL'
               ? 'No tasks match the selected filters. Try clearing your filters.'
               : 'There are no tasks in this project yet. Create the first task to start tracking work.'}
@@ -388,9 +388,9 @@ export const TaskList: React.FC<TaskListProps> = ({
           {canManageTasks && (
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-sm rounded-xl transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs rounded-md shadow-sm transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Create First Task</span>
             </button>
           )}
@@ -399,26 +399,26 @@ export const TaskList: React.FC<TaskListProps> = ({
 
       {/* Tasks Table / Card List */}
       {!loading && tasks.length > 0 && (
-        <div className="glass-panel-elevated border border-taskflow-border/80 rounded-2xl overflow-hidden shadow-xl">
-          <div className="divide-y divide-taskflow-border/60">
+        <div className="border border-slate-800 rounded-lg overflow-hidden bg-[#111827]">
+          <div className="divide-y divide-slate-800/80">
             {tasks.map(task => (
               <div
                 key={task.id}
                 onClick={() => setSelectedTaskId(task.id)}
-                className="group flex flex-col md:flex-row items-start md:items-center justify-between p-4 hover:bg-taskflow-surface/90 hover:border-l-2 hover:border-l-cyan-400 cursor-pointer transition-all gap-3 card-interactive"
+                className="group flex flex-col md:flex-row items-start md:items-center justify-between p-3 hover:bg-slate-850 cursor-pointer transition-colors gap-3"
               >
                 {/* Left: Key & Title */}
-                <div className="flex items-start md:items-center gap-3.5 flex-1 min-w-0">
-                  <span className="px-2.5 py-1 text-xs font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-md shrink-0">
+                <div className="flex items-start md:items-center gap-2.5 flex-1 min-w-0">
+                  <span className="px-1.5 py-0.2 text-[10px] font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700 rounded shrink-0">
                     {task.issueKey}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-medium text-white group-hover:text-cyan-300 transition-colors truncate">
+                    <h4 className="text-xs font-medium text-slate-200 group-hover:text-white transition-colors truncate">
                       {task.title}
                     </h4>
                     {task.labels && task.labels.length > 0 && (
                       <div
-                        className="flex flex-wrap items-center gap-1.5 mt-1.5"
+                        className="flex flex-wrap items-center gap-1 mt-1"
                         onClick={e => e.stopPropagation()}
                       >
                         {task.labels.map(label => (
@@ -430,7 +430,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                 </div>
 
                 {/* Right: Badges, Assignee, Subtasks, Due date */}
-                <div className="flex flex-wrap items-center gap-3 shrink-0 self-end md:self-center">
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-end md:self-center">
                   {/* Status */}
                   {getStatusBadge(task.status)}
 
@@ -439,8 +439,8 @@ export const TaskList: React.FC<TaskListProps> = ({
 
                   {/* Subtask pill */}
                   {task.subtaskCount > 0 && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-taskflow-surface text-taskflow-text-dim border border-taskflow-border rounded-md">
-                      <CheckSquare className="w-3 h-3 text-cyan-400" />
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.2 text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700 rounded">
+                      <CheckSquare className="w-3 h-3 text-slate-500" />
                       <span>
                         {task.completedSubtaskCount}/{task.subtaskCount}
                       </span>
@@ -450,10 +450,10 @@ export const TaskList: React.FC<TaskListProps> = ({
                   {/* Dependency pill */}
                   {task.dependencySummary && task.dependencySummary.totalDependencies > 0 && (
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-md border ${
+                      className={`inline-flex items-center gap-1 px-1.5 py-0.2 text-[10px] font-medium rounded border ${
                         task.dependencySummary.hasUnresolvedBlockers
-                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                          : 'bg-taskflow-surface text-taskflow-text-dim border-taskflow-border'
+                          ? 'bg-rose-950/40 text-rose-300 border-rose-800/60'
+                          : 'bg-slate-800 text-slate-400 border-slate-700'
                       }`}
                       title={
                         task.dependencySummary.hasUnresolvedBlockers
@@ -461,7 +461,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                           : `${task.dependencySummary.totalDependencies} linked dependencies`
                       }
                     >
-                      <Link2 className="w-3 h-3 text-cyan-400" />
+                      <Link2 className="w-3 h-3 text-slate-500" />
                       <span>
                         {task.dependencySummary.hasUnresolvedBlockers
                           ? `Blocked (${task.dependencySummary.blockedByCount})`
@@ -472,25 +472,25 @@ export const TaskList: React.FC<TaskListProps> = ({
 
                   {/* Due Date */}
                   {task.dueDate && (
-                    <span className="inline-flex items-center gap-1 text-xs text-taskflow-muted">
-                      <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+                      <Calendar className="w-3 h-3 text-slate-500" />
                       <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                     </span>
                   )}
 
                   {/* Assignee */}
-                  <div className="flex items-center gap-1.5 pl-2 border-l border-taskflow-border">
+                  <div className="flex items-center gap-1.5 pl-2 border-l border-slate-800">
                     {task.assignee ? (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center text-xs font-bold text-white uppercase">
+                        <div className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[9px] font-medium text-slate-200">
                           {task.assignee.name.charAt(0)}
                         </div>
-                        <span className="text-xs text-taskflow-text-dim hidden sm:inline">
+                        <span className="text-xs text-slate-400 hidden sm:inline">
                           {task.assignee.name}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-xs text-taskflow-muted italic">Unassigned</span>
+                      <span className="text-xs text-slate-500 italic">Unassigned</span>
                     )}
                   </div>
                 </div>

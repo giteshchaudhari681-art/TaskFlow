@@ -4,22 +4,23 @@ import {
   Layers,
   GitBranch,
   Brain,
-  ShieldCheck,
-  Server,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
-  Boxes,
   Workflow,
   LogOut,
   Building2,
   Settings,
   LayoutDashboard,
-  Users,
   CheckSquare,
   Search,
   Menu,
   X,
+  ArrowRight,
+  Sparkles,
+  Users,
+  Zap,
+  Shield,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import type { HealthCheckData } from '@taskflow/shared';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -34,12 +35,53 @@ import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { TiltCard } from './components/common/useCardTilt';
+import { LandingPage } from './components/landing/LandingPage';
 
+// ─── Feature card data ───────────────────────────────────────────────────────
+const FEATURES = [
+  {
+    icon: GitBranch,
+    color: 'from-sky-500/20 to-sky-500/5',
+    iconColor: 'text-sky-400',
+    borderGlow: 'hover:border-sky-500/40',
+    title: 'Dependency Graphs',
+    description:
+      'Deterministic DAG blocking dependencies with critical path detection and cascade delay warnings across all roadmap views.',
+  },
+  {
+    icon: Brain,
+    color: 'from-violet-500/20 to-violet-500/5',
+    iconColor: 'text-violet-400',
+    borderGlow: 'hover:border-violet-500/40',
+    title: 'AI Delivery Intelligence',
+    description:
+      'Automated task breakdowns, workload balancing, and delivery risk detection surfaced before they block your team.',
+  },
+  {
+    icon: Activity,
+    color: 'from-emerald-500/20 to-emerald-500/5',
+    iconColor: 'text-emerald-400',
+    borderGlow: 'hover:border-emerald-500/40',
+    title: 'Real-Time Operations',
+    description:
+      'Live Socket.IO state synchronization, collaborative task updates, and instant notification telemetry for every event.',
+  },
+  {
+    icon: Shield,
+    color: 'from-amber-500/20 to-amber-500/5',
+    iconColor: 'text-amber-400',
+    borderGlow: 'hover:border-amber-500/40',
+    title: 'Enterprise Security',
+    description:
+      'Multi-tenant isolation, role-based access control, and enterprise-grade permission layers protecting every workspace.',
+  },
+];
+
+// ─── Main component ───────────────────────────────────────────────────────────
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
     useAuth();
-  const [authView, setAuthView] = useState<'login' | 'register'>('login');
+  const [authView, setAuthView] = useState<'landing' | 'login' | 'register'>('landing');
   const [currentView, setCurrentView] = useState<
     'dashboard' | 'projects' | 'project-details' | 'settings' | 'my-work'
   >('dashboard');
@@ -51,16 +93,13 @@ const MainApp: React.FC = () => {
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
   const [healthError, setHealthError] = useState<string | null>(null);
-  const [lastChecked, setLastChecked] = useState<Date>(new Date());
 
   const fetchHealth = async () => {
     setHealthLoading(true);
     setHealthError(null);
     try {
       const res = await fetch('/api/v1/health');
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const json = await res.json();
       if (json.success && json.data) {
         setHealth(json.data);
@@ -73,7 +112,6 @@ const MainApp: React.FC = () => {
       setHealth(null);
     } finally {
       setHealthLoading(false);
-      setLastChecked(new Date());
     }
   };
 
@@ -86,7 +124,7 @@ const MainApp: React.FC = () => {
       setCurrentView('dashboard');
       setSelectedProjectId(null);
       setDeepLinkTaskId(null);
-      setAuthView('login');
+      setAuthView('landing');
     }
   }, [isAuthenticated]);
 
@@ -118,156 +156,142 @@ const MainApp: React.FC = () => {
     setCurrentView('project-details');
   };
 
+  // Health status indicator
+  const healthStatus = healthLoading
+    ? 'loading'
+    : healthError
+      ? 'error'
+      : health?.status === 'healthy'
+        ? 'healthy'
+        : 'error';
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
-          <p className="text-sm text-taskflow-muted">Restoring secure session...</p>
+      <div className="min-h-screen bg-[#06080d] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/30">
+            <Workflow className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <RefreshCw className="w-4 h-4 animate-spin text-sky-500" />
+            <span>Restoring your session…</span>
+          </div>
         </div>
       </div>
     );
   }
 
+  if (!isAuthenticated && authView === 'landing') {
+    return (
+      <LandingPage
+        onSignIn={() => setAuthView('login')}
+        onGetStarted={() => setAuthView('register')}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex flex-col">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 glass-panel border-b border-taskflow-border px-4 sm:px-6 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center space-x-4 lg:space-x-6 min-w-0">
-            <div
-              className="flex items-center space-x-3 cursor-pointer shrink-0 group"
+    <div className="min-h-screen bg-[#06080d] text-slate-100 flex flex-col selection:bg-sky-500/30 selection:text-sky-200 overflow-x-hidden">
+      {/* ── Top Navigation Bar ─────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 bg-[#06080d]/80 backdrop-blur-2xl border-b border-white/[0.06]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+          {/* Brand */}
+          <div className="flex items-center gap-6 min-w-0">
+            <button
+              type="button"
               onClick={() => {
-                setCurrentView('dashboard');
-                setIsMobileMenuOpen(false);
+                if (!isAuthenticated) {
+                  setAuthView('landing');
+                } else {
+                  setCurrentView('dashboard');
+                  setIsMobileMenuOpen(false);
+                }
               }}
+              className="flex items-center gap-2.5 shrink-0 group select-none cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(56,189,248,0.45)] transition-all duration-200">
-                <div className="w-full h-full bg-taskflow-surface rounded-[10px] flex items-center justify-center">
-                  <Workflow className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform duration-200" />
-                </div>
+              <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-sky-500/20 group-hover:shadow-sky-500/35 group-hover:scale-105 transition-all duration-200 ring-1 ring-white/15">
+                <Workflow className="w-4 h-4 text-white" />
+                {/* Health indicator dot */}
+                <span
+                  className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border-2 border-[#06080d] ${
+                    healthStatus === 'healthy'
+                      ? 'bg-emerald-400'
+                      : healthStatus === 'loading'
+                        ? 'bg-amber-400 animate-pulse'
+                        : 'bg-rose-500'
+                  }`}
+                  title={
+                    healthStatus === 'healthy'
+                      ? 'All systems operational'
+                      : healthStatus === 'loading'
+                        ? 'Connecting…'
+                        : 'Backend offline'
+                  }
+                />
               </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-base tracking-tight text-white group-hover:text-cyan-200 transition-colors">
-                    TaskFlow
-                  </span>
-                  <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md shadow-sm">
-                    v1.0.0
-                  </span>
-                </div>
-              </div>
-            </div>
+              <span className="font-bold text-sm tracking-tight text-white group-hover:text-sky-300 transition-colors">
+                TaskFlow
+              </span>
+            </button>
 
-            {/* Desktop Navigation Tabs */}
+            {/* Desktop nav links */}
             {isAuthenticated && (
-              <nav className="hidden xl:flex items-center space-x-1 pl-4 border-l border-taskflow-border">
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('dashboard')}
-                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'dashboard'
-                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
-                  }`}
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Dashboard</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('projects')}
-                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'projects' || currentView === 'project-details'
-                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
-                  }`}
-                >
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>Projects</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDeepLinkTaskId(null);
-                    setCurrentView('my-work');
-                  }}
-                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'my-work'
-                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
-                  }`}
-                >
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  <span>My Work</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => openSettings('workspace')}
-                  aria-label="Settings & Workspace"
-                  className={`btn-interactive flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'settings'
-                      ? 'bg-gradient-to-r from-cyan-500/15 to-indigo-500/10 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] font-semibold'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/70 hover:border hover:border-taskflow-border/80'
-                  }`}
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>Settings & Workspace</span>
-                </button>
+              <nav className="hidden lg:flex items-center gap-0.5">
+                {[
+                  {
+                    id: 'dashboard',
+                    label: 'Home',
+                    icon: LayoutDashboard,
+                    view: 'dashboard' as const,
+                  },
+                  { id: 'projects', label: 'Projects', icon: Layers, view: 'projects' as const },
+                  { id: 'my-work', label: 'My Work', icon: CheckSquare, view: 'my-work' as const },
+                ].map(({ id, label, icon: Icon, view }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    id={`nav-${id}`}
+                    onClick={() => {
+                      if (view === 'my-work') setDeepLinkTaskId(null);
+                      setCurrentView(view);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                      currentView === view ||
+                      (view === 'projects' && currentView === 'project-details')
+                        ? 'bg-white/[0.08] text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {label}
+                  </button>
+                ))}
               </nav>
             )}
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-2.5 shrink-0">
-            {/* System Health Indicator Badge (Clickable to refresh) */}
-            <button
-              type="button"
-              onClick={fetchHealth}
-              disabled={healthLoading}
-              title="Click to refresh system health status"
-              className="btn-interactive hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs hover:border-cyan-500/40 hover:shadow-card-hover transition-all cursor-pointer"
-            >
-              <span className="text-taskflow-muted">API:</span>
-              {healthLoading && !health ? (
-                <span className="flex items-center text-amber-400">
-                  <RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />
-                  Connecting...
-                </span>
-              ) : health?.status === 'healthy' ? (
-                <span className="flex items-center text-emerald-400 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5 shadow-[0_0_8px_#34d399]" />
-                  Operational
-                </span>
-              ) : (
-                <span className="flex items-center text-rose-400 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5 mr-1" />
-                  Offline
-                </span>
-              )}
-            </button>
-
+          {/* Right side actions */}
+          <div className="flex items-center gap-2 shrink-0">
             {isAuthenticated && user ? (
-              <div className="flex items-center space-x-2 sm:space-x-2.5">
-                {/* Global Search & Command Trigger */}
+              <>
+                {/* Search */}
                 {activeOrg && (
                   <button
                     type="button"
+                    id="global-search-trigger"
                     onClick={() => setIsSearchOpen(true)}
-                    className="btn-interactive flex items-center space-x-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border hover:border-cyan-500/40 text-xs text-taskflow-muted hover:text-white transition-all cursor-pointer shadow-sm group hover:shadow-card-hover"
-                    title={`Global Search & Commands (${platformKey}K)`}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.07] text-sm text-slate-400 hover:text-white transition-all duration-150 group"
+                    title={`Search (${platformKey}K)`}
                   >
-                    <Search className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-cyan-400 transition-colors duration-150" />
-                    <span className="hidden sm:inline">Search...</span>
-                    <kbd className="hidden md:inline px-1.5 py-0.2 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border group-hover:border-cyan-500/30 group-hover:text-cyan-300 transition-colors">
+                    <Search className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 transition-colors" />
+                    <span className="hidden sm:inline text-xs">Search…</span>
+                    <kbd className="hidden md:inline px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-500 bg-white/[0.06] border border-white/[0.08]">
                       {platformKey}K
                     </kbd>
                   </button>
                 )}
 
-                {/* Cross-Project Quick Switcher */}
+                {/* Project switcher */}
                 {activeOrg && (
                   <div className="hidden sm:block">
                     <ProjectSwitcher
@@ -286,9 +310,9 @@ const MainApp: React.FC = () => {
                   </div>
                 )}
 
-                {/* Organization / Workspace Selector */}
+                {/* Workspace selector */}
                 {organizations.length > 0 && activeOrg && (
-                  <div className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border hover:border-taskflow-border/80 text-xs max-w-[160px] transition-colors shadow-sm">
+                  <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07] text-xs max-w-[150px]">
                     <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                     <select
                       value={activeOrg.organizationId}
@@ -296,151 +320,132 @@ const MainApp: React.FC = () => {
                         const found = organizations.find(o => o.organizationId === e.target.value);
                         if (found) setActiveOrg(found);
                       }}
-                      className="bg-transparent text-white font-medium focus:outline-none cursor-pointer truncate w-full text-xs"
+                      className="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer truncate w-full text-xs"
                     >
                       {organizations.map(org => (
                         <option
                           key={org.organizationId}
                           value={org.organizationId}
-                          className="bg-taskflow-surface text-white"
+                          className="bg-slate-900 text-white"
                         >
-                          {org.organizationName} ({org.role})
+                          {org.organizationName}
                         </option>
                       ))}
                     </select>
                   </div>
                 )}
 
-                {/* Notification Center */}
+                {/* Notifications */}
                 <NotificationCenter onOpenTask={handleOpenTask} />
 
-                {/* Authenticated User Pill -> Opens Settings */}
+                {/* Settings */}
                 <button
                   type="button"
                   onClick={() => openSettings('profile')}
-                  title="Open user profile settings"
-                  className="btn-interactive flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer shadow-sm hover:shadow-card-hover group"
+                  title="Settings"
+                  className="p-1.5 rounded-lg hover:bg-white/[0.07] text-slate-400 hover:text-white transition-colors"
                 >
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shrink-0 group-hover:ring-2 group-hover:ring-cyan-400/40 transition-all">
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      user.name.charAt(0)
-                    )}
-                  </div>
-                  <span className="hidden 2xl:inline font-medium max-w-[90px] truncate">
-                    {user.name}
-                  </span>
+                  <Settings className="w-4 h-4" />
                 </button>
 
-                {/* Sign Out Button */}
+                {/* User avatar */}
                 <button
+                  type="button"
+                  id="user-avatar-btn"
+                  onClick={() => openSettings('profile')}
+                  title="Profile settings"
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-xs font-bold text-white overflow-hidden ring-2 ring-white/10 hover:ring-sky-500/50 transition-all"
+                >
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    user.name.charAt(0).toUpperCase()
+                  )}
+                </button>
+
+                {/* Sign out */}
+                <button
+                  type="button"
                   onClick={() => {
                     setAuthView('login');
                     setCurrentView('dashboard');
                     logout();
                   }}
-                  title="Sign out of current session"
+                  title="Sign out"
                   aria-label="Sign Out"
-                  className="btn-interactive hidden sm:flex p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors cursor-pointer"
+                  className="hidden sm:flex p-1.5 rounded-lg hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
 
-                {/* Mobile Navigation Toggle */}
+                {/* Mobile menu toggle */}
                 <button
                   type="button"
                   id="mobile-menu-toggle"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  aria-label="Toggle Navigation Menu"
-                  className="btn-interactive xl:hidden p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors"
+                  aria-label="Toggle Navigation"
+                  className="lg:hidden p-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07] text-slate-400 hover:text-white transition-colors"
                 >
                   {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
                 </button>
-              </div>
+              </>
             ) : null}
           </div>
         </div>
 
-        {/* Mobile Navigation Dropdown Drawer */}
+        {/* Mobile nav drawer */}
         {isMobileMenuOpen && isAuthenticated && (
-          <div className="xl:hidden max-w-7xl mx-auto border-t border-taskflow-border mt-3 pt-3 space-y-3 pb-2 animate-in fade-in slide-in-from-top-2">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="lg:hidden border-t border-white/[0.06] px-4 py-3 space-y-1">
+            {[
+              {
+                id: 'mobile-nav-dashboard',
+                label: 'Home',
+                icon: LayoutDashboard,
+                view: 'dashboard' as const,
+              },
+              {
+                id: 'mobile-nav-projects',
+                label: 'Projects',
+                icon: Layers,
+                view: 'projects' as const,
+              },
+              {
+                id: 'mobile-nav-my-work',
+                label: 'My Work',
+                icon: CheckSquare,
+                view: 'my-work' as const,
+              },
+              {
+                id: 'mobile-nav-settings',
+                label: 'Settings',
+                icon: Settings,
+                view: 'settings' as const,
+              },
+            ].map(({ id, label, icon: Icon, view }) => (
               <button
+                key={id}
                 type="button"
-                id="mobile-nav-dashboard"
+                id={id}
                 onClick={() => {
-                  setCurrentView('dashboard');
+                  if (view === 'my-work') setDeepLinkTaskId(null);
+                  if (view === 'settings') openSettings('workspace');
+                  else setCurrentView(view);
                   setIsMobileMenuOpen(false);
                 }}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  currentView === 'dashboard'
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
-                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  currentView === view
+                    ? 'bg-white/[0.08] text-white'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
                 }`}
               >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Dashboard</span>
+                <Icon className="w-4 h-4" />
+                {label}
               </button>
+            ))}
 
-              <button
-                type="button"
-                id="mobile-nav-projects"
-                onClick={() => {
-                  setCurrentView('projects');
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  currentView === 'projects' || currentView === 'project-details'
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
-                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
-                }`}
-              >
-                <Layers className="w-4 h-4" />
-                <span>Projects</span>
-              </button>
-
-              <button
-                type="button"
-                id="mobile-nav-my-work"
-                onClick={() => {
-                  setDeepLinkTaskId(null);
-                  setCurrentView('my-work');
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  currentView === 'my-work'
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
-                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
-                }`}
-              >
-                <CheckSquare className="w-4 h-4" />
-                <span>My Work</span>
-              </button>
-
-              <button
-                type="button"
-                id="mobile-nav-settings"
-                aria-label="Settings & Workspace"
-                onClick={() => {
-                  openSettings('workspace');
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  currentView === 'settings'
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30'
-                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                <span>Settings & Workspace</span>
-              </button>
-            </div>
-
-            {/* Mobile Workspace Selector & Sign Out */}
-            <div className="pt-2 border-t border-taskflow-border/50 flex flex-wrap items-center justify-between gap-2">
+            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between gap-2">
               {organizations.length > 0 && activeOrg && (
-                <div className="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs flex-1 min-w-[160px]">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.07] text-xs flex-1">
                   <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                   <select
                     value={activeOrg.organizationId}
@@ -454,15 +459,14 @@ const MainApp: React.FC = () => {
                       <option
                         key={org.organizationId}
                         value={org.organizationId}
-                        className="bg-taskflow-surface text-white"
+                        className="bg-slate-900 text-white"
                       >
-                        {org.organizationName} ({org.role})
+                        {org.organizationName}
                       </option>
                     ))}
                   </select>
                 </div>
               )}
-
               <button
                 type="button"
                 onClick={() => {
@@ -471,296 +475,104 @@ const MainApp: React.FC = () => {
                   setIsMobileMenuOpen(false);
                   logout();
                 }}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs font-medium hover:bg-rose-950/60 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-950/40 border border-rose-800/40 text-rose-300 text-xs font-medium"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
+                Sign Out
               </button>
             </div>
           </div>
         )}
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-8">
+      {/* ── Main Content ──────────────────────────────────────────────────────── */}
+      <main className="flex-1 w-full">
+        {/* ── Auth views ──────────────────────────────────────────────────────── */}
         {!isAuthenticated ? (
-          <div className="py-6 space-y-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <div className="mb-6 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setAuthView('landing')}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer"
+              >
+                ← Back to TaskFlow Landing Page
+              </button>
+            </div>
             {authView === 'login' ? (
               <LoginPage onSwitchToRegister={() => setAuthView('register')} />
             ) : (
               <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
             )}
           </div>
-        ) : currentView === 'my-work' ? (
-          <MyWorkView onOpenTask={handleOpenTask} />
-        ) : currentView === 'settings' ? (
-          <SettingsLayout
-            onBackToDashboard={() => setCurrentView('dashboard')}
-            initialTab={settingsTab}
-          />
-        ) : currentView === 'projects' && activeOrg ? (
-          <ProjectsList
-            organizationId={activeOrg.organizationId}
-            organizationName={activeOrg.organizationName}
-            onSelectProject={id => {
-              setSelectedProjectId(id);
+        ) : /* ── My Work ──────────────────────────────────────────────────────────── */
+        currentView === 'my-work' ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <MyWorkView onOpenTask={handleOpenTask} />
+          </div>
+        ) : /* ── Settings ─────────────────────────────────────────────────────────── */
+        currentView === 'settings' ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <SettingsLayout
+              onBackToDashboard={() => setCurrentView('dashboard')}
+              initialTab={settingsTab}
+            />
+          </div>
+        ) : /* ── Projects list ────────────────────────────────────────────────────── */
+        currentView === 'projects' && activeOrg ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <ProjectsList
+              organizationId={activeOrg.organizationId}
+              organizationName={activeOrg.organizationName}
+              onSelectProject={id => {
+                setSelectedProjectId(id);
+                setDeepLinkTaskId(null);
+                setCurrentView('project-details');
+              }}
+            />
+          </div>
+        ) : /* ── Project detail ───────────────────────────────────────────────────── */
+        currentView === 'project-details' && activeOrg && selectedProjectId ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <ProjectDetailShell
+              organizationId={activeOrg.organizationId}
+              projectId={selectedProjectId}
+              initialTaskId={deepLinkTaskId}
+              onBack={() => {
+                setSelectedProjectId(null);
+                setDeepLinkTaskId(null);
+                setCurrentView('projects');
+              }}
+            />
+          </div>
+        ) : /* ── Dashboard (authenticated) ────────────────────────────────────────── */
+        isAuthenticated ? (
+          <DashboardView
+            user={user}
+            activeOrg={activeOrg}
+            organizations={organizations}
+            health={health}
+            healthLoading={healthLoading}
+            healthError={healthError}
+            onRefreshHealth={fetchHealth}
+            onGoToProjects={() => setCurrentView('projects')}
+            onGoToMyWork={() => {
               setDeepLinkTaskId(null);
-              setCurrentView('project-details');
+              setCurrentView('my-work');
             }}
-          />
-        ) : currentView === 'project-details' && activeOrg && selectedProjectId ? (
-          <ProjectDetailShell
-            organizationId={activeOrg.organizationId}
-            projectId={selectedProjectId}
-            initialTaskId={deepLinkTaskId}
-            onBack={() => {
-              setSelectedProjectId(null);
-              setDeepLinkTaskId(null);
-              setCurrentView('projects');
-            }}
+            onOpenSettings={openSettings}
+            onGoToSearch={() => setIsSearchOpen(true)}
           />
         ) : (
-          <>
-            {/* Authenticated Hero Banner */}
-            <TiltCard
-              maxTilt={1.2}
-              className="relative overflow-hidden rounded-2xl glass-panel-elevated p-8 border border-taskflow-border/80"
-            >
-              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/10 to-indigo-600/10 blur-3xl pointer-events-none" />
-
-              <div className="relative z-10 max-w-3xl space-y-4">
-                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/50 text-emerald-300 text-xs font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>
-                    Active Workspace: {activeOrg?.organizationName || 'Personal Workspace'}
-                  </span>
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-                  Welcome back, {user?.name}.
-                </h1>
-                <p className="text-taskflow-text-dim text-base leading-relaxed">
-                  You are viewing the{' '}
-                  <span className="text-cyan-300 font-semibold">{activeOrg?.organizationName}</span>{' '}
-                  workspace with{' '}
-                  <span className="text-indigo-300 font-mono font-medium">{activeOrg?.role}</span>{' '}
-                  permissions. Manage your identity, update workspace metadata, or administer team
-                  members through the Settings panel.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentView('projects')}
-                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold flex items-center space-x-2 shadow-glow-cyan btn-interactive-primary cursor-pointer"
-                  >
-                    <Layers className="w-4 h-4" />
-                    <span>View Projects</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => openSettings('members')}
-                    className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center space-x-2 btn-interactive cursor-pointer"
-                  >
-                    <Users className="w-4 h-4" />
-                    <span>Manage Workspace Members</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => openSettings('profile')}
-                    className="px-4 py-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-white text-xs font-medium flex items-center space-x-2 btn-interactive cursor-pointer"
-                  >
-                    <Settings className="w-4 h-4 text-taskflow-muted" />
-                    <span>Edit Profile & Security</span>
-                  </button>
-                </div>
-              </div>
-            </TiltCard>
-          </>
+          /* ── Pre-auth landing ─────────────────────────────────────────────────── */
+          <PreAuthLanding
+            onLogin={() => setAuthView('login')}
+            onRegister={() => setAuthView('register')}
+          />
         )}
-
-        {/* System Health Card (Always visible to inspect live PostgreSQL status) */}
-        <TiltCard
-          maxTilt={0.8}
-          className="glass-panel-elevated rounded-xl p-6 border border-taskflow-border/80 space-y-4"
-        >
-          <div className="flex items-center justify-between border-b border-taskflow-border pb-4">
-            <div className="flex items-center space-x-2.5">
-              <Server className="w-5 h-5 text-cyan-400" />
-              <h2 className="font-semibold text-white text-base">
-                Backend & Database Health Probe
-              </h2>
-            </div>
-            <span className="text-xs text-taskflow-muted font-mono">
-              Last checked: {lastChecked.toLocaleTimeString()}
-            </span>
-          </div>
-
-          {healthError ? (
-            <div className="p-4 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-sm flex items-start space-x-3">
-              <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Backend connection offline</p>
-                <p className="text-xs text-rose-400/80 mt-1">
-                  Start the API server using{' '}
-                  <code className="bg-rose-900/60 px-1.5 py-0.5 rounded font-mono">
-                    npm run dev:api
-                  </code>{' '}
-                  to establish live telemetry.
-                </p>
-              </div>
-            </div>
-          ) : health ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
-                <span className="text-xs text-taskflow-muted block">Service</span>
-                <span className="font-mono text-sm font-semibold text-cyan-300">
-                  {health.service}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
-                <span className="text-xs text-taskflow-muted block">API Status</span>
-                <span className="font-semibold text-sm text-emerald-400 uppercase flex items-center mt-0.5">
-                  <CheckCircle2 className="w-4 h-4 mr-1 inline" />
-                  {health.status}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
-                <span className="text-xs text-taskflow-muted block">Database</span>
-                <span
-                  className={`font-semibold text-sm flex items-center mt-0.5 ${
-                    health.database?.status === 'connected' ? 'text-emerald-400' : 'text-amber-400'
-                  }`}
-                >
-                  {health.database?.status === 'connected' ? (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 mr-1 inline" />
-                      Connected
-                      {health.database.latencyMs !== undefined
-                        ? ` (${health.database.latencyMs}ms)`
-                        : ''}
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-4 h-4 mr-1 inline" />
-                      Offline
-                    </>
-                  )}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
-                <span className="text-xs text-taskflow-muted block">Environment</span>
-                <span className="font-mono text-sm font-medium text-white capitalize">
-                  {health.environment}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border card-interactive">
-                <span className="text-xs text-taskflow-muted block">Uptime</span>
-                <span className="font-mono text-sm font-medium text-white">
-                  {health.uptimeSeconds}s
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-6 text-sm text-taskflow-muted">
-              <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-cyan-400" />
-              Verifying backend status...
-            </div>
-          )}
-        </TiltCard>
-
-        {/* Planned Product Architecture Pillars */}
-        <section className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Layers className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-lg font-semibold text-white">
-              Platform Pillars (Roadmap Blueprint)
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <TiltCard
-              maxTilt={2.0}
-              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-cyan-500/40 transition-all group card-interactive"
-            >
-              <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/60 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-110 transition-transform">
-                <Boxes className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">Project Execution</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Multi-tier work hierarchy: Projects, Objectives, Tasks, Subtasks, and Milestones
-                with fine-grained status lifecycle.
-              </p>
-            </TiltCard>
-
-            <TiltCard
-              maxTilt={2.0}
-              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-indigo-500/40 transition-all group card-interactive"
-            >
-              <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/60 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition-transform">
-                <GitBranch className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">Dependency Graphs</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Deterministic DAG blocking dependencies, critical path detection, and cascade delay
-                warnings across timeline views.
-              </p>
-            </TiltCard>
-
-            <TiltCard
-              maxTilt={2.0}
-              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-purple-500/40 transition-all group card-interactive"
-            >
-              <div className="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-800/60 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-110 transition-transform">
-                <Activity className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">Real-Time Operations</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Low-latency state synchronization via Socket.IO, live presence, collaborative task
-                updates, and instant notification stream.
-              </p>
-            </TiltCard>
-
-            <TiltCard
-              maxTilt={2.0}
-              className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-emerald-500/40 transition-all group card-interactive"
-            >
-              <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
-                <Brain className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">AI Delivery Intelligence</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Automated task breakdowns, workload balancing, risk detection, schedule compression
-                recommendations, and daily digests.
-              </p>
-            </TiltCard>
-          </div>
-        </section>
-
-        {/* Platform Status Notice */}
-        <section className="rounded-xl border border-taskflow-border bg-taskflow-surface/60 p-5 flex items-start space-x-3.5">
-          <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-          <div className="text-xs space-y-1">
-            <span className="font-semibold text-white">
-              TaskFlow Enterprise Operations Platform v1.0
-            </span>
-            <p className="text-taskflow-muted leading-relaxed">
-              TaskFlow v1.0 delivers an integrated SaaS operations platform: Deterministic DAG
-              dependency graphs, automated critical path scheduling, AI task intelligence with human
-              approval controls, durable PostgreSQL background workers, and enterprise multi-tenant
-              isolation.
-            </p>
-          </div>
-        </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-taskflow-border py-4 px-6 text-center text-xs text-taskflow-muted">
-        TaskFlow Operations Platform • Production-Grade Engineering Platform v1.0
-      </footer>
-
-      {/* Global Search & Command Palette Modal */}
+      {/* ── Global Search Modal ──────────────────────────────────────────────── */}
       {isAuthenticated && activeOrg && (
         <GlobalSearchModal
           isOpen={isSearchOpen}
@@ -781,9 +593,7 @@ const MainApp: React.FC = () => {
             setDeepLinkTaskId(null);
             setCurrentView('my-work');
           }}
-          openNotifications={() => {
-            // Can open notifications
-          }}
+          openNotifications={() => {}}
           openSettings={openSettings}
         />
       )}
@@ -791,12 +601,301 @@ const MainApp: React.FC = () => {
   );
 };
 
-export const App: React.FC = () => {
+// ─────────────────────────────────────────────────────────────────────────────
+// Dashboard View — the key redesigned screen
+// ─────────────────────────────────────────────────────────────────────────────
+interface DashboardViewProps {
+  user: { name: string; avatarUrl?: string | null } | null;
+  activeOrg: { organizationId: string; organizationName: string; role: string } | null;
+  organizations: { organizationId: string; organizationName: string; role: string }[];
+  health: HealthCheckData | null;
+  healthLoading: boolean;
+  healthError: string | null;
+  onRefreshHealth: () => void;
+  onGoToProjects: () => void;
+  onGoToMyWork: () => void;
+  onOpenSettings: (tab?: SettingsTab) => void;
+  onGoToSearch: () => void;
+}
+
+const DashboardView: React.FC<DashboardViewProps> = ({
+  user,
+  activeOrg,
+  health,
+  healthLoading,
+  healthError,
+  onRefreshHealth,
+  onGoToProjects,
+  onGoToMyWork,
+  onOpenSettings,
+  onGoToSearch,
+}) => {
+  const firstName = user?.name?.split(' ')[0] ?? 'there';
+
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <MainApp />
-      </AuthProvider>
-    </ErrorBoundary>
+    <div className="relative">
+      {/* Ambient background mesh */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-radial from-sky-500/[0.07] via-indigo-500/[0.04] to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-60 -left-32 w-80 h-80 bg-violet-600/[0.06] rounded-full blur-3xl" />
+        <div className="absolute top-80 -right-32 w-96 h-96 bg-sky-600/[0.05] rounded-full blur-3xl" />
+      </div>
+
+      {/* ── Hero Section ────────────────────────────────────────────────────── */}
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-16 sm:pt-28 sm:pb-24">
+        <div className="max-w-3xl">
+          {/* Workspace badge */}
+          {activeOrg && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.09] text-xs text-slate-400 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              {activeOrg.organizationName}
+              <span className="text-slate-600">·</span>
+              <span className="text-slate-500 capitalize">{activeOrg.role}</span>
+            </div>
+          )}
+
+          {/* Main headline */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.08] mb-5">
+            Good to see you,{' '}
+            <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
+              {firstName}.
+            </span>
+          </h1>
+          <p className="text-base sm:text-lg text-slate-400 leading-relaxed max-w-xl mb-10">
+            Your workspace is ready. Jump into a project, review your assignments, or explore what
+            needs your attention today.
+          </p>
+
+          {/* Primary CTAs */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              id="hero-cta-projects"
+              onClick={onGoToProjects}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+            >
+              <Layers className="w-4 h-4" />
+              View Projects
+              <ArrowRight className="w-4 h-4 ml-0.5" />
+            </button>
+            <button
+              type="button"
+              id="hero-cta-my-work"
+              onClick={onGoToMyWork}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.09] text-white text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+            >
+              <CheckSquare className="w-4 h-4" />
+              My Work
+            </button>
+            <button
+              type="button"
+              id="hero-cta-search"
+              onClick={onGoToSearch}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] text-slate-400 hover:text-white text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+            >
+              <Search className="w-4 h-4" />
+              Search…
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Quick Stats Row ──────────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Infrastructure status */}
+          <div
+            className="group relative rounded-2xl bg-white/[0.035] border border-white/[0.07] p-6 overflow-hidden cursor-pointer hover:bg-white/[0.055] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12]"
+            onClick={onRefreshHealth}
+            role="button"
+            tabIndex={0}
+            title="Click to refresh system status"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.07] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-emerald-400" />
+                </div>
+                {healthLoading ? (
+                  <RefreshCw className="w-3.5 h-3.5 text-slate-600 animate-spin" />
+                ) : healthError ? (
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+                ) : (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                )}
+              </div>
+              <div className="text-2xl font-bold text-white mb-1">
+                {healthLoading ? '—' : healthError ? 'Offline' : 'Online'}
+              </div>
+              <div className="text-xs text-slate-500 font-medium">
+                {health?.database?.status === 'connected'
+                  ? `DB · ${health.database.latencyMs ?? '—'}ms`
+                  : healthError
+                    ? 'Backend unreachable'
+                    : 'Infrastructure'}
+              </div>
+            </div>
+          </div>
+
+          {/* My Work CTA card */}
+          <div
+            className="group relative rounded-2xl bg-white/[0.035] border border-white/[0.07] p-6 overflow-hidden cursor-pointer hover:bg-white/[0.055] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12]"
+            onClick={onGoToMyWork}
+            role="button"
+            tabIndex={0}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-sky-500/[0.07] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center">
+                  <CheckSquare className="w-4 h-4 text-sky-400" />
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <div className="text-2xl font-bold text-white mb-1">My Work</div>
+              <div className="text-xs text-slate-500 font-medium">Tasks assigned to you</div>
+            </div>
+          </div>
+
+          {/* Settings CTA card */}
+          <div
+            className="group relative rounded-2xl bg-white/[0.035] border border-white/[0.07] p-6 overflow-hidden cursor-pointer hover:bg-white/[0.055] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12]"
+            onClick={() => onOpenSettings('members')}
+            role="button"
+            tabIndex={0}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.07] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-violet-400" />
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <div className="text-2xl font-bold text-white mb-1">Workspace</div>
+              <div className="text-xs text-slate-500 font-medium">Members & permissions</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Platform Feature Cards ───────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-24">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 text-xs text-slate-500 font-medium mb-3 uppercase tracking-widest">
+            <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+            Platform Capabilities
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Built for engineering teams
+            <br className="hidden sm:block" /> that move fast.
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {FEATURES.map(({ icon: Icon, color, iconColor, borderGlow, title, description }) => (
+            <div
+              key={title}
+              className={`relative rounded-2xl bg-white/[0.03] border border-white/[0.07] p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:bg-white/[0.05] ${borderGlow} group`}
+            >
+              {/* Gradient overlay */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+              />
+
+              <div className="relative">
+                <div
+                  className={`w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center mb-5 ${iconColor} group-hover:scale-110 transition-transform duration-200`}
+                >
+                  <Icon className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-white text-sm mb-2.5">{title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Bottom status strip ──────────────────────────────────────────────── */}
+      <div className="border-t border-white/[0.05] py-5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <Zap className="w-3 h-3 text-sky-600" />
+              TaskFlow v1.0
+            </span>
+            <span>·</span>
+            <span>Enterprise Operations Platform</span>
+          </div>
+          {health && (
+            <span className="flex items-center gap-1.5 text-emerald-700">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {health.service} · uptime {Math.floor((health.uptimeSeconds ?? 0) / 60)}m
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pre-auth landing — shown to unauthenticated visitors on the dashboard route
+// ─────────────────────────────────────────────────────────────────────────────
+interface PreAuthLandingProps {
+  onLogin: () => void;
+  onRegister: () => void;
+}
+
+const PreAuthLanding: React.FC<PreAuthLandingProps> = ({ onLogin, onRegister }) => (
+  <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-20 text-center">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-radial from-sky-500/[0.08] to-transparent blur-3xl rounded-full" />
+    </div>
+    <div className="relative inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold mb-6">
+      <Sparkles className="w-3.5 h-3.5" />
+      AI-Powered Project Execution
+    </div>
+    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.06] mb-6">
+      Ship projects
+      <br />
+      <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
+        with precision.
+      </span>
+    </h1>
+    <p className="text-base sm:text-lg text-slate-400 max-w-xl mx-auto leading-relaxed mb-10">
+      TaskFlow combines deterministic dependency graphs, AI delivery intelligence, and real-time
+      collaboration into one unified platform.
+    </p>
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <button
+        type="button"
+        id="landing-cta-login"
+        onClick={onLogin}
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all duration-200 hover:-translate-y-0.5"
+      >
+        Sign In
+        <ArrowRight className="w-4 h-4" />
+      </button>
+      <button
+        type="button"
+        id="landing-cta-register"
+        onClick={onRegister}
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.09] text-white text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+      >
+        Create Account
+      </button>
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+export const App: React.FC = () => (
+  <ErrorBoundary>
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  </ErrorBoundary>
+);

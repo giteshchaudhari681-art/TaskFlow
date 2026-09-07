@@ -10,7 +10,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { MilestoneListItem, MilestoneStatus } from '@taskflow/shared';
-import { TiltCard } from '../common/useCardTilt';
+import { Badge } from '../ui/Badge';
+import { Card } from '../ui/Card';
 
 interface MilestoneCardProps {
   milestone: MilestoneListItem;
@@ -21,42 +22,36 @@ interface MilestoneCardProps {
 
 const HEALTH_CONFIG: Record<
   string,
-  { icon: React.ElementType; label: string; color: string; bg: string; border: string }
+  {
+    icon: React.ElementType;
+    label: string;
+    variant: 'primary' | 'success' | 'warning' | 'danger' | 'default';
+  }
 > = {
   COMPLETED: {
     icon: CheckCircle2,
     label: 'Completed',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/30',
+    variant: 'success',
   },
   OVERDUE: {
     icon: AlertTriangle,
     label: 'Overdue',
-    color: 'text-rose-400',
-    bg: 'bg-rose-500/10',
-    border: 'border-rose-500/30',
+    variant: 'danger',
   },
   AT_RISK: {
     icon: Clock,
     label: 'At Risk',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/30',
+    variant: 'warning',
   },
   ON_TRACK: {
     icon: BarChart3,
     label: 'On Track',
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-500/10',
-    border: 'border-cyan-500/30',
+    variant: 'primary',
   },
   NO_DATE: {
     icon: XCircle,
     label: 'No Date',
-    color: 'text-taskflow-muted',
-    bg: 'bg-taskflow-surface',
-    border: 'border-taskflow-border',
+    variant: 'default',
   },
 };
 
@@ -106,135 +101,129 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
   };
 
   return (
-    <TiltCard
-      maxTilt={1.8}
-      className={`group glass-panel rounded-2xl border p-5 bg-taskflow-surface cursor-pointer hover:border-cyan-500/40 hover:shadow-glow-cyan transition-all duration-200 card-interactive ${health.border}`}
+    <Card
+      variant="interactive"
+      padding="md"
       onClick={() => onClick(milestone)}
       role="button"
       aria-label={`Milestone: ${milestone.title}, ${health.label}`}
       tabIndex={0}
       onKeyDown={e => e.key === 'Enter' && onClick(milestone)}
+      className="group flex flex-col justify-between"
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className={`p-1.5 rounded-lg ${health.bg} flex-shrink-0`}>
-            <HealthIcon className={`w-3.5 h-3.5 ${health.color}`} aria-hidden="true" />
+      <div>
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Badge variant={health.variant} size="sm" dot>
+              <HealthIcon className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>{health.label}</span>
+            </Badge>
           </div>
-          <h3 className="font-semibold text-sm text-white truncate group-hover:text-cyan-100 transition-colors">
-            {milestone.title}
-          </h3>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {canEdit && (
+              <button
+                onClick={handleStatusToggle}
+                disabled={statusLoading}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+                title={
+                  milestone.status === MilestoneStatus.COMPLETED
+                    ? 'Reopen milestone'
+                    : 'Complete milestone'
+                }
+              >
+                {statusLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-sky-400" />
+                ) : (
+                  <CheckCircle2
+                    className={`w-4 h-4 ${milestone.status === MilestoneStatus.COMPLETED ? 'text-emerald-400' : ''}`}
+                  />
+                )}
+              </button>
+            )}
+            <ChevronRight
+              className="w-4 h-4 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all"
+              aria-hidden="true"
+            />
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span
-            className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${health.color} ${health.bg} ${health.border}`}
-            aria-label={`Status: ${health.label}`}
-          >
-            {health.label}
-          </span>
-          {canEdit && (
-            <button
-              onClick={handleStatusToggle}
-              disabled={statusLoading}
-              className="p-1 rounded-lg text-taskflow-muted hover:text-white hover:bg-taskflow-surface-hover transition-colors disabled:opacity-50 btn-interactive cursor-pointer"
-              title={
-                milestone.status === MilestoneStatus.COMPLETED
-                  ? 'Reopen milestone'
-                  : 'Complete milestone'
-              }
-              aria-label={
-                milestone.status === MilestoneStatus.COMPLETED
-                  ? 'Reopen milestone'
-                  : 'Mark milestone as complete'
-              }
-            >
-              {statusLoading ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <CheckCircle2
-                  className={`w-3.5 h-3.5 ${milestone.status === MilestoneStatus.COMPLETED ? 'text-emerald-400' : ''}`}
-                />
-              )}
-            </button>
-          )}
-          <ChevronRight
-            className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-white transition-colors"
-            aria-hidden="true"
-          />
-        </div>
-      </div>
 
-      {/* Description */}
-      {milestone.description && (
-        <p className="text-xs text-taskflow-muted mb-3 line-clamp-2 leading-relaxed">
-          {milestone.description}
-        </p>
-      )}
+        {/* Title */}
+        <h3 className="font-extrabold text-base text-white font-display truncate group-hover:text-sky-300 transition-colors mb-1.5">
+          {milestone.title}
+        </h3>
 
-      {/* Dates */}
-      <div className="flex items-center gap-2 text-xs text-taskflow-muted mb-3">
-        <Calendar className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
-        <span>
-          {milestone.startDate ? formatDate(milestone.startDate) : 'No start'} →{' '}
-          {milestone.dueDate ? formatDate(milestone.dueDate) : 'No deadline'}
-        </span>
-      </div>
-
-      {/* Progress Bar */}
-      <div
-        className="space-y-1.5 mb-3"
-        role="progressbar"
-        aria-valuenow={milestone.progress}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`Progress: ${milestone.progress}%`}
-      >
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="text-taskflow-muted">Progress</span>
-          <span
-            className={`font-bold ${milestone.progress === 100 ? 'text-emerald-400' : 'text-white'}`}
-          >
-            {milestone.progress}%
-          </span>
-        </div>
-        <div className="h-1.5 bg-taskflow-bg rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              milestone.progress === 100
-                ? 'bg-emerald-500'
-                : healthKey === 'OVERDUE'
-                  ? 'bg-rose-500'
-                  : healthKey === 'AT_RISK'
-                    ? 'bg-amber-500'
-                    : 'bg-gradient-to-r from-cyan-500 to-indigo-500'
-            }`}
-            style={{ width: `${milestone.progress}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Task stats */}
-      <div className="flex items-center justify-between text-[11px] text-taskflow-muted pt-2 border-t border-taskflow-border/40">
-        <span>
-          {milestone.completedTaskCount}/{milestone.taskCount} tasks done
-          {milestone.taskCount === 0 && (
-            <span className="ml-1 text-taskflow-muted/60">(no tasks)</span>
-          )}
-        </span>
-        {milestone.dueDate && (
-          <span
-            className={
-              healthKey === 'OVERDUE'
-                ? 'text-rose-400 font-semibold'
-                : healthKey === 'AT_RISK'
-                  ? 'text-amber-400'
-                  : ''
-            }
-          >
-            {daysLabel(milestone.dueDate)}
-          </span>
+        {/* Description */}
+        {milestone.description && (
+          <p className="text-xs text-slate-400 mb-3 line-clamp-2 leading-relaxed">
+            {milestone.description}
+          </p>
         )}
+
+        {/* Dates */}
+        <div className="flex items-center gap-2 text-xs text-slate-400 mb-3">
+          <Calendar className="w-3.5 h-3.5 text-slate-500 shrink-0" aria-hidden="true" />
+          <span className="font-medium">
+            {milestone.startDate ? formatDate(milestone.startDate) : 'No start'} →{' '}
+            {milestone.dueDate ? formatDate(milestone.dueDate) : 'No deadline'}
+          </span>
+        </div>
       </div>
-    </TiltCard>
+
+      <div>
+        {/* Progress Bar */}
+        <div
+          className="space-y-1.5 mb-3"
+          role="progressbar"
+          aria-valuenow={milestone.progress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Progress: ${milestone.progress}%`}
+        >
+          <div className="flex items-center justify-between text-xs font-semibold">
+            <span className="text-slate-400">Completion Progress</span>
+            <span
+              className={`font-mono ${milestone.progress === 100 ? 'text-emerald-400' : 'text-slate-200'}`}
+            >
+              {milestone.progress}%
+            </span>
+          </div>
+          <div className="h-2 bg-slate-800/80 rounded-full overflow-hidden border border-white/[0.05]">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                milestone.progress === 100
+                  ? 'bg-emerald-400'
+                  : healthKey === 'OVERDUE'
+                    ? 'bg-rose-500'
+                    : healthKey === 'AT_RISK'
+                      ? 'bg-amber-400'
+                      : 'bg-sky-400'
+              }`}
+              style={{ width: `${milestone.progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Task stats */}
+        <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-white/[0.08]">
+          <span className="font-medium">
+            {milestone.completedTaskCount}/{milestone.taskCount} tasks done
+          </span>
+          {milestone.dueDate && (
+            <span
+              className={`font-medium ${
+                healthKey === 'OVERDUE'
+                  ? 'text-rose-400 font-semibold'
+                  : healthKey === 'AT_RISK'
+                    ? 'text-amber-400'
+                    : 'text-slate-400'
+              }`}
+            >
+              {daysLabel(milestone.dueDate)}
+            </span>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 };

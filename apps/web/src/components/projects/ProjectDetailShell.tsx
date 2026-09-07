@@ -15,6 +15,7 @@ import {
   Tag,
   GitFork,
   History,
+  Lock,
 } from 'lucide-react';
 import {
   ProjectDetail,
@@ -22,9 +23,11 @@ import {
   ProjectStatus,
   ProjectMemberDetail,
   OrganizationMemberItem,
+  UserRole,
 } from '@taskflow/shared';
 import { updateProjectSchema } from '@taskflow/validation';
 import { projectApi, orgApi } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 import { TaskList } from '../tasks/TaskList';
 import { KanbanBoard } from '../kanban/KanbanBoard';
 import { ProjectLabelsSettings } from '../labels/ProjectLabelsSettings';
@@ -67,7 +70,9 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
   onBack,
   initialTaskId,
 }) => {
+  const { activeOrg } = useAuth();
   const [project, setProject] = useState<ProjectDetail | null>(null);
+  const isOwner = activeOrg?.role === UserRole.OWNER || project?.userRole === ProjectRole.LEAD;
   const [activeTab, setActiveTab] = useState<ProjectTab>(initialTaskId ? 'tasks' : 'overview');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null | undefined>(initialTaskId);
   const [taskViewMode, setTaskViewMode] = useState<'board' | 'list'>('board');
@@ -228,6 +233,12 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
   const handleRoleChange = async (userId: string, newRole: ProjectRole) => {
     setMemberError(null);
     setMemberSuccess(null);
+
+    if (!isOwner) {
+      setMemberError('Only workspace owners or project leads can change member roles');
+      return;
+    }
+
     try {
       await projectApi.updateMemberRole(organizationId, projectId, userId, newRole);
       setMemberSuccess('Member role updated');
@@ -330,7 +341,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         </div>
 
         {/* Sub Navigation Tabs */}
-        <div className="flex items-center space-x-1 overflow-x-auto pb-1 md:pb-0">
+        <div className="flex items-center space-x-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {(
             [
               { id: 'overview', label: 'Overview', icon: Activity },
@@ -348,10 +359,10 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold font-display transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50 border border-transparent'
+                    ? 'bg-slate-800 text-sky-400 border border-sky-500/30 shadow-sm'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -553,18 +564,25 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <select
-                            value={m.role}
-                            onChange={e =>
-                              handleRoleChange(m.userId, e.target.value as ProjectRole)
-                            }
-                            className="px-2.5 py-1 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer font-semibold"
-                          >
-                            <option value={ProjectRole.LEAD}>LEAD</option>
-                            <option value={ProjectRole.ADMIN}>ADMIN</option>
-                            <option value={ProjectRole.MEMBER}>MEMBER</option>
-                            <option value={ProjectRole.VIEWER}>VIEWER</option>
-                          </select>
+                          {isOwner ? (
+                            <select
+                              value={m.role}
+                              onChange={e =>
+                                handleRoleChange(m.userId, e.target.value as ProjectRole)
+                              }
+                              className="px-2.5 py-1 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer font-semibold"
+                            >
+                              <option value={ProjectRole.LEAD}>LEAD</option>
+                              <option value={ProjectRole.ADMIN}>ADMIN</option>
+                              <option value={ProjectRole.MEMBER}>MEMBER</option>
+                              <option value={ProjectRole.VIEWER}>VIEWER</option>
+                            </select>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300">
+                              <Lock className="w-3 h-3 text-slate-500" />
+                              <span>{m.role}</span>
+                            </span>
+                          )}
                         </td>
 
                         <td className="py-3.5 px-4 text-taskflow-muted">
@@ -572,13 +590,15 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
-                          <button
-                            onClick={() => setRemovingMemberId(m.userId)}
-                            className="p-1.5 rounded-lg text-taskflow-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                            title="Remove member from project"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {isOwner && (
+                            <button
+                              onClick={() => setRemovingMemberId(m.userId)}
+                              className="p-1.5 rounded-lg text-taskflow-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                              title="Remove member from project"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}

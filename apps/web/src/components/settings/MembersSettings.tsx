@@ -207,12 +207,8 @@ export const MembersSettings: React.FC = () => {
               const isTargetOwner = m.role === UserRole.OWNER;
               const isSoleOwner = isTargetOwner && ownerCount <= 1;
 
-              // Role edit permissions:
-              // - User cannot edit own role
-              // - ADMIN cannot edit an OWNER
-              // - Only OWNER can promote to OWNER
-              const canEditThisRole =
-                canManage && !isCurrentUser && (isOwner || (isAdmin && !isTargetOwner));
+              // Role edit permissions: Only OWNER can change member roles
+              const canEditThisRole = isOwner && !isCurrentUser;
 
               // Removal permissions:
               // - ADMIN cannot remove an OWNER

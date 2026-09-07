@@ -259,15 +259,15 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="glass-panel-elevated w-full max-w-2xl h-full bg-taskflow-surface/95 border-l border-taskflow-border/80 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
+      <div className="w-full max-w-2xl h-full bg-[#0f172a] border-l border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
         {/* Drawer Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-taskflow-border/80 bg-taskflow-surface/80 backdrop-blur-md shrink-0">
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 text-sm font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-lg">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-[#111827] shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="px-2 py-0.5 text-xs font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700 rounded">
               {task?.issueKey || projectKey}
             </span>
             {task?.archivedAt && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md">
+              <span className="px-2 py-0.5 text-[11px] font-medium bg-amber-950/40 text-amber-300 border border-amber-800/60 rounded">
                 Archived
               </span>
             )}
@@ -275,22 +275,22 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="p-1.5 text-taskflow-muted hover:text-white rounded-lg hover:bg-taskflow-card btn-interactive transition-colors cursor-pointer"
+              className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Drawer Sub-tabs */}
-        <div className="flex items-center px-6 border-b border-taskflow-border/80 bg-taskflow-bg/40 shrink-0">
+        <div className="flex items-center px-5 border-b border-slate-800 bg-[#111827] shrink-0">
           <button
             type="button"
             onClick={() => setDrawerTab('details')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 btn-interactive transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               drawerTab === 'details'
-                ? 'border-cyan-400 text-cyan-400'
-                : 'border-transparent text-taskflow-muted hover:text-white'
+                ? 'border-sky-400 text-sky-400'
+                : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -299,10 +299,10 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <button
             type="button"
             onClick={() => setDrawerTab('comments')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 btn-interactive transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               drawerTab === 'comments'
-                ? 'border-cyan-400 text-cyan-400'
-                : 'border-transparent text-taskflow-muted hover:text-white'
+                ? 'border-sky-400 text-sky-400'
+                : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -311,9 +311,9 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <button
             type="button"
             onClick={() => setDrawerTab('activity')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 btn-interactive transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               drawerTab === 'activity'
-                ? 'border-cyan-400 text-cyan-400'
+                ? 'border-sky-400 text-sky-400'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -736,11 +736,11 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         )}
 
         {/* Drawer Footer Actions */}
-        <div className="px-6 py-4 border-t border-taskflow-border bg-taskflow-surface/80 backdrop-blur-md flex items-center justify-between shrink-0">
+        <div className="px-5 py-3 border-t border-slate-800 bg-[#111827] flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-taskflow-muted hover:text-white btn-interactive transition-colors cursor-pointer"
+            className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white rounded-md hover:bg-slate-800 transition-colors cursor-pointer"
           >
             Close
           </button>
@@ -749,11 +749,11 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               type="button"
               onClick={() => handleSave()}
               disabled={saving || !title.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-semibold rounded-xl shadow-glow-cyan btn-interactive-primary disabled:opacity-50 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-md shadow-sm disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Saving...</span>
                 </>
               ) : (

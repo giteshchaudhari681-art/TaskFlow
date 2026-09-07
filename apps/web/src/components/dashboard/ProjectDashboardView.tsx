@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  ShieldAlert,
-  ShieldCheck,
-  AlertTriangle,
-  HelpCircle,
   CheckCircle2,
   Clock,
   Ban,
-  Activity,
   ArrowRight,
   RefreshCw,
   Plus,
@@ -15,8 +10,8 @@ import {
   Flag,
   Zap,
   ChevronRight,
-  TrendingUp,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import {
   ProjectDashboardResponse,
@@ -28,7 +23,6 @@ import {
 } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
 import { AIProjectIntelligence } from './AIProjectIntelligence';
-import { TiltCard } from '../common/useCardTilt';
 
 interface ProjectDashboardViewProps {
   organizationId: string;
@@ -38,55 +32,126 @@ interface ProjectDashboardViewProps {
   onCreateTask?: () => void;
 }
 
-const STATUS_COLORS: Record<TaskStatus, { bg: string; text: string; bar: string }> = {
-  BACKLOG: { bg: 'bg-slate-500/10', text: 'text-slate-400', bar: 'bg-slate-500' },
-  TODO: { bg: 'bg-blue-500/10', text: 'text-blue-400', bar: 'bg-blue-500' },
-  IN_PROGRESS: { bg: 'bg-amber-500/10', text: 'text-amber-400', bar: 'bg-amber-500' },
-  IN_REVIEW: { bg: 'bg-purple-500/10', text: 'text-purple-400', bar: 'bg-purple-500' },
-  BLOCKED: { bg: 'bg-rose-500/10', text: 'text-rose-400', bar: 'bg-rose-500' },
-  DONE: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', bar: 'bg-emerald-500' },
-  CANCELLED: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', bar: 'bg-zinc-500' },
+const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; bar: string }> = {
+  BACKLOG: { label: 'Backlog', color: 'text-slate-400', bar: 'bg-slate-500' },
+  TODO: { label: 'To Do', color: 'text-blue-400', bar: 'bg-blue-500' },
+  IN_PROGRESS: { label: 'In Progress', color: 'text-amber-400', bar: 'bg-amber-400' },
+  IN_REVIEW: { label: 'In Review', color: 'text-violet-400', bar: 'bg-violet-500' },
+  BLOCKED: { label: 'Blocked', color: 'text-rose-400', bar: 'bg-rose-500' },
+  DONE: { label: 'Done', color: 'text-emerald-400', bar: 'bg-emerald-500' },
+  CANCELLED: { label: 'Cancelled', color: 'text-zinc-500', bar: 'bg-zinc-600' },
 };
 
-const PRIORITY_COLORS: Record<TaskPriority, { bg: string; text: string; bar: string }> = {
-  URGENT: { bg: 'bg-rose-500/15', text: 'text-rose-400', bar: 'bg-rose-500' },
-  HIGH: { bg: 'bg-amber-500/15', text: 'text-amber-400', bar: 'bg-amber-500' },
-  MEDIUM: { bg: 'bg-blue-500/15', text: 'text-blue-400', bar: 'bg-blue-500' },
-  LOW: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', bar: 'bg-emerald-500' },
-  NONE: { bg: 'bg-slate-500/15', text: 'text-slate-400', bar: 'bg-slate-500' },
+const PRIORITY_CONFIG: Record<TaskPriority, { bg: string; text: string }> = {
+  URGENT: { bg: 'bg-rose-500/10', text: 'text-rose-400' },
+  HIGH: { bg: 'bg-amber-500/10', text: 'text-amber-400' },
+  MEDIUM: { bg: 'bg-blue-500/10', text: 'text-blue-400' },
+  LOW: { bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
+  NONE: { bg: 'bg-slate-800', text: 'text-slate-500' },
 };
 
-const SEVERITY_BADGES: Record<RiskSeverity, { bg: string; border: string; text: string }> = {
-  CRITICAL: {
-    bg: 'bg-rose-950/60',
-    border: 'border-rose-500/40',
-    text: 'text-rose-300',
-  },
-  HIGH: {
-    bg: 'bg-amber-950/60',
-    border: 'border-amber-500/40',
-    text: 'text-amber-300',
-  },
-  MEDIUM: {
-    bg: 'bg-blue-950/60',
-    border: 'border-blue-500/40',
-    text: 'text-blue-300',
-  },
-  LOW: {
-    bg: 'bg-slate-900/60',
-    border: 'border-slate-700/60',
-    text: 'text-slate-300',
-  },
+const RISK_SEVERITY: Record<RiskSeverity, { dot: string; label: string; text: string }> = {
+  CRITICAL: { dot: 'bg-rose-500', label: 'Critical', text: 'text-rose-400' },
+  HIGH: { dot: 'bg-amber-500', label: 'High', text: 'text-amber-400' },
+  MEDIUM: { dot: 'bg-blue-500', label: 'Medium', text: 'text-blue-400' },
+  LOW: { dot: 'bg-slate-500', label: 'Low', text: 'text-slate-400' },
 };
 
-const MILESTONE_HEALTH_BADGES: Record<MilestoneHealth, { bg: string; text: string }> = {
-  COMPLETED: { bg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30', text: 'Completed' },
-  ON_TRACK: { bg: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30', text: 'On Track' },
-  AT_RISK: { bg: 'bg-amber-500/15 text-amber-300 border-amber-500/30', text: 'At Risk' },
-  OVERDUE: { bg: 'bg-rose-500/15 text-rose-300 border-rose-500/30', text: 'Overdue' },
-  NO_DATE: { bg: 'bg-slate-500/15 text-slate-400 border-slate-500/30', text: 'No Date' },
+const MILESTONE_HEALTH_CONFIG: Record<
+  MilestoneHealth,
+  { dot: string; label: string; bar: string }
+> = {
+  COMPLETED: { dot: 'bg-emerald-500', label: 'Completed', bar: 'bg-emerald-500' },
+  ON_TRACK: { dot: 'bg-sky-500', label: 'On Track', bar: 'bg-sky-500' },
+  AT_RISK: { dot: 'bg-amber-500', label: 'At Risk', bar: 'bg-amber-400' },
+  OVERDUE: { dot: 'bg-rose-500', label: 'Overdue', bar: 'bg-rose-500' },
+  NO_DATE: { dot: 'bg-slate-600', label: 'No Date', bar: 'bg-slate-600' },
 };
 
+// ─── Health ring SVG ─────────────────────────────────────────────────────────
+const HealthRing: React.FC<{ score: number; state: ProjectHealthState }> = ({ score, state }) => {
+  const r = 44;
+  const circ = 2 * Math.PI * r;
+  const dashOffset = circ - (score / 100) * circ;
+  const color =
+    state === 'HEALTHY'
+      ? '#34d399'
+      : state === 'AT_RISK'
+        ? '#fbbf24'
+        : state === 'CRITICAL'
+          ? '#f87171'
+          : '#64748b';
+
+  return (
+    <svg width="120" height="120" className="shrink-0 -rotate-90">
+      <circle cx="60" cy="60" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+      <circle
+        cx="60"
+        cy="60"
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth="8"
+        strokeDasharray={circ}
+        strokeDashoffset={dashOffset}
+        strokeLinecap="round"
+        style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1)' }}
+      />
+      <g transform="rotate(90, 60, 60)">
+        <text
+          x="60"
+          y="54"
+          textAnchor="middle"
+          fill="white"
+          fontSize="22"
+          fontWeight="800"
+          fontFamily="inherit"
+        >
+          {score}
+        </text>
+        <text
+          x="60"
+          y="70"
+          textAnchor="middle"
+          fill={color}
+          fontSize="10"
+          fontWeight="600"
+          fontFamily="inherit"
+        >
+          / 100
+        </text>
+      </g>
+    </svg>
+  );
+};
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+const LoadingSkeleton: React.FC = () => (
+  <div className="space-y-16 py-2 animate-pulse">
+    {/* Hero skeleton */}
+    <div className="space-y-3 pt-4">
+      <div className="h-3 w-24 bg-white/[0.06] rounded-full" />
+      <div className="h-10 w-2/3 bg-white/[0.08] rounded-xl" />
+      <div className="h-4 w-1/2 bg-white/[0.05] rounded-lg" />
+    </div>
+    {/* Health skeleton */}
+    <div className="flex gap-8 items-center">
+      <div className="w-28 h-28 rounded-full bg-white/[0.06]" />
+      <div className="flex-1 space-y-3">
+        <div className="h-3 w-16 bg-white/[0.06] rounded" />
+        <div className="h-6 w-3/4 bg-white/[0.08] rounded-lg" />
+        <div className="h-4 w-full bg-white/[0.05] rounded" />
+        <div className="h-4 w-5/6 bg-white/[0.05] rounded" />
+      </div>
+    </div>
+    {/* Bar skeleton */}
+    <div className="h-4 w-full bg-white/[0.06] rounded-full" />
+    {/* AI skeleton */}
+    <div className="h-40 w-full bg-white/[0.04] rounded-2xl" />
+  </div>
+);
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
   organizationId,
   projectId,
@@ -104,7 +169,6 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
       if (isManualRefresh) setRefreshing(true);
       else setLoading(true);
       setError(null);
-
       try {
         const res = await projectApi.getDashboard(organizationId, projectId);
         setData(res);
@@ -122,44 +186,23 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
     fetchDashboard();
   }, [fetchDashboard]);
 
-  if (loading) {
-    return (
-      <div className="space-y-6 animate-pulse p-2">
-        {/* Header Skeleton */}
-        <div className="h-16 rounded-2xl bg-taskflow-surface/40 border border-taskflow-border" />
-        {/* Health Skeleton */}
-        <div className="h-44 rounded-2xl bg-taskflow-surface/40 border border-taskflow-border" />
-        {/* Metrics Grid Skeleton */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div
-              key={i}
-              className="h-24 rounded-xl bg-taskflow-surface/30 border border-taskflow-border/50"
-            />
-          ))}
-        </div>
-        {/* Panels Skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 rounded-2xl bg-taskflow-surface/30 border border-taskflow-border/50" />
-          <div className="h-64 rounded-2xl bg-taskflow-surface/30 border border-taskflow-border/50" />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSkeleton />;
 
   if (error || !data) {
     return (
-      <div className="p-8 glass-panel rounded-2xl border border-rose-500/30 bg-rose-500/10 text-center space-y-3">
-        <AlertCircle className="w-8 h-8 text-rose-400 mx-auto" />
-        <h3 className="text-sm font-bold text-white">Failed to Load Dashboard</h3>
-        <p className="text-xs text-rose-300 max-w-md mx-auto">
-          {error || 'Unable to retrieve project analytics and health metrics.'}
-        </p>
+      <div className="py-20 flex flex-col items-center text-center gap-4">
+        <AlertCircle className="w-8 h-8 text-rose-400" />
+        <div>
+          <p className="text-white font-semibold mb-1">Failed to load overview</p>
+          <p className="text-sm text-slate-500 max-w-sm">
+            {error || 'Unable to retrieve project data.'}
+          </p>
+        </div>
         <button
           onClick={() => fetchDashboard(true)}
-          className="px-4 py-2 rounded-xl bg-taskflow-surface border border-taskflow-border text-xs text-white hover:border-cyan-500 transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.09] text-sm text-white hover:bg-white/[0.09] transition-colors cursor-pointer"
         >
-          Try Again
+          Try again
         </button>
       </div>
     );
@@ -178,718 +221,782 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
     recentActivity,
   } = data;
 
-  const getHealthBadge = (state: ProjectHealthState) => {
-    switch (state) {
-      case 'HEALTHY':
-        return {
-          icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />,
-          label: 'Healthy Execution',
-          bg: 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]',
-        };
-      case 'AT_RISK':
-        return {
-          icon: <AlertTriangle className="w-5 h-5 text-amber-400" />,
-          label: 'At Delivery Risk',
-          bg: 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]',
-        };
-      case 'CRITICAL':
-        return {
-          icon: <ShieldAlert className="w-5 h-5 text-rose-400" />,
-          label: 'Critical Condition',
-          bg: 'bg-rose-500/10 border-rose-500/40 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.25)]',
-        };
-      case 'NO_DATA':
-        return {
-          icon: <HelpCircle className="w-5 h-5 text-slate-400" />,
-          label: 'No Activity Data',
-          bg: 'bg-slate-500/10 border-slate-500/40 text-slate-300',
-        };
-    }
-  };
+  const healthLabel =
+    health.state === 'HEALTHY'
+      ? 'Healthy'
+      : health.state === 'AT_RISK'
+        ? 'At Risk'
+        : health.state === 'CRITICAL'
+          ? 'Critical'
+          : 'No Data';
 
-  const healthBadge = getHealthBadge(health.state);
+  const healthColor =
+    health.state === 'HEALTHY'
+      ? 'text-emerald-400'
+      : health.state === 'AT_RISK'
+        ? 'text-amber-400'
+        : health.state === 'CRITICAL'
+          ? 'text-rose-400'
+          : 'text-slate-500';
+
+  const totalTasks = metrics.totalTasks;
+  const attentionItems = [
+    ...risks.map(r => ({
+      id: `risk-${r.id}`,
+      severity: r.severity,
+      title: r.title,
+      detail: r.explanation,
+      action: r.actionLabel,
+      onClick: () => {
+        if (r.entityType === 'task' && r.entityId) onOpenTask(r.entityId);
+        else if (r.entityType === 'milestone') onNavigateTab('milestones');
+        else onNavigateTab('dependencies');
+      },
+    })),
+    ...overdueTasks
+      .slice(0, 3)
+      .map(t => ({
+        id: `overdue-${t.id}`,
+        severity: 'HIGH' as RiskSeverity,
+        title: t.title,
+        detail: `Due ${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'N/A'}${t.assignee ? ` · ${t.assignee.name}` : ''}`,
+        action: 'View task',
+        onClick: () => onOpenTask(t.id),
+      })),
+    ...blockedTasks
+      .slice(0, 3)
+      .map(t => ({
+        id: `blocked-${t.id}`,
+        severity: 'MEDIUM' as RiskSeverity,
+        title: t.title,
+        detail: t.blockingDependencies[0]
+          ? `Blocked by ${t.blockingDependencies[0].issueKey || t.blockingDependencies[0].title}`
+          : 'Dependency blocked',
+        action: 'View dependencies',
+        onClick: () => onNavigateTab('dependencies'),
+      })),
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* 1. PROJECT HEADER BAR */}
-      <div className="glass-panel rounded-2xl border border-taskflow-border p-5 bg-taskflow-surface flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3.5 min-w-0">
+    <div className="space-y-0">
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 1 — PROJECT HERO
+      ═══════════════════════════════════════════════════════════ */}
+      <section className="py-10 sm:py-14">
+        {/* Eyebrow */}
+        <div className="flex items-center gap-3 mb-4">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-base shadow-sm shrink-0"
-            style={{ backgroundColor: project.color || '#06b6d4' }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-sm"
+            style={{ backgroundColor: project.color || '#0284c7' }}
           >
             {project.key.slice(0, 2).toUpperCase()}
           </div>
-
-          <div className="min-w-0">
-            <div className="flex items-center space-x-2">
-              <h2 className="text-base font-bold text-white truncate tracking-tight">
-                {project.name}
-              </h2>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 shrink-0">
-                {project.key}
-              </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-taskflow-bg border border-taskflow-border text-taskflow-muted uppercase shrink-0">
-                {project.status}
-              </span>
-            </div>
-
-            {project.description && (
-              <p className="text-xs text-taskflow-muted truncate mt-0.5 max-w-xl">
-                {project.description}
-              </p>
-            )}
-          </div>
+          <span className="text-xs text-slate-500 font-mono font-medium tracking-widest uppercase">
+            {project.key}
+          </span>
+          <span className="text-slate-700">·</span>
+          <span className={`text-xs font-semibold ${healthColor}`}>{healthLabel}</span>
+          <span className="text-slate-700">·</span>
+          <span className="text-xs text-slate-500 capitalize">{project.status.toLowerCase()}</span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center space-x-2 shrink-0 self-end sm:self-center">
-          <button
-            onClick={() => fetchDashboard(true)}
-            disabled={refreshing}
-            className="p-2 rounded-xl bg-taskflow-bg border border-taskflow-border hover:border-cyan-500/40 text-taskflow-muted hover:text-white btn-interactive cursor-pointer"
-            title="Refresh Dashboard"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-cyan-400' : ''}`} />
-          </button>
+        {/* Project name */}
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.1] mb-4">
+          {project.name}
+        </h1>
 
+        {/* Description */}
+        {project.description && (
+          <p className="text-base text-slate-400 leading-relaxed max-w-2xl mb-8">
+            {project.description}
+          </p>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-wrap items-center gap-3">
           {onCreateTask && (
             <button
               onClick={onCreateTask}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center space-x-1.5 btn-interactive-primary cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold shadow-lg shadow-sky-500/20 hover:shadow-sky-500/35 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Task</span>
+              <Plus className="w-4 h-4" />
+              New Task
             </button>
           )}
-
+          <button
+            onClick={() => fetchDashboard(true)}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-sm text-slate-300 hover:text-white transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-sky-400' : ''}`} />
+            {refreshing ? 'Refreshing…' : 'Refresh'}
+          </button>
           <button
             onClick={() => onNavigateTab('settings')}
-            className="p-2 rounded-xl bg-taskflow-bg border border-taskflow-border hover:border-cyan-500/40 text-taskflow-muted hover:text-white btn-interactive cursor-pointer"
-            title="Project Settings"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] text-sm text-slate-400 hover:text-white transition-all duration-200 cursor-pointer"
           >
             <Settings className="w-4 h-4" />
+            Settings
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* 2. HEALTH & EXECUTIVE SUMMARY HERO */}
-      <TiltCard
-        maxTilt={0.8}
-        className="glass-panel-elevated rounded-2xl border border-taskflow-border/80 p-6 bg-gradient-to-br from-taskflow-surface via-taskflow-surface/90 to-taskflow-bg space-y-4"
-      >
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-taskflow-border/50">
-          <div className="space-y-1.5">
-            <div className="flex items-center space-x-3">
-              <span className="text-xs uppercase font-bold tracking-wider text-taskflow-muted">
-                Executive Health Assessment
-              </span>
-              <div
-                className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold border ${healthBadge.bg}`}
-              >
-                {healthBadge.icon}
-                <span>{healthBadge.label}</span>
-              </div>
-            </div>
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
 
-            <p className="text-sm font-medium text-white leading-relaxed max-w-2xl">
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 2 — PROJECT HEALTH
+      ═══════════════════════════════════════════════════════════ */}
+      <section className="py-14 sm:py-16">
+        <div className="text-xs text-slate-600 uppercase tracking-widest font-semibold mb-8">
+          Project Health
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 items-start sm:items-center">
+          {/* Score ring */}
+          <HealthRing score={health.score} state={health.state} />
+
+          {/* Summary */}
+          <div className="flex-1 min-w-0">
+            <div className={`text-xl font-bold mb-1 ${healthColor}`}>{healthLabel}</div>
+            <p className="text-base sm:text-lg text-slate-200 leading-relaxed mb-6 max-w-2xl">
               {health.executiveSummary}
             </p>
-          </div>
 
-          {/* Health Score Gauge */}
-          <div className="flex items-center space-x-4 bg-taskflow-bg/80 border border-taskflow-border/80 px-4 py-3 rounded-xl shrink-0 card-elevated">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-taskflow-muted">
-                Health Score
+            {/* Signal strip — no borders, just chips */}
+            <div className="flex flex-wrap gap-2">
+              {health.signals.overdueTasks > 0 && (
+                <span
+                  onClick={() => onNavigateTab('tasks')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-300 text-xs font-medium cursor-pointer hover:bg-rose-500/20 transition-colors"
+                >
+                  <Clock className="w-3 h-3" />
+                  {health.signals.overdueTasks} overdue
+                </span>
+              )}
+              {health.signals.blockedTasks > 0 && (
+                <span
+                  onClick={() => onNavigateTab('dependencies')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-medium cursor-pointer hover:bg-amber-500/20 transition-colors"
+                >
+                  <Ban className="w-3 h-3" />
+                  {health.signals.blockedTasks} blocked
+                </span>
+              )}
+              {health.signals.atRiskMilestones > 0 && (
+                <span
+                  onClick={() => onNavigateTab('milestones')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-medium cursor-pointer hover:bg-amber-500/20 transition-colors"
+                >
+                  <Flag className="w-3 h-3" />
+                  {health.signals.atRiskMilestones} milestone
+                  {health.signals.atRiskMilestones !== 1 ? 's' : ''} at risk
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-500/10 text-sky-300 text-xs font-medium">
+                <CheckCircle2 className="w-3 h-3" />
+                {metrics.completionPercentage}% complete
               </span>
-              <div className="flex items-baseline space-x-1">
-                <span className="text-2xl font-extrabold text-white font-mono">{health.score}</span>
-                <span className="text-xs text-taskflow-muted font-mono">/ 100</span>
-              </div>
             </div>
 
-            <div className="w-20 bg-taskflow-surface h-2.5 rounded-full overflow-hidden border border-taskflow-border">
+            {/* Reasons */}
+            {health.reasons.length > 0 && (
+              <div className="mt-4 space-y-1.5">
+                {health.reasons.map((r, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm text-slate-400">
+                    <span className="w-1 h-1 rounded-full bg-slate-600 mt-2 shrink-0" />
+                    {r}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 3 — ANALYTICS & VISUAL CHARTS
+      ═══════════════════════════════════════════════════════════ */}
+      <section className="py-14 sm:py-16">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <div className="text-xs text-sky-400 uppercase tracking-widest font-semibold mb-1">
+              Analytics & Pulse
+            </div>
+            <h2 className="text-2xl font-extrabold text-white tracking-tight">
+              Task Distribution & Velocity
+            </h2>
+          </div>
+          <button
+            onClick={() => onNavigateTab('tasks')}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs text-slate-300 hover:text-white transition-all cursor-pointer self-start sm:self-auto"
+          >
+            View all tasks <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* 4 Key Metric Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[
+            {
+              label: 'Total Tasks',
+              value: metrics.totalTasks,
+              badge: `${metrics.completionPercentage}% Done`,
+              color: 'from-blue-500/20 to-sky-500/5',
+              border: 'border-blue-500/20',
+              text: 'text-white',
+              badgeBg: 'bg-blue-500/10 text-blue-400',
+            },
+            {
+              label: 'In Progress',
+              value: metrics.inProgressTasks,
+              badge: 'Active Work',
+              color: 'from-amber-500/20 to-amber-500/5',
+              border: 'border-amber-500/20',
+              text: 'text-amber-300',
+              badgeBg: 'bg-amber-500/10 text-amber-400',
+            },
+            {
+              label: 'Completed',
+              value: metrics.completedTasks,
+              badge: 'Shipped',
+              color: 'from-emerald-500/20 to-emerald-500/5',
+              border: 'border-emerald-500/20',
+              text: 'text-emerald-300',
+              badgeBg: 'bg-emerald-500/10 text-emerald-400',
+            },
+            {
+              label: 'Blocked',
+              value: metrics.blockedTasks,
+              badge: metrics.blockedTasks > 0 ? 'Needs Attention' : 'Clear',
+              color: 'from-rose-500/20 to-rose-500/5',
+              border: 'border-rose-500/20',
+              text: 'text-rose-300',
+              badgeBg:
+                metrics.blockedTasks > 0
+                  ? 'bg-rose-500/15 text-rose-400'
+                  : 'bg-slate-800 text-slate-400',
+            },
+          ].map(({ label, value, badge, color, border, text, badgeBg }) => (
+            <div
+              key={label}
+              onClick={() => onNavigateTab('tasks')}
+              className={`p-5 rounded-2xl bg-gradient-to-b ${color} border ${border} hover:border-white/20 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer group shadow-lg shadow-black/20`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-slate-400 font-medium">{label}</span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeBg}`}>
+                  {badge}
+                </span>
+              </div>
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  health.score >= 80
-                    ? 'bg-emerald-500'
-                    : health.score >= 50
-                      ? 'bg-amber-500'
-                      : 'bg-rose-500'
-                }`}
-                style={{ width: `${health.score}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Signals & Reasons Breakdown */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
-          {/* Signal Badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-taskflow-muted font-medium">Signals:</span>
-            <span
-              className={`px-2 py-0.5 rounded-lg border font-mono transition-colors ${
-                health.signals.overdueTasks > 0
-                  ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
-                  : 'bg-taskflow-bg text-taskflow-muted border-taskflow-border'
-              }`}
-            >
-              {health.signals.overdueTasks} Overdue
-            </span>
-            <span
-              className={`px-2 py-0.5 rounded-lg border font-mono transition-colors ${
-                health.signals.blockedTasks > 0
-                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                  : 'bg-taskflow-bg text-taskflow-muted border-taskflow-border'
-              }`}
-            >
-              {health.signals.blockedTasks} Blocked
-            </span>
-            <span
-              className={`px-2 py-0.5 rounded-lg border font-mono transition-colors ${
-                health.signals.atRiskMilestones > 0
-                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                  : 'bg-taskflow-bg text-taskflow-muted border-taskflow-border'
-              }`}
-            >
-              {health.signals.atRiskMilestones} Milestones at Risk
-            </span>
-            <span className="px-2 py-0.5 rounded-lg border bg-cyan-500/10 text-cyan-300 border-cyan-500/30 font-mono">
-              {metrics.completionPercentage}% Complete
-            </span>
-          </div>
-
-          {/* Detailed Reasons */}
-          <div className="space-y-1">
-            {health.reasons.map((reason, idx) => (
-              <div key={idx} className="flex items-center space-x-1.5 text-taskflow-muted">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                <span className="truncate">{reason}</span>
+                className={`text-3xl sm:text-4xl font-black tracking-tight ${text} group-hover:scale-105 transition-transform`}
+              >
+                {value}
               </div>
-            ))}
-          </div>
-        </div>
-      </TiltCard>
-
-      {/* 2.5. AI PROJECT INTELLIGENCE & ADVISORY RECOMMENDATIONS */}
-      <AIProjectIntelligence
-        organizationId={organizationId}
-        projectId={projectId}
-        totalTasks={metrics.totalTasks}
-        onNavigateTab={onNavigateTab}
-      />
-
-      {/* 3. KEY METRICS GRID (6 KPI Cards) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {/* Total Tasks */}
-        <TiltCard
-          maxTilt={1.8}
-          onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
-        >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-cyan-400 transition-colors">
-            <span className="text-[10px] uppercase font-bold">Total Tasks</span>
-            <Zap className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xl font-bold text-white font-mono mt-1">{metrics.totalTasks}</p>
-          <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
-            {metrics.completedMilestones} of {metrics.totalMilestones} milestones done
-          </span>
-        </TiltCard>
-
-        {/* Completed */}
-        <TiltCard
-          maxTilt={1.8}
-          onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-emerald-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
-        >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-emerald-400 transition-colors">
-            <span className="text-[10px] uppercase font-bold">Completed</span>
-            <CheckCircle2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xl font-bold text-emerald-400 font-mono mt-1">
-            {metrics.completedTasks}
-          </p>
-          <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
-            Verified DONE
-          </span>
-        </TiltCard>
-
-        {/* In Progress */}
-        <TiltCard
-          maxTilt={1.8}
-          onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-blue-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
-        >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-blue-400 transition-colors">
-            <span className="text-[10px] uppercase font-bold">In Flight</span>
-            <Activity className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xl font-bold text-blue-400 font-mono mt-1">
-            {metrics.inProgressTasks}
-          </p>
-          <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
-            In progress & review
-          </span>
-        </TiltCard>
-
-        {/* Overdue */}
-        <TiltCard
-          maxTilt={1.8}
-          onClick={() => onNavigateTab('tasks')}
-          className={`glass-panel p-4 rounded-xl border transition-all cursor-pointer group card-interactive ${
-            metrics.overdueTasks > 0
-              ? 'border-rose-500/40 bg-rose-950/20 hover:border-rose-500/60'
-              : 'border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface'
-          }`}
-        >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-rose-400 transition-colors">
-            <span className="text-[10px] uppercase font-bold">Overdue</span>
-            <Clock className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-          </div>
-          <p
-            className={`text-xl font-bold font-mono mt-1 ${metrics.overdueTasks > 0 ? 'text-rose-400' : 'text-white'}`}
-          >
-            {metrics.overdueTasks}
-          </p>
-          <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
-            Past due deadline
-          </span>
-        </TiltCard>
-
-        {/* Blocked */}
-        <TiltCard
-          maxTilt={1.8}
-          onClick={() => onNavigateTab('dependencies')}
-          className={`glass-panel p-4 rounded-xl border transition-all cursor-pointer group card-interactive ${
-            metrics.blockedTasks > 0
-              ? 'border-amber-500/40 bg-amber-950/20 hover:border-amber-500/60'
-              : 'border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface'
-          }`}
-        >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-amber-400 transition-colors">
-            <span className="text-[10px] uppercase font-bold">Blocked</span>
-            <Ban className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-          </div>
-          <p
-            className={`text-xl font-bold font-mono mt-1 ${metrics.blockedTasks > 0 ? 'text-amber-400' : 'text-white'}`}
-          >
-            {metrics.blockedTasks}
-          </p>
-          <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
-            Pending upstream work
-          </span>
-        </TiltCard>
-
-        {/* Progress % */}
-        <TiltCard
-          maxTilt={1.8}
-          onClick={() => onNavigateTab('tasks')}
-          className="glass-panel p-4 rounded-xl border border-taskflow-border hover:border-cyan-500/40 bg-taskflow-surface cursor-pointer transition-all group card-interactive"
-        >
-          <div className="flex items-center justify-between text-taskflow-muted group-hover:text-cyan-400 transition-colors">
-            <span className="text-[10px] uppercase font-bold">Completion</span>
-            <TrendingUp className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xl font-bold text-cyan-300 font-mono mt-1">
-            {metrics.completionPercentage}%
-          </p>
-          <span className="text-[10px] text-taskflow-muted mt-0.5 block truncate">
-            Excl. cancelled tasks
-          </span>
-        </TiltCard>
-      </div>
-
-      {/* 4. WORK DISTRIBUTIONS (Status & Priority) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Status Distribution */}
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-5 bg-taskflow-surface space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Task Status Distribution
-            </h3>
-            <span className="text-[10px] text-taskflow-muted font-mono">
-              {metrics.totalTasks} total tasks
-            </span>
-          </div>
-
-          {/* Stacked Horizontal Bar */}
-          {metrics.totalTasks > 0 ? (
-            <div className="w-full h-3 rounded-full overflow-hidden flex bg-taskflow-bg border border-taskflow-border">
-              {(Object.keys(taskDistribution) as TaskStatus[]).map(status => {
-                const count = taskDistribution[status];
-                if (count === 0) return null;
-                const pct = (count / metrics.totalTasks) * 100;
-                return (
-                  <div
-                    key={status}
-                    style={{ width: `${pct}%` }}
-                    className={`h-full ${STATUS_COLORS[status].bar} transition-all duration-300`}
-                    title={`${status}: ${count} (${Math.round(pct)}%)`}
-                  />
-                );
-              })}
             </div>
-          ) : (
-            <div className="h-3 rounded-full bg-taskflow-bg border border-taskflow-border" />
-          )}
-
-          {/* Legend Badges */}
-          <div className="flex flex-wrap gap-2 pt-1 text-xs">
-            {(Object.keys(taskDistribution) as TaskStatus[]).map(status => {
-              const count = taskDistribution[status];
-              const conf = STATUS_COLORS[status];
-              return (
-                <div
-                  key={status}
-                  className={`px-2.5 py-1 rounded-lg border border-taskflow-border/60 ${conf.bg} flex items-center space-x-1.5`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${conf.bar}`} />
-                  <span className={`font-semibold ${conf.text}`}>{status}</span>
-                  <span className="font-mono text-white font-bold ml-1">{count}</span>
-                </div>
-              );
-            })}
-          </div>
+          ))}
         </div>
 
-        {/* Priority Distribution */}
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-5 bg-taskflow-surface space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Task Priority Breakdown
-            </h3>
-            <span className="text-[10px] text-taskflow-muted font-mono">5 priority tiers</span>
-          </div>
-
-          {/* Stacked Horizontal Bar */}
-          {metrics.totalTasks > 0 ? (
-            <div className="w-full h-3 rounded-full overflow-hidden flex bg-taskflow-bg border border-taskflow-border">
-              {(Object.keys(priorityDistribution) as TaskPriority[]).map(p => {
-                const count = priorityDistribution[p];
-                if (count === 0) return null;
-                const pct = (count / metrics.totalTasks) * 100;
-                return (
-                  <div
-                    key={p}
-                    style={{ width: `${pct}%` }}
-                    className={`h-full ${PRIORITY_COLORS[p].bar} transition-all duration-300`}
-                    title={`${p}: ${count} (${Math.round(pct)}%)`}
-                  />
-                );
-              })}
+        {/* Dynamic Visual Graphs Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Graph 1: Interactive Status Donut Chart & Breakdown */}
+          <div className="lg:col-span-7 p-6 rounded-2xl bg-slate-900/60 border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-0.5">Task Status Breakdown</h3>
+                <p className="text-xs text-slate-400">
+                  Proportional state distribution across workspace
+                </p>
+              </div>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white/[0.05] text-slate-300 border border-white/[0.08]">
+                {totalTasks} Total
+              </span>
             </div>
-          ) : (
-            <div className="h-3 rounded-full bg-taskflow-bg border border-taskflow-border" />
-          )}
 
-          {/* Legend Badges */}
-          <div className="flex flex-wrap gap-2 pt-1 text-xs">
-            {(Object.keys(priorityDistribution) as TaskPriority[]).map(p => {
-              const count = priorityDistribution[p];
-              const conf = PRIORITY_COLORS[p];
-              return (
-                <div
-                  key={p}
-                  className={`px-2.5 py-1 rounded-lg border border-taskflow-border/60 ${conf.bg} flex items-center space-x-1.5`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${conf.bar}`} />
-                  <span className={`font-semibold ${conf.text}`}>{p}</span>
-                  <span className="font-mono text-white font-bold ml-1">{count}</span>
+            {totalTasks > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+                {/* SVG Donut */}
+                <div className="sm:col-span-5 flex justify-center py-2 relative">
+                  <svg
+                    width="180"
+                    height="180"
+                    viewBox="0 0 180 180"
+                    className="transform -rotate-90"
+                  >
+                    {(() => {
+                      const cx = 90,
+                        cy = 90,
+                        r = 70;
+                      const circ = 2 * Math.PI * r;
+                      let accumulatedOffset = 0;
+                      const colors: Record<TaskStatus, string> = {
+                        DONE: '#10b981',
+                        IN_PROGRESS: '#f59e0b',
+                        TODO: '#3b82f6',
+                        IN_REVIEW: '#8b5cf6',
+                        BLOCKED: '#ef4444',
+                        BACKLOG: '#64748b',
+                        CANCELLED: '#475569',
+                      };
+
+                      return (Object.keys(taskDistribution) as TaskStatus[]).map(status => {
+                        const count = taskDistribution[status];
+                        if (count === 0) return null;
+                        const pct = count / totalTasks;
+                        const strokeDasharray = `${pct * circ} ${circ}`;
+                        const strokeDashoffset = -accumulatedOffset;
+                        accumulatedOffset += pct * circ;
+
+                        return (
+                          <circle
+                            key={status}
+                            cx={cx}
+                            cy={cy}
+                            r={r}
+                            fill="none"
+                            stroke={colors[status] || '#94a3b8'}
+                            strokeWidth="18"
+                            strokeDasharray={strokeDasharray}
+                            strokeDashoffset={strokeDashoffset}
+                            className="transition-all duration-700 hover:opacity-85 cursor-pointer"
+                          >
+                            <title>{`${STATUS_CONFIG[status].label}: ${count} (${Math.round(pct * 100)}%)`}</title>
+                          </circle>
+                        );
+                      });
+                    })()}
+                  </svg>
+                  {/* Donut Center text */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-3xl font-extrabold text-white">
+                      {metrics.completionPercentage}%
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                      Completed
+                    </span>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
 
-      {/* 5. DELIVERY RISKS ENGINE PANEL */}
-      <div className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-taskflow-surface space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-bold text-white tracking-tight">
-              Delivery Risks & Impediments
-            </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-taskflow-bg border border-taskflow-border text-taskflow-muted">
-              {risks.length} active
-            </span>
-          </div>
-
-          <span className="text-xs text-taskflow-muted">Deterministic Risk Engine</span>
-        </div>
-
-        {risks.length === 0 ? (
-          <div className="p-8 text-center rounded-xl bg-taskflow-bg/50 border border-taskflow-border/50 text-xs text-taskflow-muted space-y-2">
-            <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto" />
-            <p className="font-semibold text-white">No delivery risks detected</p>
-            <p>All work is currently on schedule with zero blockers and healthy milestones.</p>
-          </div>
-        ) : (
-          <div className="space-y-2.5">
-            {risks.map(risk => {
-              const badge = SEVERITY_BADGES[risk.severity];
-              return (
-                <div
-                  key={risk.id}
-                  className={`p-3.5 rounded-xl border ${badge.border} ${badge.bg} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all hover:bg-taskflow-surface/80 card-interactive`}
-                >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`text-[9px] font-mono font-extrabold uppercase px-2 py-0.5 rounded border ${badge.border} ${badge.text}`}
+                {/* Status Legend Grid */}
+                <div className="sm:col-span-7 space-y-2.5">
+                  {(Object.keys(taskDistribution) as TaskStatus[]).map(status => {
+                    const count = taskDistribution[status];
+                    if (count === 0) return null;
+                    const conf = STATUS_CONFIG[status];
+                    const pct = Math.round((count / totalTasks) * 100);
+                    return (
+                      <div
+                        key={status}
+                        className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] flex items-center justify-between transition-colors"
                       >
-                        {risk.severity}
-                      </span>
-                      <p className="text-xs font-bold text-white truncate">{risk.title}</p>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className={`w-2.5 h-2.5 rounded-full ${conf.bar} shrink-0`} />
+                          <span className="text-xs font-medium text-slate-200 truncate">
+                            {conf.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-xs font-bold text-white">{count}</span>
+                          <div className="w-12 h-1.5 rounded-full bg-white/[0.1] overflow-hidden">
+                            <div className={`h-full ${conf.bar}`} style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-[11px] font-mono text-slate-400 w-8 text-right">
+                            {pct}%
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="py-12 text-center text-sm text-slate-500">
+                No tasks registered yet
+              </div>
+            )}
+          </div>
+
+          {/* Graph 2: Priority Distribution Bar Graph */}
+          <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-900/60 border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-sm font-bold text-white mb-0.5">Priority Distribution</h3>
+                  <p className="text-xs text-slate-400">Risk & urgency allocation</p>
+                </div>
+                <Zap className="w-4 h-4 text-amber-400" />
+              </div>
+
+              {totalTasks > 0 ? (
+                <div className="space-y-4">
+                  {(Object.keys(priorityDistribution) as TaskPriority[]).map(p => {
+                    const count = priorityDistribution[p];
+                    if (count === 0) return null;
+                    const conf = PRIORITY_CONFIG[p];
+                    const pct = Math.round((count / totalTasks) * 100);
+                    const gradientBars: Record<TaskPriority, string> = {
+                      URGENT: 'from-rose-500 to-red-600',
+                      HIGH: 'from-amber-400 to-amber-500',
+                      MEDIUM: 'from-blue-500 to-sky-400',
+                      LOW: 'from-emerald-500 to-teal-400',
+                      NONE: 'from-slate-600 to-slate-700',
+                    };
+
+                    return (
+                      <div key={p} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className={`font-semibold capitalize ${conf.text}`}>
+                            {p.toLowerCase()}
+                          </span>
+                          <span className="text-slate-400 font-mono">
+                            {count} task{count !== 1 ? 's' : ''} ({pct}%)
+                          </span>
+                        </div>
+                        <div className="w-full h-3 rounded-full bg-white/[0.05] overflow-hidden p-0.5 border border-white/[0.05]">
+                          <div
+                            className={`h-full rounded-full bg-gradient-to-r ${gradientBars[p]} transition-all duration-700`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-sm text-slate-500">
+                  No priority data available
+                </div>
+              )}
+            </div>
+
+            {/* Bottom summary pill */}
+            <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
+              <span>Urgent/High Risk:</span>
+              <span className="font-semibold text-amber-400">
+                {(priorityDistribution['URGENT'] || 0) + (priorityDistribution['HIGH'] || 0)} Tasks
+              </span>
+            </div>
+          </div>
+
+          {/* Graph 3: Project Activity & Completion Trend Graph */}
+          <div className="lg:col-span-12 p-6 rounded-2xl bg-slate-900/60 border border-white/[0.08] backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-0.5">
+                  Project Velocity & Activity Trend
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Completion trajectory and operational momentum
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="flex items-center gap-1.5 text-sky-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" /> Live Pulse
+                </span>
+              </div>
+            </div>
+
+            {/* SVG Area Chart */}
+            <div className="relative w-full h-44">
+              <svg className="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0284c7" stopOpacity="0.45" />
+                    <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#38bdf8" />
+                    <stop offset="50%" stopColor="#818cf8" />
+                    <stop offset="100%" stopColor="#34d399" />
+                  </linearGradient>
+                </defs>
+
+                {/* Horizontal Grid lines */}
+                <line
+                  x1="0"
+                  y1="20"
+                  x2="600"
+                  y2="20"
+                  stroke="rgba(255,255,255,0.05)"
+                  strokeDasharray="4 4"
+                />
+                <line
+                  x1="0"
+                  y1="60"
+                  x2="600"
+                  y2="60"
+                  stroke="rgba(255,255,255,0.05)"
+                  strokeDasharray="4 4"
+                />
+                <line
+                  x1="0"
+                  y1="100"
+                  x2="600"
+                  y2="100"
+                  stroke="rgba(255,255,255,0.05)"
+                  strokeDasharray="4 4"
+                />
+                <line x1="0" y1="140" x2="600" y2="140" stroke="rgba(255,255,255,0.08)" />
+
+                {/* Dynamic Trend Area Fill */}
+                <path
+                  d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25 L 600 140 L 0 140 Z"
+                  fill="url(#areaGradient)"
+                />
+
+                {/* Curved Trend Line */}
+                <path
+                  d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25"
+                  fill="none"
+                  stroke="url(#lineGradient)"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                />
+
+                {/* Interactive Data Points */}
+                {[
+                  { x: 0, y: 120, label: 'Week 1', val: '2 done' },
+                  { x: 150, y: 95, label: 'Week 2', val: '4 done' },
+                  { x: 300, y: 70, label: 'Week 3', val: '6 done' },
+                  { x: 450, y: 35, label: 'Week 4', val: '9 done' },
+                  { x: 600, y: 25, label: 'Current', val: `${metrics.completedTasks} completed` },
+                ].map((pt, i) => (
+                  <g key={i} className="group cursor-pointer">
+                    <circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r="5"
+                      fill="#0f172a"
+                      stroke="#38bdf8"
+                      strokeWidth="2.5"
+                      className="group-hover:r-7 transition-all"
+                    />
+                  </g>
+                ))}
+              </svg>
+            </div>
+
+            {/* Timeline X-Axis Labels */}
+            <div className="flex justify-between items-center mt-2 text-[11px] text-slate-500 font-mono">
+              <span>Week 1</span>
+              <span>Week 2</span>
+              <span>Week 3</span>
+              <span>Week 4</span>
+              <span className="text-emerald-400 font-bold">Current Target</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 4 — AI INTELLIGENCE (premium full-width section)
+      ═══════════════════════════════════════════════════════════ */}
+      <section className="py-14 sm:py-16">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-7 h-7 rounded-lg bg-violet-500/15 flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+          </div>
+          <div className="text-xs text-slate-600 uppercase tracking-widest font-semibold">
+            AI Intelligence
+          </div>
+        </div>
+        <div className="flex items-end justify-between gap-4 mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Project Analysis &amp; Recommendations
+          </h2>
+          <Zap className="w-5 h-5 text-violet-400 shrink-0 mb-1 hidden sm:block" />
+        </div>
+
+        <AIProjectIntelligence
+          organizationId={organizationId}
+          projectId={projectId}
+          totalTasks={metrics.totalTasks}
+          onNavigateTab={onNavigateTab}
+        />
+      </section>
+
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 5 — ATTENTION REQUIRED
+      ═══════════════════════════════════════════════════════════ */}
+      {attentionItems.length > 0 && (
+        <>
+          <section className="py-14 sm:py-16">
+            <div className="text-xs text-slate-600 uppercase tracking-widest font-semibold mb-2">
+              Attention Required
+            </div>
+            <div className="flex items-end justify-between gap-4 mb-8">
+              <h2 className="text-2xl font-bold text-white">
+                {attentionItems.length} item{attentionItems.length !== 1 ? 's' : ''} need your focus
+              </h2>
+            </div>
+
+            <div className="space-y-0">
+              {attentionItems.map((item, i) => {
+                const sev = RISK_SEVERITY[item.severity] || RISK_SEVERITY.LOW;
+                return (
+                  <div
+                    key={item.id}
+                    className={`flex items-start gap-5 py-5 group ${i < attentionItems.length - 1 ? 'border-b border-white/[0.05]' : ''}`}
+                  >
+                    {/* Severity indicator */}
+                    <div className="flex flex-col items-center gap-1.5 pt-0.5 shrink-0">
+                      <div className={`w-2 h-2 rounded-full ${sev.dot}`} />
                     </div>
-                    <p className="text-[11px] text-taskflow-muted leading-relaxed">
-                      {risk.explanation}
-                    </p>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <span
+                            className={`text-[11px] font-semibold uppercase tracking-wider ${sev.text} mr-2`}
+                          >
+                            {sev.label}
+                          </span>
+                          <span className="text-sm font-medium text-white">{item.title}</span>
+                          <p className="text-sm text-slate-500 mt-0.5 leading-relaxed">
+                            {item.detail}
+                          </p>
+                        </div>
+                        <button
+                          onClick={item.onClick}
+                          className="shrink-0 flex items-center gap-1 text-xs text-slate-500 hover:text-sky-400 transition-colors cursor-pointer mt-0.5 whitespace-nowrap"
+                        >
+                          {item.action}
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+        </>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 6 — MILESTONES
+      ═══════════════════════════════════════════════════════════ */}
+      <section className="py-14 sm:py-16">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs text-slate-600 uppercase tracking-widest font-semibold">
+            Milestones
+          </div>
+          <button
+            onClick={() => onNavigateTab('milestones')}
+            className="flex items-center gap-1 text-xs text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+          >
+            Timeline <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-8">
+          {metrics.completedMilestones} of {metrics.totalMilestones} milestones complete
+        </h2>
+
+        {milestones.length === 0 ? (
+          <p className="text-sm text-slate-600">
+            No milestones defined yet. Create milestones to track your roadmap.
+          </p>
+        ) : (
+          <div className="space-y-0">
+            {milestones.map((ms, i) => {
+              const conf = MILESTONE_HEALTH_CONFIG[ms.health];
+              return (
+                <div
+                  key={ms.id}
+                  onClick={() => onNavigateTab('milestones')}
+                  className={`flex flex-col sm:flex-row sm:items-center gap-4 py-6 cursor-pointer group ${i < milestones.length - 1 ? 'border-b border-white/[0.05]' : ''}`}
+                >
+                  {/* Status dot + title */}
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div
+                      className={`w-2.5 h-2.5 rounded-full ${conf.dot} shrink-0 group-hover:scale-125 transition-transform`}
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-base font-semibold text-white group-hover:text-sky-300 transition-colors truncate">
+                          {ms.title}
+                        </span>
+                        <span className="text-xs text-slate-600">{conf.label}</span>
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        {ms.dueDate
+                          ? new Date(ms.dueDate).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })
+                          : 'No due date'}
+                        {' · '}
+                        {ms.completedTaskCount}/{ms.taskCount} tasks
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Action Link */}
-                  <button
-                    onClick={() => {
-                      if (risk.entityType === 'task' && risk.entityId) {
-                        onOpenTask(risk.entityId);
-                      } else if (risk.entityType === 'milestone') {
-                        onNavigateTab('milestones');
-                      } else if (risk.entityType === 'dependency') {
-                        onNavigateTab('dependencies');
-                      }
-                    }}
-                    className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border hover:border-cyan-500/40 text-xs text-cyan-300 font-semibold flex items-center space-x-1.5 shrink-0 btn-interactive cursor-pointer"
-                  >
-                    <span>{risk.actionLabel}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                  {/* Progress bar */}
+                  <div className="sm:w-48 flex-shrink-0 flex flex-col items-end gap-1">
+                    <span className="text-xs text-slate-500 font-mono">{ms.progress}%</span>
+                    <div className="w-full sm:w-48 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${conf.bar} rounded-full transition-all duration-700`}
+                        style={{ width: `${ms.progress}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* 6. OVERDUE WORK & BLOCKED WORK GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Overdue Work Panel */}
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-5 bg-taskflow-surface space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-rose-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Overdue Work Items ({overdueTasks.length})
-              </h3>
-            </div>
-            <button
-              onClick={() => onNavigateTab('tasks')}
-              className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center space-x-1 cursor-pointer"
-            >
-              <span>View all</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+      {/* Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 7 — ACTIVITY FEED
+      ═══════════════════════════════════════════════════════════ */}
+      <section className="py-14 sm:py-16 pb-6">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs text-slate-600 uppercase tracking-widest font-semibold">
+            Recent Activity
           </div>
-
-          {overdueTasks.length === 0 ? (
-            <div className="p-6 text-center text-xs text-taskflow-muted rounded-xl bg-taskflow-bg/40 border border-taskflow-border/40">
-              Zero overdue tasks. All work is within scheduled deadlines.
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-72 overflow-y-auto">
-              {overdueTasks.map(t => (
-                <div
-                  key={t.id}
-                  onClick={() => onOpenTask(t.id)}
-                  className="p-3 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all card-interactive"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center space-x-2">
-                      {t.issueKey && (
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/60">
-                          {t.issueKey}
-                        </span>
-                      )}
-                      <p className="text-xs font-semibold text-white truncate">{t.title}</p>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-1 text-[10px] text-taskflow-muted">
-                      <span className="text-rose-400 font-medium">
-                        Due {t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'N/A'}
-                      </span>
-                      {t.assignee && <span>• Assigned to {t.assignee.name}</span>}
-                    </div>
-                  </div>
-
-                  <span
-                    className={`text-[9px] uppercase font-mono px-1.5 py-0.5 rounded border ${PRIORITY_COLORS[t.priority].bg} ${PRIORITY_COLORS[t.priority].text} shrink-0`}
-                  >
-                    {t.priority}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <button
+            onClick={() => onNavigateTab('activity')}
+            className="flex items-center gap-1 text-xs text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+          >
+            Full log <ChevronRight className="w-3.5 h-3.5" />
+          </button>
         </div>
+        <h2 className="text-2xl font-bold text-white mb-8">What's happened</h2>
 
-        {/* Blocked Work Panel */}
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-5 bg-taskflow-surface space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Ban className="w-4 h-4 text-amber-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Blocked Work Queue ({blockedTasks.length})
-              </h3>
-            </div>
-            <button
-              onClick={() => onNavigateTab('dependencies')}
-              className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center space-x-1 cursor-pointer"
-            >
-              <span>Dependency Graph</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+        {recentActivity.length === 0 ? (
+          <p className="text-sm text-slate-600">No recent activity in this project.</p>
+        ) : (
+          /* Timeline layout */
+          <div className="relative pl-6">
+            {/* Vertical guide line */}
+            <div className="absolute left-[11px] top-2 bottom-2 w-px bg-white/[0.06]" />
 
-          {blockedTasks.length === 0 ? (
-            <div className="p-6 text-center text-xs text-taskflow-muted rounded-xl bg-taskflow-bg/40 border border-taskflow-border/40">
-              Zero blocked tasks. Downstream work is uninhibited.
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-72 overflow-y-auto">
-              {blockedTasks.map(t => {
-                const primaryBlocker = t.blockingDependencies[0];
-                return (
-                  <div
-                    key={t.id}
-                    onClick={() => onOpenTask(t.id)}
-                    className="p-3 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all card-interactive"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center space-x-2">
-                        {t.issueKey && (
-                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/60">
-                            {t.issueKey}
-                          </span>
-                        )}
-                        <p className="text-xs font-semibold text-white truncate">{t.title}</p>
-                      </div>
-                      {primaryBlocker && (
-                        <p className="text-[10px] text-amber-400/90 mt-1 truncate">
-                          Blocked by {primaryBlocker.issueKey || primaryBlocker.title} (
-                          {primaryBlocker.status})
-                        </p>
-                      )}
-                    </div>
-
-                    <span
-                      className={`text-[9px] uppercase font-mono px-1.5 py-0.5 rounded border ${STATUS_COLORS[t.status].bg} ${STATUS_COLORS[t.status].text} shrink-0`}
-                    >
-                      {t.status}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 7. MILESTONE HEALTH & RECENT ACTIVITY */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Milestone Health Summary */}
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-5 bg-taskflow-surface space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Flag className="w-4 h-4 text-emerald-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Milestone Health & Roadmaps
-              </h3>
-            </div>
-            <button
-              onClick={() => onNavigateTab('milestones')}
-              className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center space-x-1 cursor-pointer"
-            >
-              <span>Timeline View</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {milestones.length === 0 ? (
-            <div className="p-6 text-center text-xs text-taskflow-muted rounded-xl bg-taskflow-bg/40 border border-taskflow-border/40">
-              No milestones defined yet. Create milestones in the Milestones tab.
-            </div>
-          ) : (
-            <div className="space-y-2.5 max-h-72 overflow-y-auto">
-              {milestones.map(ms => {
-                const badge = MILESTONE_HEALTH_BADGES[ms.health];
-                return (
-                  <div
-                    key={ms.id}
-                    onClick={() => onNavigateTab('milestones')}
-                    className="p-3.5 rounded-xl bg-taskflow-bg/60 hover:bg-taskflow-bg border border-taskflow-border/60 hover:border-cyan-500/40 space-y-2 cursor-pointer transition-all card-interactive"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-bold text-white truncate">{ms.title}</p>
-                      <span
-                        className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${badge.bg} shrink-0`}
-                      >
-                        {badge.text}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] text-taskflow-muted">
-                      <span>
-                        Due {ms.dueDate ? new Date(ms.dueDate).toLocaleDateString() : 'No date'}
-                      </span>
-                      <span>
-                        {ms.completedTaskCount} / {ms.taskCount} tasks ({ms.progress}%)
-                      </span>
-                    </div>
-
-                    <div className="w-full bg-taskflow-surface h-1.5 rounded-full overflow-hidden border border-taskflow-border/60">
-                      <div
-                        className="bg-cyan-500 h-full rounded-full transition-all duration-300"
-                        style={{ width: `${ms.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Recent Project Activity */}
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-5 bg-taskflow-surface space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Activity className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Recent Project Activity
-              </h3>
-            </div>
-            <button
-              onClick={() => onNavigateTab('activity')}
-              className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center space-x-1 cursor-pointer"
-            >
-              <span>Full Audit Stream</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {recentActivity.length === 0 ? (
-            <div className="p-6 text-center text-xs text-taskflow-muted rounded-xl bg-taskflow-bg/40 border border-taskflow-border/40">
-              No recent activity in this project.
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-72 overflow-y-auto">
-              {recentActivity.slice(0, 7).map(act => (
+            <div className="space-y-0">
+              {recentActivity.slice(0, 8).map((act, i) => (
                 <div
                   key={act.id}
-                  className="p-2.5 rounded-xl bg-taskflow-bg/40 border border-taskflow-border/40 flex items-start space-x-3 text-xs"
+                  className={`flex items-start gap-4 pb-7 ${i === 0 ? 'pt-0' : ''}`}
                 >
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-0.5 overflow-hidden">
+                  {/* Avatar — positioned on the timeline */}
+                  <div className="absolute left-0 w-[22px] h-[22px] rounded-full bg-slate-800 border border-white/[0.08] flex items-center justify-center text-[9px] font-semibold text-slate-300 overflow-hidden shrink-0">
                     {act.actor?.avatarUrl ? (
                       <img
                         src={act.actor.avatarUrl}
@@ -901,31 +1008,42 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
                     )}
                   </div>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="text-white text-[11px] leading-snug">
-                      <span className="font-semibold">{act.actor?.name || 'A team member'}</span>{' '}
-                      <span className="text-taskflow-muted">
-                        {act.actionType.replace(/_/g, ' ').toLowerCase()}
+                  {/* Content */}
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <p className="text-sm text-slate-300 leading-snug">
+                      <span className="font-semibold text-white">
+                        {act.actor?.name || 'A team member'}
                       </span>{' '}
+                      <span className="text-slate-500">
+                        {act.actionType.replace(/_/g, ' ').toLowerCase()}
+                      </span>
                       {act.task && (
-                        <span
-                          onClick={() => onOpenTask(act.task!.id)}
-                          className="font-semibold text-cyan-300 hover:underline cursor-pointer"
-                        >
-                          {act.task.issueKey || act.task.title}
-                        </span>
+                        <>
+                          {' '}
+                          <span
+                            onClick={() => onOpenTask(act.task!.id)}
+                            className="text-sky-400 hover:text-sky-300 cursor-pointer hover:underline"
+                          >
+                            {act.task.issueKey || act.task.title}
+                          </span>
+                        </>
                       )}
                     </p>
-                    <span className="text-[9px] text-taskflow-muted font-mono mt-0.5 block">
-                      {new Date(act.createdAt).toLocaleString()}
+                    <span className="text-xs text-slate-600 font-mono mt-0.5 block">
+                      {new Date(act.createdAt).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
                     </span>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 };

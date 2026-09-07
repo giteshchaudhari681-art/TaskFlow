@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
-import { Lock, Mail, Eye, EyeOff, LogIn, AlertCircle, Sparkles, UserCheck } from 'lucide-react';
+import {
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  LogIn,
+  AlertCircle,
+  Sparkles,
+  UserCheck,
+  CheckCircle2,
+  ShieldCheck,
+  Zap,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { TiltCard } from '../common/useCardTilt';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 
 interface LoginPageProps {
   onSwitchToRegister: () => void;
@@ -34,7 +47,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
     }
   };
 
-  // Development convenience demo account autofill
   const handleQuickFill = (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('TaskFlow2026!Dev');
@@ -42,124 +54,146 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <TiltCard
-        maxTilt={1.5}
-        className="glass-panel-elevated rounded-2xl p-8 border border-taskflow-border/80 shadow-elevation-4 relative overflow-hidden"
-      >
-        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-40 h-40 rounded-full bg-cyan-500/10 blur-2xl pointer-events-none" />
+    <div className="w-full max-w-4xl mx-auto my-4 sm:my-8 grid grid-cols-1 md:grid-cols-12 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/[0.08] shadow-elevation-4 overflow-hidden">
+      {/* Left Feature Showcase Banner (SaaS / Editorial Hybrid) */}
+      <div className="md:col-span-5 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden border-b md:border-b-0 md:border-r border-white/[0.08]">
+        <div className="absolute -top-16 -left-16 w-48 h-48 bg-sky-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl" />
 
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/50 text-cyan-400 text-xs font-medium mb-3">
+        <div className="relative z-10 space-y-6">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Secure Operations Portal</span>
+            <span>AI Operations Platform</span>
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Sign in to TaskFlow</h2>
-          <p className="text-xs text-taskflow-muted mt-1.5">
-            Enter your credentials to access your engineering workspace
+
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display tracking-tight leading-tight">
+              Execute Projects with Precision.
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+              TaskFlow powers high-fidelity engineering delivery, automated Gantt roadmaps, and DAG
+              dependency intelligence.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center space-x-3 text-xs text-slate-300">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Deterministic DAG dependency graph tracking</span>
+            </div>
+            <div className="flex items-center space-x-3 text-xs text-slate-300">
+              <Zap className="w-4 h-4 text-sky-400 shrink-0" />
+              <span>Real-time WebSocket task telemetry</span>
+            </div>
+            <div className="flex items-center space-x-3 text-xs text-slate-300">
+              <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
+              <span>Enterprise multi-tenant role RBAC</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 pt-8 border-t border-white/[0.08] mt-6">
+          <p className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">
+            Version 1.0 • Enterprise Edition
+          </p>
+        </div>
+      </div>
+
+      {/* Right Login Form Container */}
+      <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-center bg-[#0b0f17]/90 relative">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white font-display tracking-tight">
+            Sign in to TaskFlow
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Enter your credentials to access your workspace session
           </p>
         </div>
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-lg bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-start space-x-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+          <div className="mb-5 p-3.5 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-start space-x-2.5">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-taskflow-text-dim mb-1.5">
-              Work Email
-            </label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-taskflow-muted absolute left-3 top-3" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="alex.chen@taskflow.dev"
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
-              />
-            </div>
-          </div>
+          <Input
+            label="Work Email"
+            type="email"
+            required
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="alex.chen@taskflow.dev"
+            leftIcon={<Mail className="w-4 h-4" />}
+          />
 
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-medium text-taskflow-text-dim">Password</label>
-            </div>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-taskflow-muted absolute left-3 top-3" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 input-interactive transition-colors"
-              />
+          <Input
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            required
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="••••••••••••"
+            leftIcon={<Lock className="w-4 h-4" />}
+            rightIcon={
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-taskflow-muted hover:text-white transition-colors cursor-pointer"
+                className="text-slate-500 hover:text-white transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
-            </div>
-          </div>
+            }
+          />
 
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-semibold shadow-glow-cyan btn-interactive-primary transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+            variant="primary"
+            size="lg"
+            isLoading={loading}
+            className="w-full mt-2"
+            leftIcon={<LogIn className="w-4 h-4" />}
           >
-            {loading ? (
-              <span>Signing in...</span>
-            ) : (
-              <>
-                <LogIn className="w-4 h-4" />
-                <span>Sign In</span>
-              </>
-            )}
-          </button>
+            Sign In to Workspace
+          </Button>
         </form>
 
-        {/* Development Seed Quick Fill Helpers */}
-        <div className="mt-6 pt-5 border-t border-taskflow-border/60">
-          <span className="text-[11px] uppercase tracking-wider text-taskflow-muted block mb-2 font-medium">
-            Demo Accounts (Development Seed)
+        {/* Demo Quick Fill Shortcuts */}
+        <div className="mt-6 pt-5 border-t border-white/[0.08]">
+          <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-2.5">
+            Quick Fill Demo Accounts (Development)
           </span>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
               onClick={() => handleQuickFill('alex.chen@taskflow.dev')}
-              className="px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-xs text-taskflow-muted hover:text-cyan-300 btn-interactive transition-colors flex items-center space-x-1.5 text-left cursor-pointer"
+              className="px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-white/[0.08] hover:border-sky-500/30 text-xs text-slate-300 hover:text-white transition-all flex items-center space-x-2 text-left cursor-pointer"
             >
-              <UserCheck className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
-              <span className="truncate">Alex (Owner)</span>
+              <UserCheck className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+              <span className="truncate font-medium">Alex (Owner)</span>
             </button>
             <button
               type="button"
               onClick={() => handleQuickFill('sam.miller@taskflow.dev')}
-              className="px-2.5 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-xs text-taskflow-muted hover:text-indigo-300 btn-interactive transition-colors flex items-center space-x-1.5 text-left cursor-pointer"
+              className="px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-white/[0.08] hover:border-indigo-500/30 text-xs text-slate-300 hover:text-white transition-all flex items-center space-x-2 text-left cursor-pointer"
             >
-              <UserCheck className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
-              <span className="truncate">Sam (Admin)</span>
+              <UserCheck className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+              <span className="truncate font-medium">Sam (Admin)</span>
             </button>
           </div>
         </div>
 
-        <div className="text-center mt-5 text-xs text-taskflow-muted">
+        <div className="text-center mt-6 text-xs text-slate-400">
           Don&apos;t have an account?{' '}
           <button
             onClick={onSwitchToRegister}
-            className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors cursor-pointer"
+            className="text-sky-400 hover:text-sky-300 font-semibold transition-colors cursor-pointer underline underline-offset-4"
           >
-            Create Workspace
+            Create New Workspace
           </button>
         </div>
-      </TiltCard>
+      </div>
     </div>
   );
 };

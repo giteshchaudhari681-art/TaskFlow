@@ -102,9 +102,9 @@ export interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const TiltCard: React.FC<TiltCardProps> = ({
   children,
   className = '',
-  maxTilt = 2.5,
-  scale = 1.01,
-  perspective = 1000,
+  maxTilt = 0.8,
+  scale = 1.002,
+  perspective = 1200,
   disabled = false,
   ...rest
 }) => {

@@ -503,34 +503,33 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
 
   return (
     <div
-      className="glass-panel-elevated border border-indigo-500/20 rounded-2xl p-5 relative overflow-hidden transition-all duration-300 shadow-glow-purple/20 mt-4"
+      className="border border-slate-800 bg-[#111827] rounded-lg p-4 relative transition-colors mt-4"
       data-testid="ai-task-intelligence"
     >
-      {/* Decorative gradient overlay */}
-      <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
       {/* Header bar with Mode Tabs */}
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-            <Sparkles className="w-4 h-4" />
+      <div className="flex items-center justify-between mb-3.5 relative z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+            <h4 className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
               AI Task Assistant
-              {taskKey && <span className="text-xs text-indigo-400 font-mono">[{taskKey}]</span>}
+              {taskKey && (
+                <span className="text-[11px] text-indigo-400 font-mono">[{taskKey}]</span>
+              )}
             </h4>
           </div>
         </div>
 
         {/* Tab switch buttons */}
-        <div className="flex items-center bg-slate-950/80 p-0.5 rounded-lg border border-slate-800 text-xs">
+        <div className="flex items-center bg-slate-900 p-0.5 rounded-md border border-slate-800 text-xs">
           <button
             type="button"
             onClick={() => setActiveTab('intelligence')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
               activeTab === 'intelligence'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
+                ? 'bg-slate-800 text-white font-medium shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -540,9 +539,9 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('decomposition')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
               activeTab === 'decomposition'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
+                ? 'bg-slate-800 text-white font-medium shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
             data-testid="ai-tab-decomposition"
@@ -553,9 +552,9 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('actions')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 btn-interactive cursor-pointer ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
               activeTab === 'actions'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
+                ? 'bg-slate-800 text-white font-medium shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
             data-testid="ai-tab-actions"
