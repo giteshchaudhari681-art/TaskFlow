@@ -1,193 +1,118 @@
-import React, { useState } from 'react';
-import { Sparkles, AlertTriangle, ShieldCheck, TrendingUp, Clock } from 'lucide-react';
-
-const insights = [
- {
-  id: 'bottleneck',
-  type: 'warning',
-  icon: AlertTriangle,
-  badge: 'Bottleneck Detected',
-  badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  title: 'OPS-102 blocks 3 downstream tasks',
-  detail:
-   'API Token Sync is gating Milestone 2 delivery. Estimated cascade delay: 6 days if unresolved.',
-  action: 'Auto-Resolve',
-  actionColor: 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border-amber-500/30',
-  borderColor: 'border-amber-500/20',
-  bgColor: 'bg-amber-500/[0.04]',
- },
- {
-  id: 'optimization',
-  type: 'info',
-  icon: ShieldCheck,
-  badge: 'Optimization Available',
-  badgeColor: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-  title: 'Reassign subtask to save 1.5 days',
-  detail:
-   'Moving Frontend Integration to Alex Chen (currently at 40% capacity) optimizes delivery by 1.5d.',
-  action: 'Apply AI Fix',
-  actionColor: 'bg-sky-500/15 hover:bg-sky-500/25 text-sky-200 border-sky-500/30',
-  borderColor: 'border-sky-500/20',
-  bgColor: 'bg-sky-500/[0.03]',
- },
- {
-  id: 'velocity',
-  type: 'success',
-  icon: TrendingUp,
-  badge: 'Velocity Insight',
-  badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  title: 'Sprint pace 12% above target',
-  detail:
-   'Team velocity has increased 3 weeks in a row. Current trajectory puts milestone completion 2 days early.',
-  action: 'View Forecast',
-  actionColor: 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-200 border-emerald-500/30',
-  borderColor: 'border-emerald-500/20',
-  bgColor: 'bg-emerald-500/[0.03]',
- },
-];
+import React from 'react';
+import { Check, ArrowRight, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const LandingAIShowcase: React.FC = () => {
- const [activeInsight, setActiveInsight] = useState(0);
- const current = insights[activeInsight];
+  return (
+    <section className="py-32 relative overflow-hidden bg-[#0A0A0A]">
+      {/* Background ambient lighting */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-[#E85D22]/[0.02] rounded-full blur-[140px] pointer-events-none" />
 
- return (
-  <section id="ai" className="py-24 sm:py-36 relative overflow-hidden">
-   {/* Background atmosphere */}
-   <div className="pointer-events-none absolute inset-0">
-    <div className="absolute top-0 left-0 right-0 h-px bg-taskflow-surface from-transparent to-transparent" />
-    <div className="absolute bottom-0 left-0 right-0 h-px bg-taskflow-surface from-transparent to-transparent" />
-    <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[400px] bg-violet-600/[0.06] rounded-full blur-3xl" />
-   </div>
-   <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px]" />
+      <div className="max-w-[1400px] mx-auto px-6 relative z-10">
+        <div className="grid lg:grid-cols-[1fr,1.2fr] gap-20 lg:gap-16 items-center">
+          
+          {/* Left Column - Typography & Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-start"
+          >
+            <div className="flex items-center gap-2.5 mb-8">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#A3A3A3]">
+                AI-POWERED INSIGHTS
+              </span>
+            </div>
+            
+            <h2 className="font-display text-[clamp(2.5rem,4.5vw,3.5rem)] font-medium tracking-tight leading-[1.05] mb-8 text-[#F3EDE4]">
+              Know what's going wrong before your team does.
+            </h2>
+            
+            <p className="text-[1.15rem] text-[#A3A3A3] leading-relaxed mb-12 max-w-[480px] font-sans">
+              TaskFlow analyzes your projects, tasks, and team activity to surface risks, bottlenecks, and opportunities in real time.
+            </p>
 
-   <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative z-10">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-     {/* Left: text */}
-     <div>
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-taskflow-elevated border border-taskflow-border text-[11px] font-bold text-taskflow-text mb-6 tracking-wide">
-       <Sparkles className="w-3.5 h-3.5 text-taskflow-text" />
-       AI Delivery Intelligence
-      </div>
-      <h2 className="text-[clamp(2rem,4vw,3rem)] font-black text-white tracking-[-0.025em] leading-[1.1] mb-5">
-       Know what's going wrong
-       <br />
-       before your team does.
-      </h2>
-      <p className="text-[15px] text-slate-400 leading-[1.8] mb-8">
-       TaskFlow's AI engine continuously monitors velocity, dependency health, and workload
-       balance — surfacing risks with single-click resolutions before they reach your
-       stakeholders.
-      </p>
+            <ul className="space-y-5 mb-12">
+              {[
+                'Detect at-risk tasks automatically',
+                'Get intelligent recommendations',
+                'See workload imbalances',
+                'Make data-driven decisions'
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-4">
+                  <div className="w-5 h-5 rounded-[4px] bg-[#E85D22] flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(232,93,34,0.4)]">
+                    <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                  </div>
+                  <span className="text-[#F3EDE4] text-[15px] font-medium">{item}</span>
+                </li>
+              ))}
+            </ul>
 
-      {/* Feature list */}
-      <ul className="space-y-4">
-       {[
-        {
-         icon: AlertTriangle,
-         label: 'Cascade delay prediction',
-         desc: 'Detects upstream tasks that will block milestones, days in advance.',
-         color: 'text-amber-400 bg-amber-500/10',
-        },
-        {
-         icon: Clock,
-         label: 'Delivery timeline intelligence',
-         desc: 'Calculates milestone risk from historical execution velocity.',
-         color: 'text-sky-400 bg-sky-500/10',
-        },
-        {
-         icon: TrendingUp,
-         label: 'Workload optimization',
-         desc: 'Smart task reassignment suggestions to unblock the critical path.',
-         color: 'text-taskflow-text bg-taskflow-elevated',
-        },
-       ].map(({ icon: Icon, label, desc, color }) => (
-        <li key={label} className="flex items-start gap-4">
-         <div
-          className={`w-8 h-8 rounded-lg ${color} flex items-center justify-center shrink-0 mt-0.5`}
-         >
-          <Icon className="w-4 h-4" />
-         </div>
-         <div>
-          <div className="text-[13px] font-bold text-white mb-0.5">{label}</div>
-          <div className="text-[12px] text-slate-500">{desc}</div>
-         </div>
-        </li>
-       ))}
-      </ul>
-     </div>
+            <button className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_16px_rgba(232,93,34,0.3)] hover:shadow-[0_6px_24px_rgba(232,93,34,0.4)] transition-all hover:-translate-y-[1px]">
+              See AI in action
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </motion.div>
 
-     {/* Right: interactive AI radar */}
-     <div className="relative">
-      {/* Outer glow */}
-      <div className="absolute -inset-4 bg-taskflow-elevated rounded-3xl blur-2xl" />
+          {/* Right Column - Massive Floating UI */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 40, rotateX: 5, rotateY: 5 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0, rotateX: 0, rotateY: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative perspective-[1400px]"
+          >
+            <div className="relative w-full max-w-[640px] ml-auto rounded-[14px] border border-[#333333] bg-[#111111] shadow-[0_40px_80px_rgba(0,0,0,0.8),_0_0_60px_rgba(232,93,34,0.06),_inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden preserve-3d">
+              
+              {/* Card Header */}
+              <div className="p-8 border-b border-[#262626] bg-[#161616]">
+                <div className="flex items-center gap-3 mb-6">
+                  <AlertTriangle className="w-5 h-5 text-[#E85D22]" />
+                  <span className="text-[13px] font-semibold tracking-wide uppercase text-[#F3EDE4]">AI Project Insight</span>
+                </div>
+                
+                <div className="flex items-start gap-5">
+                  <div className="w-12 h-12 rounded-[8px] bg-[#EF4444]/10 border border-[#EF4444]/20 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-6 h-6 text-[#EF4444]" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-display font-medium text-[#F3EDE4] mb-2">3 tasks are at risk</h3>
+                    <p className="text-[15px] text-[#A3A3A3]">These tasks may delay your project by 2-4 days.</p>
+                  </div>
+                </div>
+              </div>
 
-      <div className="relative p-6 sm:p-8 rounded-lg bg-slate-950/80 border border-taskflow-border ">
-       {/* Header */}
-       <div className="flex items-center justify-between pb-5 border-b border-white/[0.07] mb-5">
-        <div className="flex items-center gap-3">
-         <div className="w-8 h-8 rounded-md bg-taskflow-elevated border border-taskflow-border flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-taskflow-text" />
-         </div>
-         <div>
-          <div className="text-[13px] font-bold text-white">AI Intelligence Radar</div>
-          <div className="text-[11px] text-slate-500">
-           Live · {insights.length} insights active
-          </div>
-         </div>
+              {/* Tasks List */}
+              <div className="p-8 bg-[#0A0A0A] space-y-4">
+                {[
+                  { title: 'Fix payment flow', priority: 'High Risk', color: 'text-[#EF4444]', bg: 'bg-[#EF4444]/10', borderColor: 'border-[#EF4444]/20' },
+                  { title: 'Update dependencies', priority: 'Medium Risk', color: 'text-[#F59E0B]', bg: 'bg-[#F59E0B]/10', borderColor: 'border-[#F59E0B]/20' },
+                  { title: 'Write documentation', priority: 'Medium Risk', color: 'text-[#F59E0B]', bg: 'bg-[#F59E0B]/10', borderColor: 'border-[#F59E0B]/20' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-5 bg-[#161616] border border-[#262626] rounded-[8px] hover:border-[#333333] transition-colors cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-2.5 h-2.5 rounded-full ${item.bg.replace('/10', '')}`} />
+                      <span className="text-[15px] font-medium text-[#F3EDE4]">{item.title}</span>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-[4px] text-[11px] font-bold tracking-wide uppercase ${item.color} ${item.bg} border ${item.borderColor}`}>
+                      {item.priority}
+                    </span>
+                  </div>
+                ))}
+                
+                <div className="pt-4">
+                  <button className="px-5 py-2.5 border border-[#333333] bg-[#161616] text-[#F3EDE4] rounded-[6px] text-[13px] font-medium hover:bg-[#1A1A1A] transition-colors flex items-center gap-2">
+                    View Details
+                    <ArrowRight className="w-4 h-4 text-[#A3A3A3]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+          </motion.div>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-bold text-emerald-400">
-         Monitoring
-        </span>
-       </div>
-
-       {/* Tab selectors */}
-       <div className="flex gap-2 mb-4">
-        {insights.map((ins, i) => (
-         <button
-          key={ins.id}
-          onClick={() => setActiveInsight(i)}
-          className={`flex-1 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-           activeInsight === i
-            ? 'bg-white/[0.08] text-white'
-            : 'text-slate-500 hover:text-slate-300'
-          }`}
-         >
-          {i === 0 ? 'Warning' : i === 1 ? 'Suggestion' : 'Insight'}
-         </button>
-        ))}
-       </div>
-
-       {/* Active insight card */}
-       <div
-        key={current.id}
-        className={`p-5 rounded-md ${current.bgColor} border ${current.borderColor} transition-all duration-300`}
-       >
-        <div className="flex items-start justify-between gap-3 mb-3">
-         <div
-          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold ${current.badgeColor}`}
-         >
-          <current.icon className="w-3 h-3" />
-          {current.badge}
-         </div>
-        </div>
-        <h4 className="text-[14px] font-bold text-white mb-2">{current.title}</h4>
-        <p className="text-[12px] text-slate-400 leading-relaxed mb-4">{current.detail}</p>
-        <button
-         className={`px-3.5 py-2 rounded-lg border text-[12px] font-bold ${current.actionColor} transition-colors cursor-pointer`}
-        >
-         {current.action}
-        </button>
-       </div>
-
-       {/* Pulse indicator */}
-       <div className="mt-4 flex items-center gap-2 text-[11px] text-slate-600">
-        <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-        Analyzing 47 task dependencies in real-time…
-       </div>
       </div>
-     </div>
-    </div>
-   </div>
-  </section>
- );
+    </section>
+  );
 };

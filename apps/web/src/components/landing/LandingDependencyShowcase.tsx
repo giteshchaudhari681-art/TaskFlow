@@ -1,266 +1,108 @@
 import React from 'react';
-import { GitBranch, AlertCircle, CheckCircle2, ArrowRight, Clock } from 'lucide-react';
-
-interface DagNode {
- id: string;
- title: string;
- status: 'completed' | 'in-progress' | 'at-risk' | 'planned';
- milestone?: string;
-}
-
-const nodes: DagNode[] = [
- { id: 'OPS-080', title: 'OAuth Auth Isolation', status: 'completed' },
- { id: 'OPS-089', title: 'DB Schema Migration', status: 'completed' },
- { id: 'OPS-094', title: 'API Token Sync', status: 'in-progress' },
- { id: 'OPS-102', title: 'DAG Cascade Verify', status: 'at-risk' },
- { id: 'MS-02', title: 'Production Release', status: 'planned', milestone: 'Oct 1' },
-];
-
-const statusConfig: Record<
- DagNode['status'],
- { label: string; dot: string; border: string; bg: string; text: string }
-> = {
- completed: {
-  label: 'DONE',
-  dot: 'bg-emerald-400',
-  border: 'border-emerald-500/40',
-  bg: 'bg-emerald-500/5',
-  text: 'text-emerald-400',
- },
- 'in-progress': {
-  label: 'IN PROGRESS',
-  dot: 'bg-amber-400',
-  border: 'border-amber-500/40',
-  bg: 'bg-amber-500/5',
-  text: 'text-amber-400',
- },
- 'at-risk': {
-  label: 'AT RISK',
-  dot: 'bg-rose-400 animate-pulse',
-  border: 'border-rose-500/50',
-  bg: 'bg-rose-500/[0.07]',
-  text: 'text-rose-400',
- },
- planned: {
-  label: 'MILESTONE',
-  dot: 'bg-sky-400',
-  border: 'border-sky-500/40',
-  bg: 'bg-sky-500/5',
-  text: 'text-sky-400',
- },
-};
+import { Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const LandingDependencyShowcase: React.FC = () => {
- return (
-  <section id="dependencies" className="py-24 sm:py-36 relative overflow-hidden">
-   {/* Background */}
-   <div className="pointer-events-none absolute inset-0">
-    <div className="absolute top-0 left-0 right-0 h-px bg-taskflow-surface from-transparent to-transparent" />
-    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(14,165,233,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(14,165,233,0.015)_1px,transparent_1px)] bg-[size:56px_56px]" />
-    <div className="absolute top-1/3 right-1/4 w-[500px] h-[350px] bg-sky-600/[0.05] rounded-full blur-3xl" />
-   </div>
-
-   <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative z-10">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
-     {/* Left: DAG visualization */}
-     <div className="order-2 lg:order-1">
-      {/* Visual header */}
-      <div className="flex items-center gap-2 mb-5">
-       <div className="w-8 h-8 rounded-md bg-sky-500/15 border border-sky-500/25 flex items-center justify-center">
-        <GitBranch className="w-4 h-4 text-sky-400" />
-       </div>
-       <div>
-        <div className="text-[12px] font-bold text-white">
-         Dependency Graph · Project OPS-2024
-        </div>
-        <div className="text-[10px] text-slate-500">
-         Live · 5 tasks tracked · 1 at-risk path
-        </div>
-       </div>
-      </div>
-
-      {/* DAG flow */}
-      <div className="p-6 rounded-lg bg-slate-950/80 border border-white/[0.08] shadow-2xl space-y-3">
-       {/* Node layout */}
-       <div className="flex flex-col gap-3">
-        {/* Row 1: root nodes */}
-        <div className="grid grid-cols-2 gap-3">
-         {nodes.slice(0, 2).map(node => {
-          const cfg = statusConfig[node.status];
-          return (
-           <div
-            key={node.id}
-            className={`p-3.5 rounded-md border ${cfg.border} ${cfg.bg} space-y-1.5`}
-           >
-            <div className="flex items-center justify-between">
-             <span className={`text-[9px] font-mono font-bold ${cfg.text}`}>
-              {node.id}
-             </span>
-             <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-            </div>
-            <div className="text-[11px] font-bold text-white leading-snug">
-             {node.title}
-            </div>
-            <div className={`text-[9px] font-bold ${cfg.text}`}>{cfg.label}</div>
-           </div>
-          );
-         })}
-        </div>
-
-        {/* Arrow row */}
-        <div className="flex justify-around items-center px-6">
-         {[0, 1].map(i => (
-          <div key={i} className="flex flex-col items-center gap-0.5">
-           <div className="w-px h-4 bg-white/[0.12]" />
-           <ArrowRight className="w-3.5 h-3.5 text-sky-500/50 rotate-90" />
-          </div>
-         ))}
-        </div>
-
-        {/* Row 2: dependent nodes */}
-        <div className="grid grid-cols-2 gap-3">
-         {nodes.slice(2, 4).map(node => {
-          const cfg = statusConfig[node.status];
-          return (
-           <div
-            key={node.id}
-            className={`p-3.5 rounded-md border ${cfg.border} ${cfg.bg} space-y-1.5`}
-           >
-            <div className="flex items-center justify-between">
-             <span className={`text-[9px] font-mono font-bold ${cfg.text}`}>
-              {node.id}
-             </span>
-             <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-            </div>
-            <div className="text-[11px] font-bold text-white leading-snug">
-             {node.title}
-            </div>
-            <div className={`text-[9px] font-bold ${cfg.text}`}>{cfg.label}</div>
-           </div>
-          );
-         })}
-        </div>
-
-        {/* Arrow to milestone */}
-        <div className="flex justify-center">
-         <div className="flex flex-col items-center gap-0.5">
-          <div className="w-px h-4 bg-white/[0.12]" />
-          <ArrowRight className="w-3.5 h-3.5 text-sky-500/50 rotate-90" />
-         </div>
-        </div>
-
-        {/* Milestone node */}
-        {(() => {
-         const node = nodes[4];
-         const cfg = statusConfig[node.status];
-         return (
-          <div
-           className={`p-4 rounded-md border ${cfg.border} ${cfg.bg} flex items-center justify-between`}
+  return (
+    <section className="py-32 relative overflow-hidden bg-[#0A0A0A]">
+      <div className="max-w-[1400px] mx-auto px-6 relative z-10">
+        <div className="grid lg:grid-cols-[1fr,1.2fr] gap-20 lg:gap-16 items-center">
+          
+          {/* Left Column - Typography & Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-start"
           >
-           <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-             <span className={`text-[9px] font-mono font-bold ${cfg.text}`}>
-              {node.id}
-             </span>
-             <span
-              className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}
-             >
-              {cfg.label}
-             </span>
+            <div className="flex items-center gap-2.5 mb-8">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#3B82F6]">
+                BUILT FOR TEAMS
+              </span>
             </div>
-            <div className="text-[12px] font-bold text-white">{node.title}</div>
-           </div>
-           <div className="flex items-center gap-1.5 text-[11px] text-sky-400 font-semibold">
-            <Clock className="w-3.5 h-3.5" />
-            {node.milestone}
-           </div>
-          </div>
-         );
-        })()}
-       </div>
+            
+            <h2 className="font-display text-[clamp(2.5rem,4.5vw,3.5rem)] font-medium tracking-tight leading-[1.05] mb-8 text-[#F3EDE4]">
+              See exactly which task is about to sink your sprint.
+            </h2>
+            
+            <p className="text-[1.15rem] text-[#A3A3A3] leading-relaxed mb-12 max-w-[480px] font-sans">
+              TaskFlow analyzes your team's workload, tracks progress, and surfaces capacity bottlenecks before they become problems.
+            </p>
 
-       {/* Risk alert */}
-       <div className="mt-3 p-3.5 rounded-md bg-rose-500/[0.07] border border-rose-500/25 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-         <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-         <div className="text-[11px] text-slate-300">
-          <span className="font-bold text-rose-400">OPS-102</span> is at risk — cascade
-          delay of <span className="font-bold text-white">6 days</span> if unresolved.
-         </div>
+            <div className="grid grid-cols-2 gap-6 w-full">
+              {[
+                'Workload visualization',
+                'Real-time activity feed',
+                'Team performance insights',
+                'Smart notifications'
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="w-5 h-5 rounded-[4px] bg-[#E85D22] flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(232,93,34,0.4)]">
+                    <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                  </div>
+                  <span className="text-[#F3EDE4] text-[14px] font-medium">{item}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Right Column - Team Workload UI Mockup */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative"
+          >
+            <div className="relative w-full max-w-[640px] ml-auto rounded-[14px] border border-[#333333] bg-[#111111] shadow-[0_40px_80px_rgba(0,0,0,0.8),_inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden">
+              
+              {/* Header */}
+              <div className="p-6 border-b border-[#262626] bg-[#161616] flex items-center justify-between">
+                <span className="text-[15px] font-semibold text-[#F3EDE4]">Team Workload</span>
+                <div className="px-3 py-1.5 rounded-[6px] border border-[#333333] bg-[#0A0A0A] text-[12px] text-[#A3A3A3] font-medium flex items-center gap-2 cursor-pointer">
+                  This Week
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
+
+              {/* Workload List */}
+              <div className="p-2 bg-[#0A0A0A]">
+                {[
+                  { name: 'Alex Chen', role: 'Frontend Dev', capacity: '8/10', barWidth: '80%', color: 'bg-[#22C55E]', avatar: 'Alex' },
+                  { name: 'Sarah Kim', role: 'Backend Dev', capacity: '4/10', barWidth: '40%', color: 'bg-[#E85D22]', avatar: 'Sarah' },
+                  { name: 'Mike Johnson', role: 'DevOps', capacity: '10/10', barWidth: '100%', color: 'bg-[#A855F7]', avatar: 'Mike' },
+                  { name: 'Priya Patel', role: 'Product Manager', capacity: '5/10', barWidth: '50%', color: 'bg-[#F59E0B]', avatar: 'Priya' },
+                ].map((user, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 hover:bg-[#161616] rounded-[8px] transition-colors cursor-pointer border border-transparent hover:border-[#262626]">
+                    <div className="flex items-center gap-4 w-1/2">
+                      <div className="w-10 h-10 rounded-full bg-[#262626] border border-[#333333] overflow-hidden shrink-0">
+                        <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user.avatar}&backgroundColor=transparent`} alt={user.name} className="w-full h-full" />
+                      </div>
+                      <div>
+                        <div className="text-[14px] font-semibold text-[#F3EDE4] leading-tight mb-1">{user.name}</div>
+                        <div className="text-[12px] text-[#737373]">{user.role}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 w-1/2 justify-end">
+                      <div className="w-full max-w-[140px] h-2 bg-[#262626] rounded-full overflow-hidden">
+                        <div className={`h-full ${user.color} rounded-full`} style={{ width: user.barWidth }} />
+                      </div>
+                      <span className="text-[13px] font-medium text-[#A3A3A3] w-10 text-right">{user.capacity}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+            </div>
+            
+            {/* Background glow for the panel */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#3B82F6]/[0.03] blur-[80px] rounded-full pointer-events-none -z-10" />
+
+          </motion.div>
         </div>
-        <button className="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-[10px] font-bold transition-colors shrink-0 cursor-pointer">
-         Fix Now
-        </button>
-       </div>
-
-       {/* Legend */}
-       <div className="pt-3 border-t border-white/[0.06] flex flex-wrap gap-4 text-[10px] font-medium">
-        {[
-         { color: 'bg-emerald-400', label: 'Completed' },
-         { color: 'bg-amber-400', label: 'In Progress' },
-         { color: 'bg-rose-400', label: 'At Risk' },
-         { color: 'bg-sky-400', label: 'Milestone' },
-        ].map(({ color, label }) => (
-         <div key={label} className="flex items-center gap-1.5 text-slate-500">
-          <span className={`w-2 h-2 rounded-full ${color}`} />
-          {label}
-         </div>
-        ))}
-       </div>
       </div>
-     </div>
-
-     {/* Right: text */}
-     <div className="order-1 lg:order-2">
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/25 text-[11px] font-bold text-sky-300 mb-6 tracking-wide">
-       <GitBranch className="w-3.5 h-3.5 text-sky-400" />
-       Deterministic DAG Engine
-      </div>
-      <h2 className="text-[clamp(2rem,4vw,3rem)] font-black text-white tracking-[-0.025em] leading-[1.1] mb-5">
-       See exactly which task
-       <br />
-       is about to sink your sprint.
-      </h2>
-      <p className="text-[15px] text-slate-400 leading-[1.8] mb-8">
-       TaskFlow's DAG engine maps every dependency relationship and calculates the critical
-       path in real-time. When an upstream task slips, you see the cascade impact instantly —
-       not in your post-mortem.
-      </p>
-
-      {/* Feature points */}
-      <ul className="space-y-4">
-       {[
-        {
-         icon: CheckCircle2,
-         color: 'text-emerald-400',
-         label: 'Critical path detection',
-         desc: 'Automatically identifies which sequence of tasks must finish on time.',
-        },
-        {
-         icon: AlertCircle,
-         color: 'text-amber-400',
-         label: 'Cascade delay warnings',
-         desc: 'When Task A slips, immediately see how far downstream the impact ripples.',
-        },
-        {
-         icon: GitBranch,
-         color: 'text-sky-400',
-         label: 'Visual DAG graph view',
-         desc: 'Interactive dependency graph for any project, milestone, or sprint.',
-        },
-       ].map(({ icon: Icon, color, label, desc }) => (
-        <li key={label} className="flex items-start gap-4">
-         <Icon className={`w-5 h-5 ${color} shrink-0 mt-0.5`} />
-         <div>
-          <div className="text-[13px] font-bold text-white mb-0.5">{label}</div>
-          <div className="text-[12px] text-slate-500">{desc}</div>
-         </div>
-        </li>
-       ))}
-      </ul>
-     </div>
-    </div>
-   </div>
-  </section>
- );
+    </section>
+  );
 };
