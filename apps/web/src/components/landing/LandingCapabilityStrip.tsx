@@ -49,7 +49,7 @@ export const LandingCapabilityStrip: React.FC = () => {
   return (
     <div className="relative z-20 mt-12 mb-24">
       <div className="max-w-[1200px] mx-auto px-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -65,7 +65,9 @@ export const LandingCapabilityStrip: React.FC = () => {
               transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className={`flex-1 min-w-[200px] flex items-center gap-4 px-5 py-4 rounded-[12px] bg-[#161616]/80 backdrop-blur-sm border ${border} ${bg} hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-300 cursor-default`}
             >
-              <div className={`w-10 h-10 rounded-[8px] flex items-center justify-center shrink-0 ${iconBg} border ${border}`}>
+              <div
+                className={`w-10 h-10 rounded-[8px] flex items-center justify-center shrink-0 ${iconBg} border ${border}`}
+              >
                 <Icon className={`w-5 h-5 ${color}`} />
               </div>
               <span className="text-[13px] font-semibold text-[#F3EDE4] whitespace-pre-line leading-snug">

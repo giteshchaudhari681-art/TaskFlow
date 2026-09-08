@@ -32,13 +32,7 @@ export default {
       },
       fontFamily: {
         display: ['Newsreader', 'Georgia', 'serif'],
-        sans: [
-          'Source Sans 3',
-          'Segoe UI',
-          'system-ui',
-          '-apple-system',
-          'sans-serif',
-        ],
+        sans: ['Source Sans 3', 'Segoe UI', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
       },
       boxShadow: {

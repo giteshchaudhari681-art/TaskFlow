@@ -14,7 +14,7 @@ export const LandingCTA: React.FC<LandingCTAProps> = ({ onGetStarted }) => {
       </div>
 
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true }}
@@ -31,12 +31,14 @@ export const LandingCTA: React.FC<LandingCTAProps> = ({ onGetStarted }) => {
             </div>
 
             <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-medium text-[#F3EDE4] tracking-tight leading-[1.05] max-w-3xl mx-auto mb-6">
-              Build with clarity.<br />
+              Build with clarity.
+              <br />
               <span className="text-[#A3A3A3]">Ship with confidence.</span>
             </h2>
 
             <p className="text-[1.1rem] text-[#8A8A8A] max-w-xl mx-auto mb-12 leading-relaxed font-sans">
-              Join engineering and product teams who've replaced reactive firefighting with deterministic, AI-powered project delivery.
+              Join engineering and product teams who've replaced reactive firefighting with
+              deterministic, AI-powered project delivery.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">

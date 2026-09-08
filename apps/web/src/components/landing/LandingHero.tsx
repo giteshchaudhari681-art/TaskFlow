@@ -9,11 +9,11 @@ interface LandingHeroProps {
 
 export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Motion values for parallax and 3D
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  
+
   const springConfig = { damping: 40, stiffness: 120, mass: 1.5 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
@@ -28,7 +28,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
   const floatY = useTransform(smoothY, [-0.5, 0.5], [-30, 30]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!containerRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+      return;
     const { left, top, width, height } = containerRef.current.getBoundingClientRect();
     const x = (e.clientX - left) / width - 0.5;
     const y = (e.clientY - top) / height - 0.5;
@@ -64,9 +65,9 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
       {/* Deep environmental atmosphere */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#E85D22]/10 via-[#0A0A0A]/0 to-[#0A0A0A]/0 pointer-events-none" />
       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
-      
+
       {/* Large subtle orange glow behind the product mockup */}
-      <motion.div 
+      <motion.div
         className="absolute w-[1000px] h-[1000px] rounded-full blur-[160px] bg-[#E85D22]/[0.07] pointer-events-none"
         style={{
           x: useTransform(smoothX, [-0.5, 0.5], [-50, 50]),
@@ -77,7 +78,6 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
       />
 
       <div className="max-w-[1400px] mx-auto px-6 w-full grid lg:grid-cols-[1fr,1.3fr] gap-16 lg:gap-12 items-center z-10 py-16 lg:py-0">
-        
         {/* Left Column - Typography */}
         <div className="flex flex-col items-start text-left max-w-xl z-20">
           <motion.div
@@ -110,7 +110,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
             variants={staggerVariants}
             className="text-[1.15rem] text-[#A3A3A3] leading-relaxed mb-10 max-w-[480px] font-sans"
           >
-            Plan, execute, and ship with clarity. TaskFlow brings your projects, tasks, and team together in one intelligent workspace.
+            Plan, execute, and ship with clarity. TaskFlow brings your projects, tasks, and team
+            together in one intelligent workspace.
           </motion.p>
 
           <motion.div
@@ -145,9 +146,16 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
             className="flex items-center gap-5"
           >
             <div className="flex -space-x-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-9 h-9 rounded-full border-2 border-[#0A0A0A] bg-[#262626] flex items-center justify-center overflow-hidden">
-                  <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${i}&backgroundColor=transparent`} alt="avatar" className="w-full h-full object-cover" />
+              {[1, 2, 3, 4].map(i => (
+                <div
+                  key={i}
+                  className="w-9 h-9 rounded-full border-2 border-[#0A0A0A] bg-[#262626] flex items-center justify-center overflow-hidden"
+                >
+                  <img
+                    src={`https://api.dicebear.com/7.x/notionists/svg?seed=${i}&backgroundColor=transparent`}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -174,7 +182,6 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
           >
             {/* Main Application Window */}
             <div className="absolute inset-0 rounded-[14px] border border-[#262626] bg-[#0F0F0F] shadow-[0_40px_80px_rgba(0,0,0,0.8),_0_0_80px_rgba(232,93,34,0.05),_inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden flex flex-col">
-              
               {/* App Header */}
               <div className="h-14 border-b border-[#262626] bg-[#161616] flex items-center justify-between px-5">
                 <div className="flex items-center gap-4">
@@ -196,22 +203,31 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
                     <span className="text-[11px] text-[#737373]">Search tasks...</span>
                   </div>
                   <div className="w-7 h-7 rounded-full bg-[#262626] overflow-hidden">
-                    <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Alex&backgroundColor=transparent" alt="Alex" className="w-full h-full" />
+                    <img
+                      src="https://api.dicebear.com/7.x/notionists/svg?seed=Alex&backgroundColor=transparent"
+                      alt="Alex"
+                      className="w-full h-full"
+                    />
                   </div>
                 </div>
               </div>
-              
+
               {/* App Body */}
               <div className="flex-1 flex bg-[#0A0A0A]">
                 {/* Sidebar */}
                 <div className="w-56 border-r border-[#262626] bg-[#111111] p-5 flex flex-col gap-6">
                   <div className="space-y-1">
                     <div className="flex items-center gap-3 px-3 py-2 bg-[#262626]/50 rounded-[6px] text-[#F3EDE4]">
-                      <div className="w-4 h-4 rounded-[4px] bg-[#E85D22]/20 flex items-center justify-center"><CheckCircle2 className="w-3 h-3 text-[#E85D22]"/></div>
+                      <div className="w-4 h-4 rounded-[4px] bg-[#E85D22]/20 flex items-center justify-center">
+                        <CheckCircle2 className="w-3 h-3 text-[#E85D22]" />
+                      </div>
                       <span className="text-[13px] font-medium">Home</span>
                     </div>
                     {['Projects', 'My Work', 'AI', 'Members', 'Settings'].map(item => (
-                      <div key={item} className="flex items-center gap-3 px-3 py-2 text-[#8A8A8A] hover:bg-[#1A1A1A] rounded-[6px] cursor-pointer transition-colors">
+                      <div
+                        key={item}
+                        className="flex items-center gap-3 px-3 py-2 text-[#8A8A8A] hover:bg-[#1A1A1A] rounded-[6px] cursor-pointer transition-colors"
+                      >
                         <div className="w-4 h-4 rounded-[4px] bg-[#262626] border border-[#333333]" />
                         <span className="text-[13px] font-medium">{item}</span>
                       </div>
@@ -221,13 +237,16 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
 
                 {/* Main Content */}
                 <div className="flex-1 p-8 overflow-hidden relative">
-                  
                   {/* Decorative background glow for main content */}
                   <div className="absolute top-0 right-0 w-96 h-96 bg-[#E85D22]/[0.03] blur-[100px] rounded-full pointer-events-none" />
 
                   <div className="mb-8">
-                    <h2 className="text-2xl font-display font-medium text-[#F3EDE4] mb-1">Good to see you, Alex</h2>
-                    <p className="text-sm text-[#8A8A8A]">Here's what's happening across your workspace.</p>
+                    <h2 className="text-2xl font-display font-medium text-[#F3EDE4] mb-1">
+                      Good to see you, Alex
+                    </h2>
+                    <p className="text-sm text-[#8A8A8A]">
+                      Here's what's happening across your workspace.
+                    </p>
                   </div>
 
                   {/* Metrics Row */}
@@ -235,23 +254,35 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
                     <div className="h-[104px] rounded-[10px] border border-[#262626] bg-[#161616] p-5 flex flex-col justify-between relative overflow-hidden group hover:border-[#333333] transition-colors">
                       <div className="flex justify-between items-start">
                         <div className="text-sm text-[#A3A3A3] font-medium">Active Projects</div>
-                        <span className="text-[10px] text-[#22C55E] bg-[#22C55E]/10 px-1.5 py-0.5 rounded font-semibold">+2</span>
+                        <span className="text-[10px] text-[#22C55E] bg-[#22C55E]/10 px-1.5 py-0.5 rounded font-semibold">
+                          +2
+                        </span>
                       </div>
-                      <div className="text-[2.2rem] font-display text-[#F3EDE4] leading-none">12</div>
+                      <div className="text-[2.2rem] font-display text-[#F3EDE4] leading-none">
+                        12
+                      </div>
                     </div>
                     <div className="h-[104px] rounded-[10px] border border-[#262626] bg-[#161616] p-5 flex flex-col justify-between relative overflow-hidden group hover:border-[#333333] transition-colors">
                       <div className="flex justify-between items-start">
                         <div className="text-sm text-[#A3A3A3] font-medium">Tasks in Progress</div>
-                        <span className="text-[10px] text-[#A3A3A3] bg-[#262626] px-1.5 py-0.5 rounded font-semibold">-4</span>
+                        <span className="text-[10px] text-[#A3A3A3] bg-[#262626] px-1.5 py-0.5 rounded font-semibold">
+                          -4
+                        </span>
                       </div>
-                      <div className="text-[2.2rem] font-display text-[#F3EDE4] leading-none">28</div>
+                      <div className="text-[2.2rem] font-display text-[#F3EDE4] leading-none">
+                        28
+                      </div>
                     </div>
                     <div className="h-[104px] rounded-[10px] border border-[#262626] border-t-[3px] border-t-[#EF4444] bg-[#161616] p-5 flex flex-col justify-between relative overflow-hidden">
                       <div className="flex justify-between items-start">
                         <div className="text-sm text-[#A3A3A3] font-medium">Overdue</div>
-                        <span className="text-[10px] text-[#EF4444] bg-[#EF4444]/10 px-1.5 py-0.5 rounded font-semibold">+1</span>
+                        <span className="text-[10px] text-[#EF4444] bg-[#EF4444]/10 px-1.5 py-0.5 rounded font-semibold">
+                          +1
+                        </span>
                       </div>
-                      <div className="text-[2.2rem] font-display text-[#EF4444] leading-none">3</div>
+                      <div className="text-[2.2rem] font-display text-[#EF4444] leading-none">
+                        3
+                      </div>
                     </div>
                   </div>
 
@@ -261,33 +292,61 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
                       <div className="text-sm text-[#F3EDE4] font-medium mb-6">Project Health</div>
                       <div className="flex-1 flex items-end justify-between px-2 gap-2">
                         {[40, 60, 30, 80, 50, 90, 70, 85].map((h, i) => (
-                          <div key={i} className="w-full bg-[#262626] rounded-t-[4px] relative group">
-                            <div 
-                              className="absolute bottom-0 w-full rounded-t-[4px] bg-gradient-to-t from-[#E85D22]/80 to-[#E85D22] opacity-80 group-hover:opacity-100 transition-opacity" 
+                          <div
+                            key={i}
+                            className="w-full bg-[#262626] rounded-t-[4px] relative group"
+                          >
+                            <div
+                              className="absolute bottom-0 w-full rounded-t-[4px] bg-gradient-to-t from-[#E85D22]/80 to-[#E85D22] opacity-80 group-hover:opacity-100 transition-opacity"
                               style={{ height: `${h}%` }}
                             />
                           </div>
                         ))}
                       </div>
                       <div className="flex justify-between px-2 mt-3 text-[10px] text-[#737373] uppercase font-semibold">
-                        <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+                        <span>Jan</span>
+                        <span>Feb</span>
+                        <span>Mar</span>
+                        <span>Apr</span>
+                        <span>May</span>
+                        <span>Jun</span>
                       </div>
                     </div>
                     <div className="col-span-1 h-[220px] rounded-[10px] border border-[#262626] bg-[#161616] p-5 flex flex-col items-center justify-center relative">
-                      <div className="absolute top-5 left-5 text-sm text-[#F3EDE4] font-medium">Team Activity</div>
+                      <div className="absolute top-5 left-5 text-sm text-[#F3EDE4] font-medium">
+                        Team Activity
+                      </div>
                       <div className="relative w-32 h-32 mt-4">
                         <svg className="w-full h-full transform -rotate-90">
-                          <circle cx="64" cy="64" r="56" fill="none" stroke="#262626" strokeWidth="12" />
-                          <circle cx="64" cy="64" r="56" fill="none" stroke="#22C55E" strokeWidth="12" strokeDasharray="351" strokeDashoffset="84" strokeLinecap="round" />
+                          <circle
+                            cx="64"
+                            cy="64"
+                            r="56"
+                            fill="none"
+                            stroke="#262626"
+                            strokeWidth="12"
+                          />
+                          <circle
+                            cx="64"
+                            cy="64"
+                            r="56"
+                            fill="none"
+                            stroke="#22C55E"
+                            strokeWidth="12"
+                            strokeDasharray="351"
+                            strokeDashoffset="84"
+                            strokeLinecap="round"
+                          />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <span className="text-2xl font-display text-[#F3EDE4]">76%</span>
-                          <span className="text-[10px] text-[#22C55E] font-semibold tracking-wide uppercase">On track</span>
+                          <span className="text-[10px] text-[#22C55E] font-semibold tracking-wide uppercase">
+                            On track
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
                 </div>
               </div>
             </div>
@@ -302,11 +361,17 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
                   <AlertTriangle className="w-4 h-4 text-[#E85D22]" />
                 </div>
                 <div>
-                  <span className="text-[12px] font-semibold tracking-wide uppercase text-[#F3EDE4]">AI Insight</span>
+                  <span className="text-[12px] font-semibold tracking-wide uppercase text-[#F3EDE4]">
+                    AI Insight
+                  </span>
                 </div>
               </div>
-              <p className="text-[15px] font-medium text-[#F3EDE4] leading-snug mb-1">2 tasks are at risk</p>
-              <p className="text-[13px] text-[#8A8A8A] mb-3">These tasks may delay your project by 2-4 days.</p>
+              <p className="text-[15px] font-medium text-[#F3EDE4] leading-snug mb-1">
+                2 tasks are at risk
+              </p>
+              <p className="text-[13px] text-[#8A8A8A] mb-3">
+                These tasks may delay your project by 2-4 days.
+              </p>
               <button className="text-[13px] text-[#E85D22] font-semibold hover:text-[#F0703B] transition-colors flex items-center gap-1">
                 Review now <ArrowRight className="w-3.5 h-3.5" />
               </button>
@@ -314,18 +379,30 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
 
             {/* Handwritten annotation element */}
             <motion.div
-              style={{ x: useTransform(smoothX, [-0.5, 0.5], [-20, 20]), y: useTransform(smoothY, [-0.5, 0.5], [-20, 20]), translateZ: 100 }}
+              style={{
+                x: useTransform(smoothX, [-0.5, 0.5], [-20, 20]),
+                y: useTransform(smoothY, [-0.5, 0.5], [-20, 20]),
+                translateZ: 100,
+              }}
               className="absolute -right-24 bottom-24 z-30 pointer-events-none opacity-80"
             >
-              <p className="font-['Caveat',_cursive] text-[28px] text-[#E85D22] -rotate-6">From tasks to outcomes.</p>
-              <svg className="w-16 h-16 ml-8 mt-2 opacity-60" viewBox="0 0 100 100" fill="none" stroke="#E85D22" strokeWidth="2" strokeLinecap="round">
+              <p className="font-['Caveat',_cursive] text-[28px] text-[#E85D22] -rotate-6">
+                From tasks to outcomes.
+              </p>
+              <svg
+                className="w-16 h-16 ml-8 mt-2 opacity-60"
+                viewBox="0 0 100 100"
+                fill="none"
+                stroke="#E85D22"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
                 <path d="M10,90 Q40,50 90,10" />
                 <path d="M75,10 L90,10 L85,25" />
               </svg>
             </motion.div>
           </motion.div>
         </motion.div>
-
       </div>
     </section>
   );

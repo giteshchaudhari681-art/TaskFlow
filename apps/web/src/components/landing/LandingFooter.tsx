@@ -27,17 +27,19 @@ export const LandingFooter: React.FC = () => {
     <footer className="border-t border-[#262626] bg-[#0A0A0A]">
       <div className="max-w-[1400px] mx-auto px-6 pt-16 pb-10">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
-          
           {/* Brand */}
           <div className="col-span-2 space-y-5">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-[8px] bg-[#E85D22] flex items-center justify-center shadow-[0_4px_12px_rgba(232,93,34,0.3)]">
                 <Workflow className="w-4 h-4 text-white" />
               </div>
-              <span className="font-display font-bold text-[18px] text-[#F3EDE4] tracking-tight">TaskFlow</span>
+              <span className="font-display font-bold text-[18px] text-[#F3EDE4] tracking-tight">
+                TaskFlow
+              </span>
             </div>
             <p className="text-[14px] text-[#A3A3A3] leading-relaxed max-w-[280px]">
-              AI-powered project operations platform for engineering and product teams that ship fast.
+              AI-powered project operations platform for engineering and product teams that ship
+              fast.
             </p>
             <div className="flex items-center gap-3">
               <a

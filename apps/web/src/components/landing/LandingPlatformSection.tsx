@@ -9,18 +9,18 @@ export const LandingPlatformSection: React.FC = () => {
   return (
     <section id="platform" className="py-32 relative overflow-hidden bg-[#0A0A0A]">
       <div className="pointer-events-none absolute inset-0">
-        <motion.div 
+        <motion.div
           style={{ y: yBg }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-[#E85D22]/[0.03] rounded-full blur-[140px]" 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-[#E85D22]/[0.03] rounded-full blur-[140px]"
         />
       </div>
 
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-3xl mx-auto text-center mb-24"
         >
@@ -33,22 +33,22 @@ export const LandingPlatformSection: React.FC = () => {
             Enterprise-grade infrastructure.
           </h2>
           <p className="text-[1.15rem] text-[#A3A3A3] leading-relaxed font-sans max-w-[600px] mx-auto">
-            Every layer of TaskFlow is engineered for teams that cannot afford downtime or data breaches.
+            Every layer of TaskFlow is engineered for teams that cannot afford downtime or data
+            breaches.
           </p>
         </motion.div>
 
         {/* 3D Infrastructure Visual */}
         <div className="relative h-[600px] w-full flex items-center justify-center perspective-[1600px] mb-20">
-          
           <motion.div
             initial={{ rotateX: 30, rotateY: 0 }}
             whileInView={{ rotateX: 20, rotateY: 5 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
             className="relative w-full max-w-[800px] h-full preserve-3d"
           >
             {/* Layer 1: Base/Data Layer */}
-            <motion.div 
+            <motion.div
               initial={{ y: 0, opacity: 0 }}
               whileInView={{ y: 80, opacity: 1 }}
               viewport={{ once: true }}
@@ -58,14 +58,16 @@ export const LandingPlatformSection: React.FC = () => {
             >
               <div className="w-full flex justify-between items-center opacity-40">
                 <div className="flex gap-4">
-                  {[1,2,3,4].map(i => <div key={i} className="w-20 h-4 bg-[#262626] rounded-full" />)}
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="w-20 h-4 bg-[#262626] rounded-full" />
+                  ))}
                 </div>
                 <Server className="w-8 h-8 text-[#A3A3A3]" />
               </div>
             </motion.div>
 
             {/* Layer 2: API/Compute Layer */}
-            <motion.div 
+            <motion.div
               initial={{ y: 0, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -76,7 +78,9 @@ export const LandingPlatformSection: React.FC = () => {
               <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10 pointer-events-none" />
               <div className="w-full flex justify-between items-center">
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-[8px] bg-[#262626] border border-[#333333] flex items-center justify-center"><Lock className="w-5 h-5 text-[#8A8A8A]" /></div>
+                  <div className="w-12 h-12 rounded-[8px] bg-[#262626] border border-[#333333] flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-[#8A8A8A]" />
+                  </div>
                   <div className="w-12 h-12 rounded-[8px] bg-[#262626] border border-[#333333]" />
                   <div className="w-12 h-12 rounded-[8px] bg-[#262626] border border-[#333333]" />
                 </div>
@@ -84,7 +88,7 @@ export const LandingPlatformSection: React.FC = () => {
             </motion.div>
 
             {/* Layer 3: Security/Application Layer (Top) */}
-            <motion.div 
+            <motion.div
               initial={{ y: 0, opacity: 0 }}
               whileInView={{ y: -80, opacity: 1 }}
               viewport={{ once: true }}
@@ -94,20 +98,22 @@ export const LandingPlatformSection: React.FC = () => {
             >
               {/* Glowing edge effect */}
               <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E85D22] to-transparent opacity-50" />
-              
+
               <div className="flex flex-col items-center gap-4">
                 <div className="w-16 h-16 rounded-[12px] bg-[#E85D22]/10 border border-[#E85D22]/30 flex items-center justify-center shadow-[0_0_40px_rgba(232,93,34,0.3)]">
                   <Shield className="w-8 h-8 text-[#E85D22]" />
                 </div>
                 <div className="text-center">
-                  <div className="text-[14px] font-bold tracking-widest text-[#F3EDE4] uppercase mb-1">SOC2 Type II</div>
+                  <div className="text-[14px] font-bold tracking-widest text-[#F3EDE4] uppercase mb-1">
+                    SOC2 Type II
+                  </div>
                   <div className="text-[12px] text-[#A3A3A3]">End-to-end encryption</div>
                 </div>
               </div>
             </motion.div>
 
             {/* Connecting Beams */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -122,16 +128,19 @@ export const LandingPlatformSection: React.FC = () => {
           {[
             {
               title: 'Multi-Tenant Isolation',
-              description: 'Strict logical database isolation protecting each workspace boundary. Zero data cross-contamination.',
+              description:
+                'Strict logical database isolation protecting each workspace boundary. Zero data cross-contamination.',
             },
             {
               title: 'Role-Based Access',
-              description: 'Fine-grained RBAC with Owner, Admin, Lead, Member, and Viewer permission layers.',
+              description:
+                'Fine-grained RBAC with Owner, Admin, Lead, Member, and Viewer permission layers.',
             },
             {
               title: 'Real-Time Sync',
-              description: 'Event-driven WebSocket architecture keeps every connected client synchronized instantly.',
-            }
+              description:
+                'Event-driven WebSocket architecture keeps every connected client synchronized instantly.',
+            },
           ].map(({ title, description }, i) => (
             <motion.div
               key={title}
@@ -142,11 +151,12 @@ export const LandingPlatformSection: React.FC = () => {
               className="text-center"
             >
               <h3 className="text-[18px] font-bold text-[#F3EDE4] mb-3">{title}</h3>
-              <p className="text-[15px] text-[#A3A3A3] leading-relaxed max-w-[320px] mx-auto">{description}</p>
+              <p className="text-[15px] text-[#A3A3A3] leading-relaxed max-w-[320px] mx-auto">
+                {description}
+              </p>
             </motion.div>
           ))}
         </div>
-
       </div>
     </section>
   );
