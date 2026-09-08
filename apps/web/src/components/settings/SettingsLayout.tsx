@@ -22,11 +22,16 @@ interface SettingsLayoutProps {
  initialTab?: SettingsTab;
 }
 
-export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
- onBackToDashboard,
- initialTab = 'profile',
-}) => {
- const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
+  onBackToDashboard,
+  initialTab = 'profile',
+ }) => {
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+ 
+  React.useEffect(() => {
+   setActiveTab(initialTab);
+  }, [initialTab]);
+ 
 
  const tabs = [
   { id: 'profile' as SettingsTab, label: 'Profile' },

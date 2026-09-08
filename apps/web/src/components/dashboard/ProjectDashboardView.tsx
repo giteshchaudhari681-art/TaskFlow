@@ -23,6 +23,8 @@ import {
 } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
 import { AIProjectIntelligence } from './AIProjectIntelligence';
+import { useCardTilt } from '../../hooks/useCardTilt';
+import { motion } from 'framer-motion';
 
 interface ProjectDashboardViewProps {
  organizationId: string;
@@ -164,6 +166,8 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
  const [refreshing, setRefreshing] = useState(false);
  const [error, setError] = useState<string | null>(null);
 
+ const tiltRef = useCardTilt(2);
+
  const fetchDashboard = useCallback(
   async (isManualRefresh = false) => {
    if (isManualRefresh) setRefreshing(true);
@@ -282,7 +286,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
    {/* ═══════════════════════════════════════════════════════════
      SECTION 1 — PROJECT HERO
    ═══════════════════════════════════════════════════════════ */}
-   <section className="py-10 sm:py-14">
+   <section ref={tiltRef} className="py-10 sm:py-14 transition-transform duration-200 ease-out" style={{ transformStyle: 'preserve-3d' }}>
     {/* Eyebrow */}
     <div className="flex items-center gap-3 mb-4">
      <div
@@ -439,7 +443,19 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
     </div>
 
     {/* 4 Key Metric Cards */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <motion.div 
+     className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+     initial="hidden"
+     whileInView="show"
+     viewport={{ once: true, margin: "-50px" }}
+     variants={{
+      hidden: { opacity: 0 },
+      show: {
+       opacity: 1,
+       transition: { staggerChildren: 0.05 }
+      }
+     }}
+    >
      {[
       {
        label: 'Total Tasks',
@@ -477,8 +493,12 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
          : 'bg-[#1e222d] text-slate-400 border border-[#2a2f3d]',
       },
      ].map(({ label, value, badge, border, text, badgeBg }) => (
-      <div
+      <motion.div
        key={label}
+       variants={{
+        hidden: { opacity: 0, y: 15 },
+        show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 200, damping: 20 } }
+       }}
        onClick={() => onNavigateTab('tasks')}
        className={`p-5 rounded-lg bg-[#161920] border ${border} hover:border-[#363c4c] transition-all duration-180 hover:-translate-y-0.5 cursor-pointer group shadow-elevation-1`}
       >
@@ -493,9 +513,9 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
        >
         {value}
        </div>
-      </div>
+      </motion.div>
      ))}
-    </div>
+    </motion.div>
 
     {/* Dynamic Visual Graphs Grid */}
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

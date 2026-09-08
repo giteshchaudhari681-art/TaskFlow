@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 import {
  Activity,
  Layers,
@@ -35,7 +36,6 @@ import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { LandingPage } from './components/landing/LandingPage';
-
 const FEATURES = [
  {
   icon: GitBranch,
@@ -230,8 +230,16 @@ const MainApp: React.FC = () => {
          setCurrentView(view);
          setIsMobileMenuOpen(false);
         }}
-        className={`tf-nav-item ${active ? 'tf-nav-item-active' : ''}`}
+        className={`tf-nav-item relative ${active ? 'tf-nav-item-active' : ''}`}
        >
+        {active && (
+         <motion.div
+          layoutId="nav-active-indicator"
+          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+         />
+        )}
         <Icon className="w-3.5 h-3.5 shrink-0" />
         {label}
        </button>
@@ -241,39 +249,34 @@ const MainApp: React.FC = () => {
      <div className="mx-5 my-5 tf-rule" />
 
      <div className="px-5 mb-2 tf-kicker">Admin</div>
-     <button
-      type="button"
-      id={mobile ? 'mobile-nav-settings' : undefined}
-      onClick={() => openSettings('members')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'members' ? 'tf-nav-item-active' : ''}`}
-     >
-      <Users className="w-3.5 h-3.5" />
-      Members
-     </button>
-     <button
-      type="button"
-      onClick={() => openSettings('usage')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'usage' ? 'tf-nav-item-active' : ''}`}
-     >
-      <Gauge className="w-3.5 h-3.5" />
-      Usage
-     </button>
-     <button
-      type="button"
-      onClick={() => openSettings('audit')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'audit' ? 'tf-nav-item-active' : ''}`}
-     >
-      <ShieldCheck className="w-3.5 h-3.5" />
-      Audit
-     </button>
-     <button
-      type="button"
-      onClick={() => openSettings('workspace')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'workspace' ? 'tf-nav-item-active' : ''}`}
-     >
-      <Settings className="w-3.5 h-3.5" />
-      Settings
-     </button>
+     {[
+      { id: 'members', label: 'Members', icon: Users },
+      { id: 'usage', label: 'Usage', icon: Gauge },
+      { id: 'audit', label: 'Audit', icon: ShieldCheck },
+      { id: 'workspace', label: 'Settings', icon: Settings },
+     ].map(({ id, label, icon: Icon }) => {
+      const active = currentView === 'settings' && settingsTab === id;
+      return (
+       <button
+        key={id}
+        type="button"
+        id={mobile ? `mobile-nav-settings-${id}` : undefined}
+        onClick={() => openSettings(id as any)}
+        className={`tf-nav-item relative ${active ? 'tf-nav-item-active' : ''}`}
+       >
+        {active && (
+         <motion.div
+          layoutId="nav-active-indicator"
+          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+         />
+        )}
+        <Icon className="w-3.5 h-3.5 shrink-0" />
+        {label}
+       </button>
+      );
+     })}
     </nav>
    )}
 
@@ -564,115 +567,177 @@ const DashboardView: React.FC<DashboardViewProps> = ({
  user,
  activeOrg,
  health,
- healthLoading,
  healthError,
- onRefreshHealth,
  onGoToProjects,
  onGoToMyWork,
  onOpenSettings,
- onGoToSearch,
 }) => {
  const firstName = user?.name?.split(' ')[0] ?? 'there';
+ const [projects, setProjects] = React.useState<any[]>([]);
+ const [myWork, setMyWork] = React.useState<any>(null);
+ const [loadingData, setLoadingData] = React.useState(true);
+
+ const mouseX = useMotionValue(0);
+ const mouseY = useMotionValue(0);
+
+ function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const { left, top } = currentTarget.getBoundingClientRect();
+  mouseX.set(clientX - left);
+  mouseY.set(clientY - top);
+ }
+
+ React.useEffect(() => {
+  if (!activeOrg) return;
+  const loadData = async () => {
+   setLoadingData(true);
+   try {
+    const { projectApi, workApi } = await import('./lib/api');
+    const [projRes, workRes] = await Promise.all([
+     projectApi.listProjects(activeOrg.organizationId).then(data => ({ success: true, data })).catch(() => ({ success: false, data: [] })),
+     workApi.getMyWork().then(data => ({ success: true, data })).catch(() => ({ success: false, data: null })),
+    ]);
+    if (projRes.success) setProjects(projRes.data);
+    if (workRes.success) setMyWork(workRes.data);
+   } catch (error) {
+    console.error('Failed to load dashboard data', error);
+   } finally {
+    setLoadingData(false);
+   }
+  };
+  loadData();
+ }, [activeOrg]);
+
+ const containerVariants: any = {
+  hidden: { opacity: 0 },
+  show: {
+   opacity: 1,
+   transition: { staggerChildren: 0.05 }
+  }
+ };
+
+ const itemVariants: any = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } }
+ };
 
  return (
-  <div className="px-4 sm:px-8 lg:px-10 py-10 max-w-[1100px]">
-   <p className="tf-kicker mb-3">
-    {activeOrg ? `${activeOrg.organizationName} · ${activeOrg.role}` : 'Workspace'}
-   </p>
-   <h1 className="tf-page-title mb-3">
-    Good to see you, <span className="italic text-[#c45c26]">{firstName}</span>
-   </h1>
-   <p className="text-[#9c948a] max-w-xl leading-relaxed mb-8">
-    Open a project, review assigned work, or search the workspace. TaskFlow is built for
-    delivery — not decoration.
-   </p>
+  <motion.div 
+   className="px-4 sm:px-8 lg:px-10 py-10 max-w-[1100px] relative group"
+   onMouseMove={handleMouseMove}
+   variants={containerVariants}
+   initial="hidden"
+   animate="show"
+  >
+   {/* Pointer Spotlight */}
+   <motion.div
+    className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-500 group-hover:opacity-100 hidden sm:block"
+    style={{
+     background: useMotionTemplate`
+      radial-gradient(
+       400px circle at ${mouseX}px ${mouseY}px,
+       rgba(196, 92, 38, 0.04),
+       transparent 80%
+      )
+     `,
+    }}
+   />
 
-   <div className="flex flex-wrap items-center gap-2 mb-10">
+   <motion.p variants={itemVariants} className="tf-kicker mb-3 relative z-10">
+    {activeOrg ? `${activeOrg.organizationName} · Workspace Home` : 'Workspace'}
+   </motion.p>
+   <motion.h1 variants={itemVariants} className="tf-page-title mb-8 relative z-10">
+    Good to see you, <span className="italic text-[#c45c26]">{firstName}</span>
+   </motion.h1>
+
+   {/* Primary Actions */}
+   <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2 mb-10 relative z-10">
     <button
      type="button"
-     id="hero-cta-projects"
      onClick={onGoToProjects}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[#c45c26] hover:bg-[#a84d20] text-white text-sm font-semibold"
+     className="btn-interactive inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[#c45c26] text-white text-sm font-semibold hover:bg-[#a84d20] shadow-[0_4px_12px_rgba(196,92,38,0.2)] hover:shadow-[0_6px_16px_rgba(196,92,38,0.3)] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0"
     >
      View projects
      <ArrowRight className="w-4 h-4" />
     </button>
     <button
      type="button"
-     id="hero-cta-my-work"
      onClick={onGoToMyWork}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] border border-[#3a342c] text-sm text-[#f3ede4] hover:bg-[#1c1916]"
+     className="btn-interactive inline-flex items-center gap-2 px-4 py-2 rounded-[4px] border border-[#3a342c] text-sm text-[#f3ede4] hover:bg-[#1c1916] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0"
     >
      My work
     </button>
-    <button
-     type="button"
-     id="hero-cta-search"
-     onClick={onGoToSearch}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] text-sm text-[#9c948a] hover:text-[#f3ede4]"
-    >
-     <Search className="w-4 h-4" />
-     Search
-    </button>
-   </div>
+   </motion.div>
 
-   <div className="tf-rule mb-8" />
-
-   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12">
-    <button type="button" onClick={onRefreshHealth} className="text-left">
-     <div className="tf-kicker mb-2">System</div>
-     <div className="tf-metric">
-      {healthLoading ? '—' : healthError ? 'Offline' : 'Online'}
-     </div>
-     <p className="text-xs text-[#9c948a] mt-2">
-      {health?.database?.status === 'connected'
-       ? `Database ${health.database.latencyMs ?? '—'}ms`
-       : healthError
-        ? 'Backend unreachable'
-        : 'Infrastructure'}
-     </p>
-    </button>
-    <button type="button" onClick={onGoToMyWork} className="text-left">
-     <div className="tf-kicker mb-2">Assigned</div>
-     <div className="tf-metric">My work</div>
-     <p className="text-xs text-[#9c948a] mt-2">Tasks waiting on you</p>
-    </button>
-    <button type="button" onClick={() => onOpenSettings('members')} className="text-left">
-     <div className="tf-kicker mb-2">Workspace</div>
-     <div className="tf-metric">Members</div>
-     <p className="text-xs text-[#9c948a] mt-2">People and permissions</p>
-    </button>
-   </div>
-
-   <div className="tf-rule mb-8" />
-
-   <div className="tf-kicker mb-4">Capabilities</div>
-   <div>
-    {FEATURES.map(({ icon: Icon, title, description }) => (
-     <div key={title} className="tf-row items-start sm:items-center">
-      <Icon className="w-4 h-4 text-[#c45c26] shrink-0 mt-0.5" />
-      <div className="min-w-0">
-       <div className="text-sm font-semibold text-[#f3ede4]">{title}</div>
-       <p className="text-xs text-[#9c948a] mt-0.5 leading-relaxed">{description}</p>
+   {/* Dashboard Content */}
+   <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 relative z-10">
+    
+    {/* Your Work Section */}
+    <div className="space-y-4">
+     <h2 className="text-sm font-semibold text-[#f3ede4] border-b border-[#2e2924] pb-2">Your Work</h2>
+     {loadingData ? (
+      <div className="animate-pulse flex flex-col gap-3">
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
       </div>
-     </div>
-    ))}
-   </div>
+     ) : myWork && myWork.tasks && myWork.tasks.length > 0 ? (
+      <div className="space-y-2">
+       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px] card-interactive hover:bg-[#1c1916]">
+        <span className="text-sm text-[#f3ede4]">{myWork.tasks.length} active tasks</span>
+        <button onClick={onGoToMyWork} className="text-xs text-[#c45c26] hover:underline">View all</button>
+       </div>
+      </div>
+     ) : (
+      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a] bg-[#161310]">
+       You have no assigned tasks.
+      </div>
+     )}
+    </div>
 
-   <div className="mt-12 pt-6 border-t border-[#2e2924] flex flex-wrap items-center justify-between gap-3 text-xs text-[#7d756c]">
-    <span>TaskFlow · workspace operations</span>
-    {health && (
-     <span className="flex items-center gap-1.5">
-      {healthError ? (
-       <AlertCircle className="w-3 h-3" />
-      ) : (
-       <CheckCircle2 className="w-3 h-3 text-[#3d8b6e]" />
-      )}
-      {health.service} · {Math.floor((health.uptimeSeconds ?? 0) / 60)}m uptime
-     </span>
-    )}
-   </div>
-  </div>
+    {/* Projects Section */}
+    <div className="space-y-4">
+     <h2 className="text-sm font-semibold text-[#f3ede4] border-b border-[#2e2924] pb-2">Projects</h2>
+     {loadingData ? (
+      <div className="animate-pulse flex flex-col gap-3">
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+      </div>
+     ) : projects.length > 0 ? (
+      <div className="space-y-2">
+       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px] card-interactive hover:bg-[#1c1916]">
+        <span className="text-sm text-[#f3ede4]">{projects.length} active projects</span>
+        <button onClick={onGoToProjects} className="text-xs text-[#c45c26] hover:underline">View all</button>
+       </div>
+      </div>
+     ) : (
+      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a] bg-[#161310]">
+       No active projects.
+      </div>
+     )}
+    </div>
+
+   </motion.div>
+
+   {/* System Status (Contextual) */}
+   <motion.div variants={itemVariants} className="mt-12 pt-6 border-t border-[#2e2924] flex flex-wrap items-center justify-between gap-3 text-xs text-[#7d756c] relative z-10">
+    <span>TaskFlow · Workspace operations</span>
+    <div className="flex items-center gap-4">
+     {health && (
+      <span className="flex items-center gap-1.5">
+       {healthError ? (
+        <AlertCircle className="w-3 h-3 text-[#c44a4a]" />
+       ) : (
+        <CheckCircle2 className="w-3 h-3 text-[#3d8b6e]" />
+       )}
+       {healthError ? 'Offline' : 'Online'}
+      </span>
+     )}
+     <button onClick={() => onOpenSettings('members')} className="hover:text-[#f3ede4] transition-colors">
+      Manage Members
+     </button>
+    </div>
+   </motion.div>
+  </motion.div>
  );
 };
 

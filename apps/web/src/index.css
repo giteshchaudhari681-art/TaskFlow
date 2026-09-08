@@ -117,16 +117,6 @@
  .tf-nav-item-active {
   @apply text-taskflow-text bg-[#1c1916];
  }
-
- .tf-nav-item-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 6px;
-  bottom: 6px;
-  width: 2px;
-  background: var(--tf-accent);
- }
 }
 
 @layer utilities {

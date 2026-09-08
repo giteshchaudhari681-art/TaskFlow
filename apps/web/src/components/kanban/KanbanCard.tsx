@@ -10,6 +10,7 @@ import {
 import { TaskListItem, TaskStatus, TaskPriority } from '@taskflow/shared';
 import { LabelBadge } from '../labels/LabelBadge';
 import { Badge } from '../ui/Badge';
+import { motion } from 'framer-motion';
 
 interface KanbanCardProps {
  task: TaskListItem;
@@ -76,15 +77,23 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
  };
 
  return (
-  <div
+  <motion.div
+   layoutId={task.id}
    draggable={canMove}
-   onDragStart={handleDragStart}
+   onDragStart={(e: any) => handleDragStart(e)}
    onDragEnd={handleDragEnd}
    onClick={() => onCardClick(task)}
-   className={`group relative rounded-lg border p-3.5 bg-[#181b23] border-[#242834] hover:bg-[#1c202a] transition-all duration-200 cursor-pointer shadow-elevation-1 hover:shadow-elevation-2 hover:border-[#323746] ${
+   initial={{ opacity: 0, y: 5 }}
+   animate={{ opacity: 1, y: 0, rotateZ: isDragging ? 1.5 : 0, scale: isDragging ? 1.02 : 1 }}
+   transition={{ 
+    type: 'spring', 
+    stiffness: isDragging ? 200 : 300, 
+    damping: isDragging ? 15 : 20 
+   }}
+   className={`group relative rounded-lg border p-3.5 bg-[#181b23] border-[#242834] hover:bg-[#1c202a] transition-colors cursor-pointer ${
     isDragging
-     ? 'opacity-70 scale-[0.98] border-[#e05638] ring-1 ring-[#e05638]/50 shadow-elevation-3'
-     : ''
+     ? 'opacity-90 border-[#e05638] ring-1 ring-[#e05638]/50 shadow-[0_24px_48px_rgba(12,10,8,0.62)] z-50'
+     : 'shadow-elevation-1 hover:shadow-[0_6px_16px_rgba(20,18,16,0.4)] hover:-translate-y-0.5 z-10'
    }`}
   >
    {/* Top row: Issue key & priority */}
@@ -250,6 +259,6 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
      )}
     </div>
    </div>
-  </div>
+  </motion.div>
  );
 };
