@@ -20,6 +20,8 @@ import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
 import { EmptyState } from '../ui/EmptyState';
 import { Skeleton } from '../ui/Skeleton';
+import { motion } from 'framer-motion';
+import { useCardTilt } from '../../hooks/useCardTilt';
 
 interface ProjectsListProps {
  organizationId: string;
@@ -60,6 +62,51 @@ const STATUS_CONFIG: Record<
   variant: 'danger',
   icon: Archive,
  },
+};
+
+const ProjectRow = ({ project, statusConfig, onSelectProject }: any) => {
+ const tiltRef = useCardTilt(1); // very subtle 1 degree tilt for rows
+ return (
+  <motion.button
+   ref={tiltRef as any}
+   variants={{
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } }
+   }}
+   type="button"
+   onClick={() => onSelectProject(project.id)}
+   className="w-full text-left grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-3 py-3.5 border-b border-[#2e2924] hover:bg-[#1c1916] transition-colors card-interactive"
+   style={{ transformStyle: 'preserve-3d' }}
+  >
+   <div className="md:col-span-5 min-w-0">
+    <div className="flex items-center gap-2 mb-0.5">
+     <span
+      className="w-1.5 h-1.5 rounded-full shrink-0"
+      style={{ backgroundColor: project.color || '#c45c26' }}
+     />
+     <span className="font-mono text-[10px] text-[#9c948a]">{project.key}</span>
+    </div>
+    <div className="font-display text-[1.05rem] text-[#f3ede4] truncate">
+     {project.name}
+    </div>
+   </div>
+   <div className="md:col-span-2 flex items-center">
+    <Badge variant={statusConfig.variant} size="sm">
+     {statusConfig.label}
+    </Badge>
+   </div>
+   <div className="md:col-span-2 flex items-center text-xs text-[#9c948a]">
+    {project.userRole || '—'}
+   </div>
+   <div className="md:col-span-2 flex items-center gap-1.5 text-xs text-[#9c948a]">
+    <Users className="w-3.5 h-3.5" />
+    {project.memberCount}
+   </div>
+   <div className="md:col-span-1 flex items-center justify-end text-[#7d756c] group-hover:text-[#f3ede4] transition-colors">
+    <ArrowRight className="w-4 h-4" />
+   </div>
+  </motion.button>
+ );
 };
 
 export const ProjectsList: React.FC<ProjectsListProps> = ({
@@ -220,46 +267,30 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
       <div className="col-span-2">Members</div>
       <div className="col-span-1 text-right" />
      </div>
-     {projects.map(project => {
-      const statusConfig =
-       STATUS_CONFIG[project.status] || STATUS_CONFIG[ProjectStatus.PLANNING];
-      return (
-       <button
-        key={project.id}
-        type="button"
-        onClick={() => onSelectProject(project.id)}
-        className="w-full text-left grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-3 py-3.5 border-b border-[#2e2924] hover:bg-[#1c1916] transition-colors"
-       >
-        <div className="md:col-span-5 min-w-0">
-         <div className="flex items-center gap-2 mb-0.5">
-          <span
-           className="w-1.5 h-1.5 rounded-full shrink-0"
-           style={{ backgroundColor: project.color || '#c45c26' }}
-          />
-          <span className="font-mono text-[10px] text-[#9c948a]">{project.key}</span>
-         </div>
-         <div className="font-display text-[1.05rem] text-[#f3ede4] truncate">
-          {project.name}
-         </div>
-        </div>
-        <div className="md:col-span-2 flex items-center">
-         <Badge variant={statusConfig.variant} size="sm">
-          {statusConfig.label}
-         </Badge>
-        </div>
-        <div className="md:col-span-2 flex items-center text-xs text-[#9c948a]">
-         {project.userRole || '—'}
-        </div>
-        <div className="md:col-span-2 flex items-center gap-1.5 text-xs text-[#9c948a]">
-         <Users className="w-3.5 h-3.5" />
-         {project.memberCount}
-        </div>
-        <div className="md:col-span-1 flex items-center justify-end text-[#7d756c]">
-         <ArrowRight className="w-4 h-4" />
-        </div>
-       </button>
-      );
-     })}
+     <motion.div
+      initial="hidden"
+      animate="show"
+      variants={{
+       hidden: { opacity: 0 },
+       show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.03 }
+       }
+      }}
+     >
+      {projects.map(project => {
+       const statusConfig =
+        STATUS_CONFIG[project.status] || STATUS_CONFIG[ProjectStatus.PLANNING];
+       return (
+        <ProjectRow 
+         key={project.id} 
+         project={project} 
+         statusConfig={statusConfig} 
+         onSelectProject={onSelectProject} 
+        />
+       );
+      })}
+     </motion.div>
     </div>
    )}
 

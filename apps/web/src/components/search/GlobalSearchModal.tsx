@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { SearchResultItem, SearchEntityType } from '@taskflow/shared';
 import { searchApi } from '../../lib/api';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
  createStandardCommands,
  filterCommands,
@@ -295,21 +296,31 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
  };
 
  return (
-  <div
-   className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/70"
-   onClick={onClose}
-  >
-   <div
-    className="w-full max-w-2xl rounded-lg border border-[#1e2230] shadow-elevation-4 bg-[#12141a] text-slate-100 overflow-hidden flex flex-col max-h-[80vh]"
-    onClick={e => e.stopPropagation()}
-    onKeyDown={handleKeyDown}
-   >
-    {/* Search Header Bar */}
-    <div className="relative flex items-center px-4 py-3 border-b border-[#1e2230] bg-[#161920]">
-     <Search className="w-4 h-4 text-slate-500 mr-2.5 flex-shrink-0" />
-     <input
-      ref={inputRef}
-      type="text"
+  <AnimatePresence>
+   {isOpen && (
+    <motion.div
+     initial={{ opacity: 0 }}
+     animate={{ opacity: 1 }}
+     exit={{ opacity: 0 }}
+     transition={{ duration: 0.15, ease: 'easeOut' }}
+     className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-[#0a0a0c]/80 backdrop-blur-sm"
+     onClick={onClose}
+    >
+     <motion.div
+      initial={{ opacity: 0, scale: 0.98, y: -10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98, y: -10 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      className="w-full max-w-2xl rounded-lg border border-[#1e2230] shadow-[0_24px_48px_rgba(12,10,8,0.62)] bg-[#12141a] text-slate-100 overflow-hidden flex flex-col max-h-[80vh]"
+      onClick={e => e.stopPropagation()}
+      onKeyDown={handleKeyDown}
+     >
+      {/* Search Header Bar */}
+      <div className="relative flex items-center px-4 py-3 border-b border-[#1e2230] bg-[#161920]">
+       <Search className="w-4 h-4 text-slate-500 mr-2.5 flex-shrink-0" />
+       <input
+        ref={inputRef}
+        type="text"
       value={query}
       onChange={e => setQuery(e.target.value)}
       placeholder="Search tasks, projects, milestones, or run commands..."
@@ -349,13 +360,21 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         setActiveTab(tab.id);
         setSelectedIndex(0);
        }}
-       className={`px-2.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
+       className={`relative px-2.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
         activeTab === tab.id
-         ? 'bg-[#1e2230] text-slate-200 border border-[#2a3040]'
+         ? 'text-slate-200'
          : 'text-slate-500 hover:text-slate-300 hover:bg-[#1a1d26]'
        }`}
       >
-       {tab.label}
+       {activeTab === tab.id && (
+        <motion.div
+         layoutId="search-tab-indicator"
+         className="absolute inset-0 bg-[#1e2230] border border-[#2a3040] rounded z-0"
+         initial={false}
+         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        />
+       )}
+       <span className="relative z-10">{tab.label}</span>
       </button>
      ))}
     </div>
@@ -534,8 +553,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       <span>•</span>
       <span>{platformKey}K</span>
      </div>
-    </div>
-   </div>
-  </div>
+     </div>
+    </motion.div>
+   </motion.div>
+  )}
+  </AnimatePresence>
  );
 };

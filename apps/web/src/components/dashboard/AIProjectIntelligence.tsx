@@ -1,22 +1,14 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
  RefreshCw,
- AlertTriangle,
- CheckCircle2,
- ShieldAlert,
  ArrowRight,
- Layers,
- Clock,
- UserCheck,
- AlertCircle,
  Zap,
 } from 'lucide-react';
 import {
  AIAnalysisResponse,
- RecommendationPriority,
- RecommendationCategory,
 } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
+import { motion } from 'framer-motion';
 
 interface AIProjectIntelligenceProps {
  organizationId: string;
@@ -123,8 +115,11 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
  // ── State: Loading ───────────────────────────────────────────────────────────
  if (loading) {
   return (
-   <div
-    className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8 shadow-elevation-1"
+   <motion.div
+    initial={{ opacity: 0, height: 0 }}
+    animate={{ opacity: 1, height: 'auto' }}
+    exit={{ opacity: 0, height: 0 }}
+    className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8 shadow-elevation-1 overflow-hidden"
     data-testid="ai-project-intelligence"
    >
     <div data-testid="ai-loading-skeleton">
@@ -134,14 +129,30 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
        Analyzing project context, blocker graph, and milestone velocity…
       </span>
      </div>
-     <div className="space-y-3 animate-pulse">
-      <div className="h-5 bg-[#1f232d] rounded w-3/4" />
-      <div className="h-4 bg-[#1a1d26] rounded w-full" />
-      <div className="h-4 bg-[#1a1d26] rounded w-5/6" />
-      <div className="h-4 bg-[#1a1d26] rounded w-2/3" />
+     <div className="space-y-3">
+      <motion.div 
+       className="h-5 bg-[#1f232d] rounded w-3/4"
+       animate={{ opacity: [0.5, 1, 0.5] }}
+       transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div 
+       className="h-4 bg-[#1a1d26] rounded w-full"
+       animate={{ opacity: [0.5, 1, 0.5] }}
+       transition={{ duration: 1.5, delay: 0.2, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div 
+       className="h-4 bg-[#1a1d26] rounded w-5/6"
+       animate={{ opacity: [0.5, 1, 0.5] }}
+       transition={{ duration: 1.5, delay: 0.4, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div 
+       className="h-4 bg-[#1a1d26] rounded w-2/3"
+       animate={{ opacity: [0.5, 1, 0.5] }}
+       transition={{ duration: 1.5, delay: 0.6, repeat: Infinity, ease: 'easeInOut' }}
+      />
      </div>
     </div>
-   </div>
+   </motion.div>
   );
  }
 
@@ -188,8 +199,37 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
  if (!hasRun || !data) return null;
 
  return (
-  <div className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8">
-   <div>AI Project Intelligence Analysis complete.</div>
-  </div>
+  <motion.div 
+   initial={{ opacity: 0, y: 10 }}
+   animate={{ opacity: 1, y: 0 }}
+   transition={{ duration: 0.4, ease: 'easeOut' }}
+   className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8 overflow-hidden"
+  >
+   <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.2, duration: 0.3 }}
+   >
+    <div className="text-sm text-slate-300 font-medium mb-4">Executive Summary</div>
+    <div className="text-base text-slate-100">{data.summary}</div>
+   </motion.div>
+
+   <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.5, duration: 0.3 }}
+    className="mt-6"
+   >
+    <div className="text-sm text-slate-300 font-medium mb-3">AI Recommendations</div>
+    <ul className="space-y-2">
+     {data.recommendations.map((rec, i) => (
+      <li key={i} className="text-sm text-slate-400 flex items-start gap-2">
+       <span className="text-[#e05638] mt-0.5">•</span>
+       {rec.description}
+      </li>
+     ))}
+    </ul>
+   </motion.div>
+  </motion.div>
  );
 };

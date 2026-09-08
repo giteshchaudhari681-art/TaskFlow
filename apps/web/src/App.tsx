@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 import {
  Activity,
  Layers,
@@ -35,7 +36,6 @@ import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { LandingPage } from './components/landing/LandingPage';
-
 const FEATURES = [
  {
   icon: GitBranch,
@@ -230,8 +230,16 @@ const MainApp: React.FC = () => {
          setCurrentView(view);
          setIsMobileMenuOpen(false);
         }}
-        className={`tf-nav-item ${active ? 'tf-nav-item-active' : ''}`}
+        className={`tf-nav-item relative ${active ? 'tf-nav-item-active' : ''}`}
        >
+        {active && (
+         <motion.div
+          layoutId="nav-active-indicator"
+          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+         />
+        )}
         <Icon className="w-3.5 h-3.5 shrink-0" />
         {label}
        </button>
@@ -241,39 +249,34 @@ const MainApp: React.FC = () => {
      <div className="mx-5 my-5 tf-rule" />
 
      <div className="px-5 mb-2 tf-kicker">Admin</div>
-     <button
-      type="button"
-      id={mobile ? 'mobile-nav-settings' : undefined}
-      onClick={() => openSettings('members')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'members' ? 'tf-nav-item-active' : ''}`}
-     >
-      <Users className="w-3.5 h-3.5" />
-      Members
-     </button>
-     <button
-      type="button"
-      onClick={() => openSettings('usage')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'usage' ? 'tf-nav-item-active' : ''}`}
-     >
-      <Gauge className="w-3.5 h-3.5" />
-      Usage
-     </button>
-     <button
-      type="button"
-      onClick={() => openSettings('audit')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'audit' ? 'tf-nav-item-active' : ''}`}
-     >
-      <ShieldCheck className="w-3.5 h-3.5" />
-      Audit
-     </button>
-     <button
-      type="button"
-      onClick={() => openSettings('workspace')}
-      className={`tf-nav-item ${currentView === 'settings' && settingsTab === 'workspace' ? 'tf-nav-item-active' : ''}`}
-     >
-      <Settings className="w-3.5 h-3.5" />
-      Settings
-     </button>
+     {[
+      { id: 'members', label: 'Members', icon: Users },
+      { id: 'usage', label: 'Usage', icon: Gauge },
+      { id: 'audit', label: 'Audit', icon: ShieldCheck },
+      { id: 'workspace', label: 'Settings', icon: Settings },
+     ].map(({ id, label, icon: Icon }) => {
+      const active = currentView === 'settings' && settingsTab === id;
+      return (
+       <button
+        key={id}
+        type="button"
+        id={mobile ? `mobile-nav-settings-${id}` : undefined}
+        onClick={() => openSettings(id as any)}
+        className={`tf-nav-item relative ${active ? 'tf-nav-item-active' : ''}`}
+       >
+        {active && (
+         <motion.div
+          layoutId="nav-active-indicator"
+          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+         />
+        )}
+        <Icon className="w-3.5 h-3.5 shrink-0" />
+        {label}
+       </button>
+      );
+     })}
     </nav>
    )}
 
@@ -564,28 +567,35 @@ const DashboardView: React.FC<DashboardViewProps> = ({
  user,
  activeOrg,
  health,
- healthLoading,
  healthError,
- onRefreshHealth,
  onGoToProjects,
  onGoToMyWork,
  onOpenSettings,
- onGoToSearch,
 }) => {
  const firstName = user?.name?.split(' ')[0] ?? 'there';
  const [projects, setProjects] = React.useState<any[]>([]);
  const [myWork, setMyWork] = React.useState<any>(null);
  const [loadingData, setLoadingData] = React.useState(true);
 
+ const mouseX = useMotionValue(0);
+ const mouseY = useMotionValue(0);
+
+ function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const { left, top } = currentTarget.getBoundingClientRect();
+  mouseX.set(clientX - left);
+  mouseY.set(clientY - top);
+ }
+
  React.useEffect(() => {
   if (!activeOrg) return;
   const loadData = async () => {
    setLoadingData(true);
    try {
-    const { api } = await import('./lib/api');
+    const { projectApi, workApi } = await import('./lib/api');
     const [projRes, workRes] = await Promise.all([
-     api.projects.list(activeOrg.organizationId),
-     api.myWork.get(activeOrg.organizationId),
+     projectApi.listProjects(activeOrg.organizationId).then(data => ({ success: true, data })).catch(() => ({ success: false, data: [] })),
+     workApi.getMyWork().then(data => ({ success: true, data })).catch(() => ({ success: false, data: null })),
     ]);
     if (projRes.success) setProjects(projRes.data);
     if (workRes.success) setMyWork(workRes.data);
@@ -598,21 +608,54 @@ const DashboardView: React.FC<DashboardViewProps> = ({
   loadData();
  }, [activeOrg]);
 
+ const containerVariants: any = {
+  hidden: { opacity: 0 },
+  show: {
+   opacity: 1,
+   transition: { staggerChildren: 0.05 }
+  }
+ };
+
+ const itemVariants: any = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } }
+ };
+
  return (
-  <div className="px-4 sm:px-8 lg:px-10 py-10 max-w-[1100px]">
-   <p className="tf-kicker mb-3">
+  <motion.div 
+   className="px-4 sm:px-8 lg:px-10 py-10 max-w-[1100px] relative group"
+   onMouseMove={handleMouseMove}
+   variants={containerVariants}
+   initial="hidden"
+   animate="show"
+  >
+   {/* Pointer Spotlight */}
+   <motion.div
+    className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-500 group-hover:opacity-100 hidden sm:block"
+    style={{
+     background: useMotionTemplate`
+      radial-gradient(
+       400px circle at ${mouseX}px ${mouseY}px,
+       rgba(196, 92, 38, 0.04),
+       transparent 80%
+      )
+     `,
+    }}
+   />
+
+   <motion.p variants={itemVariants} className="tf-kicker mb-3 relative z-10">
     {activeOrg ? `${activeOrg.organizationName} · Workspace Home` : 'Workspace'}
-   </p>
-   <h1 className="tf-page-title mb-8">
+   </motion.p>
+   <motion.h1 variants={itemVariants} className="tf-page-title mb-8 relative z-10">
     Good to see you, <span className="italic text-[#c45c26]">{firstName}</span>
-   </h1>
+   </motion.h1>
 
    {/* Primary Actions */}
-   <div className="flex flex-wrap items-center gap-2 mb-10">
+   <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2 mb-10 relative z-10">
     <button
      type="button"
      onClick={onGoToProjects}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[#c45c26] hover:bg-[#a84d20] text-white text-sm font-semibold transition-colors"
+     className="btn-interactive inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[#c45c26] text-white text-sm font-semibold hover:bg-[#a84d20] shadow-[0_4px_12px_rgba(196,92,38,0.2)] hover:shadow-[0_6px_16px_rgba(196,92,38,0.3)] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0"
     >
      View projects
      <ArrowRight className="w-4 h-4" />
@@ -620,14 +663,14 @@ const DashboardView: React.FC<DashboardViewProps> = ({
     <button
      type="button"
      onClick={onGoToMyWork}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] border border-[#3a342c] text-sm text-[#f3ede4] hover:bg-[#1c1916] transition-colors"
+     className="btn-interactive inline-flex items-center gap-2 px-4 py-2 rounded-[4px] border border-[#3a342c] text-sm text-[#f3ede4] hover:bg-[#1c1916] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0"
     >
      My work
     </button>
-   </div>
+   </motion.div>
 
    {/* Dashboard Content */}
-   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+   <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 relative z-10">
     
     {/* Your Work Section */}
     <div className="space-y-4">
@@ -639,13 +682,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
      ) : myWork && myWork.tasks && myWork.tasks.length > 0 ? (
       <div className="space-y-2">
-       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px]">
+       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px] card-interactive hover:bg-[#1c1916]">
         <span className="text-sm text-[#f3ede4]">{myWork.tasks.length} active tasks</span>
         <button onClick={onGoToMyWork} className="text-xs text-[#c45c26] hover:underline">View all</button>
        </div>
       </div>
      ) : (
-      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a]">
+      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a] bg-[#161310]">
        You have no assigned tasks.
       </div>
      )}
@@ -661,22 +704,22 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
      ) : projects.length > 0 ? (
       <div className="space-y-2">
-       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px]">
+       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px] card-interactive hover:bg-[#1c1916]">
         <span className="text-sm text-[#f3ede4]">{projects.length} active projects</span>
         <button onClick={onGoToProjects} className="text-xs text-[#c45c26] hover:underline">View all</button>
        </div>
       </div>
      ) : (
-      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a]">
+      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a] bg-[#161310]">
        No active projects.
       </div>
      )}
     </div>
 
-   </div>
+   </motion.div>
 
    {/* System Status (Contextual) */}
-   <div className="mt-12 pt-6 border-t border-[#2e2924] flex flex-wrap items-center justify-between gap-3 text-xs text-[#7d756c]">
+   <motion.div variants={itemVariants} className="mt-12 pt-6 border-t border-[#2e2924] flex flex-wrap items-center justify-between gap-3 text-xs text-[#7d756c] relative z-10">
     <span>TaskFlow · Workspace operations</span>
     <div className="flex items-center gap-4">
      {health && (
@@ -693,8 +736,8 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       Manage Members
      </button>
     </div>
-   </div>
-  </div>
+   </motion.div>
+  </motion.div>
  );
 };
 
