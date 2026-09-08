@@ -23,6 +23,7 @@ import {
 } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
 import { AIProjectIntelligence } from './AIProjectIntelligence';
+import { useCardTilt } from '../../hooks/useCardTilt';
 
 interface ProjectDashboardViewProps {
  organizationId: string;
@@ -164,6 +165,8 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
  const [refreshing, setRefreshing] = useState(false);
  const [error, setError] = useState<string | null>(null);
 
+ const tiltRef = useCardTilt(2);
+
  const fetchDashboard = useCallback(
   async (isManualRefresh = false) => {
    if (isManualRefresh) setRefreshing(true);
@@ -282,7 +285,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
    {/* ═══════════════════════════════════════════════════════════
      SECTION 1 — PROJECT HERO
    ═══════════════════════════════════════════════════════════ */}
-   <section className="py-10 sm:py-14">
+   <section ref={tiltRef} className="py-10 sm:py-14 transition-transform duration-200 ease-out" style={{ transformStyle: 'preserve-3d' }}>
     {/* Eyebrow */}
     <div className="flex items-center gap-3 mb-4">
      <div

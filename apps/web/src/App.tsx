@@ -573,104 +573,126 @@ const DashboardView: React.FC<DashboardViewProps> = ({
  onGoToSearch,
 }) => {
  const firstName = user?.name?.split(' ')[0] ?? 'there';
+ const [projects, setProjects] = React.useState<any[]>([]);
+ const [myWork, setMyWork] = React.useState<any>(null);
+ const [loadingData, setLoadingData] = React.useState(true);
+
+ React.useEffect(() => {
+  if (!activeOrg) return;
+  const loadData = async () => {
+   setLoadingData(true);
+   try {
+    const { api } = await import('./lib/api');
+    const [projRes, workRes] = await Promise.all([
+     api.projects.list(activeOrg.organizationId),
+     api.myWork.get(activeOrg.organizationId),
+    ]);
+    if (projRes.success) setProjects(projRes.data);
+    if (workRes.success) setMyWork(workRes.data);
+   } catch (error) {
+    console.error('Failed to load dashboard data', error);
+   } finally {
+    setLoadingData(false);
+   }
+  };
+  loadData();
+ }, [activeOrg]);
 
  return (
   <div className="px-4 sm:px-8 lg:px-10 py-10 max-w-[1100px]">
    <p className="tf-kicker mb-3">
-    {activeOrg ? `${activeOrg.organizationName} · ${activeOrg.role}` : 'Workspace'}
+    {activeOrg ? `${activeOrg.organizationName} · Workspace Home` : 'Workspace'}
    </p>
-   <h1 className="tf-page-title mb-3">
+   <h1 className="tf-page-title mb-8">
     Good to see you, <span className="italic text-[#c45c26]">{firstName}</span>
    </h1>
-   <p className="text-[#9c948a] max-w-xl leading-relaxed mb-8">
-    Open a project, review assigned work, or search the workspace. TaskFlow is built for
-    delivery — not decoration.
-   </p>
 
+   {/* Primary Actions */}
    <div className="flex flex-wrap items-center gap-2 mb-10">
     <button
      type="button"
-     id="hero-cta-projects"
      onClick={onGoToProjects}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[#c45c26] hover:bg-[#a84d20] text-white text-sm font-semibold"
+     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[#c45c26] hover:bg-[#a84d20] text-white text-sm font-semibold transition-colors"
     >
      View projects
      <ArrowRight className="w-4 h-4" />
     </button>
     <button
      type="button"
-     id="hero-cta-my-work"
      onClick={onGoToMyWork}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] border border-[#3a342c] text-sm text-[#f3ede4] hover:bg-[#1c1916]"
+     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] border border-[#3a342c] text-sm text-[#f3ede4] hover:bg-[#1c1916] transition-colors"
     >
      My work
     </button>
-    <button
-     type="button"
-     id="hero-cta-search"
-     onClick={onGoToSearch}
-     className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] text-sm text-[#9c948a] hover:text-[#f3ede4]"
-    >
-     <Search className="w-4 h-4" />
-     Search
-    </button>
    </div>
 
-   <div className="tf-rule mb-8" />
-
-   <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12">
-    <button type="button" onClick={onRefreshHealth} className="text-left">
-     <div className="tf-kicker mb-2">System</div>
-     <div className="tf-metric">
-      {healthLoading ? '—' : healthError ? 'Offline' : 'Online'}
-     </div>
-     <p className="text-xs text-[#9c948a] mt-2">
-      {health?.database?.status === 'connected'
-       ? `Database ${health.database.latencyMs ?? '—'}ms`
-       : healthError
-        ? 'Backend unreachable'
-        : 'Infrastructure'}
-     </p>
-    </button>
-    <button type="button" onClick={onGoToMyWork} className="text-left">
-     <div className="tf-kicker mb-2">Assigned</div>
-     <div className="tf-metric">My work</div>
-     <p className="text-xs text-[#9c948a] mt-2">Tasks waiting on you</p>
-    </button>
-    <button type="button" onClick={() => onOpenSettings('members')} className="text-left">
-     <div className="tf-kicker mb-2">Workspace</div>
-     <div className="tf-metric">Members</div>
-     <p className="text-xs text-[#9c948a] mt-2">People and permissions</p>
-    </button>
-   </div>
-
-   <div className="tf-rule mb-8" />
-
-   <div className="tf-kicker mb-4">Capabilities</div>
-   <div>
-    {FEATURES.map(({ icon: Icon, title, description }) => (
-     <div key={title} className="tf-row items-start sm:items-center">
-      <Icon className="w-4 h-4 text-[#c45c26] shrink-0 mt-0.5" />
-      <div className="min-w-0">
-       <div className="text-sm font-semibold text-[#f3ede4]">{title}</div>
-       <p className="text-xs text-[#9c948a] mt-0.5 leading-relaxed">{description}</p>
+   {/* Dashboard Content */}
+   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+    
+    {/* Your Work Section */}
+    <div className="space-y-4">
+     <h2 className="text-sm font-semibold text-[#f3ede4] border-b border-[#2e2924] pb-2">Your Work</h2>
+     {loadingData ? (
+      <div className="animate-pulse flex flex-col gap-3">
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
       </div>
-     </div>
-    ))}
+     ) : myWork && myWork.tasks && myWork.tasks.length > 0 ? (
+      <div className="space-y-2">
+       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px]">
+        <span className="text-sm text-[#f3ede4]">{myWork.tasks.length} active tasks</span>
+        <button onClick={onGoToMyWork} className="text-xs text-[#c45c26] hover:underline">View all</button>
+       </div>
+      </div>
+     ) : (
+      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a]">
+       You have no assigned tasks.
+      </div>
+     )}
+    </div>
+
+    {/* Projects Section */}
+    <div className="space-y-4">
+     <h2 className="text-sm font-semibold text-[#f3ede4] border-b border-[#2e2924] pb-2">Projects</h2>
+     {loadingData ? (
+      <div className="animate-pulse flex flex-col gap-3">
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+       <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+      </div>
+     ) : projects.length > 0 ? (
+      <div className="space-y-2">
+       <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px]">
+        <span className="text-sm text-[#f3ede4]">{projects.length} active projects</span>
+        <button onClick={onGoToProjects} className="text-xs text-[#c45c26] hover:underline">View all</button>
+       </div>
+      </div>
+     ) : (
+      <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a]">
+       No active projects.
+      </div>
+     )}
+    </div>
+
    </div>
 
+   {/* System Status (Contextual) */}
    <div className="mt-12 pt-6 border-t border-[#2e2924] flex flex-wrap items-center justify-between gap-3 text-xs text-[#7d756c]">
-    <span>TaskFlow · workspace operations</span>
-    {health && (
-     <span className="flex items-center gap-1.5">
-      {healthError ? (
-       <AlertCircle className="w-3 h-3" />
-      ) : (
-       <CheckCircle2 className="w-3 h-3 text-[#3d8b6e]" />
-      )}
-      {health.service} · {Math.floor((health.uptimeSeconds ?? 0) / 60)}m uptime
-     </span>
-    )}
+    <span>TaskFlow · Workspace operations</span>
+    <div className="flex items-center gap-4">
+     {health && (
+      <span className="flex items-center gap-1.5">
+       {healthError ? (
+        <AlertCircle className="w-3 h-3 text-[#c44a4a]" />
+       ) : (
+        <CheckCircle2 className="w-3 h-3 text-[#3d8b6e]" />
+       )}
+       {healthError ? 'Offline' : 'Online'}
+      </span>
+     )}
+     <button onClick={() => onOpenSettings('members')} className="hover:text-[#f3ede4] transition-colors">
+      Manage Members
+     </button>
+    </div>
    </div>
   </div>
  );
