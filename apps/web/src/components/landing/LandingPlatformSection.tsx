@@ -49,12 +49,11 @@ export const LandingPlatformSection: React.FC = () => {
           >
             {/* Layer 1: Base/Data Layer */}
             <motion.div
-              initial={{ y: 0, opacity: 0 }}
-              whileInView={{ y: 80, opacity: 1 }}
+              initial={{ y: 0, opacity: 0, z: -100 }}
+              whileInView={{ y: 80, opacity: 1, z: -100 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] rounded-[24px] border-2 border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-md shadow-[0_40px_100px_rgba(0,0,0,0.9),_inset_0_2px_0_rgba(255,255,255,0.02)] flex items-end p-8 preserve-3d transform"
-              style={{ translateZ: -100 }}
+              className="absolute inset-0 m-auto w-full h-[300px] rounded-[24px] border-2 border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-md shadow-[0_40px_100px_rgba(0,0,0,0.9),_inset_0_2px_0_rgba(255,255,255,0.02)] flex items-end p-8 preserve-3d"
             >
               <div className="w-full flex justify-between items-center opacity-40">
                 <div className="flex gap-4">
@@ -68,12 +67,11 @@ export const LandingPlatformSection: React.FC = () => {
 
             {/* Layer 2: API/Compute Layer */}
             <motion.div
-              initial={{ y: 0, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
+              initial={{ y: 0, opacity: 0, z: 0 }}
+              whileInView={{ y: 0, opacity: 1, z: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.4 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[260px] rounded-[24px] border border-[#262626] bg-[#111111]/80 backdrop-blur-xl shadow-[0_40px_100px_rgba(0,0,0,0.8),_inset_0_1px_0_rgba(255,255,255,0.05)] flex items-end p-8 preserve-3d"
-              style={{ translateZ: 0 }}
+              className="absolute inset-0 m-auto w-[90%] h-[260px] rounded-[24px] border border-[#262626] bg-[#111111]/80 backdrop-blur-xl shadow-[0_40px_100px_rgba(0,0,0,0.8),_inset_0_1px_0_rgba(255,255,255,0.05)] flex items-end p-8 preserve-3d"
             >
               <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10 pointer-events-none" />
               <div className="w-full flex justify-between items-center">
@@ -89,12 +87,11 @@ export const LandingPlatformSection: React.FC = () => {
 
             {/* Layer 3: Security/Application Layer (Top) */}
             <motion.div
-              initial={{ y: 0, opacity: 0 }}
-              whileInView={{ y: -80, opacity: 1 }}
+              initial={{ y: 0, opacity: 0, z: 100 }}
+              whileInView={{ y: -80, opacity: 1, z: 100 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[220px] rounded-[24px] border border-[#E85D22]/30 bg-[#161616]/90 backdrop-blur-2xl shadow-[0_40px_120px_rgba(232,93,34,0.2),_inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center preserve-3d overflow-hidden"
-              style={{ translateZ: 100 }}
+              className="absolute inset-0 m-auto w-[80%] h-[220px] rounded-[24px] border border-[#E85D22]/30 bg-[#161616]/90 backdrop-blur-2xl shadow-[0_40px_120px_rgba(232,93,34,0.2),_inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center preserve-3d overflow-hidden"
             >
               {/* Glowing edge effect */}
               <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E85D22] to-transparent opacity-60" />
@@ -116,11 +113,11 @@ export const LandingPlatformSection: React.FC = () => {
 
             {/* Connecting Beams */}
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, z: -50 }}
+              whileInView={{ opacity: 1, z: -50 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 1 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[200px] border-l border-r border-[#E85D22]/20 border-dashed transform -translate-z-50"
+              className="absolute inset-0 m-auto w-[60%] h-[200px] border-l border-r border-[#E85D22]/20 border-dashed"
             />
           </motion.div>
         </div>
