@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Shield, Lock, Server } from 'lucide-react';
+import { Shield, Lock } from 'lucide-react';
 
 export const LandingPlatformSection: React.FC = () => {
   const { scrollYProgress } = useScroll();
@@ -38,87 +38,119 @@ export const LandingPlatformSection: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* 3D Infrastructure Visual */}
-        <div className="relative h-[600px] w-full flex items-center justify-center perspective-[1600px] mb-20">
+        {/* Premium 3D Security Core Visual */}
+        <div className="relative h-[600px] w-full flex items-center justify-center perspective-[2000px] mb-20 group">
           <motion.div
-            initial={{ rotateX: 30, rotateY: 0 }}
-            whileInView={{ rotateX: 25, rotateY: 8 }}
+            initial={{ rotateX: 25, rotateY: 0 }}
+            whileInView={{ rotateX: 15, rotateY: 5 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 1.5, ease: 'easeOut' }}
             className="relative w-full max-w-[800px] h-full preserve-3d"
           >
-            {/* Layer 1: Base/Data Layer */}
+            {/* Base Core Platform */}
             <motion.div
-              initial={{ y: 0, opacity: 0, z: -100 }}
-              whileInView={{ y: 80, opacity: 1, z: -100 }}
+              initial={{ y: 0, opacity: 0, z: -150 }}
+              whileInView={{ y: 60, opacity: 1, z: -150 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="absolute inset-0 m-auto w-full h-[300px] rounded-[24px] border-2 border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-md shadow-[0_40px_100px_rgba(0,0,0,0.9),_inset_0_2px_0_rgba(255,255,255,0.02)] flex items-end p-8 preserve-3d"
+              className="absolute inset-0 m-auto w-[600px] h-[300px] rounded-[32px] border border-[#1A1A1A] bg-gradient-to-b from-[#0A0A0A] to-[#050505] shadow-[0_60px_120px_rgba(0,0,0,0.9),_inset_0_2px_0_rgba(255,255,255,0.03)] flex items-center justify-center preserve-3d overflow-hidden"
             >
-              <div className="w-full flex justify-between items-center opacity-40">
-                <div className="flex gap-4">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-20 h-4 bg-[#262626] rounded-full" />
-                  ))}
-                </div>
-                <Server className="w-8 h-8 text-[#A3A3A3]" />
-              </div>
+              <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-[0.03] pointer-events-none" />
+              {/* Inner metallic structure */}
+              <div className="w-[400px] h-[200px] rounded-[24px] border border-[#262626] bg-[#0F0F0F] shadow-[inset_0_0_40px_rgba(0,0,0,0.8)]" />
             </motion.div>
 
-            {/* Layer 2: API/Compute Layer */}
-            <motion.div
-              initial={{ y: 0, opacity: 0, z: 0 }}
-              whileInView={{ y: 0, opacity: 1, z: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, delay: 0.4 }}
-              className="absolute inset-0 m-auto w-[90%] h-[260px] rounded-[24px] border border-[#262626] bg-[#111111]/80 backdrop-blur-xl shadow-[0_40px_100px_rgba(0,0,0,0.8),_inset_0_1px_0_rgba(255,255,255,0.05)] flex items-end p-8 preserve-3d"
-            >
-              <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10 pointer-events-none" />
-              <div className="w-full flex justify-between items-center">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-[8px] bg-[#262626] border border-[#333333] flex items-center justify-center">
-                    <Lock className="w-5 h-5 text-[#8A8A8A]" />
-                  </div>
-                  <div className="w-12 h-12 rounded-[8px] bg-[#262626] border border-[#333333]" />
-                  <div className="w-12 h-12 rounded-[8px] bg-[#262626] border border-[#333333]" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Layer 3: Security/Application Layer (Top) */}
-            <motion.div
-              initial={{ y: 0, opacity: 0, z: 100 }}
-              whileInView={{ y: -80, opacity: 1, z: 100 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, delay: 0.6 }}
-              className="absolute inset-0 m-auto w-[80%] h-[220px] rounded-[24px] border border-[#E85D22]/30 bg-[#161616]/90 backdrop-blur-2xl shadow-[0_40px_120px_rgba(232,93,34,0.2),_inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center preserve-3d overflow-hidden"
-            >
-              {/* Glowing edge effect */}
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E85D22] to-transparent opacity-60" />
-
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-[12px] bg-[#E85D22]/10 border border-[#E85D22]/30 flex items-center justify-center shadow-[0_0_40px_rgba(232,93,34,0.3)]">
-                  <Shield className="w-8 h-8 text-[#E85D22]" />
-                </div>
-                <div className="text-center">
-                  <div className="text-[14px] font-bold tracking-widest text-[#F3EDE4] uppercase mb-2">
-                    SOC2 Type II
-                  </div>
-                  <div className="text-[13px] text-[#A3A3A3] font-medium">
-                    End-to-end encryption
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Connecting Beams */}
+            {/* Glowing Orange Light Source */}
             <motion.div
               initial={{ opacity: 0, z: -50 }}
               whileInView={{ opacity: 1, z: -50 }}
               viewport={{ once: true }}
-              transition={{ duration: 1, delay: 1 }}
-              className="absolute inset-0 m-auto w-[60%] h-[200px] border-l border-r border-[#E85D22]/20 border-dashed"
+              transition={{ duration: 1, delay: 0.5 }}
+              className="absolute inset-0 m-auto w-[250px] h-[250px] bg-[#E85D22] rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"
             />
+
+            {/* Protection Rings */}
+            {[0, 1].map(ring => (
+              <motion.div
+                key={ring}
+                initial={{ opacity: 0, z: -50 + ring * 50 }}
+                whileInView={{ opacity: 1, z: -50 + ring * 50 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.4 + ring * 0.2 }}
+                className={`absolute inset-0 m-auto w-full max-w-[${400 - ring * 50}px] h-[${400 - ring * 50}px] rounded-full border ${ring === 0 ? 'border-[#333333]' : 'border-[#E85D22]/30 border-dashed'} bg-transparent preserve-3d`}
+                style={{ transform: `rotateX(60deg) translateZ(${ring * 20}px)` }}
+              />
+            ))}
+
+            {/* The Central Security Core Object */}
+            <motion.div
+              initial={{ y: 0, opacity: 0, z: 0 }}
+              whileInView={{ y: -40, opacity: 1, z: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.6 }}
+              className="absolute inset-0 m-auto w-[180px] h-[180px] rounded-[32px] border border-[#E85D22]/40 bg-[#161616]/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(232,93,34,0.15),_inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center preserve-3d transition-transform duration-700 group-hover:-translate-y-[50px]"
+            >
+              <div className="absolute inset-0 rounded-[32px] bg-gradient-to-b from-[#E85D22]/10 to-transparent opacity-50" />
+              <div className="relative w-20 h-20 rounded-[20px] bg-[#E85D22]/15 border border-[#E85D22]/30 flex items-center justify-center shadow-[0_0_30px_rgba(232,93,34,0.2)]">
+                <Shield className="w-10 h-10 text-[#E85D22]" />
+              </div>
+            </motion.div>
+
+            {/* Floating UI Panel 1: SOC2 */}
+            <motion.div
+              initial={{ x: -100, y: 50, opacity: 0, z: 100 }}
+              whileInView={{ x: -160, y: 0, opacity: 1, z: 100 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="absolute left-1/2 top-1/2 w-52 p-4 rounded-[16px] border border-[#22C55E]/30 bg-[#111111]/90 backdrop-blur-xl shadow-[0_30px_60px_rgba(0,0,0,0.8),_0_0_30px_rgba(34,197,94,0.05)] preserve-3d transition-transform duration-700 group-hover:translate-x-[-180px] group-hover:translate-z-[120px]"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#22C55E]/15 border border-[#22C55E]/30 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-[#22C55E]" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold tracking-[0.1em] text-[#22C55E] uppercase mb-1">
+                    Security Layer
+                  </div>
+                  <div className="text-[14px] font-semibold text-[#F3EDE4]">SOC 2 Type II</div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Floating UI Panel 2: Encryption */}
+            <motion.div
+              initial={{ x: 50, y: -50, opacity: 0, z: 80 }}
+              whileInView={{ x: 80, y: -80, opacity: 1, z: 80 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.9 }}
+              className="absolute left-1/2 top-1/2 w-56 p-4 rounded-[16px] border border-[#E85D22]/30 bg-[#111111]/90 backdrop-blur-xl shadow-[0_30px_60px_rgba(0,0,0,0.8),_0_0_30px_rgba(232,93,34,0.05)] preserve-3d transition-transform duration-700 group-hover:translate-x-[100px] group-hover:translate-z-[100px]"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#E85D22]/15 border border-[#E85D22]/30 flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-[#E85D22]" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold tracking-[0.1em] text-[#E85D22] uppercase mb-1">
+                    Data Protection
+                  </div>
+                  <div className="text-[14px] font-semibold text-[#F3EDE4]">E2E Encrypted</div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Floating UI Panel 3: Uptime */}
+            <motion.div
+              initial={{ x: 80, y: 100, opacity: 0, z: 120 }}
+              whileInView={{ x: 120, y: 60, opacity: 1, z: 120 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 1 }}
+              className="absolute left-1/2 top-1/2 w-44 p-3.5 rounded-[12px] border border-[#3B82F6]/30 bg-[#111111]/90 backdrop-blur-xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] preserve-3d transition-transform duration-700 group-hover:translate-x-[140px] group-hover:translate-z-[140px]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#3B82F6] animate-pulse" />
+                <div className="text-[13px] font-semibold text-[#F3EDE4]">99.99% Uptime</div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
 
