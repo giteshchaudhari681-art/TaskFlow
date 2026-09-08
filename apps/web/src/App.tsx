@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 import {
-  Activity,
   Layers,
-  GitBranch,
   Workflow,
   LogOut,
   Building2,
@@ -15,7 +13,6 @@ import {
   X,
   ArrowRight,
   Users,
-  Shield,
   RefreshCw,
   AlertCircle,
   CheckCircle2,
@@ -36,30 +33,6 @@ import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { LandingPage } from './components/landing/LandingPage';
-const FEATURES = [
-  {
-    icon: GitBranch,
-    title: 'Dependency graphs',
-    description:
-      'Deterministic DAG blocking with critical-path detection and cascade delay warnings.',
-  },
-  {
-    icon: Activity,
-    title: 'Delivery intelligence',
-    description: 'Risk, workload, and milestone analysis as decision support — not decoration.',
-  },
-  {
-    icon: CheckSquare,
-    title: 'Live operations',
-    description: 'Collaborative task updates and notification telemetry as work happens.',
-  },
-  {
-    icon: Shield,
-    title: 'Workspace security',
-    description: 'Multi-tenant isolation, role-based access, and auditable administration.',
-  },
-];
-
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
     useAuth();
