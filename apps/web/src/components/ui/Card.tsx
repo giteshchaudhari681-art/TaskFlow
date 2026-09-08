@@ -3,45 +3,43 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated' | 'glass' | 'interactive' | 'outline' | 'spotlight';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
+ variant?: 'default' | 'elevated' | 'glass' | 'interactive' | 'outline' | 'spotlight';
+ padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', padding = 'md', children, ...props }, ref) => {
-    const baseStyles = 'rounded-xl transition-all duration-200 ease-out relative overflow-hidden';
+ ({ className, variant = 'default', padding = 'md', children, ...props }, ref) => {
+  const baseStyles = 'rounded-[6px] relative';
 
-    const paddingStyles = {
-      none: '',
-      sm: 'p-3.5 sm:p-4',
-      md: 'p-5 sm:p-6',
-      lg: 'p-6 sm:p-8',
-    };
+  const paddingStyles = {
+   none: '',
+   sm: 'p-3.5 sm:p-4',
+   md: 'p-5',
+   lg: 'p-6 sm:p-8',
+  };
 
-    const variantStyles = {
-      default: 'bg-[#111827] border border-white/[0.08] shadow-sm',
-      elevated: 'bg-[#0f172a] border border-white/[0.08] shadow-elevation-2',
-      glass:
-        'bg-slate-900/70 backdrop-blur-xl border border-white/[0.08] shadow-elevation-2 text-slate-100',
-      interactive:
-        'bg-[#111827] border border-white/[0.08] shadow-sm hover:border-sky-500/40 hover:shadow-glow-cyan hover:-translate-y-0.5 cursor-pointer',
-      outline: 'bg-transparent border border-slate-800 hover:border-slate-700',
-      spotlight:
-        'bg-gradient-to-b from-slate-900/90 to-slate-900/40 border border-white/[0.1] backdrop-blur-md shadow-elevation-2',
-    };
+  const variantStyles = {
+   default: 'bg-[#211e1a] border border-[#3a342c]',
+   elevated: 'bg-[#2a2621] border border-[#3a342c] shadow-elevation-2',
+   glass: 'bg-[#211e1a] border border-[#3a342c] text-[#f3ede4]',
+   interactive:
+    'bg-[#211e1a] border border-[#3a342c] hover:border-[#4a4339] hover:bg-[#2a2621] cursor-pointer transition-colors duration-150',
+   outline: 'bg-transparent border border-[#3a342c]',
+   spotlight: 'bg-[#1a1714] border border-[#3a342c]',
+  };
 
-    return (
-      <div
-        ref={ref}
-        className={twMerge(
-          clsx(baseStyles, paddingStyles[padding], variantStyles[variant], className)
-        )}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  }
+  return (
+   <div
+    ref={ref}
+    className={twMerge(
+     clsx(baseStyles, paddingStyles[padding], variantStyles[variant], className)
+    )}
+    {...props}
+   >
+    {children}
+   </div>
+  );
+ }
 );
 
 Card.displayName = 'Card';

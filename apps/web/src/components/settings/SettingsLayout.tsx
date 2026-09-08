@@ -9,84 +9,95 @@ import { AuditLogSettings } from './AuditLogSettings';
 import { UsageSettings } from './UsageSettings';
 
 export type SettingsTab =
-  'profile' | 'security' | 'workspace' | 'members' | 'notifications' | 'audit' | 'usage';
+ | 'profile'
+ | 'security'
+ | 'workspace'
+ | 'members'
+ | 'notifications'
+ | 'audit'
+ | 'usage';
 
 interface SettingsLayoutProps {
-  onBackToDashboard: () => void;
-  initialTab?: SettingsTab;
+ onBackToDashboard: () => void;
+ initialTab?: SettingsTab;
 }
 
 export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
-  onBackToDashboard,
-  initialTab = 'profile',
+ onBackToDashboard,
+ initialTab = 'profile',
 }) => {
-  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+ const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
-  const tabs = [
-    { id: 'profile' as SettingsTab, label: 'Profile & Identity', icon: User },
-    { id: 'security' as SettingsTab, label: 'Security & Password', icon: Lock },
-    { id: 'notifications' as SettingsTab, label: 'Notifications', icon: Bell },
-    { id: 'workspace' as SettingsTab, label: 'Workspace Settings', icon: Building2 },
-    { id: 'members' as SettingsTab, label: 'Workspace Members', icon: Users },
-    { id: 'usage' as SettingsTab, label: 'Usage & Plan', icon: Gauge },
-    { id: 'audit' as SettingsTab, label: 'Audit & Security Log', icon: ShieldCheck },
-  ];
+ const tabs = [
+  { id: 'profile' as SettingsTab, label: 'Profile' },
+  { id: 'security' as SettingsTab, label: 'Security' },
+  { id: 'notifications' as SettingsTab, label: 'Notifications' },
+  { id: 'workspace' as SettingsTab, label: 'Workspace' },
+  { id: 'members' as SettingsTab, label: 'Members' },
+  { id: 'usage' as SettingsTab, label: 'Usage' },
+  { id: 'audit' as SettingsTab, label: 'Audit log' },
+ ];
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-        <button
-          type="button"
-          onClick={onBackToDashboard}
-          className="flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-900 border border-white/[0.08] hover:border-slate-700 transition-colors group cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Dashboard</span>
-        </button>
-        <span className="text-[11px] text-slate-500 font-mono">Platform Settings v1.0</span>
-      </div>
+ const icons: Record<SettingsTab, React.FC<{ className?: string }>> = {
+  profile: User,
+  security: Lock,
+  notifications: Bell,
+  workspace: Building2,
+  members: Users,
+  usage: Gauge,
+  audit: ShieldCheck,
+ };
 
-      {/* Main Settings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Navigation Sidebar */}
-        <div className="md:col-span-1 space-y-1">
-          <div className="p-2 rounded-xl border border-white/[0.08] bg-slate-900/80 backdrop-blur-xl shadow-sm space-y-1">
-            {tabs.map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold font-display transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-slate-800 text-sky-400 border border-sky-500/30 shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-sky-400' : 'text-slate-500'}`} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Content Pane */}
-        <div className="md:col-span-3">
-          <div className="p-6 sm:p-8 rounded-xl border border-white/[0.08] bg-slate-900/80 backdrop-blur-xl shadow-elevation-2">
-            {activeTab === 'profile' && <ProfileSettings />}
-            {activeTab === 'security' && <SecuritySettings />}
-            {activeTab === 'notifications' && <NotificationSettings />}
-            {activeTab === 'workspace' && <WorkspaceSettings />}
-            {activeTab === 'members' && <MembersSettings />}
-            {activeTab === 'usage' && <UsageSettings />}
-            {activeTab === 'audit' && <AuditLogSettings />}
-          </div>
-        </div>
-      </div>
+ return (
+  <div className="space-y-8">
+   <div className="flex items-end justify-between gap-4 pb-4 border-b border-[#2e2924]">
+    <div>
+     <button
+      type="button"
+      onClick={onBackToDashboard}
+      className="inline-flex items-center gap-1.5 text-xs text-[#9c948a] hover:text-[#f3ede4] mb-3"
+     >
+      <ArrowLeft className="w-3.5 h-3.5" />
+      Home
+     </button>
+     <h1 className="tf-page-title">Settings</h1>
     </div>
-  );
+   </div>
+
+   <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+    <nav className="md:col-span-1 space-y-0.5">
+     {tabs.map(tab => {
+      const Icon = icons[tab.id];
+      const isActive = activeTab === tab.id;
+      return (
+       <button
+        key={tab.id}
+        type="button"
+        onClick={() => setActiveTab(tab.id)}
+        className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-[13px] font-medium relative ${
+         isActive ? 'text-[#f3ede4] bg-[#1c1916]' : 'text-[#9c948a] hover:text-[#f3ede4]'
+        }`}
+       >
+        {isActive && (
+         <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]" />
+        )}
+        <Icon className="w-3.5 h-3.5" />
+        {tab.label}
+       </button>
+      );
+     })}
+    </nav>
+
+    <div className="md:col-span-3 min-w-0">
+     {activeTab === 'profile' && <ProfileSettings />}
+     {activeTab === 'security' && <SecuritySettings />}
+     {activeTab === 'notifications' && <NotificationSettings />}
+     {activeTab === 'workspace' && <WorkspaceSettings />}
+     {activeTab === 'members' && <MembersSettings />}
+     {activeTab === 'usage' && <UsageSettings />}
+     {activeTab === 'audit' && <AuditLogSettings />}
+    </div>
+   </div>
+  </div>
+ );
 };
