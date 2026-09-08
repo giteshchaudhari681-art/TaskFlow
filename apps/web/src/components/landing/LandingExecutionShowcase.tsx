@@ -1,146 +1,232 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import { Check, ArrowRight, Clock, Network } from 'lucide-react';
 
 export const LandingExecutionShowcase: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
+
+  // Mouse parallax for subtle 3D interaction
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
+
+  const rotateX = useTransform(smoothY, [-0.5, 0.5], [6, -2]);
+  const rotateY = useTransform(smoothX, [-0.5, 0.5], [8, 2]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - left) / width - 0.5;
+    const y = (e.clientY - top) / height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
-    <section className="py-24 sm:py-32 relative overflow-hidden bg-[#0A0A0A]">
-      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-[1.2fr,1fr] gap-16 lg:gap-12 items-center">
+    <section
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="py-32 relative overflow-hidden bg-[#0A0A0A]"
+    >
+      {/* Background ambient lighting */}
+      <div className="absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-[#E85D22]/[0.02] rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="max-w-[1400px] mx-auto px-6 relative z-10">
+        <div className="grid lg:grid-cols-[1.3fr,1fr] gap-20 lg:gap-16 items-center">
           {/* Left Column - Floating UI */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9, y: 60 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative perspective-1000 order-2 lg:order-1"
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative perspective-[1400px] order-2 lg:order-1 hidden lg:block"
           >
-            <div className="relative w-full rounded-[12px] border border-[#262626] bg-[#161616] shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden preserve-3d transform rotate-y-[4deg] rotate-x-[2deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700 ease-out">
+            <motion.div
+              style={{ y, rotateX, rotateY }}
+              className="relative w-[120%] ml-[-20%] rounded-[16px] border border-[#333333] bg-[#0F0F0F] shadow-[0_60px_120px_rgba(0,0,0,0.9),_0_0_80px_rgba(232,93,34,0.06),_inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden preserve-3d"
+            >
               {/* App Shell Mockup */}
-              <div className="h-12 border-b border-[#262626] bg-[#1A1A1A] flex items-center px-4 justify-between">
-                <div className="flex gap-2">
-                  <div className="w-24 h-6 bg-[#262626] rounded-[4px]" />
-                  <div className="w-16 h-6 bg-[#0A0A0A] border border-[#333333] rounded-[4px]" />
+              <div className="h-16 border-b border-[#262626] bg-[#161616]/90 backdrop-blur-xl flex items-center px-6 justify-between">
+                <div className="flex items-center gap-6">
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#EF4444]/40" />
+                    <div className="w-3 h-3 rounded-full bg-[#F59E0B]/40" />
+                    <div className="w-3 h-3 rounded-full bg-[#22C55E]/40" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Network className="w-5 h-5 text-[#E85D22]" />
+                    <span className="text-[14px] font-semibold text-[#F3EDE4]">
+                      Dependency Graph
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="px-3 py-1.5 rounded-[6px] bg-[#1A1A1A] border border-[#333333] text-[12px] text-[#A3A3A3] font-medium flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5" />
+                    Sprint 14
+                  </div>
                 </div>
               </div>
 
-              <div className="p-6 bg-[#0D0D0D] min-h-[400px]">
-                {/* Kanban Mockup */}
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { title: 'To Do', items: [1, 2, 3] },
-                    { title: 'In Progress', items: [1, 2] },
-                    { title: 'Review', items: [1] },
-                  ].map((col, i) => (
-                    <div key={i} className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between px-1">
-                        <span className="text-sm font-semibold text-[#F3EDE4]">{col.title}</span>
-                        <span className="text-xs text-[#8A8A8A]">{col.items.length}</span>
+              <div className="p-8 bg-[#0D0D0D] min-h-[450px] relative overflow-hidden">
+                {/* Timeline Grid Background */}
+                <div
+                  className="absolute inset-0 z-0 pointer-events-none"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)',
+                    backgroundSize: '60px 60px',
+                  }}
+                />
+
+                {/* Timeline Mockup */}
+                <div className="relative z-10 space-y-8 pt-4">
+                  {/* Item 1 */}
+                  <div className="flex items-center gap-4 relative">
+                    <div className="w-[120px] shrink-0 text-right">
+                      <span className="text-[13px] font-medium text-[#A3A3A3]">Design System</span>
+                    </div>
+                    <div className="relative w-full h-10">
+                      <div className="absolute left-[10%] w-[30%] h-full bg-[#3B82F6]/20 border border-[#3B82F6]/40 rounded-[6px] shadow-[0_0_15px_rgba(59,130,246,0.15)] flex items-center px-3">
+                        <div className="w-6 h-6 rounded-full bg-[#3B82F6]/30 border border-[#3B82F6]/50 shrink-0" />
+                        <span className="ml-3 text-[12px] font-semibold text-[#F3EDE4]">
+                          Foundation
+                        </span>
                       </div>
-                      <div className="space-y-3">
-                        {col.items.map((_, j) => (
-                          <div
-                            key={j}
-                            className="p-3 bg-[#161616] border border-[#262626] rounded-[6px] shadow-sm hover:-translate-y-1 hover:border-[#333333] transition-all cursor-grab active:cursor-grabbing"
-                          >
-                            <div className="w-3/4 h-3 bg-[#262626] rounded-[2px] mb-3" />
-                            <div className="w-1/2 h-3 bg-[#262626] rounded-[2px] mb-4" />
-                            <div className="flex items-center justify-between">
-                              <div className="w-5 h-5 rounded-full bg-[#333333]" />
-                              <div className="w-12 h-4 rounded-[2px] bg-[#E85D22]/10 border border-[#E85D22]/20" />
-                            </div>
-                          </div>
-                        ))}
+                      {/* Connection Line */}
+                      <svg
+                        className="absolute left-[40%] top-1/2 w-[20%] h-20 overflow-visible"
+                        style={{ transform: 'translateY(-50%)' }}
+                      >
+                        <path
+                          d="M0,0 C20,0 20,40 40,40"
+                          fill="none"
+                          stroke="#E85D22"
+                          strokeWidth="2"
+                          strokeDasharray="4 4"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Item 2 */}
+                  <div className="flex items-center gap-4 relative">
+                    <div className="w-[120px] shrink-0 text-right">
+                      <span className="text-[13px] font-medium text-[#A3A3A3]">Frontend Core</span>
+                    </div>
+                    <div className="relative w-full h-10">
+                      <div className="absolute left-[40%] w-[35%] h-full bg-[#E85D22]/20 border border-[#E85D22]/40 rounded-[6px] shadow-[0_0_15px_rgba(232,93,34,0.15)] flex items-center px-3">
+                        <div className="w-6 h-6 rounded-full bg-[#E85D22]/30 border border-[#E85D22]/50 shrink-0" />
+                        <span className="ml-3 text-[12px] font-semibold text-[#F3EDE4]">
+                          Component Library
+                        </span>
+                      </div>
+                      {/* Connection Line */}
+                      <svg
+                        className="absolute left-[75%] top-1/2 w-[15%] h-20 overflow-visible"
+                        style={{ transform: 'translateY(-50%)' }}
+                      >
+                        <path
+                          d="M0,0 C15,0 15,40 30,40"
+                          fill="none"
+                          stroke="#22C55E"
+                          strokeWidth="2"
+                          strokeDasharray="4 4"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Item 3 */}
+                  <div className="flex items-center gap-4 relative">
+                    <div className="w-[120px] shrink-0 text-right">
+                      <span className="text-[13px] font-medium text-[#A3A3A3]">Backend API</span>
+                    </div>
+                    <div className="relative w-full h-10">
+                      <div className="absolute left-[20%] w-[25%] h-full bg-[#A855F7]/20 border border-[#A855F7]/40 rounded-[6px] shadow-[0_0_15px_rgba(168,85,247,0.15)] flex items-center px-3">
+                        <div className="w-6 h-6 rounded-full bg-[#A855F7]/30 border border-[#A855F7]/50 shrink-0" />
+                        <span className="ml-3 text-[12px] font-semibold text-[#F3EDE4]">
+                          Auth Service
+                        </span>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Item 4 */}
+                  <div className="flex items-center gap-4 relative">
+                    <div className="w-[120px] shrink-0 text-right">
+                      <span className="text-[13px] font-medium text-[#A3A3A3]">Integration</span>
+                    </div>
+                    <div className="relative w-full h-10">
+                      <div className="absolute left-[75%] w-[20%] h-full bg-[#22C55E]/20 border border-[#22C55E]/40 rounded-[6px] shadow-[0_0_15px_rgba(34,197,94,0.15)] flex items-center px-3">
+                        <div className="w-6 h-6 rounded-full bg-[#22C55E]/30 border border-[#22C55E]/50 shrink-0" />
+                        <span className="ml-3 text-[12px] font-semibold text-[#F3EDE4]">
+                          End-to-End
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Handwriting annotation mockup (optional decorative element) */}
-            <div className="absolute top-10 -right-10 opacity-60 hidden xl:block">
-              <svg
-                width="120"
-                height="80"
-                viewBox="0 0 120 80"
-                className="stroke-[#E85D22]"
-                fill="none"
-              >
-                <path d="M10,70 C40,70 60,30 110,40" strokeWidth="1.5" strokeDasharray="4 4" />
-                <path
-                  d="M100,35 L110,40 L105,50"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <text
-                  x="0"
-                  y="85"
-                  fill="#E85D22"
-                  className="font-display italic text-lg"
-                  stroke="none"
-                >
-                  From ideas to impact
-                </text>
-              </svg>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Right Column - Typography & Content */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-start order-1 lg:order-2"
           >
-            <div className="flex items-center gap-2 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E85D22]" />
-              <span className="text-[11px] font-semibold uppercase tracking-widest text-[#E85D22]">
-                Flexible Workflows
+            <div className="flex items-center gap-3 mb-8">
+              <span className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#E85D22]">
+                FLEXIBLE WORKFLOWS
               </span>
             </div>
 
-            <h2 className="font-display text-[clamp(2rem,4vw,3.2rem)] font-medium tracking-tight leading-[1.1] mb-6 text-[#F3EDE4]">
+            <h2 className="font-display text-[clamp(3rem,4.5vw,4rem)] font-medium tracking-tight leading-[1.05] mb-8 text-[#F3EDE4]">
               Every view your team needs. Zero context switching.
             </h2>
 
-            <p className="text-[1.05rem] text-[#A3A3A3] leading-relaxed mb-10 max-w-[90%] font-sans">
+            <p className="text-[1.2rem] text-[#A3A3A3] leading-relaxed mb-12 max-w-[480px] font-sans">
               Switch between board, list, calendar, and timeline views. TaskFlow adapts to your
               team's workflow, not the other way around.
             </p>
 
-            <div className="flex gap-2 mb-8">
-              <div className="px-5 py-2 bg-[#E85D22] text-white rounded-[6px] text-[13px] font-semibold shadow-[0_2px_8px_rgba(232,93,34,0.25)]">
-                Board
-              </div>
-              <div className="px-5 py-2 border border-[#262626] bg-[#161616] text-[#A3A3A3] rounded-[6px] text-[13px] font-medium hover:text-[#F3EDE4] transition-colors cursor-pointer">
-                List
-              </div>
-              <div className="px-5 py-2 border border-[#262626] bg-[#161616] text-[#A3A3A3] rounded-[6px] text-[13px] font-medium hover:text-[#F3EDE4] transition-colors cursor-pointer">
-                Calendar
-              </div>
-              <div className="px-5 py-2 border border-[#262626] bg-[#161616] text-[#A3A3A3] rounded-[6px] text-[13px] font-medium hover:text-[#F3EDE4] transition-colors cursor-pointer">
-                Timeline
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+            <ul className="space-y-6 mb-14">
               {[
                 'Drag and drop with ease',
                 'Real-time collaboration',
                 'Customizable workflows',
                 'Works for any team size',
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-[4px] bg-[#E85D22]/10 border border-[#E85D22]/20 flex items-center justify-center shrink-0">
-                    <Check className="w-3 h-3 text-[#E85D22] stroke-[3]" />
+                <li key={i} className="flex items-center gap-5">
+                  <div className="w-6 h-6 rounded-[6px] bg-[#E85D22] flex items-center justify-center shrink-0 shadow-[0_2px_12px_rgba(232,93,34,0.4)]">
+                    <Check className="w-4 h-4 text-white stroke-[3]" />
                   </div>
-                  <span className="text-[#A3A3A3] text-sm font-medium">{item}</span>
-                </div>
+                  <span className="text-[#F3EDE4] text-[16px] font-medium">{item}</span>
+                </li>
               ))}
-            </div>
+            </ul>
+
+            <button className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]">
+              Explore features
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </motion.div>
         </div>
       </div>

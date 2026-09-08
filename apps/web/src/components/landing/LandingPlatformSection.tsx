@@ -11,7 +11,7 @@ export const LandingPlatformSection: React.FC = () => {
       <div className="pointer-events-none absolute inset-0">
         <motion.div
           style={{ y: yBg }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-[#E85D22]/[0.03] rounded-full blur-[140px]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-[#E85D22]/[0.02] rounded-full blur-[140px]"
         />
       </div>
 
@@ -22,19 +22,19 @@ export const LandingPlatformSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-3xl mx-auto text-center mb-24"
+          className="max-w-4xl mx-auto text-center mb-24"
         >
           <div className="inline-flex items-center justify-center gap-2 mb-6">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#E85D22]">
-              SECURITY & SCALE
+            <span className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#E85D22]">
+              BUILT FOR ENTERPRISE
             </span>
           </div>
-          <h2 className="font-display text-[clamp(2.5rem,4.5vw,3.5rem)] font-medium tracking-tight leading-[1.05] mb-6 text-[#F3EDE4]">
-            Enterprise-grade infrastructure.
+          <h2 className="font-display text-[clamp(3rem,4.5vw,4rem)] font-medium tracking-tight leading-[1.05] mb-8 text-[#F3EDE4]">
+            Scale without the growing pains.
           </h2>
-          <p className="text-[1.15rem] text-[#A3A3A3] leading-relaxed font-sans max-w-[600px] mx-auto">
-            Every layer of TaskFlow is engineered for teams that cannot afford downtime or data
-            breaches.
+          <p className="text-[1.2rem] text-[#A3A3A3] leading-relaxed font-sans max-w-[640px] mx-auto">
+            TaskFlow is built on enterprise-grade infrastructure to support your team as it grows
+            from 10 to 10,000 without a hiccup.
           </p>
         </motion.div>
 
@@ -42,7 +42,7 @@ export const LandingPlatformSection: React.FC = () => {
         <div className="relative h-[600px] w-full flex items-center justify-center perspective-[1600px] mb-20">
           <motion.div
             initial={{ rotateX: 30, rotateY: 0 }}
-            whileInView={{ rotateX: 20, rotateY: 5 }}
+            whileInView={{ rotateX: 25, rotateY: 8 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 1.5, ease: 'easeOut' }}
             className="relative w-full max-w-[800px] h-full preserve-3d"
@@ -93,21 +93,23 @@ export const LandingPlatformSection: React.FC = () => {
               whileInView={{ y: -80, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[220px] rounded-[24px] border border-[#E85D22]/30 bg-[#161616]/90 backdrop-blur-2xl shadow-[0_40px_120px_rgba(232,93,34,0.15),_inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center preserve-3d overflow-hidden"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[220px] rounded-[24px] border border-[#E85D22]/30 bg-[#161616]/90 backdrop-blur-2xl shadow-[0_40px_120px_rgba(232,93,34,0.2),_inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center preserve-3d overflow-hidden"
               style={{ translateZ: 100 }}
             >
               {/* Glowing edge effect */}
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E85D22] to-transparent opacity-50" />
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E85D22] to-transparent opacity-60" />
 
               <div className="flex flex-col items-center gap-4">
                 <div className="w-16 h-16 rounded-[12px] bg-[#E85D22]/10 border border-[#E85D22]/30 flex items-center justify-center shadow-[0_0_40px_rgba(232,93,34,0.3)]">
                   <Shield className="w-8 h-8 text-[#E85D22]" />
                 </div>
                 <div className="text-center">
-                  <div className="text-[14px] font-bold tracking-widest text-[#F3EDE4] uppercase mb-1">
+                  <div className="text-[14px] font-bold tracking-widest text-[#F3EDE4] uppercase mb-2">
                     SOC2 Type II
                   </div>
-                  <div className="text-[12px] text-[#A3A3A3]">End-to-end encryption</div>
+                  <div className="text-[13px] text-[#A3A3A3] font-medium">
+                    End-to-end encryption
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -124,7 +126,7 @@ export const LandingPlatformSection: React.FC = () => {
         </div>
 
         {/* Feature grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {[
             {
               title: 'Multi-Tenant Isolation',
@@ -148,9 +150,9 @@ export const LandingPlatformSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-center"
+              className="text-center bg-[#111111] border border-[#262626] rounded-[16px] p-8 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
             >
-              <h3 className="text-[18px] font-bold text-[#F3EDE4] mb-3">{title}</h3>
+              <h3 className="text-[18px] font-bold text-[#F3EDE4] mb-4">{title}</h3>
               <p className="text-[15px] text-[#A3A3A3] leading-relaxed max-w-[320px] mx-auto">
                 {description}
               </p>
