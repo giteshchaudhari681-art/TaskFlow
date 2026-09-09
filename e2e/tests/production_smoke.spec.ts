@@ -58,10 +58,8 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     await loginPage.register('Production Smoke Engineer', smokeEmail, TEST_PASSWORD, smokeOrgName);
 
     // 3. Organization & Workspace Access
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('span', { hasText: 'Active Workspace:' })).toContainText(
-      smokeOrgName
-    );
+    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('select')).toContainText(smokeOrgName);
 
     // 4. Project Creation
     const projectsPage = new ProjectsPage(page);
@@ -100,12 +98,11 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     await expect(page.getByText('Total Tasks', { exact: true })).toBeVisible({ timeout: 10000 });
 
     // 7. Access Audit & Security Log (Authorized Owner)
-    await page.getByRole('button', { name: 'Settings & Workspace' }).click();
-    await page.getByRole('button', { name: 'Audit & Security Log' }).click();
+    await page.getByRole('button', { name: 'Audit', exact: true }).click();
     await expect(page.getByText('Security & Audit Log')).toBeVisible({ timeout: 10000 });
 
     // 8. Access Usage & Entitlement Plan (Authorized Owner)
-    await page.getByRole('button', { name: 'Usage & Plan' }).click();
+    await page.getByRole('button', { name: 'Usage', exact: true }).click();
     await expect(page.getByTestId('usage-settings-panel')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('current-plan-badge')).toContainText('FREE');
     await expect(page.getByTestId('meter-projects')).toBeVisible();
@@ -127,14 +124,14 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     );
 
     // Return to dashboard and verify UI remains functional
-    await page.getByRole('button', { name: 'Back to Operations Dashboard' }).click();
-    await expect(page.locator('text=Welcome back')).toBeVisible({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Home', exact: true }).click();
+    await expect(page.locator('text=Production Smoke Engineer')).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('button', { name: 'View Projects' })).toBeVisible({
       timeout: 10000,
     });
 
     // 10. Logout and Re-authentication Flow
-    await page.locator('button[title="Sign out of current session"]').click();
+    await page.locator('button[title="Sign out"]').click();
     await page.waitForLoadState('networkidle').catch(() => {});
     await loginPage.switchToLogin();
     await expect(page.locator('h2', { hasText: 'Sign in to TaskFlow' })).toBeVisible({
@@ -143,10 +140,8 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
 
     // Re-login with the same account
     await loginPage.login(smokeEmail, TEST_PASSWORD);
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 20000 });
-    await expect(page.locator('span', { hasText: 'Active Workspace:' })).toContainText(
-      smokeOrgName
-    );
+    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 20000 });
+    await expect(page.locator('select')).toContainText(smokeOrgName);
 
     // 11. Verify Persistent State (Project and Task survive session lifecycle)
     await projectsPage.goto();

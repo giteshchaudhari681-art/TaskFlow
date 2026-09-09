@@ -21,7 +21,7 @@ test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     await loginPage.goto();
     await loginPage.login(owner.email, TEST_PASSWORD);
 
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 15000 });
 
     // 3. Navigate to Settings -> Usage & Plan tab
     await page.getByRole('button', { name: 'Settings & Workspace' }).click();
@@ -77,10 +77,10 @@ test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     });
 
     // Log out and log in as MEMBER
-    await page.locator('button[title="Sign out of current session"]').click();
+    await page.locator('button[title="Sign out"]').click();
     await loginPage.switchToLogin();
     await loginPage.login(memberEmail, TEST_PASSWORD);
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 15000 });
 
     // Switch to owner organization
     const orgSelect = page.locator('header select').first();

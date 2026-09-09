@@ -49,15 +49,14 @@ test.describe('E2E RBAC & Permission Enforcement Workflows', () => {
     await loginPage.goto();
     await loginPage.login(memberEmail, TEST_PASSWORD);
 
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 10000 });
 
     // Select the shared organization from organization dropdown
     const orgSelect = page.locator('header select').first();
     await orgSelect.selectOption(owner.organizationId);
 
-    // 4. Navigate to Settings & Workspace -> Members
-    await page.getByRole('button', { name: 'Settings & Workspace' }).click();
-    await page.getByRole('button', { name: 'Workspace Members' }).click();
+    // 4. Navigate to Members
+    await page.getByRole('button', { name: 'Members', exact: true }).click();
 
     // 5. Verify UI-level restriction: "Invite Member" button is NOT rendered for MEMBER
     await expect(page.getByRole('button', { name: 'Invite Member' })).toBeHidden();

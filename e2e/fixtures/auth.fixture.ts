@@ -16,10 +16,14 @@ export const test = base.extend<AuthFixtures>({
     // Navigate to root (login page) and wait for it to fully render
     await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // If the landing page is shown, click "Sign in" to reach the login form
-    const signInNavButton = page.getByRole('button', { name: /^sign in$/i });
-    if (await signInNavButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+    // If the landing page is shown, click "Sign in" to reach the login form.
+    // Use a long timeout to wait out the initial App.tsx loading spinner.
+    const signInNavButton = page.getByRole('button', { name: /^sign in$/i }).first();
+    try {
+      await signInNavButton.waitFor({ state: 'visible', timeout: 20000 });
       await signInNavButton.click();
+    } catch (e) {
+      // Ignore if not visible; we might already be on the login page or it timed out.
     }
 
     // Wait for login form elements to be visible before interacting
@@ -38,7 +42,7 @@ export const test = base.extend<AuthFixtures>({
     );
 
     // Wait until authenticated navigation / hero is visible
-    await page.locator('text=Active Workspace:').waitFor({ state: 'visible', timeout: 15000 });
+    await page.getByRole('button', { name: 'Home' }).waitFor({ state: 'visible', timeout: 15000 });
 
     await use(page);
   },

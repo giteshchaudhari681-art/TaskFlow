@@ -42,7 +42,7 @@ export class LoginPage {
     this.switchToLoginButton = page.getByRole('button', { name: /sign in to existing account/i });
 
     // Authenticated state
-    this.activeWorkspaceIndicator = page.locator('text=Active Workspace:');
+    this.activeWorkspaceIndicator = page.getByRole('button', { name: 'Home' });
   }
 
   /**
@@ -52,10 +52,14 @@ export class LoginPage {
   async goto() {
     await this.page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // If the landing page is shown, click "Sign in" to reach the login form
-    const signInNavButton = this.page.getByRole('button', { name: /^sign in$/i });
-    if (await signInNavButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+    // If the landing page is shown, click "Sign in" to reach the login form.
+    // Use a long timeout to wait out the initial App.tsx loading spinner.
+    const signInNavButton = this.page.getByRole('button', { name: /^sign in$/i }).first();
+    try {
+      await signInNavButton.waitFor({ state: 'visible', timeout: 20000 });
       await signInNavButton.click();
+    } catch (e) {
+      // Ignore if not visible; we might already be on the login page or it timed out.
     }
 
     // Wait for login form
