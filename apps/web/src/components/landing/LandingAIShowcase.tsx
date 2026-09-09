@@ -1,8 +1,50 @@
-import React, { useRef } from 'react';
-import { Check, ArrowRight, AlertTriangle, Sparkles, BrainCircuit } from 'lucide-react';
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import React, { useRef, useState } from 'react';
+import {
+  Check,
+  ArrowRight,
+  AlertTriangle,
+  Sparkles,
+  BrainCircuit,
+  CheckCircle2,
+} from 'lucide-react';
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+  AnimatePresence,
+} from 'framer-motion';
+import { AIDemoModal } from './AIDemoModal';
+
+type SuggestionState = 'idle' | 'applying' | 'done';
+
+const SUGGESTIONS = [
+  {
+    title: 'Reassign API tickets to Backend Team B',
+    priority: '+3 Days Saved',
+    color: 'text-[#22C55E]',
+    bg: 'bg-[#22C55E]/10',
+    borderColor: 'border-[#22C55E]/20',
+    appliedColor: 'border-[#22C55E]/40',
+    icon: Sparkles,
+  },
+  {
+    title: 'Delay Marketing site launch by 1 week',
+    priority: 'Low Impact',
+    color: 'text-[#F59E0B]',
+    bg: 'bg-[#F59E0B]/10',
+    borderColor: 'border-[#F59E0B]/20',
+    appliedColor: 'border-[#F59E0B]/40',
+    icon: AlertTriangle,
+  },
+];
 
 export const LandingAIShowcase: React.FC = () => {
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [applyState, setApplyState] = useState<SuggestionState>('idle');
+  const [appliedIdx, setAppliedIdx] = useState(-1);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -11,7 +53,6 @@ export const LandingAIShowcase: React.FC = () => {
 
   const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
-  // Mouse parallax for subtle 3D interaction
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
@@ -23,15 +64,36 @@ export const LandingAIShowcase: React.FC = () => {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
     const { left, top, width, height } = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - left) / width - 0.5;
-    const y = (e.clientY - top) / height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
+    mouseX.set((e.clientX - left) / width - 0.5);
+    mouseY.set((e.clientY - top) / height - 0.5);
   };
-
   const handleMouseLeave = () => {
     mouseX.set(0);
     mouseY.set(0);
+  };
+
+  const handleApply = () => {
+    if (applyState !== 'idle') return;
+    setApplyState('applying');
+    setAppliedIdx(-1);
+
+    // Apply each suggestion with a staggered delay
+    SUGGESTIONS.forEach((_, i) => {
+      setTimeout(
+        () => {
+          setAppliedIdx(i);
+          if (i === SUGGESTIONS.length - 1) {
+            setTimeout(() => setApplyState('done'), 400);
+          }
+        },
+        700 + i * 900
+      );
+    });
+  };
+
+  const handleReset = () => {
+    setApplyState('idle');
+    setAppliedIdx(-1);
   };
 
   return (
@@ -85,13 +147,16 @@ export const LandingAIShowcase: React.FC = () => {
               ))}
             </ul>
 
-            <button className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]">
+            <button
+              onClick={() => setDemoOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]"
+            >
               See AI in action
               <ArrowRight className="w-4 h-4" />
             </button>
           </motion.div>
 
-          {/* Right Column - Massive Floating UI */}
+          {/* Right Column - Interactive AI Panel */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 60 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
@@ -130,65 +195,131 @@ export const LandingAIShowcase: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tasks List */}
+              {/* Interactive Suggestions Area */}
               <div className="p-8 bg-[#0A0A0A] space-y-5 min-h-[350px]">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[13px] font-bold uppercase tracking-widest text-[#737373]">
                     AI Recommendations
                   </span>
+                  {applyState === 'done' && (
+                    <button
+                      onClick={handleReset}
+                      className="text-[11px] text-[#737373] hover:text-[#A3A3A3] transition-colors underline underline-offset-2"
+                    >
+                      Reset
+                    </button>
+                  )}
                 </div>
 
-                {[
-                  {
-                    title: 'Reassign API tickets to Backend Team B',
-                    priority: '+3 Days Saved',
-                    color: 'text-[#22C55E]',
-                    bg: 'bg-[#22C55E]/10',
-                    borderColor: 'border-[#22C55E]/20',
-                    icon: Sparkles,
-                  },
-                  {
-                    title: 'Delay Marketing site launch by 1 week',
-                    priority: 'Low Impact',
-                    color: 'text-[#F59E0B]',
-                    bg: 'bg-[#F59E0B]/10',
-                    borderColor: 'border-[#F59E0B]/20',
-                    icon: AlertTriangle,
-                  },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-6 bg-[#161616] border border-[#262626] rounded-[10px] hover:border-[#333333] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-5">
-                      <div
-                        className={`w-10 h-10 rounded-[8px] flex items-center justify-center ${item.bg} border ${item.borderColor}`}
-                      >
-                        <item.icon className={`w-5 h-5 ${item.color}`} />
-                      </div>
-                      <span className="text-[16px] font-medium text-[#F3EDE4] group-hover:text-white transition-colors">
-                        {item.title}
-                      </span>
-                    </div>
-                    <span
-                      className={`px-3 py-1.5 rounded-[6px] text-[12px] font-bold tracking-wide uppercase ${item.color} ${item.bg} border ${item.borderColor}`}
+                {SUGGESTIONS.map((item, i) => {
+                  const isApplied = appliedIdx >= i;
+                  return (
+                    <div
+                      key={i}
+                      className={`relative flex items-center justify-between p-6 rounded-[10px] border transition-all duration-500 ${
+                        isApplied
+                          ? `${item.bg} ${item.appliedColor}`
+                          : 'bg-[#161616] border-[#262626] hover:border-[#333333] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] cursor-pointer group'
+                      }`}
                     >
-                      {item.priority}
-                    </span>
-                  </div>
-                ))}
+                      <div className="flex items-center gap-5">
+                        <div
+                          className={`w-10 h-10 rounded-[8px] flex items-center justify-center ${item.bg} border ${item.borderColor} transition-all duration-300`}
+                        >
+                          {isApplied ? (
+                            <CheckCircle2 className={`w-5 h-5 ${item.color}`} />
+                          ) : (
+                            <item.icon className={`w-5 h-5 ${item.color}`} />
+                          )}
+                        </div>
+                        <div>
+                          <span
+                            className={`text-[15px] font-medium transition-colors ${isApplied ? item.color : 'text-[#F3EDE4]'}`}
+                          >
+                            {item.title}
+                          </span>
+                          {isApplied && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="text-[11px] text-[#737373] mt-0.5"
+                            >
+                              Applied successfully
+                            </motion.div>
+                          )}
+                        </div>
+                      </div>
+                      <AnimatePresence mode="wait">
+                        {isApplied ? (
+                          <motion.span
+                            key="applied"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className={`px-3 py-1.5 rounded-[6px] text-[12px] font-bold tracking-wide uppercase ${item.color} ${item.bg} border ${item.borderColor}`}
+                          >
+                            ✓ Applied
+                          </motion.span>
+                        ) : (
+                          <motion.span
+                            key="impact"
+                            initial={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className={`px-3 py-1.5 rounded-[6px] text-[12px] font-bold tracking-wide uppercase ${item.color} ${item.bg} border ${item.borderColor}`}
+                          >
+                            {item.priority}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
 
                 <div className="pt-6">
-                  <button className="px-6 py-3.5 border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#3B82F6] rounded-[8px] text-[14px] font-semibold hover:bg-[#3B82F6]/20 transition-colors flex items-center gap-2 shadow-[0_4px_12px_rgba(59,130,246,0.15)]">
-                    Apply AI Suggestions
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <AnimatePresence mode="wait">
+                    {applyState === 'done' ? (
+                      <motion.div
+                        key="success"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-3 px-6 py-3.5 rounded-[8px] bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#22C55E]"
+                      >
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                        <span className="text-[14px] font-semibold">
+                          All suggestions applied · 3 days saved
+                        </span>
+                      </motion.div>
+                    ) : (
+                      <motion.button
+                        key="apply-btn"
+                        onClick={handleApply}
+                        disabled={applyState === 'applying'}
+                        whileHover={{ scale: applyState === 'idle' ? 1.02 : 1 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="px-6 py-3.5 border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#3B82F6] rounded-[8px] text-[14px] font-semibold hover:bg-[#3B82F6]/20 transition-colors flex items-center gap-2 shadow-[0_4px_12px_rgba(59,130,246,0.15)] disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {applyState === 'applying' ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-[#3B82F6]/30 border-t-[#3B82F6] rounded-full animate-spin" />
+                            Applying…
+                          </>
+                        ) : (
+                          <>
+                            Apply AI Suggestions
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         </div>
       </div>
+
+      {/* AI Demo Modal */}
+      <AIDemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </section>
   );
 };
