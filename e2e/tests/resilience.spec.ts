@@ -75,7 +75,9 @@ test.describe('E2E Production Hardening & System Resilience Workflows', () => {
     await page.goto('/');
 
     // Renders landing page screen
-    await expect(page.getByRole('button', { name: /^sign in$/i }).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /^sign in$/i }).first()).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByRole('button', { name: 'Home' })).not.toBeVisible();
   });
 });
