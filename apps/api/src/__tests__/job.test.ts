@@ -645,7 +645,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
       });
 
       const worker = new JobWorker({ pollingIntervalMs: 100 });
-      const didWork = await worker.runOnce();
+      const didWork = await worker.runOnce(ownerOrgId);
       expect(didWork).toBe(true);
       expect(executed).toBe(true);
 

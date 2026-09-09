@@ -55,13 +55,18 @@ export class JobRepository extends BaseRepository {
     return this.db.job.findUnique({ where: { id } });
   }
 
-  async claimNextJob(): Promise<Job | null> {
+  async claimNextJob(organizationId?: string): Promise<Job | null> {
+    const orgFilter = organizationId 
+      ? Prisma.sql`AND "organizationId" = ${organizationId}::uuid`
+      : Prisma.empty;
+
     const result = await this.db.$queryRaw<Job[]>`
       WITH next_job AS (
         SELECT id
         FROM jobs
         WHERE status = 'PENDING'::"JobStatus"
           AND "availableAt" <= (NOW() AT TIME ZONE 'UTC')
+          ${orgFilter}
         ORDER BY "availableAt" ASC
         LIMIT 1
         FOR UPDATE SKIP LOCKED
