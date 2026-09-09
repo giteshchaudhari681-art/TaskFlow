@@ -8,6 +8,7 @@ import { LandingAIShowcase } from './LandingAIShowcase';
 import { LandingExecutionShowcase } from './LandingExecutionShowcase';
 import { LandingDependencyShowcase } from './LandingDependencyShowcase';
 import { LandingPlatformSection } from './LandingPlatformSection';
+import { LandingPricing } from './LandingPricing';
 import { LandingCTA } from './LandingCTA';
 import { LandingFooter } from './LandingFooter';
 
@@ -53,6 +54,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onGetStarted
         <LandingExecutionShowcase />
         <LandingDependencyShowcase />
         <LandingPlatformSection />
+        <LandingPricing onGetStarted={onGetStarted} />
         <LandingCTA onGetStarted={onGetStarted} />
       </main>
 
