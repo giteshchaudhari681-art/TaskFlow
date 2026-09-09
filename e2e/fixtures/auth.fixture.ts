@@ -13,8 +13,12 @@ export const test = base.extend<AuthFixtures>({
   },
 
   authenticatedPage: async ({ page, authenticatedUser }, use) => {
-    // Navigate to root (login page)
-    await page.goto('/');
+    // Navigate to root (login page) and wait for it to fully render
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    // Wait for login form elements to be visible before interacting
+    await page.locator('input[type="email"]').waitFor({ state: 'visible', timeout: 10000 });
+    await page.locator('input[type="password"]').waitFor({ state: 'visible', timeout: 10000 });
 
     // Fill credentials through real login form
     await page.locator('input[type="email"]').fill(authenticatedUser.email);
