@@ -246,12 +246,12 @@ export const LandingPricing: React.FC<LandingPricingProps> = ({ onGetStarted }) 
                         <span className="text-[13px] text-[#A3A3A3]">{f}</span>
                       </div>
                     ))}
-                    {plan.notIncluded.map(f => (
-                      <div key={f} className="flex items-center gap-3 opacity-35">
-                        <div className="w-4 h-4 rounded-full border border-[#333333] flex items-center justify-center shrink-0">
-                          <div className="w-1.5 h-px bg-[#555555]" />
+                    {plan.notIncluded.map((f) => (
+                      <div key={f} className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-full border border-[#2A2A2A] flex items-center justify-center shrink-0 bg-[#161616]">
+                          <div className="w-2 h-px bg-[#444444]" />
                         </div>
-                        <span className="text-[13px] text-[#555555] line-through">{f}</span>
+                        <span className="text-[13px] text-[#4A4A4A]">{f}</span>
                       </div>
                     ))}
                   </div>
