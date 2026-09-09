@@ -23,9 +23,8 @@ test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
 
     await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 15000 });
 
-    // 3. Navigate to Settings -> Usage & Plan tab
-    await page.getByRole('button', { name: 'Settings & Workspace' }).click();
-    await page.getByRole('button', { name: 'Usage & Plan' }).click();
+    // 3. Navigate to Usage
+    await page.getByRole('button', { name: 'Usage', exact: true }).click();
 
     // 4. Verify Usage & Plan panel is rendered
     await expect(page.getByTestId('usage-settings-panel')).toBeVisible();
@@ -86,9 +85,8 @@ test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     const orgSelect = page.locator('header select').first();
     await orgSelect.selectOption(owner.organizationId);
 
-    // Open settings and go to Usage & Plan
-    await page.getByRole('button', { name: 'Settings & Workspace' }).click();
-    await page.getByRole('button', { name: 'Usage & Plan' }).click();
+    // Navigate to Usage
+    await page.getByRole('button', { name: 'Usage', exact: true }).click();
 
     // Member should see unauthorized restricted access message
     await expect(page.getByTestId('usage-unauthorized')).toBeVisible({ timeout: 10000 });

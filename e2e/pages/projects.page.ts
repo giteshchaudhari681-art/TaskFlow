@@ -16,7 +16,7 @@ export class ProjectsPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.projectsNavButton = page.locator('header nav').getByRole('button', { name: 'Projects' });
+    this.projectsNavButton = page.locator('#nav-projects');
     this.newProjectButton = page.getByRole('button', { name: 'New Project' });
     this.searchInput = page.getByPlaceholder('Search projects by name or key...');
 
@@ -52,7 +52,7 @@ export class ProjectsPage {
   }
 
   async openProject(projectKeyOrName: string) {
-    const card = this.page.locator('h3', { hasText: projectKeyOrName }).first();
+    const card = this.page.locator('button', { hasText: projectKeyOrName }).first();
     await card.click();
   }
 }

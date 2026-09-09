@@ -27,7 +27,7 @@ export class LoginPage {
     this.passwordInput = page.locator('input[type="password"]');
     // The actual sign-in button text is "Sign in to workspace"
     this.signInButton = page.getByRole('button', { name: /sign in to workspace/i });
-    this.errorMessage = page.locator('div.border-rose-800\\/60');
+    this.errorMessage = page.locator('div.text-\\[\\#e07a7a\\]');
     // The "switch to register" link text is "Create workspace"
     this.switchToRegisterButton = page.getByRole('button', { name: /create workspace/i });
 

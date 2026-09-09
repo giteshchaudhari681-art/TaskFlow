@@ -74,9 +74,8 @@ test.describe('E2E Production Hardening & System Resilience Workflows', () => {
     // Access application without session token
     await page.goto('/');
 
-    // Renders login screen
-    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('input[type="email"]')).toBeVisible();
+    // Renders landing page screen
+    await expect(page.getByRole('button', { name: /^sign in$/i }).first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('button', { name: 'Home' })).not.toBeVisible();
   });
 });
