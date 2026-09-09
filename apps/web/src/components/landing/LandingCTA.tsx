@@ -8,7 +8,7 @@ interface LandingCTAProps {
 
 export const LandingCTA: React.FC<LandingCTAProps> = ({ onGetStarted }) => {
   return (
-    <section className="py-24 sm:py-36 relative overflow-hidden bg-[#0A0A0A]">
+    <section id="contact" className="py-24 sm:py-36 relative overflow-hidden bg-[#0A0A0A]">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-[#E85D22]/10 rounded-full blur-[120px]" />
       </div>

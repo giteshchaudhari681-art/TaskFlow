@@ -43,6 +43,7 @@ export const LandingProductStory: React.FC = () => {
 
   return (
     <section
+      id="solutions"
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}

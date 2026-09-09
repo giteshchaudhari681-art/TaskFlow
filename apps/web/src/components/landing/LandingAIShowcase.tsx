@@ -98,6 +98,7 @@ export const LandingAIShowcase: React.FC = () => {
 
   return (
     <section
+      id="features"
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
