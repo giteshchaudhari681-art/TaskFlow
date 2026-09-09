@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { FeaturesModal } from './FeaturesModal';
 import {
   Check,
   ArrowRight,
@@ -512,6 +513,7 @@ const TimelineView: React.FC = () => {
 /* ─── Main Component ─── */
 export const LandingProductPreview: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewType>('board');
+  const [featuresOpen, setFeaturesOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -617,7 +619,10 @@ export const LandingProductPreview: React.FC = () => {
                 </li>
               ))}
             </ul>
-            <button className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]">
+            <button
+              onClick={() => setFeaturesOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]"
+            >
               Explore features
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -715,6 +720,7 @@ export const LandingProductPreview: React.FC = () => {
           </motion.div>
         </div>
       </div>
+      <FeaturesModal open={featuresOpen} onClose={() => setFeaturesOpen(false)} />
     </section>
   );
 };
