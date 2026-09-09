@@ -17,8 +17,8 @@ export const test = base.extend<AuthFixtures>({
     await page.goto('/');
 
     // Fill credentials through real login form
-    await page.getByPlaceholder('alex.chen@taskflow.dev').fill(authenticatedUser.email);
-    await page.getByPlaceholder('••••••••••••').fill(authenticatedUser.password);
+    await page.locator('input[type="email"]').fill(authenticatedUser.email);
+    await page.locator('input[type="password"]').fill(authenticatedUser.password);
     await page.getByRole('button', { name: 'Sign In' }).click();
 
     // Verify authenticated state is established
