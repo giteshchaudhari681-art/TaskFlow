@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Check, ArrowRight, Users } from 'lucide-react';
+import { Check, Users } from 'lucide-react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { WorkloadModal } from './WorkloadModal';
 

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { Check, ArrowRight, Clock, Network, GitBranch } from 'lucide-react';
+import { Check, Clock, Network, GitBranch } from 'lucide-react';
 import { WorkflowModal } from './WorkflowModal';
 
 export const LandingExecutionShowcase: React.FC = () => {
