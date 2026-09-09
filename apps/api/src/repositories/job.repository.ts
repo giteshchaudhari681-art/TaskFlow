@@ -56,7 +56,7 @@ export class JobRepository extends BaseRepository {
   }
 
   async claimNextJob(organizationId?: string): Promise<Job | null> {
-    const orgFilter = organizationId 
+    const orgFilter = organizationId
       ? Prisma.sql`AND "organizationId" = ${organizationId}::uuid`
       : Prisma.empty;
 
