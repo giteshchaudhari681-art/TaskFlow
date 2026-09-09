@@ -330,7 +330,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
           {/* Simple links */}
           <button
             type="button"
-            onClick={() => scrollToSection('contact')}
+            onClick={() => scrollToSection('pricing')}
             className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
             Pricing
