@@ -27,6 +27,12 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
   // Floating cards parallax
   const floatX = useTransform(smoothX, [-0.5, 0.5], [-40, 40]);
   const floatY = useTransform(smoothY, [-0.5, 0.5], [-40, 40]);
+  const floatXReverse = useTransform(smoothX, [-0.5, 0.5], [40, -40]);
+  const floatYReverse = useTransform(smoothY, [-0.5, 0.5], [40, -40]);
+
+  // Floating cursor
+  const cursorX = useTransform(smoothX, [-0.5, 0.5], [-80, 80]);
+  const cursorY = useTransform(smoothY, [-0.5, 0.5], [-80, 80]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -169,10 +175,10 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
         {/* Right Column - Massive 3D Mockup */}
         <motion.div
           custom={5}
-          initial={{ opacity: 0, scale: 0.9, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative lg:h-[750px] flex items-center justify-start perspective-[1400px] hidden lg:flex ml-[-20px]"
+          initial={{ opacity: 0, scale: 0.8, rotateX: 20, rotateY: -10, y: 100, z: -200 }}
+          animate={{ opacity: 1, scale: 1, rotateX: 0, rotateY: 0, y: 0, z: 0 }}
+          transition={{ delay: 0.2, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+          className="relative lg:h-[750px] flex items-center justify-start perspective-[1400px] hidden lg:flex ml-[-20px] preserve-3d"
         >
           {/* We apply a base static rotation here to ensure 3D is ALWAYS visible, and motion adds slight parallax */}
           <motion.div
@@ -388,30 +394,68 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
               </button>
             </motion.div>
 
-            {/* Handwritten annotation element */}
+            {/* Floating Card 2: Team Workload (Bottom Left) */}
             <motion.div
-              style={{
-                x: useTransform(smoothX, [-0.5, 0.5], [-30, 30]),
-                y: useTransform(smoothY, [-0.5, 0.5], [-30, 30]),
-                translateZ: 150,
-              }}
-              className="absolute -right-20 bottom-16 z-30 pointer-events-none opacity-90 drop-shadow-xl"
+              style={{ x: floatXReverse, y: floatYReverse, translateZ: 140 }}
+              className="absolute -left-12 bottom-20 w-72 rounded-[12px] border border-[#333333] bg-[#1A1A1A]/95 backdrop-blur-2xl shadow-[0_32px_64px_rgba(0,0,0,0.9),_0_0_0_1px_rgba(255,255,255,0.08),_inset_0_1px_0_rgba(255,255,255,0.15)] p-5 z-20 preserve-3d"
             >
-              <p className="font-['Caveat',_cursive] text-[34px] text-[#E85D22] -rotate-6 tracking-wide drop-shadow-[0_0_10px_rgba(232,93,34,0.5)]">
-                From tasks to outcomes.
-              </p>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[13px] font-bold tracking-widest uppercase text-[#F3EDE4]">
+                  Team Load
+                </span>
+                <span className="text-[11px] text-[#22C55E] bg-[#22C55E]/10 px-2 py-0.5 rounded border border-[#22C55E]/20 font-semibold">
+                  Balanced
+                </span>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { name: 'Sarah', w: '70%', color: '#3B82F6' },
+                  { name: 'Mike', w: '40%', color: '#E85D22' },
+                  { name: 'Alex', w: '85%', color: '#22C55E' },
+                ].map((user, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#262626] border border-[#333333] shrink-0 overflow-hidden">
+                      <img
+                        src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user.name}&backgroundColor=transparent`}
+                        alt=""
+                        className="w-full h-full"
+                      />
+                    </div>
+                    <div className="flex-1 h-2 bg-[#0A0A0A] rounded-full overflow-hidden border border-[#262626]">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: user.w, backgroundColor: user.color }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Floating Cursor (Top Left, moving across) */}
+            <motion.div
+              style={{ x: cursorX, y: cursorY, translateZ: 180 }}
+              className="absolute left-1/4 top-1/4 z-40 pointer-events-none drop-shadow-2xl"
+            >
               <svg
-                className="w-20 h-20 ml-12 mt-2 opacity-80"
-                viewBox="0 0 100 100"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
                 fill="none"
-                stroke="#E85D22"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                style={{ filter: 'drop-shadow(0px 0px 8px rgba(232,93,34,0.4))' }}
+                xmlns="http://www.w3.org/2000/svg"
+                className="transform -rotate-12 drop-shadow-md"
               >
-                <path d="M10,90 Q40,50 90,10" />
-                <path d="M75,10 L90,10 L85,25" />
+                <path
+                  d="M5.5 3.25L11.5 21L13.5 14L20.5 12L5.5 3.25Z"
+                  fill="#A855F7"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
               </svg>
+              <div className="mt-1 ml-4 bg-[#A855F7] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px] shadow-sm whitespace-nowrap">
+                Priya (Editing)
+              </div>
             </motion.div>
           </motion.div>
         </motion.div>
