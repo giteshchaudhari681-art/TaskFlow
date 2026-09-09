@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { Check, ArrowRight, Clock, Network } from 'lucide-react';
+import { Check, ArrowRight, Clock, Network, GitBranch } from 'lucide-react';
+import { WorkflowModal } from './WorkflowModal';
 
 export const LandingExecutionShowcase: React.FC = () => {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [workflowOpen, setWorkflowOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -288,13 +290,17 @@ export const LandingExecutionShowcase: React.FC = () => {
               ))}
             </ul>
 
-            <button className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]">
-              Explore features
-              <ArrowRight className="w-4 h-4" />
+            <button
+              onClick={() => setWorkflowOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]"
+            >
+              <GitBranch className="w-4 h-4" />
+              Try it yourself
             </button>
           </motion.div>
         </div>
       </div>
+      <WorkflowModal open={workflowOpen} onClose={() => setWorkflowOpen(false)} />
     </section>
   );
 };

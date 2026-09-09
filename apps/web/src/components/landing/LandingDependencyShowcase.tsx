@@ -1,8 +1,10 @@
-import React, { useRef } from 'react';
-import { Check, ArrowRight } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Check, ArrowRight, Users } from 'lucide-react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import { WorkloadModal } from './WorkloadModal';
 
 export const LandingDependencyShowcase: React.FC = () => {
+  const [workloadOpen, setWorkloadOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -82,9 +84,12 @@ export const LandingDependencyShowcase: React.FC = () => {
               ))}
             </ul>
 
-            <button className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]">
-              Explore features
-              <ArrowRight className="w-4 h-4" />
+            <button
+              onClick={() => setWorkloadOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] bg-[#E85D22] text-white text-[15px] font-semibold hover:bg-[#F0703B] shadow-[0_4px_20px_rgba(232,93,34,0.35)] hover:shadow-[0_6px_28px_rgba(232,93,34,0.45)] transition-all hover:-translate-y-[1px]"
+            >
+              <Users className="w-4 h-4" />
+              Balance workload
             </button>
           </motion.div>
 
@@ -205,6 +210,7 @@ export const LandingDependencyShowcase: React.FC = () => {
           </motion.div>
         </div>
       </div>
+      <WorkloadModal open={workloadOpen} onClose={() => setWorkloadOpen(false)} />
     </section>
   );
 };
