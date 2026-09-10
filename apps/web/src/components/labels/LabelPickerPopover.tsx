@@ -137,7 +137,7 @@ export const LabelPickerPopover: React.FC<LabelPickerPopoverProps> = ({
                   {label.name}
                 </span>
               </div>
-              {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+              {isSelected && <Check className="w-3.5 h-3.5 text-taskflow-accent shrink-0" />}
             </button>
           );
         })}
@@ -148,7 +148,7 @@ export const LabelPickerPopover: React.FC<LabelPickerPopoverProps> = ({
             type="button"
             onClick={handleCreate}
             disabled={isSubmitting}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300 transition-colors border border-dashed border-cyan-500/30 mt-1"
+            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-taskflow-accent hover:bg-taskflow-accent-subtle hover:text-taskflow-accent transition-colors border border-dashed border-taskflow-accent mt-1"
           >
             {isSubmitting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

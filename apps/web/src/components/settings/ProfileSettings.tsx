@@ -72,7 +72,7 @@ export const ProfileSettings: React.FC = () => {
   if (loading) {
     return (
       <div className="py-12 text-center text-taskflow-muted">
-        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
+        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-taskflow-accent" />
         <p className="text-sm">Loading user profile details...</p>
       </div>
     );
@@ -88,14 +88,14 @@ export const ProfileSettings: React.FC = () => {
       </div>
 
       {successMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
           <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -103,12 +103,12 @@ export const ProfileSettings: React.FC = () => {
 
       <form onSubmit={handleSave} className="space-y-5">
         {/* Avatar Selection Card */}
-        <div className="glass-card p-5 rounded-xl border border-taskflow-border space-y-4">
+        <div className="editorial-card p-5 rounded-md border border-taskflow-border space-y-4">
           <label className="block text-xs font-semibold text-taskflow-text-dim uppercase tracking-wider">
             Profile Avatar
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-5">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 p-0.5 shadow-glow-cyan flex-shrink-0">
+            <div className="w-16 h-16 rounded-lg bg-taskflow-surface p-0.5 shadow-glow-cyan flex-shrink-0">
               <div className="w-full h-full bg-taskflow-surface rounded-[14px] overflow-hidden flex items-center justify-center">
                 {avatarUrl ? (
                   <img
@@ -133,9 +133,9 @@ export const ProfileSettings: React.FC = () => {
                     key={idx}
                     type="button"
                     onClick={() => setAvatarUrl(preset)}
-                    className={`w-9 h-9 rounded-xl overflow-hidden border-2 transition-all ${
+                    className={`w-9 h-9 rounded-md overflow-hidden border-2 transition-all ${
                       avatarUrl === preset
-                        ? 'border-cyan-400 scale-105 shadow-glow-cyan'
+                        ? 'border-taskflow-accent scale-105 shadow-glow-cyan'
                         : 'border-taskflow-border hover:border-taskflow-text-dim'
                     }`}
                   >
@@ -164,7 +164,7 @@ export const ProfileSettings: React.FC = () => {
                   value={avatarUrl}
                   onChange={e => setAvatarUrl(e.target.value)}
                   placeholder="Or enter custom image URL (https://...)"
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white text-xs placeholder-taskflow-muted focus:outline-none focus:border-cyan-500 transition-colors"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white text-xs placeholder-taskflow-muted focus:outline-none focus:border-taskflow-accent transition-colors"
                 />
               </div>
             </div>
@@ -172,7 +172,7 @@ export const ProfileSettings: React.FC = () => {
         </div>
 
         {/* Identity Information */}
-        <div className="glass-card p-5 rounded-xl border border-taskflow-border space-y-4">
+        <div className="editorial-card p-5 rounded-md border border-taskflow-border space-y-4">
           <div>
             <label className="block text-xs font-medium text-taskflow-text-dim mb-1.5">
               Full Name *
@@ -185,7 +185,7 @@ export const ProfileSettings: React.FC = () => {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Alex Chen"
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-taskflow-accent transition-colors"
               />
             </div>
           </div>
@@ -232,7 +232,7 @@ export const ProfileSettings: React.FC = () => {
           <button
             type="submit"
             disabled={saving}
-            className="py-2.5 px-5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 disabled:opacity-50"
+            className="py-2.5 px-5 rounded-lg bg-taskflow-surface hover: hover: text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 disabled:opacity-50"
           >
             {saving ? (
               <>

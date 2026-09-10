@@ -131,11 +131,16 @@ export class JobWorker {
   /**
    * Single-step execution for testing or manual triggers.
    */
-  async runOnce(): Promise<boolean> {
-    const job = await jobRepository.claimNextJob();
-    if (!job) return false;
-    await jobService.processJob(job);
-    return true;
+  async runOnce(organizationId?: string): Promise<boolean> {
+    try {
+      const job = await jobRepository.claimNextJob(organizationId);
+      if (!job) return false;
+      await jobService.processJob(job);
+      return true;
+    } catch (error) {
+      this.consecutiveErrors++;
+      return false;
+    }
   }
 
   private sleep(ms: number): Promise<void> {

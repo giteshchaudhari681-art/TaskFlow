@@ -258,16 +258,16 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     totalSubtasks > 0 ? Math.round((completedSubtaskCount / totalSubtasks) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl h-full bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl h-full bg-[#0f172a] border-l border-slate-800 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
         {/* Drawer Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md shrink-0">
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 text-sm font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-lg">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-[#111827] shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="px-2 py-0.5 text-xs font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700 rounded">
               {task?.issueKey || projectKey}
             </span>
             {task?.archivedAt && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md">
+              <span className="px-2 py-0.5 text-[11px] font-medium bg-amber-950/40 text-amber-300 border border-amber-800/60 rounded">
                 Archived
               </span>
             )}
@@ -275,21 +275,21 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Drawer Sub-tabs */}
-        <div className="flex items-center px-6 border-b border-slate-800 bg-slate-950/40 shrink-0">
+        <div className="flex items-center px-5 border-b border-slate-800 bg-[#111827] shrink-0">
           <button
             type="button"
             onClick={() => setDrawerTab('details')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               drawerTab === 'details'
-                ? 'border-cyan-400 text-cyan-400'
+                ? 'border-sky-400 text-sky-400'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -299,9 +299,9 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <button
             type="button"
             onClick={() => setDrawerTab('comments')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               drawerTab === 'comments'
-                ? 'border-cyan-400 text-cyan-400'
+                ? 'border-sky-400 text-sky-400'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -311,9 +311,9 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
           <button
             type="button"
             onClick={() => setDrawerTab('activity')}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               drawerTab === 'activity'
-                ? 'border-cyan-400 text-cyan-400'
+                ? 'border-sky-400 text-sky-400'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -325,7 +325,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         {/* Drawer Body */}
         {loading ? (
           <div className="flex-1 flex items-center justify-center p-12 text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-taskflow-accent" />
           </div>
         ) : drawerTab === 'comments' ? (
           <div className="flex-1 overflow-y-auto p-6">
@@ -350,14 +350,14 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         ) : (
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {error && (
-              <div className="flex items-center gap-2 p-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <div className="flex items-center gap-2 p-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-md">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="flex items-center gap-2 p-3 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+              <div className="flex items-center gap-2 p-3 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{successMsg}</span>
               </div>
@@ -373,7 +373,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="Task title"
-                className="w-full text-lg font-semibold px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+                className="w-full text-lg font-semibold px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent focus:ring-1 focus:ring-taskflow-accent transition-colors"
               />
             </div>
 
@@ -386,7 +386,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 <select
                   value={status}
                   onChange={e => setStatus(e.target.value as TaskStatus)}
-                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent text-sm"
                   data-testid="task-status-select"
                 >
                   <option value={TaskStatus.TODO}>To Do</option>
@@ -407,7 +407,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 <select
                   value={priority}
                   onChange={e => setPriority(e.target.value as TaskPriority)}
-                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent text-sm"
                   data-testid="task-priority-select"
                 >
                   <option value={TaskPriority.LOW}>Low</option>
@@ -422,13 +422,13 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-cyan-400" />
+                  <User className="w-3.5 h-3.5 text-taskflow-accent" />
                   Assignee
                 </label>
                 <select
                   value={assigneeId}
                   onChange={e => setAssigneeId(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent text-sm"
                 >
                   <option value="">Unassigned</option>
                   {members.map(m => (
@@ -448,7 +448,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   type="date"
                   value={dueDate}
                   onChange={e => setDueDate(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-sm"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent text-sm"
                 />
               </div>
             </div>
@@ -457,14 +457,14 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-cyan-400" />
+                  <Tag className="w-3.5 h-3.5 text-taskflow-accent" />
                   Labels
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setIsLabelPickerOpen(!isLabelPickerOpen)}
-                    className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+                    className="inline-flex items-center gap-1 text-xs text-taskflow-accent hover:text-taskflow-accent transition-colors font-medium"
                   >
                     <span>+ Add Label</span>
                   </button>
@@ -520,7 +520,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               </div>
 
               {/* Attached Label Badges */}
-              <div className="flex flex-wrap items-center gap-2 min-h-[36px] p-2.5 bg-slate-950/60 border border-slate-800 rounded-xl">
+              <div className="flex flex-wrap items-center gap-2 min-h-[36px] p-2.5 bg-slate-950/60 border border-slate-800 rounded-md">
                 {task?.labels && task.labels.length > 0 ? (
                   task.labels.map(label => (
                     <LabelBadge
@@ -560,7 +560,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Add more detailed context or acceptance criteria..."
                 rows={4}
-                className="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-sm resize-none"
+                className="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-md text-white placeholder-slate-500 focus:outline-none focus:border-taskflow-accent text-sm resize-none"
               />
             </div>
 
@@ -568,14 +568,16 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
             <div className="pt-4 border-t border-slate-800">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <CheckSquare className="w-4 h-4 text-cyan-400" />
+                  <CheckSquare className="w-4 h-4 text-taskflow-accent" />
                   <h3 className="text-sm font-semibold text-white">Subtasks</h3>
                   <span className="text-xs text-slate-400">
                     ({completedSubtaskCount}/{totalSubtasks})
                   </span>
                 </div>
                 {totalSubtasks > 0 && (
-                  <span className="text-xs font-medium text-cyan-400">{progressPercent}%</span>
+                  <span className="text-xs font-medium text-taskflow-accent">
+                    {progressPercent}%
+                  </span>
                 )}
               </div>
 
@@ -583,7 +585,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               {totalSubtasks > 0 && (
                 <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4">
                   <div
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
+                    className="h-full bg-taskflow-surface transition-all duration-300"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -594,7 +596,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 {task?.subtasks.map(subtask => (
                   <div
                     key={subtask.id}
-                    className="group flex items-center justify-between p-2.5 bg-slate-950/60 border border-slate-800/80 rounded-xl hover:border-slate-700 transition-all"
+                    className="group flex items-center justify-between p-2.5 bg-slate-950/60 border border-slate-800/80 rounded-md hover:border-slate-700 transition-all"
                   >
                     <button
                       type="button"
@@ -634,12 +636,12 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   value={newSubtaskTitle}
                   onChange={e => setNewSubtaskTitle(e.target.value)}
                   placeholder="+ Add a subtask..."
-                  className="flex-1 px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                  className="flex-1 px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-taskflow-accent"
                 />
                 <button
                   type="submit"
                   disabled={isAddingSubtask || !newSubtaskTitle.trim()}
-                  className="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 bg-taskflow-accent-subtle hover:bg-taskflow-accent-subtle text-taskflow-accent border border-taskflow-accent rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
                 >
                   {isAddingSubtask ? 'Adding...' : 'Add'}
                 </button>
@@ -736,11 +738,11 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
         )}
 
         {/* Drawer Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-800 bg-slate-900/80 backdrop-blur-md flex items-center justify-between shrink-0">
+        <div className="px-5 py-3 border-t border-slate-800 bg-[#111827] flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white rounded-md hover:bg-slate-800 transition-colors cursor-pointer"
           >
             Close
           </button>
@@ -749,11 +751,11 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
               type="button"
               onClick={() => handleSave()}
               disabled={saving || !title.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium rounded-xl shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-md shadow-sm disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Saving...</span>
                 </>
               ) : (

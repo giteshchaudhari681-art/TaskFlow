@@ -34,7 +34,7 @@ const HEALTH_CONFIG: Record<string, { icon: React.ElementType; label: string; co
   COMPLETED: { icon: CheckCircle2, label: 'Completed', color: 'text-emerald-400' },
   OVERDUE: { icon: AlertTriangle, label: 'Overdue', color: 'text-rose-400' },
   AT_RISK: { icon: Clock, label: 'At Risk', color: 'text-amber-400' },
-  ON_TRACK: { icon: BarChart3, label: 'On Track', color: 'text-cyan-400' },
+  ON_TRACK: { icon: BarChart3, label: 'On Track', color: 'text-taskflow-accent' },
   NO_DATE: { icon: XCircle, label: 'No Date', color: 'text-taskflow-muted' },
 };
 
@@ -124,10 +124,10 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-end p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-start justify-end p-4 bg-black/50 animate-fadeIn"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-lg h-full max-h-[calc(100vh-2rem)] overflow-y-auto glass-panel rounded-2xl border border-taskflow-border shadow-2xl bg-taskflow-surface flex flex-col">
+      <div className="w-full max-w-lg h-full max-h-[calc(100vh-2rem)] overflow-y-auto editorial-surface rounded-lg border border-taskflow-border shadow-2xl bg-taskflow-surface flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 p-6 border-b border-taskflow-border/60 sticky top-0 bg-taskflow-surface z-10">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -140,7 +140,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                   type="text"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
-                  className="w-full bg-transparent border-b border-cyan-500 text-sm font-bold text-white focus:outline-none pb-0.5"
+                  className="w-full bg-transparent border-b border-taskflow-accent text-sm font-bold text-white focus:outline-none pb-0.5"
                   aria-label="Milestone title"
                 />
               ) : (
@@ -153,7 +153,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
             {canEdit && !isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="p-1.5 rounded-lg text-taskflow-muted hover:text-cyan-400 hover:bg-taskflow-bg transition-colors"
+                className="p-1.5 rounded-lg text-taskflow-muted hover:text-taskflow-accent hover:bg-taskflow-bg transition-colors"
                 aria-label="Edit milestone"
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -187,7 +187,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
         <div className="flex-1 p-6 space-y-5 overflow-y-auto">
           {editError && (
             <div
-              className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
+              className="p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
               role="alert"
             >
               <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -206,7 +206,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                 onChange={e => setDescription(e.target.value)}
                 rows={2}
                 placeholder="Add a description..."
-                className="w-full px-3 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none text-xs text-white resize-none transition-all"
+                className="w-full px-3 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none text-xs text-white resize-none transition-all"
                 aria-label="Milestone description"
               />
             ) : (
@@ -230,7 +230,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                   type="date"
                   value={startDate}
                   onChange={e => setStartDate(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-xl bg-taskflow-bg border border-taskflow-border focus:border-cyan-500 focus:outline-none text-xs text-white transition-all"
+                  className="w-full px-3 py-1.5 rounded-md bg-taskflow-bg border border-taskflow-border focus:border-taskflow-accent focus:outline-none text-xs text-white transition-all"
                 />
               ) : (
                 <p className="text-xs text-white">{formatDate(milestone.startDate)}</p>
@@ -247,7 +247,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                   value={dueDate}
                   onChange={e => setDueDate(e.target.value)}
                   min={startDate || undefined}
-                  className="w-full px-3 py-1.5 rounded-xl bg-taskflow-bg border border-taskflow-border focus:border-cyan-500 focus:outline-none text-xs text-white transition-all"
+                  className="w-full px-3 py-1.5 rounded-md bg-taskflow-bg border border-taskflow-border focus:border-taskflow-accent focus:outline-none text-xs text-white transition-all"
                 />
               ) : (
                 <p
@@ -268,7 +268,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
               <select
                 value={status}
                 onChange={e => setStatus(e.target.value as MilestoneStatus)}
-                className="w-full px-3 py-1.5 rounded-xl bg-taskflow-bg border border-taskflow-border focus:border-cyan-500 focus:outline-none text-xs text-white cursor-pointer transition-all"
+                className="w-full px-3 py-1.5 rounded-md bg-taskflow-bg border border-taskflow-border focus:border-taskflow-accent focus:outline-none text-xs text-white cursor-pointer transition-all"
               >
                 <option value={MilestoneStatus.OPEN}>Open</option>
                 <option value={MilestoneStatus.COMPLETED}>Completed</option>
@@ -280,7 +280,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
           </div>
 
           {/* Progress */}
-          <div className="glass-panel rounded-xl border border-taskflow-border p-4 bg-taskflow-bg/40 space-y-3">
+          <div className="editorial-surface rounded-md border border-taskflow-border p-4 bg-taskflow-bg/40 space-y-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-taskflow-muted uppercase tracking-wider text-[10px]">
                 Progress
@@ -299,7 +299,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
               aria-valuemax={100}
             >
               <div
-                className={`h-full rounded-full transition-all duration-700 ${milestone.progress === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-cyan-500 to-indigo-500'}`}
+                className={`h-full rounded-full transition-all duration-700 ${milestone.progress === 100 ? 'bg-emerald-500' : 'bg-taskflow-surface'}`}
                 style={{ width: `${milestone.progress}%` }}
               />
             </div>
@@ -327,7 +327,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                 {displayedTasks.map((task: MilestoneTaskItem) => (
                   <div
                     key={task.id}
-                    className="flex items-center gap-2.5 p-2.5 rounded-xl bg-taskflow-bg/60 border border-taskflow-border/40 hover:border-taskflow-border transition-colors"
+                    className="flex items-center gap-2.5 p-2.5 rounded-md bg-taskflow-bg/60 border border-taskflow-border/40 hover:border-taskflow-border transition-colors"
                   >
                     <span
                       className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${STATUS_COLORS[task.status] ?? 'bg-taskflow-surface text-taskflow-muted'}`}
@@ -340,7 +340,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                     <span className="text-xs text-white truncate flex-1">{task.title}</span>
                     {task.assignee && (
                       <div
-                        className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
+                        className="w-5 h-5 rounded-full bg-taskflow-surface flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
                         title={task.assignee.name}
                         aria-label={`Assigned to ${task.assignee.name}`}
                       >
@@ -352,7 +352,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                 {milestone.tasks.length > 5 && (
                   <button
                     onClick={() => setShowAllTasks(!showAllTasks)}
-                    className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors py-1"
+                    className="flex items-center gap-1.5 text-xs text-taskflow-accent hover:text-taskflow-accent transition-colors py-1"
                     aria-expanded={showAllTasks}
                     aria-label={
                       showAllTasks ? 'Show fewer tasks' : `Show all ${milestone.tasks.length} tasks`
@@ -372,7 +372,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
 
           {/* Delete zone */}
           {canEdit && (
-            <div className="glass-panel rounded-xl border border-rose-500/20 p-4 bg-rose-500/5 space-y-2.5">
+            <div className="editorial-surface rounded-md border border-rose-500/20 p-4 bg-rose-500/5 space-y-2.5">
               <p className="text-[11px] font-semibold text-rose-400">Danger Zone</p>
               <p className="text-[11px] text-taskflow-muted leading-relaxed">
                 Deleting this milestone will NOT delete its tasks. Tasks will be unassigned from

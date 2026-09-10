@@ -178,8 +178,8 @@ export const AuditLogSettings: React.FC = () => {
     }
     if (source === AuditSource.AI) {
       return (
-        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-          <Bot className="w-2.5 h-2.5 text-cyan-400" />
+        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-taskflow-accent-subtle text-taskflow-accent border border-taskflow-accent">
+          <Bot className="w-2.5 h-2.5 text-taskflow-accent" />
           <span>AI Advisory</span>
         </span>
       );
@@ -206,8 +206,8 @@ export const AuditLogSettings: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-taskflow-border pb-5">
         <div>
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-              <ShieldAlert className="w-5 h-5 text-cyan-400" />
+            <div className="p-2 rounded-lg bg-taskflow-accent-subtle border border-taskflow-accent">
+              <ShieldAlert className="w-5 h-5 text-taskflow-accent" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-white tracking-tight">
@@ -234,9 +234,9 @@ export const AuditLogSettings: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-card p-4 rounded-xl border border-taskflow-border space-y-3">
+      <div className="editorial-card p-4 rounded-md border border-taskflow-border space-y-3">
         <div className="flex items-center space-x-2 text-xs font-semibold text-taskflow-muted uppercase tracking-wider">
-          <Filter className="w-3.5 h-3.5 text-cyan-400" />
+          <Filter className="w-3.5 h-3.5 text-taskflow-accent" />
           <span>Filter Audit Trail</span>
         </div>
         <form
@@ -254,7 +254,7 @@ export const AuditLogSettings: React.FC = () => {
                 setSelectedAction(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-cyan-500 focus:outline-none"
+              className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-taskflow-accent focus:outline-none"
             >
               <option value="">All Actions</option>
               <optgroup label="Authentication & Security">
@@ -301,7 +301,7 @@ export const AuditLogSettings: React.FC = () => {
                 setSelectedProjectId(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-cyan-500 focus:outline-none"
+              className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-taskflow-accent focus:outline-none"
             >
               <option value="">All Projects</option>
               {projects.map(p => (
@@ -319,7 +319,7 @@ export const AuditLogSettings: React.FC = () => {
               type="date"
               value={fromFilter}
               onChange={e => setFromFilter(e.target.value)}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-cyan-500 focus:outline-none"
+              className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-taskflow-accent focus:outline-none"
             />
           </div>
 
@@ -331,11 +331,11 @@ export const AuditLogSettings: React.FC = () => {
                 type="date"
                 value={toFilter}
                 onChange={e => setToFilter(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-cyan-500 focus:outline-none"
+                className="w-full px-2.5 py-1.5 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:border-taskflow-accent focus:outline-none"
               />
               <button
                 type="submit"
-                className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs rounded-lg transition-colors"
+                className="px-3 py-1.5 bg-taskflow-accent hover:bg-taskflow-accent text-black font-semibold text-xs rounded-lg transition-colors"
               >
                 Apply
               </button>
@@ -356,17 +356,17 @@ export const AuditLogSettings: React.FC = () => {
 
       {/* Error state */}
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center space-x-3 text-xs text-red-300">
+        <div className="p-4 rounded-md bg-red-500/10 border border-red-500/30 flex items-center space-x-3 text-xs text-red-300">
           <AlertTriangle className="w-4 h-4 flex-shrink-0 text-red-400" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Table Container */}
-      <div className="glass-card rounded-xl border border-taskflow-border overflow-hidden">
+      <div className="editorial-card rounded-md border border-taskflow-border overflow-hidden">
         {loading && events.length === 0 ? (
           <div className="p-12 text-center text-taskflow-muted text-xs flex flex-col items-center space-y-3">
-            <RefreshCw className="w-6 h-6 animate-spin text-cyan-400" />
+            <RefreshCw className="w-6 h-6 animate-spin text-taskflow-accent" />
             <span>Loading audit log events...</span>
           </div>
         ) : events.length === 0 ? (
@@ -417,8 +417,8 @@ export const AuditLogSettings: React.FC = () => {
                                 className="w-5 h-5 rounded-full"
                               />
                             ) : event.actorType === ActorType.AI ? (
-                              <div className="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                                <Bot className="w-3 h-3 text-cyan-400" />
+                              <div className="w-5 h-5 rounded-full bg-taskflow-accent-subtle flex items-center justify-center">
+                                <Bot className="w-3 h-3 text-taskflow-accent" />
                               </div>
                             ) : (
                               <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white">
@@ -457,7 +457,7 @@ export const AuditLogSettings: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => setExpandedEventId(isExpanded ? null : event.id)}
-                              className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                              className="text-[11px] text-taskflow-accent hover:text-taskflow-accent font-medium transition-colors"
                             >
                               {isExpanded ? 'Hide Payload' : 'View Payload'}
                             </button>
@@ -469,7 +469,7 @@ export const AuditLogSettings: React.FC = () => {
                       {isExpanded && event.metadata && (
                         <tr className="bg-taskflow-surface/30">
                           <td colSpan={6} className="p-4">
-                            <div className="glass-card p-3 rounded-lg border border-taskflow-border text-left font-mono text-[11px] text-slate-300 max-h-48 overflow-y-auto">
+                            <div className="editorial-card p-3 rounded-lg border border-taskflow-border text-left font-mono text-[11px] text-slate-300 max-h-48 overflow-y-auto">
                               <div className="text-taskflow-muted text-[10px] mb-1 flex items-center justify-between">
                                 <span>SANITIZED AUDIT METADATA</span>
                                 {event.requestId && (

@@ -86,22 +86,22 @@ export const SecuritySettings: React.FC = () => {
       </div>
 
       {successMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
           <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Session notice */}
-      <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-800/50 text-cyan-300 text-xs flex items-start space-x-3">
-        <ShieldCheck className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+      <div className="p-4 rounded-md bg-taskflow-accent-subtle border border-taskflow-accent text-taskflow-accent text-xs flex items-start space-x-3">
+        <ShieldCheck className="w-4 h-4 text-taskflow-accent flex-shrink-0 mt-0.5" />
         <div>
           <span className="font-semibold text-white">Active Device Session Guard</span>
           <p className="text-taskflow-muted mt-0.5 leading-relaxed">
@@ -113,7 +113,7 @@ export const SecuritySettings: React.FC = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="glass-card p-5 rounded-xl border border-taskflow-border space-y-4">
+        <div className="editorial-card p-5 rounded-md border border-taskflow-border space-y-4">
           <div>
             <label className="block text-xs font-medium text-taskflow-text-dim mb-1.5">
               Current Password *
@@ -126,7 +126,7 @@ export const SecuritySettings: React.FC = () => {
                 value={currentPassword}
                 onChange={e => setCurrentPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-taskflow-accent transition-colors"
               />
               <button
                 type="button"
@@ -150,7 +150,7 @@ export const SecuritySettings: React.FC = () => {
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-taskflow-accent transition-colors"
               />
               <button
                 type="button"
@@ -174,7 +174,7 @@ export const SecuritySettings: React.FC = () => {
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-taskflow-accent transition-colors"
               />
             </div>
           </div>
@@ -225,7 +225,7 @@ export const SecuritySettings: React.FC = () => {
           <button
             type="submit"
             disabled={saving || !isValidNewPassword || !isMatch || !currentPassword}
-            className="py-2.5 px-5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 disabled:opacity-40"
+            className="py-2.5 px-5 rounded-lg bg-taskflow-surface hover: hover: text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 disabled:opacity-40"
           >
             {saving ? (
               <>

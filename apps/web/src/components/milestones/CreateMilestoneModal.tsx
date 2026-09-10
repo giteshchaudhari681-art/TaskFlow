@@ -50,8 +50,8 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-lg glass-panel rounded-2xl border border-taskflow-border shadow-2xl p-6 bg-taskflow-surface space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn">
+      <div className="w-full max-w-lg editorial-surface rounded-lg border border-taskflow-border shadow-2xl p-6 bg-taskflow-surface space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -62,7 +62,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-taskflow-muted hover:text-white hover:bg-taskflow-bg transition-colors"
+            className="p-2 rounded-md text-taskflow-muted hover:text-white hover:bg-taskflow-bg transition-colors"
             aria-label="Close create milestone dialog"
           >
             <X className="w-4 h-4" />
@@ -71,7 +71,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
 
         {error && (
           <div
-            className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
+            className="p-3.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
             role="alert"
           >
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -93,7 +93,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
               placeholder="e.g. Design Phase, Launch v1.0"
               maxLength={200}
               required
-              className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white placeholder-taskflow-muted transition-all"
+              className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white placeholder-taskflow-muted transition-all"
             />
           </div>
 
@@ -113,7 +113,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
               placeholder="What does this milestone represent?"
               rows={2}
               maxLength={5000}
-              className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white placeholder-taskflow-muted transition-all resize-none"
+              className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white placeholder-taskflow-muted transition-all resize-none"
             />
           </div>
 
@@ -132,7 +132,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
                 type="date"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white transition-all"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all"
               />
             </div>
             <div className="space-y-1.5">
@@ -149,7 +149,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
                 value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
                 min={startDate || undefined}
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white transition-all"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
               id="ms-status"
               value={status}
               onChange={e => setStatus(e.target.value as MilestoneStatus)}
-              className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white transition-all cursor-pointer"
+              className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all cursor-pointer"
             >
               <option value={MilestoneStatus.OPEN}>Open</option>
               <option value={MilestoneStatus.COMPLETED}>Completed</option>
@@ -176,14 +176,14 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-taskflow-muted hover:text-white bg-taskflow-surface border border-taskflow-border hover:bg-taskflow-bg transition-all"
+              className="px-4 py-2 rounded-md text-xs font-semibold text-taskflow-muted hover:text-white bg-taskflow-surface border border-taskflow-border hover:bg-taskflow-bg transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !title.trim()}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer"
+              className="px-5 py-2 rounded-md text-xs font-semibold bg-taskflow-surface hover: hover: text-white shadow-glow-cyan disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer"
             >
               {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               <span>Create Milestone</span>

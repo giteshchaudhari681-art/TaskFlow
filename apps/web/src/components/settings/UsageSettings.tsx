@@ -69,7 +69,7 @@ export const UsageSettings: React.FC = () => {
     return (
       <div className="space-y-6" data-testid="usage-unauthorized">
         <div className="flex items-center space-x-3 pb-4 border-b border-taskflow-border">
-          <Gauge className="w-5 h-5 text-cyan-400" />
+          <Gauge className="w-5 h-5 text-taskflow-accent" />
           <div>
             <h2 className="text-base font-semibold text-white">Usage & Plan</h2>
             <p className="text-xs text-taskflow-muted">
@@ -77,7 +77,7 @@ export const UsageSettings: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center space-x-3">
+        <div className="p-4 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center space-x-3">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>
             Restricted Access: Workspace usage and subscription controls are restricted to workspace
@@ -93,7 +93,7 @@ export const UsageSettings: React.FC = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-taskflow-border">
           <div className="flex items-center space-x-3">
-            <Gauge className="w-5 h-5 text-cyan-400" />
+            <Gauge className="w-5 h-5 text-taskflow-accent" />
             <div>
               <h2 className="text-base font-semibold text-white">Usage & Plan</h2>
               <p className="text-xs text-taskflow-muted">Loading workspace capacity...</p>
@@ -101,7 +101,7 @@ export const UsageSettings: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center justify-center py-12 text-taskflow-muted text-xs space-x-2">
-          <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
+          <RefreshCw className="w-4 h-4 animate-spin text-taskflow-accent" />
           <span>Retrieving authoritative usage metrics...</span>
         </div>
       </div>
@@ -121,7 +121,7 @@ export const UsageSettings: React.FC = () => {
 
     return (
       <div
-        className={`p-4 rounded-xl border transition-all ${
+        className={`p-4 rounded-md border transition-all ${
           isFull
             ? 'bg-rose-500/5 border-rose-500/30'
             : 'bg-taskflow-surface/40 border-taskflow-border hover:border-taskflow-border/80'
@@ -135,7 +135,7 @@ export const UsageSettings: React.FC = () => {
           </div>
           <span
             className={`text-xs font-mono font-semibold ${
-              isFull ? 'text-rose-400' : pct > 80 ? 'text-amber-400' : 'text-cyan-400'
+              isFull ? 'text-rose-400' : pct > 80 ? 'text-amber-400' : 'text-taskflow-accent'
             }`}
           >
             {current} / {limit}
@@ -150,7 +150,7 @@ export const UsageSettings: React.FC = () => {
                 ? 'bg-rose-500 shadow-glow-rose'
                 : pct > 80
                   ? 'bg-amber-500'
-                  : 'bg-gradient-to-r from-cyan-500 to-indigo-500'
+                  : 'bg-taskflow-surface'
             }`}
             style={{ width: `${pct}%` }}
           />
@@ -176,7 +176,7 @@ export const UsageSettings: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-taskflow-border">
         <div className="flex items-center space-x-3">
-          <Gauge className="w-5 h-5 text-cyan-400" />
+          <Gauge className="w-5 h-5 text-taskflow-accent" />
           <div>
             <h2 className="text-base font-semibold text-white">Usage & Plan</h2>
             <p className="text-xs text-taskflow-muted">
@@ -212,7 +212,7 @@ export const UsageSettings: React.FC = () => {
       {usage && (
         <>
           {/* Subscription Overview Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-950/20 via-taskflow-surface/60 to-indigo-950/20 border border-taskflow-border relative overflow-hidden">
+          <div className="p-5 rounded-lg bg-taskflow-surface  border border-taskflow-border relative overflow-hidden">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center space-x-3">
@@ -222,9 +222,9 @@ export const UsageSettings: React.FC = () => {
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide border ${
                       usage.plan === Plan.BUSINESS
-                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                        ? 'bg-taskflow-elevated text-taskflow-text border-taskflow-border'
                         : usage.plan === Plan.PRO
-                          ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                          ? 'bg-taskflow-accent-subtle text-taskflow-accent border-taskflow-accent'
                           : 'bg-zinc-500/20 text-zinc-300 border-zinc-500/40'
                     }`}
                     data-testid="current-plan-badge"
@@ -261,7 +261,7 @@ export const UsageSettings: React.FC = () => {
                   <select
                     value={selectedPlan}
                     onChange={e => setSelectedPlan(e.target.value as Plan)}
-                    className="bg-taskflow-bg border border-taskflow-border text-white text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500"
+                    className="bg-taskflow-bg border border-taskflow-border text-white text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-taskflow-accent"
                     data-testid="plan-select"
                   >
                     <option value={Plan.FREE}>FREE</option>
@@ -272,7 +272,7 @@ export const UsageSettings: React.FC = () => {
                     type="button"
                     onClick={handleUpdatePlan}
                     disabled={updatingPlan || selectedPlan === usage.plan}
-                    className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-xs font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-taskflow-accent hover:bg-taskflow-accent disabled:opacity-50 text-white text-xs font-medium transition-colors"
                     data-testid="change-plan-btn"
                   >
                     {updatingPlan ? 'Updating...' : 'Change Plan'}
@@ -288,7 +288,7 @@ export const UsageSettings: React.FC = () => {
             usage.activeTasks.remaining <= 0 ||
             usage.aiRequests.remaining <= 0) && (
             <div
-              className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-3"
+              className="p-4 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-3"
               data-testid="limit-reached-banner"
             >
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -310,7 +310,7 @@ export const UsageSettings: React.FC = () => {
               usage.members.current,
               usage.members.limit,
               usage.members.remaining,
-              <Users className="w-4 h-4 text-cyan-400" />,
+              <Users className="w-4 h-4 text-taskflow-accent" />,
               'meter-members'
             )}
             {renderMeter(
@@ -334,15 +334,15 @@ export const UsageSettings: React.FC = () => {
               usage.aiRequests.current,
               usage.aiRequests.limit,
               usage.aiRequests.remaining,
-              <Sparkles className="w-4 h-4 text-purple-400" />,
+              <Sparkles className="w-4 h-4 text-taskflow-text" />,
               'meter-ai'
             )}
           </div>
 
           {/* Feature Matrix Card */}
-          <div className="glass-card p-5 rounded-xl border border-taskflow-border space-y-4">
+          <div className="editorial-card p-5 rounded-md border border-taskflow-border space-y-4">
             <div className="flex items-center space-x-2 text-xs font-semibold text-white">
-              <Shield className="w-4 h-4 text-cyan-400" />
+              <Shield className="w-4 h-4 text-taskflow-accent" />
               <span>Plan Feature Capabilities</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -369,8 +369,8 @@ export const UsageSettings: React.FC = () => {
           </div>
 
           {/* Billing Notice */}
-          <div className="p-4 rounded-xl bg-taskflow-surface/20 border border-taskflow-border/40 text-[11px] text-taskflow-muted flex items-start space-x-3">
-            <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-md bg-taskflow-surface/20 border border-taskflow-border/40 text-[11px] text-taskflow-muted flex items-start space-x-3">
+            <Info className="w-4 h-4 text-taskflow-accent shrink-0 mt-0.5" />
             <div>
               <span className="text-zinc-300 font-medium block">
                 Subscription Architecture Notice

@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { TaskListItem, TaskStatus, TaskPriority } from '@taskflow/shared';
 import { LabelBadge } from '../labels/LabelBadge';
+import { Badge } from '../ui/Badge';
+import { motion } from 'framer-motion';
 
 interface KanbanCardProps {
   task: TaskListItem;
@@ -30,31 +32,27 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
     switch (priority) {
       case TaskPriority.URGENT:
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-950/80 text-rose-300 border border-rose-800/80">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse mr-1" />
+          <Badge variant="danger" size="sm" dot>
             Urgent
-          </span>
+          </Badge>
         );
       case TaskPriority.HIGH:
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-950/80 text-amber-300 border border-amber-800/80">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1" />
+          <Badge variant="warning" size="sm" dot>
             High
-          </span>
+          </Badge>
         );
       case TaskPriority.MEDIUM:
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider bg-cyan-950/60 text-cyan-300 border border-cyan-800/60">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mr-1" />
+          <Badge variant="primary" size="sm" dot>
             Medium
-          </span>
+          </Badge>
         );
       case TaskPriority.LOW:
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider bg-slate-900/80 text-slate-400 border border-slate-700/60">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-1" />
+          <Badge variant="default" size="sm">
             Low
-          </span>
+          </Badge>
         );
       default:
         return null;
@@ -79,21 +77,29 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
   };
 
   return (
-    <div
+    <motion.div
+      layoutId={task.id}
       draggable={canMove}
-      onDragStart={handleDragStart}
+      onDragStart={(e: any) => handleDragStart(e)}
       onDragEnd={handleDragEnd}
       onClick={() => onCardClick(task)}
-      className={`group relative rounded-xl border p-3.5 bg-taskflow-surface/80 hover:bg-taskflow-surface hover:border-cyan-500/40 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-glow-cyan/20 ${
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0, rotateZ: isDragging ? 1.5 : 0, scale: isDragging ? 1.02 : 1 }}
+      transition={{
+        type: 'spring',
+        stiffness: isDragging ? 200 : 300,
+        damping: isDragging ? 15 : 20,
+      }}
+      className={`group relative rounded-lg border p-3.5 bg-[#181b23] border-[#242834] hover:bg-[#1c202a] transition-colors cursor-pointer ${
         isDragging
-          ? 'opacity-40 scale-[0.98] border-cyan-500/60 ring-2 ring-cyan-500/30 shadow-2xl'
-          : 'border-taskflow-border'
+          ? 'opacity-90 border-[#e05638] ring-1 ring-[#e05638]/50 shadow-[0_24px_48px_rgba(12,10,8,0.62)] z-50'
+          : 'shadow-elevation-1 hover:shadow-[0_6px_16px_rgba(20,18,16,0.4)] hover:-translate-y-0.5 z-10'
       }`}
     >
       {/* Top row: Issue key & priority */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center space-x-1.5">
-          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-cyan-950/60 text-cyan-300 border border-cyan-800/60">
+        <div className="flex items-center space-x-2">
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#111318] border border-[#242834] text-slate-300">
             {task.issueKey}
           </span>
         </div>
@@ -101,7 +107,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
         <div className="flex items-center space-x-1.5">
           {getPriorityBadge(task.priority)}
 
-          {/* Accessible Quick Move Menu for Keyboard/Screen-reader */}
+          {/* Quick Move Dropdown */}
           {canMove && onStatusChange && (
             <div className="relative" onClick={e => e.stopPropagation()}>
               <button
@@ -109,14 +115,14 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
                 onClick={() => setShowQuickMove(!showQuickMove)}
                 title="Move task to another column"
                 aria-label="Move task"
-                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-taskflow-surface-hover text-taskflow-muted hover:text-white transition-opacity"
+                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#242834] text-slate-400 hover:text-white transition-opacity cursor-pointer"
               >
                 <MoreHorizontal className="w-3.5 h-3.5" />
               </button>
 
               {showQuickMove && (
-                <div className="absolute right-0 top-6 z-30 w-44 rounded-xl bg-taskflow-surface border border-taskflow-border shadow-2xl p-1.5 space-y-0.5 text-xs animate-in fade-in zoom-in-95">
-                  <div className="px-2 py-1 text-[10px] font-bold text-taskflow-muted uppercase tracking-wider border-b border-taskflow-border mb-1">
+                <div className="absolute right-0 top-6 z-30 w-44 rounded-lg bg-[#161920] border border-[#282c38] shadow-elevation-3 p-1.5 space-y-0.5 text-xs">
+                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 font-display uppercase tracking-wider border-b border-[#242834] mb-1">
                     Move to Column
                   </div>
                   {Object.values(TaskStatus).map(s => (
@@ -128,16 +134,14 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
                         setShowQuickMove(false);
                         onStatusChange(task.id, s);
                       }}
-                      className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-left transition-colors ${
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-left text-xs transition-colors cursor-pointer ${
                         task.status === s
-                          ? 'text-cyan-400 bg-cyan-950/40 font-semibold'
-                          : 'text-gray-300 hover:text-white hover:bg-taskflow-surface-hover'
+                          ? 'text-[#e05638] bg-[#1e222d] font-semibold'
+                          : 'text-slate-300 hover:text-white hover:bg-[#1e222d]'
                       }`}
                     >
                       <span className="capitalize">{s.replace('_', ' ').toLowerCase()}</span>
-                      {task.status !== s && (
-                        <ChevronRight className="w-3 h-3 text-taskflow-muted" />
-                      )}
+                      {task.status !== s && <ChevronRight className="w-3 h-3 text-slate-500" />}
                     </button>
                   ))}
                 </div>
@@ -148,22 +152,19 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
       </div>
 
       {/* Title */}
-      <h4 className="text-sm font-semibold text-white group-hover:text-cyan-200 transition-colors line-clamp-2 leading-snug mb-2">
+      <h4 className="text-xs sm:text-sm font-medium text-slate-100 group-hover:text-white transition-colors line-clamp-2 leading-snug mb-2.5 font-display">
         {task.title}
       </h4>
 
       {/* Labels */}
       {task.labels && task.labels.length > 0 && (
-        <div
-          className="flex flex-wrap items-center gap-1.5 mb-3"
-          onClick={e => e.stopPropagation()}
-        >
+        <div className="flex flex-wrap items-center gap-1 mb-3" onClick={e => e.stopPropagation()}>
           {task.labels.slice(0, 3).map(label => (
             <LabelBadge key={label.id} label={label} size="xs" />
           ))}
           {task.labels.length > 3 && (
             <span
-              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700"
+              className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-[#111318] text-slate-400 border border-[#242834]"
               title={task.labels
                 .slice(3)
                 .map(l => l.name)
@@ -176,15 +177,15 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
       )}
 
       {/* Bottom row: Subtasks, Due Date, and Assignee */}
-      <div className="flex items-center justify-between pt-2 border-t border-taskflow-border/50 text-xs text-taskflow-muted">
-        <div className="flex items-center space-x-2.5">
+      <div className="flex items-center justify-between pt-2.5 border-t border-[#242834] text-xs text-slate-400">
+        <div className="flex items-center space-x-3">
           {/* Subtask count */}
           {task.subtaskCount > 0 && (
             <span
-              className="flex items-center text-[11px] font-medium text-taskflow-muted"
+              className="flex items-center text-[11px] font-medium text-slate-300"
               title={`${task.completedSubtaskCount}/${task.subtaskCount} subtasks completed`}
             >
-              <CheckSquare className="w-3.5 h-3.5 mr-1 text-cyan-400" />
+              <CheckSquare className="w-3.5 h-3.5 mr-1 text-slate-500" />
               <span>
                 {task.completedSubtaskCount > 0
                   ? `${task.completedSubtaskCount}/${task.subtaskCount}`
@@ -197,14 +198,14 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
           {task.dueDate && (
             <span
               className={`flex items-center text-[11px] font-medium ${
-                isOverdue ? 'text-rose-400 font-semibold' : 'text-taskflow-muted'
+                isOverdue ? 'text-rose-400 font-semibold' : 'text-slate-400'
               }`}
               title={`Due ${new Date(task.dueDate).toLocaleDateString()}`}
             >
               {isOverdue ? (
                 <AlertCircle className="w-3.5 h-3.5 mr-1" />
               ) : (
-                <Calendar className="w-3.5 h-3.5 mr-1" />
+                <Calendar className="w-3.5 h-3.5 mr-1 text-slate-500" />
               )}
               <span>
                 {new Date(task.dueDate).toLocaleDateString(undefined, {
@@ -221,7 +222,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
               className={`flex items-center text-[11px] font-medium ${
                 task.dependencySummary.hasUnresolvedBlockers
                   ? 'text-rose-400 font-semibold'
-                  : 'text-taskflow-muted'
+                  : 'text-slate-400'
               }`}
               title={
                 task.dependencySummary.hasUnresolvedBlockers
@@ -229,7 +230,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
                   : `${task.dependencySummary.totalDependencies} linked dependencies`
               }
             >
-              <Link2 className="w-3.5 h-3.5 mr-1 text-cyan-400" />
+              <Link2 className="w-3.5 h-3.5 mr-1 text-slate-500" />
               <span>
                 {task.dependencySummary.hasUnresolvedBlockers
                   ? `Blocked (${task.dependencySummary.blockedByCount})`
@@ -243,14 +244,14 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
         <div>
           {task.assignee ? (
             <div
-              className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-cyan-500/40"
+              className="w-5.5 h-5.5 rounded bg-[#222634] border border-[#323748] flex items-center justify-center text-[10px] font-mono font-bold text-slate-200"
               title={`Assigned to ${task.assignee.name}`}
             >
               {task.assignee.name.charAt(0).toUpperCase()}
             </div>
           ) : (
             <div
-              className="w-6 h-6 rounded-full border border-dashed border-taskflow-border flex items-center justify-center text-[9px] text-taskflow-muted"
+              className="w-5.5 h-5.5 rounded border border-dashed border-[#2d3242] flex items-center justify-center text-[10px] text-slate-500"
               title="Unassigned"
             >
               -
@@ -258,6 +259,6 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

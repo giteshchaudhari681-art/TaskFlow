@@ -153,7 +153,7 @@ export const MembersSettings: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowInviteModal(true)}
-            className="py-2 px-4 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 self-start sm:self-auto"
+            className="py-2 px-4 rounded-lg bg-taskflow-surface hover: hover: text-white text-xs font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 self-start sm:self-auto"
           >
             <UserPlus className="w-3.5 h-3.5" />
             <span>Invite Member</span>
@@ -162,14 +162,14 @@ export const MembersSettings: React.FC = () => {
       </div>
 
       {successMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
           <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -183,15 +183,15 @@ export const MembersSettings: React.FC = () => {
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Filter members by name or email..."
-          className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-xs focus:outline-none focus:border-cyan-500 transition-colors"
+          className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-xs focus:outline-none focus:border-taskflow-accent transition-colors"
         />
       </div>
 
       {/* Members Table / List */}
-      <div className="glass-card rounded-xl border border-taskflow-border overflow-hidden">
+      <div className="editorial-card rounded-md border border-taskflow-border overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-taskflow-muted">
-            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
+            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-taskflow-accent" />
             <p className="text-xs">Loading members directory...</p>
           </div>
         ) : filteredMembers.length === 0 ? (
@@ -207,12 +207,8 @@ export const MembersSettings: React.FC = () => {
               const isTargetOwner = m.role === UserRole.OWNER;
               const isSoleOwner = isTargetOwner && ownerCount <= 1;
 
-              // Role edit permissions:
-              // - User cannot edit own role
-              // - ADMIN cannot edit an OWNER
-              // - Only OWNER can promote to OWNER
-              const canEditThisRole =
-                canManage && !isCurrentUser && (isOwner || (isAdmin && !isTargetOwner));
+              // Role edit permissions: Only OWNER can change member roles
+              const canEditThisRole = isOwner && !isCurrentUser;
 
               // Removal permissions:
               // - ADMIN cannot remove an OWNER
@@ -226,7 +222,7 @@ export const MembersSettings: React.FC = () => {
                   className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-taskflow-surface/30 transition-colors"
                 >
                   <div className="flex items-center space-x-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 p-0.5 flex-shrink-0">
+                    <div className="w-10 h-10 rounded-md bg-taskflow-surface p-0.5 flex-shrink-0">
                       <div className="w-full h-full bg-taskflow-surface rounded-[10px] overflow-hidden flex items-center justify-center">
                         {m.user.avatarUrl ? (
                           <img
@@ -246,7 +242,7 @@ export const MembersSettings: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <span className="text-xs font-semibold text-white">{m.user.name}</span>
                         {isCurrentUser && (
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-medium">
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-taskflow-accent-subtle text-taskflow-accent border border-taskflow-accent font-medium">
                             You
                           </span>
                         )}
@@ -273,7 +269,7 @@ export const MembersSettings: React.FC = () => {
                         disabled={actionLoading}
                         value={m.role}
                         onChange={e => handleRoleChange(m, e.target.value as UserRole)}
-                        className="text-xs px-2.5 py-1 rounded-lg bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                        className="text-xs px-2.5 py-1 rounded-lg bg-taskflow-surface border border-taskflow-border text-white focus:outline-none focus:border-taskflow-accent transition-colors"
                       >
                         {isOwner && <option value={UserRole.OWNER}>OWNER</option>}
                         <option value={UserRole.ADMIN}>ADMIN</option>
@@ -320,11 +316,11 @@ export const MembersSettings: React.FC = () => {
 
       {/* Invite Member Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="glass-card max-w-md w-full p-6 rounded-2xl border border-taskflow-border shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 ">
+          <div className="editorial-card max-w-md w-full p-6 rounded-lg border border-taskflow-border shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <UserPlus className="w-4 h-4 text-cyan-400" />
+                <UserPlus className="w-4 h-4 text-taskflow-accent" />
                 <h4 className="text-sm font-semibold text-white">Add Team Member</h4>
               </div>
               <button
@@ -355,7 +351,7 @@ export const MembersSettings: React.FC = () => {
                     value={inviteEmail}
                     onChange={e => setInviteEmail(e.target.value)}
                     placeholder="teammate@company.com"
-                    className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white text-xs placeholder-taskflow-muted focus:outline-none focus:border-cyan-500"
+                    className="w-full pl-9 pr-4 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white text-xs placeholder-taskflow-muted focus:outline-none focus:border-taskflow-accent"
                   />
                 </div>
               </div>
@@ -367,7 +363,7 @@ export const MembersSettings: React.FC = () => {
                 <select
                   value={inviteRole}
                   onChange={e => setInviteRole(e.target.value as UserRole)}
-                  className="w-full px-3 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white text-xs focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white text-xs focus:outline-none focus:border-taskflow-accent"
                 >
                   <option value={UserRole.MEMBER}>MEMBER (Standard execution access)</option>
                   <option value={UserRole.ADMIN}>ADMIN (Workspace administrator)</option>
@@ -386,7 +382,7 @@ export const MembersSettings: React.FC = () => {
                 <button
                   type="submit"
                   disabled={actionLoading || !inviteEmail.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-glow-cyan transition-all disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-lg bg-taskflow-surface hover: hover: text-white text-xs font-semibold shadow-glow-cyan transition-all disabled:opacity-50"
                 >
                   {actionLoading ? 'Adding...' : 'Add Member'}
                 </button>
@@ -398,8 +394,8 @@ export const MembersSettings: React.FC = () => {
 
       {/* Remove Member Confirmation Modal */}
       {memberToRemove && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="glass-card max-w-sm w-full p-5 rounded-2xl border border-rose-900/60 shadow-2xl space-y-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 ">
+          <div className="editorial-card max-w-sm w-full p-5 rounded-lg border border-rose-900/60 shadow-2xl space-y-3">
             <div className="flex items-center space-x-2 text-rose-400">
               <AlertCircle className="w-5 h-5" />
               <h4 className="text-sm font-semibold text-white">Remove Member</h4>

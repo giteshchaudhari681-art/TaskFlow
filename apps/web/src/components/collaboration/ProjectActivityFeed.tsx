@@ -62,9 +62,9 @@ export const ProjectActivityFeed: React.FC<ProjectActivityFeedProps> = ({
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-900/60 border border-slate-800 rounded-2xl backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-900/60 border border-slate-800 rounded-lg ">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
+          <div className="p-2.5 bg-taskflow-accent-subtle border border-taskflow-accent rounded-md text-taskflow-accent">
             <History className="w-5 h-5" />
           </div>
           <div>
@@ -85,9 +85,9 @@ export const ProjectActivityFeed: React.FC<ProjectActivityFeedProps> = ({
               <button
                 key={chip.id}
                 onClick={() => setActiveFilter(chip.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
                   isSelected
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/10'
+                    ? 'bg-taskflow-accent-subtle text-taskflow-accent border border-taskflow-accent shadow-sm shadow-elevation-1'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent'
                 }`}
               >
@@ -102,14 +102,14 @@ export const ProjectActivityFeed: React.FC<ProjectActivityFeedProps> = ({
       {/* Loading State */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400 text-sm">
-          <Loader2 className="w-6 h-6 animate-spin text-cyan-400 mb-3" />
+          <Loader2 className="w-6 h-6 animate-spin text-taskflow-accent mb-3" />
           <span>Loading project activity feed...</span>
         </div>
       )}
 
       {/* Error Banner */}
       {error && (
-        <div className="p-4 bg-red-950/40 border border-red-800/60 rounded-2xl text-sm text-red-300 flex items-center justify-between">
+        <div className="p-4 bg-red-950/40 border border-red-800/60 rounded-lg text-sm text-red-300 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
             <span>{error}</span>
@@ -125,7 +125,7 @@ export const ProjectActivityFeed: React.FC<ProjectActivityFeedProps> = ({
 
       {/* Empty State */}
       {!loading && !error && activities.length === 0 && (
-        <div className="text-center py-16 px-4 bg-slate-900/30 border border-slate-800/80 rounded-2xl">
+        <div className="text-center py-16 px-4 bg-slate-900/30 border border-slate-800/80 rounded-lg">
           <Activity className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <h3 className="text-sm font-semibold text-slate-300">No activity events found</h3>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
@@ -144,10 +144,10 @@ export const ProjectActivityFeed: React.FC<ProjectActivityFeedProps> = ({
             return (
               <div
                 key={activity.id}
-                className="group flex items-start gap-3.5 p-4 bg-slate-900/50 hover:bg-slate-900/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl transition-all shadow-sm"
+                className="group flex items-start gap-3.5 p-4 bg-slate-900/50 hover:bg-slate-900/80 border border-slate-800/80 hover:border-slate-700/80 rounded-lg transition-all shadow-sm"
               >
                 {/* Actor Avatar */}
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white shadow-md shadow-cyan-500/10 shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-md bg-taskflow-surface flex items-center justify-center text-xs font-bold text-white shadow-md shadow-elevation-1 shrink-0 mt-0.5">
                   {activity.actor?.name ? activity.actor.name[0].toUpperCase() : 'U'}
                 </div>
 

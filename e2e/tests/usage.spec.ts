@@ -21,11 +21,10 @@ test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     await loginPage.goto();
     await loginPage.login(owner.email, TEST_PASSWORD);
 
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 15000 });
 
-    // 3. Navigate to Settings -> Usage & Plan tab
-    await page.getByRole('button', { name: 'Settings & Workspace' }).click();
-    await page.getByRole('button', { name: 'Usage & Plan' }).click();
+    // 3. Navigate to Usage
+    await page.getByRole('button', { name: 'Usage', exact: true }).first().click();
 
     // 4. Verify Usage & Plan panel is rendered
     await expect(page.getByTestId('usage-settings-panel')).toBeVisible();
@@ -77,18 +76,17 @@ test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
     });
 
     // Log out and log in as MEMBER
-    await page.locator('button[title="Sign out of current session"]').click();
+    await page.locator('button[title="Sign out"]').click();
     await loginPage.switchToLogin();
     await loginPage.login(memberEmail, TEST_PASSWORD);
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 15000 });
 
     // Switch to owner organization
-    const orgSelect = page.locator('header select').first();
+    const orgSelect = page.locator('select').first();
     await orgSelect.selectOption(owner.organizationId);
 
-    // Open settings and go to Usage & Plan
-    await page.getByRole('button', { name: 'Settings & Workspace' }).click();
-    await page.getByRole('button', { name: 'Usage & Plan' }).click();
+    // Navigate to Usage
+    await page.getByRole('button', { name: 'Usage', exact: true }).first().click();
 
     // Member should see unauthorized restricted access message
     await expect(page.getByTestId('usage-unauthorized')).toBeVisible({ timeout: 10000 });

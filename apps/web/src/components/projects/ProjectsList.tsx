@@ -6,7 +6,6 @@ import {
   AlertCircle,
   FolderPlus,
   ArrowRight,
-  Shield,
   Activity,
   CheckCircle2,
   Clock,
@@ -16,6 +15,13 @@ import {
 import { ProjectListItem, ProjectStatus } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
 import { CreateProjectModal } from './CreateProjectModal';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Badge } from '../ui/Badge';
+import { EmptyState } from '../ui/EmptyState';
+import { Skeleton } from '../ui/Skeleton';
+import { motion } from 'framer-motion';
+import { useCardTilt } from '../../hooks/useCardTilt';
 
 interface ProjectsListProps {
   organizationId: string;
@@ -27,47 +33,78 @@ const STATUS_CONFIG: Record<
   ProjectStatus,
   {
     label: string;
-    bg: string;
-    text: string;
-    border: string;
+    variant: 'indigo' | 'success' | 'warning' | 'primary' | 'danger';
     icon: React.FC<{ className?: string }>;
   }
 > = {
   [ProjectStatus.PLANNING]: {
     label: 'Planning',
-    bg: 'bg-indigo-950/60',
-    text: 'text-indigo-400',
-    border: 'border-indigo-800/50',
+    variant: 'indigo',
     icon: Clock,
   },
   [ProjectStatus.ACTIVE]: {
     label: 'Active',
-    bg: 'bg-emerald-950/60',
-    text: 'text-emerald-400',
-    border: 'border-emerald-800/50',
+    variant: 'success',
     icon: Activity,
   },
   [ProjectStatus.PAUSED]: {
     label: 'Paused',
-    bg: 'bg-amber-950/60',
-    text: 'text-amber-400',
-    border: 'border-amber-800/50',
+    variant: 'warning',
     icon: PauseCircle,
   },
   [ProjectStatus.COMPLETED]: {
     label: 'Completed',
-    bg: 'bg-cyan-950/60',
-    text: 'text-cyan-400',
-    border: 'border-cyan-800/50',
+    variant: 'primary',
     icon: CheckCircle2,
   },
   [ProjectStatus.ARCHIVED]: {
     label: 'Archived',
-    bg: 'bg-rose-950/60',
-    text: 'text-rose-400',
-    border: 'border-rose-800/50',
+    variant: 'danger',
     icon: Archive,
   },
+};
+
+const ProjectRow = ({ project, statusConfig, onSelectProject }: any) => {
+  const tiltRef = useCardTilt(1); // very subtle 1 degree tilt for rows
+  return (
+    <motion.button
+      ref={tiltRef as any}
+      variants={{
+        hidden: { opacity: 0, y: 10 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
+      }}
+      type="button"
+      onClick={() => onSelectProject(project.id)}
+      className="w-full text-left grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-3 py-3.5 border-b border-[#2e2924] hover:bg-[#1c1916] transition-colors card-interactive"
+      style={{ transformStyle: 'preserve-3d' }}
+    >
+      <div className="md:col-span-5 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span
+            className="w-1.5 h-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: project.color || '#c45c26' }}
+          />
+          <span className="font-mono text-[10px] text-[#9c948a]">{project.key}</span>
+        </div>
+        <div className="font-display text-[1.05rem] text-[#f3ede4] truncate">{project.name}</div>
+      </div>
+      <div className="md:col-span-2 flex items-center">
+        <Badge variant={statusConfig.variant} size="sm">
+          {statusConfig.label}
+        </Badge>
+      </div>
+      <div className="md:col-span-2 flex items-center text-xs text-[#9c948a]">
+        {project.userRole || '—'}
+      </div>
+      <div className="md:col-span-2 flex items-center gap-1.5 text-xs text-[#9c948a]">
+        <Users className="w-3.5 h-3.5" />
+        {project.memberCount}
+      </div>
+      <div className="md:col-span-1 flex items-center justify-end text-[#7d756c] group-hover:text-[#f3ede4] transition-colors">
+        <ArrowRight className="w-4 h-4" />
+      </div>
+    </motion.button>
+  );
 };
 
 export const ProjectsList: React.FC<ProjectsListProps> = ({
@@ -103,7 +140,6 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
     fetchProjects();
   }, [organizationId, statusFilter]);
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchProjects();
@@ -114,52 +150,75 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-taskflow-border/80">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-[#2e2924]">
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-white tracking-tight">Projects</h1>
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-taskflow-surface border border-taskflow-border text-cyan-400">
-              {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
-            </span>
-          </div>
-          <p className="text-xs text-taskflow-muted mt-1">
-            Workspace initiatives, execution pipelines, and project telemetry for {organizationName}
+          <p className="tf-kicker mb-2">{organizationName}</p>
+          <h1 className="tf-page-title">Projects</h1>
+          <p className="text-sm text-[#9c948a] mt-2">
+            {projects.length} {projects.length === 1 ? 'project' : 'projects'} in this workspace
           </p>
         </div>
-
-        <button
+        <Button
+          variant="primary"
+          size="md"
           onClick={() => setCreateModalOpen(true)}
-          className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center justify-center space-x-2 transition-all cursor-pointer"
+          leftIcon={<Plus className="w-4 h-4" />}
         >
-          <Plus className="w-4 h-4" />
-          <span>New Project</span>
-        </button>
+          New project
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 py-2">
+        <div>
+          <span className="tf-kicker block mb-2">Total</span>
+          <span className="tf-metric">{projects.length}</span>
+        </div>
+        <div>
+          <span className="tf-kicker block mb-2">Active</span>
+          <span className="tf-metric">
+            {projects.filter(p => p.status === ProjectStatus.ACTIVE).length}
+          </span>
+        </div>
+        <div>
+          <span className="tf-kicker block mb-2">Planning / paused</span>
+          <span className="tf-metric">
+            {
+              projects.filter(
+                p => p.status === ProjectStatus.PLANNING || p.status === ProjectStatus.PAUSED
+              ).length
+            }
+          </span>
+        </div>
+        <div>
+          <span className="tf-kicker block mb-2">Members</span>
+          <span className="tf-metric">
+            {projects.reduce((acc, p) => acc + (p.memberCount || 0), 0)}
+          </span>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-taskflow-muted" />
-          <input
+        <div className="w-full md:w-80">
+          <Input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search projects by name or key..."
-            className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-taskflow-surface border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs text-white placeholder-taskflow-muted transition-all"
+            leftIcon={<Search className="w-4 h-4" />}
           />
         </div>
 
         {/* Status Filter Chips */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
+        <div className="flex items-center space-x-1 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
           {['ALL', 'ACTIVE', 'PLANNING', 'PAUSED', 'COMPLETED', 'ARCHIVED'].map(status => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                 statusFilter === status
-                  ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                  : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50 border border-transparent'
+                  ? 'bg-[#1e2230] text-[#e05638] border border-[#e05638]/30'
+                  : 'text-slate-500 hover:text-slate-300 hover:bg-[#161920] border border-transparent'
               }`}
             >
               {status.charAt(0) + status.slice(1).toLowerCase()}
@@ -170,123 +229,66 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2.5">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="p-4 rounded-md bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Loading Skeleton */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-0">
           {[1, 2, 3].map(i => (
-            <div
-              key={i}
-              className="glass-panel p-5 rounded-2xl border border-taskflow-border/60 bg-taskflow-surface/50 animate-pulse space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-16 h-5 bg-taskflow-border/80 rounded-md" />
-                <div className="w-20 h-5 bg-taskflow-border/80 rounded-full" />
-              </div>
-              <div className="space-y-2">
-                <div className="w-3/4 h-5 bg-taskflow-border/80 rounded-md" />
-                <div className="w-full h-3 bg-taskflow-border/50 rounded-md" />
-              </div>
-              <div className="flex items-center justify-between pt-3 border-t border-taskflow-border/40">
-                <div className="w-16 h-4 bg-taskflow-border/60 rounded-md" />
-                <div className="w-20 h-4 bg-taskflow-border/60 rounded-md" />
-              </div>
+            <div key={i} className="h-12 border-b border-[#2e2924] flex items-center">
+              <Skeleton className="w-2/3 h-4" />
             </div>
           ))}
         </div>
       ) : projects.length === 0 ? (
-        /* Empty State */
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto mb-4">
-            <FolderPlus className="w-7 h-7" />
-          </div>
-          <h3 className="text-base font-semibold text-white">No projects found</h3>
-          <p className="text-xs text-taskflow-muted max-w-sm mx-auto mt-1.5">
-            {searchQuery || statusFilter !== 'ALL'
+        <EmptyState
+          icon={<FolderPlus className="w-6 h-6" />}
+          title="No projects found"
+          description={
+            searchQuery || statusFilter !== 'ALL'
               ? 'No projects match your current filters. Try changing your search query or status filter.'
-              : 'Get started by creating your first project workspace in this organization.'}
-          </p>
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="mt-5 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan inline-flex items-center space-x-2 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create First Project</span>
-          </button>
-        </div>
+              : 'Create the first project in this workspace.'
+          }
+          actionLabel="Create first project"
+          onAction={() => setCreateModalOpen(true)}
+        />
       ) : (
-        /* Project Cards Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map(project => {
-            const statusConfig =
-              STATUS_CONFIG[project.status] || STATUS_CONFIG[ProjectStatus.PLANNING];
-            const StatusIcon = statusConfig.icon;
-
-            return (
-              <div
-                key={project.id}
-                onClick={() => onSelectProject(project.id)}
-                className="group glass-panel rounded-2xl border border-taskflow-border hover:border-cyan-500/50 p-5 bg-taskflow-surface hover:bg-taskflow-surface/90 transition-all cursor-pointer flex flex-col justify-between hover:shadow-glow-cyan"
-              >
-                <div>
-                  {/* Top Bar: Key & Status Pill */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: project.color || '#06b6d4' }}
-                      />
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-taskflow-bg border border-taskflow-border text-cyan-300 uppercase">
-                        {project.key}
-                      </span>
-                    </div>
-
-                    <span
-                      className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
-                    >
-                      <StatusIcon className="w-3 h-3" />
-                      <span>{statusConfig.label}</span>
-                    </span>
-                  </div>
-
-                  {/* Name & Description */}
-                  <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors tracking-tight line-clamp-1">
-                    {project.name}
-                  </h3>
-                  <p className="text-xs text-taskflow-muted mt-1.5 line-clamp-2 min-h-[2rem]">
-                    {project.description || 'No description provided.'}
-                  </p>
-                </div>
-
-                {/* Footer Telemetry */}
-                <div className="pt-4 mt-4 border-t border-taskflow-border/60 flex items-center justify-between text-xs text-taskflow-muted">
-                  <div className="flex items-center space-x-3">
-                    <span className="flex items-center space-x-1" title="Active Project Members">
-                      <Users className="w-3.5 h-3.5 text-taskflow-muted" />
-                      <span>{project.memberCount}</span>
-                    </span>
-
-                    {project.userRole && (
-                      <span className="flex items-center space-x-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-taskflow-bg border border-taskflow-border text-indigo-300">
-                        <Shield className="w-2.5 h-2.5 mr-0.5" />
-                        {project.userRole}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center space-x-1 text-cyan-400 group-hover:translate-x-0.5 transition-transform text-[11px] font-medium">
-                    <span>Open</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="overflow-x-auto">
+          <div className="hidden md:grid grid-cols-12 gap-3 py-2 text-[11px] uppercase tracking-[0.12em] text-[#7d756c] border-b border-[#2e2924]">
+            <div className="col-span-5">Project</div>
+            <div className="col-span-2">Status</div>
+            <div className="col-span-2">Role</div>
+            <div className="col-span-2">Members</div>
+            <div className="col-span-1 text-right" />
+          </div>
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: 0.03 },
+              },
+            }}
+          >
+            {projects.map(project => {
+              const statusConfig =
+                STATUS_CONFIG[project.status] || STATUS_CONFIG[ProjectStatus.PLANNING];
+              return (
+                <ProjectRow
+                  key={project.id}
+                  project={project}
+                  statusConfig={statusConfig}
+                  onSelectProject={onSelectProject}
+                />
+              );
+            })}
+          </motion.div>
         </div>
       )}
 

@@ -22,71 +22,78 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
+  React.useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
   const tabs = [
-    { id: 'profile' as SettingsTab, label: 'Profile & Identity', icon: User },
-    { id: 'security' as SettingsTab, label: 'Security & Password', icon: Lock },
-    { id: 'notifications' as SettingsTab, label: 'Notifications', icon: Bell },
-    { id: 'workspace' as SettingsTab, label: 'Workspace Settings', icon: Building2 },
-    { id: 'members' as SettingsTab, label: 'Workspace Members', icon: Users },
-    { id: 'usage' as SettingsTab, label: 'Usage & Plan', icon: Gauge },
-    { id: 'audit' as SettingsTab, label: 'Audit & Security Log', icon: ShieldCheck },
+    { id: 'profile' as SettingsTab, label: 'Profile' },
+    { id: 'security' as SettingsTab, label: 'Security' },
+    { id: 'notifications' as SettingsTab, label: 'Notifications' },
+    { id: 'workspace' as SettingsTab, label: 'Workspace' },
+    { id: 'members' as SettingsTab, label: 'Members' },
+    { id: 'usage' as SettingsTab, label: 'Usage' },
+    { id: 'audit' as SettingsTab, label: 'Audit log' },
   ];
 
+  const icons: Record<SettingsTab, React.FC<{ className?: string }>> = {
+    profile: User,
+    security: Lock,
+    notifications: Bell,
+    workspace: Building2,
+    members: Users,
+    usage: Gauge,
+    audit: ShieldCheck,
+  };
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBackToDashboard}
-          className="flex items-center space-x-2 text-xs text-taskflow-muted hover:text-white transition-colors group"
-        >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Operations Dashboard</span>
-        </button>
-        <span className="text-[11px] text-taskflow-muted font-mono">Platform Settings v0.4.0</span>
+    <div className="space-y-8">
+      <div className="flex items-end justify-between gap-4 pb-4 border-b border-[#2e2924]">
+        <div>
+          <button
+            type="button"
+            onClick={onBackToDashboard}
+            className="inline-flex items-center gap-1.5 text-xs text-[#9c948a] hover:text-[#f3ede4] mb-3"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Home
+          </button>
+          <h1 className="tf-page-title">Settings</h1>
+        </div>
       </div>
 
-      {/* Main Settings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Navigation Sidebar */}
-        <div className="md:col-span-1 space-y-1">
-          <div className="glass-card p-2 rounded-xl border border-taskflow-border space-y-1">
-            {tabs.map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50'
-                  }`}
-                >
-                  <Icon
-                    className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-taskflow-muted'}`}
-                  />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <nav className="md:col-span-1 space-y-0.5">
+          {tabs.map(tab => {
+            const Icon = icons[tab.id];
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-[13px] font-medium relative ${
+                  isActive ? 'text-[#f3ede4] bg-[#1c1916]' : 'text-[#9c948a] hover:text-[#f3ede4]'
+                }`}
+              >
+                {isActive && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]" />
+                )}
+                <Icon className="w-3.5 h-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
 
-        {/* Content Pane */}
-        <div className="md:col-span-3">
-          <div className="glass-card p-6 rounded-2xl border border-taskflow-border">
-            {activeTab === 'profile' && <ProfileSettings />}
-            {activeTab === 'security' && <SecuritySettings />}
-            {activeTab === 'notifications' && <NotificationSettings />}
-            {activeTab === 'workspace' && <WorkspaceSettings />}
-            {activeTab === 'members' && <MembersSettings />}
-            {activeTab === 'usage' && <UsageSettings />}
-            {activeTab === 'audit' && <AuditLogSettings />}
-          </div>
+        <div className="md:col-span-3 min-w-0">
+          {activeTab === 'profile' && <ProfileSettings />}
+          {activeTab === 'security' && <SecuritySettings />}
+          {activeTab === 'notifications' && <NotificationSettings />}
+          {activeTab === 'workspace' && <WorkspaceSettings />}
+          {activeTab === 'members' && <MembersSettings />}
+          {activeTab === 'usage' && <UsageSettings />}
+          {activeTab === 'audit' && <AuditLogSettings />}
         </div>
       </div>
     </div>

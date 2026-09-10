@@ -142,7 +142,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
       case TaskStatus.DONE:
         return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
       case TaskStatus.IN_PROGRESS:
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+        return 'bg-taskflow-accent-subtle text-taskflow-accent border-taskflow-accent';
       case TaskStatus.IN_REVIEW:
         return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
       case TaskStatus.BLOCKED:
@@ -159,7 +159,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
       case TaskPriority.HIGH:
         return 'text-amber-400';
       case TaskPriority.MEDIUM:
-        return 'text-cyan-400';
+        return 'text-taskflow-accent';
       default:
         return 'text-slate-400';
     }
@@ -174,7 +174,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
     return (
       <div
         key={item.id}
-        className={`group flex items-center justify-between p-3 rounded-xl border transition-all ${
+        className={`group flex items-center justify-between p-3 rounded-md border transition-all ${
           isUnresolved
             ? 'bg-rose-950/20 border-rose-900/40 hover:border-rose-700/60'
             : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
@@ -184,7 +184,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
           className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
           onClick={() => onSelectTask && onSelectTask(item.task.id)}
         >
-          <span className="text-xs font-mono font-bold text-cyan-400 shrink-0">
+          <span className="text-xs font-mono font-bold text-taskflow-accent shrink-0">
             {item.task.issueKey}
           </span>
           <span className="text-xs text-slate-200 font-medium truncate">{item.task.title}</span>
@@ -232,7 +232,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link2 className="w-4 h-4 text-cyan-400" />
+          <Link2 className="w-4 h-4 text-taskflow-accent" />
           <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
             Dependencies
           </h3>
@@ -256,7 +256,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
               setIsAdding(true);
               setFormError(null);
             }}
-            className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+            className="inline-flex items-center gap-1 text-xs text-taskflow-accent hover:text-taskflow-accent transition-colors font-medium"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Dependency</span>
@@ -266,7 +266,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
 
       {/* Error alert */}
       {error && (
-        <div className="flex items-center gap-2 p-2.5 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+        <div className="flex items-center gap-2 p-2.5 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-md">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -276,7 +276,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
       {isAdding && (
         <form
           onSubmit={handleCreateDependency}
-          className="p-4 bg-slate-950 border border-cyan-500/30 rounded-xl space-y-3 shadow-lg shadow-cyan-950/20 animate-in fade-in duration-200"
+          className="p-4 bg-slate-950 border border-taskflow-accent rounded-md space-y-3 shadow-lg shadow-elevation-1 animate-in fade-in duration-200"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-white">New Dependency</span>
@@ -309,7 +309,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
               <select
                 value={depType}
                 onChange={e => setDepType(e.target.value as DependencyType)}
-                className="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                className="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-taskflow-accent"
               >
                 <option value={DependencyType.BLOCKS}>Blocks</option>
                 <option value={DependencyType.BLOCKED_BY}>Blocked By</option>
@@ -322,9 +322,9 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
                 Target Task
               </label>
               {selectedTargetTask ? (
-                <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 border border-cyan-500/40 rounded-lg">
+                <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 border border-taskflow-accent rounded-lg">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="text-xs font-mono font-bold text-cyan-400 shrink-0">
+                    <span className="text-xs font-mono font-bold text-taskflow-accent shrink-0">
                       {selectedTargetTask.issueKey}
                     </span>
                     <span className="text-xs text-slate-200 truncate">
@@ -348,10 +348,10 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       placeholder="Search key or title..."
-                      className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                      className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-taskflow-accent"
                     />
                     {searching && (
-                      <Loader2 className="absolute right-2.5 top-2 w-3.5 h-3.5 animate-spin text-cyan-400" />
+                      <Loader2 className="absolute right-2.5 top-2 w-3.5 h-3.5 animate-spin text-taskflow-accent" />
                     )}
                   </div>
 
@@ -370,7 +370,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
                           className="w-full flex items-center justify-between p-2 hover:bg-slate-800/80 text-left transition-colors"
                         >
                           <div className="flex items-center gap-2 truncate">
-                            <span className="text-xs font-mono font-bold text-cyan-400 shrink-0">
+                            <span className="text-xs font-mono font-bold text-taskflow-accent shrink-0">
                               {task.issueKey}
                             </span>
                             <span className="text-xs text-slate-200 truncate">{task.title}</span>
@@ -413,7 +413,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
             <button
               type="submit"
               disabled={submitting || !selectedTargetTask}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-slate-950 rounded-lg shadow-sm"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-taskflow-accent hover:bg-taskflow-accent disabled:opacity-50 text-slate-950 rounded-lg shadow-sm"
             >
               {submitting ? (
                 <>
@@ -431,7 +431,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
       {/* Loading state */}
       {loading ? (
         <div className="flex items-center justify-center p-6 text-slate-500">
-          <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
+          <Loader2 className="w-5 h-5 animate-spin text-taskflow-accent" />
         </div>
       ) : (
         <div className="space-y-4">
@@ -450,7 +450,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
           {/* Blocks List */}
           {data && data.blocks.length > 0 && (
             <div className="space-y-2">
-              <span className="block text-[11px] font-semibold text-cyan-400 uppercase tracking-wider">
+              <span className="block text-[11px] font-semibold text-taskflow-accent uppercase tracking-wider">
                 Blocks ({data.blocks.length})
               </span>
               <div className="space-y-1.5">
@@ -473,7 +473,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
 
           {/* Empty state */}
           {data && data.totalCount === 0 && !isAdding && (
-            <div className="p-4 bg-slate-950/40 border border-slate-800/80 rounded-xl text-center text-xs text-slate-500 italic">
+            <div className="p-4 bg-slate-950/40 border border-slate-800/80 rounded-md text-center text-xs text-slate-500 italic">
               No dependencies linked to this task
             </div>
           )}

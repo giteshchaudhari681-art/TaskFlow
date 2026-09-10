@@ -26,9 +26,9 @@ test.describe('E2E Authentication Workflows', () => {
     await loginPage.register(name, email, TEST_PASSWORD, orgName);
 
     // Expect successful transition to authenticated application
-    await expect(page.locator('text=Active Workspace:')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator(`text=Welcome back, ${name}`)).toBeVisible();
-    await expect(page.locator('text=Active Workspace:').first()).toContainText(orgName);
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(`text=${name}`)).toBeVisible();
+    await expect(page.locator('select')).toContainText(orgName);
   });
 
   test('TEST 2: Invalid registration validation prevents submission and displays error', async ({
@@ -62,9 +62,9 @@ test.describe('E2E Authentication Workflows', () => {
     // Submit credentials
     await loginPage.login(user.email, user.password);
 
-    // Expect authenticated navigation
-    await expect(loginPage.activeWorkspaceIndicator).toBeVisible({ timeout: 10000 });
-    await expect(page.locator(`text=Welcome back, ${user.name}`)).toBeVisible();
+    // Wait for the UI to update with authenticated state
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(`text=${user.name}`)).toBeVisible();
   });
 
   test('TEST 4: Invalid login displays meaningful error message', async ({ page }) => {
@@ -99,6 +99,6 @@ test.describe('E2E Authentication Workflows', () => {
 
     // Verify authenticated session remains active without redirecting to login form
     await expect(loginPage.activeWorkspaceIndicator).toBeVisible({ timeout: 10000 });
-    await expect(page.locator(`text=Welcome back, ${user.name}`)).toBeVisible();
+    await expect(page.locator(`text=${user.name}`)).toBeVisible();
   });
 });

@@ -137,7 +137,7 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
     return (
       <div className="min-h-[300px] flex items-center justify-center">
         <div className="text-center space-y-3">
-          <RefreshCw className="w-7 h-7 text-cyan-400 animate-spin mx-auto" />
+          <RefreshCw className="w-7 h-7 text-taskflow-accent animate-spin mx-auto" />
           <p className="text-sm text-taskflow-muted">Loading milestones...</p>
         </div>
       </div>
@@ -159,7 +159,7 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={fetchMilestones}
-            className="p-2 rounded-xl text-taskflow-muted hover:text-white hover:bg-taskflow-surface border border-taskflow-border transition-colors"
+            className="p-2 rounded-md text-taskflow-muted hover:text-white hover:bg-taskflow-surface border border-taskflow-border transition-colors"
             aria-label="Refresh milestones"
             title="Refresh"
           >
@@ -169,7 +169,7 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
             <button
               onClick={() => setShowCreate(true)}
               id="create-milestone-btn"
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-md text-xs font-semibold bg-taskflow-surface hover: hover: text-white shadow-glow-cyan flex items-center gap-1.5 transition-all cursor-pointer"
               aria-label="Create new milestone"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -181,7 +181,7 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
 
       {error && (
         <div
-          className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
+          className="p-3.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
           role="alert"
         >
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -192,33 +192,33 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
       {/* Stats Bar */}
       {milestones.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="glass-panel rounded-xl border border-taskflow-border p-3.5 bg-taskflow-surface/60">
+          <div className="editorial-surface rounded-md border border-taskflow-border p-3.5 bg-taskflow-surface/60">
             <div className="flex items-center gap-2">
-              <Milestone className="w-4 h-4 text-cyan-400" aria-hidden="true" />
+              <Milestone className="w-4 h-4 text-taskflow-accent" aria-hidden="true" />
               <span className="text-xs font-semibold text-taskflow-muted">Total</span>
             </div>
             <p className="text-2xl font-bold text-white mt-1.5">{stats.total}</p>
           </div>
-          <div className="glass-panel rounded-xl border border-emerald-500/20 p-3.5 bg-emerald-500/5">
+          <div className="editorial-surface rounded-md border border-emerald-500/20 p-3.5 bg-emerald-500/5">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               <span className="text-xs font-semibold text-emerald-500/60">Done</span>
             </div>
             <p className="text-2xl font-bold text-emerald-400 mt-1.5">{stats.completed}</p>
           </div>
-          <div className="glass-panel rounded-xl border border-rose-500/20 p-3.5 bg-rose-500/5">
+          <div className="editorial-surface rounded-md border border-rose-500/20 p-3.5 bg-rose-500/5">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-rose-400" aria-hidden="true" />
               <span className="text-xs font-semibold text-rose-500/60">Overdue</span>
             </div>
             <p className="text-2xl font-bold text-rose-400 mt-1.5">{stats.overdue}</p>
           </div>
-          <div className="glass-panel rounded-xl border border-cyan-500/20 p-3.5 bg-cyan-500/5">
+          <div className="editorial-surface rounded-md border border-taskflow-accent p-3.5 bg-taskflow-accent-subtle">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-cyan-400" aria-hidden="true" />
-              <span className="text-xs font-semibold text-cyan-500/60">On Track</span>
+              <BarChart3 className="w-4 h-4 text-taskflow-accent" aria-hidden="true" />
+              <span className="text-xs font-semibold text-taskflow-accent/60">On Track</span>
             </div>
-            <p className="text-2xl font-bold text-cyan-400 mt-1.5">{stats.onTrack}</p>
+            <p className="text-2xl font-bold text-taskflow-accent mt-1.5">{stats.onTrack}</p>
           </div>
         </div>
       )}
@@ -230,9 +230,9 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
             <button
               key={f.key}
               onClick={() => setFilterHealth(f.key)}
-              className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all border ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all border ${
                 filterHealth === f.key
-                  ? 'bg-taskflow-surface text-cyan-300 border-cyan-500/40 shadow-glow-cyan'
+                  ? 'bg-taskflow-surface text-taskflow-accent border-taskflow-accent shadow-glow-cyan'
                   : 'text-taskflow-muted hover:text-white border-transparent hover:bg-taskflow-surface/50'
               }`}
               aria-pressed={filterHealth === f.key}
@@ -246,8 +246,8 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
 
       {/* Milestone Grid */}
       {filteredMilestones.length === 0 && !loading ? (
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30 space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-950/60 border border-indigo-800/60 text-indigo-400 flex items-center justify-center mx-auto">
+        <div className="editorial-surface rounded-lg border border-taskflow-border p-12 text-center bg-taskflow-surface/30 space-y-4">
+          <div className="w-14 h-14 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-400 flex items-center justify-center mx-auto">
             <Milestone className="w-7 h-7" aria-hidden="true" />
           </div>
           <div className="space-y-1">
@@ -265,7 +265,7 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
           {canEdit && filterHealth === 'ALL' && (
             <button
               onClick={() => setShowCreate(true)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-glow-cyan flex items-center gap-1.5 mx-auto transition-all cursor-pointer"
+              className="px-4 py-2 rounded-md text-xs font-semibold bg-taskflow-surface text-white shadow-glow-cyan flex items-center gap-1.5 mx-auto transition-all cursor-pointer"
               aria-label="Create your first milestone"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -289,8 +289,8 @@ export const MilestonesView: React.FC<MilestonesViewProps> = ({
 
       {/* Loading detail overlay */}
       {detailLoading && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <RefreshCw className="w-6 h-6 text-cyan-400 animate-spin" />
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/20 ">
+          <RefreshCw className="w-6 h-6 text-taskflow-accent animate-spin" />
         </div>
       )}
 

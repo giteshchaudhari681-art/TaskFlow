@@ -91,7 +91,7 @@ describe('PR31: Worker Contention & Recovery Validation Suite', () => {
       organizationId: testOrgId,
     });
 
-    const claimed = await jobRepository.claimNextJob();
+    const claimed = await jobRepository.claimNextJob(testOrgId);
     expect(claimed).not.toBeNull();
     expect(claimed?.id).toBe(job.id);
 

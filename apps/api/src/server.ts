@@ -69,7 +69,9 @@ export const createServer = (): Express => {
       },
     },
   });
-  app.use(limiter);
+  if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+    app.use(limiter);
+  }
 
   // Request Body Parsers
   app.use(express.json({ limit: '10mb' }));

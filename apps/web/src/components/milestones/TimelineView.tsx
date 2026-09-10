@@ -12,7 +12,7 @@ const HEALTH_BAR_CLASS: Record<string, string> = {
   COMPLETED: 'bg-emerald-500',
   OVERDUE: 'bg-rose-500',
   AT_RISK: 'bg-amber-500',
-  ON_TRACK: 'bg-gradient-to-r from-cyan-500 to-indigo-500',
+  ON_TRACK: 'bg-taskflow-surface',
   NO_DATE: 'bg-taskflow-muted/40',
 };
 
@@ -20,7 +20,7 @@ const HEALTH_TEXT: Record<string, string> = {
   COMPLETED: 'text-emerald-400',
   OVERDUE: 'text-rose-400',
   AT_RISK: 'text-amber-400',
-  ON_TRACK: 'text-cyan-400',
+  ON_TRACK: 'text-taskflow-accent',
   NO_DATE: 'text-taskflow-muted',
 };
 
@@ -99,7 +99,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
     return (
       <div className="min-h-[300px] flex items-center justify-center">
         <div className="text-center space-y-3">
-          <RefreshCw className="w-7 h-7 text-cyan-400 animate-spin mx-auto" />
+          <RefreshCw className="w-7 h-7 text-taskflow-accent animate-spin mx-auto" />
           <p className="text-sm text-taskflow-muted">Loading timeline...</p>
         </div>
       </div>
@@ -109,7 +109,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
   if (error) {
     return (
       <div
-        className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
+        className="p-3.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2"
         role="alert"
       >
         <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -120,8 +120,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
 
   if (!timeline || timeline.milestones.length === 0) {
     return (
-      <div className="glass-panel rounded-2xl border border-taskflow-border p-12 text-center bg-taskflow-surface/30 space-y-4">
-        <div className="w-14 h-14 rounded-2xl bg-indigo-950/60 border border-indigo-800/60 text-indigo-400 flex items-center justify-center mx-auto">
+      <div className="editorial-surface rounded-lg border border-taskflow-border p-12 text-center bg-taskflow-surface/30 space-y-4">
+        <div className="w-14 h-14 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-400 flex items-center justify-center mx-auto">
           <Milestone className="w-7 h-7" aria-hidden="true" />
         </div>
         <div className="space-y-1">
@@ -166,7 +166,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
         </div>
         <button
           onClick={fetchTimeline}
-          className="p-2 rounded-xl text-taskflow-muted hover:text-white hover:bg-taskflow-surface border border-taskflow-border transition-colors"
+          className="p-2 rounded-md text-taskflow-muted hover:text-white hover:bg-taskflow-surface border border-taskflow-border btn-interactive transition-colors cursor-pointer"
           aria-label="Refresh timeline"
           title="Refresh"
         >
@@ -188,29 +188,32 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
           </div>
         ))}
         <div className="flex items-center gap-1.5">
-          <div className="w-0.5 h-3 bg-cyan-400 rounded-full" aria-hidden="true" />
+          <div className="w-0.5 h-3 bg-taskflow-accent rounded-full" aria-hidden="true" />
           <span>Today</span>
         </div>
       </div>
 
       {/* Gantt */}
-      <div className="glass-panel rounded-2xl border border-taskflow-border bg-taskflow-surface overflow-hidden">
+      <div className="rounded-lg border border-slate-800 bg-[#111827] overflow-hidden shadow-sm">
         {/* Month header row */}
-        <div className="relative h-8 border-b border-taskflow-border/60 bg-taskflow-bg/50 ml-48">
+        <div className="relative h-7 border-b border-slate-800 bg-slate-900 ml-48">
           {monthHeaders.map((month, i) => (
             <div
               key={i}
-              className="absolute top-0 h-full flex items-center px-2 text-[10px] font-semibold text-taskflow-muted border-r border-taskflow-border/30"
+              className="absolute top-0 h-full flex items-center px-2 text-[10px] font-medium text-slate-400 border-r border-slate-800"
               style={{ left: `${month.left}%`, width: `${month.width}%` }}
             >
-              <Calendar className="w-2.5 h-2.5 mr-1 flex-shrink-0" aria-hidden="true" />
+              <Calendar
+                className="w-2.5 h-2.5 mr-1 flex-shrink-0 text-slate-500"
+                aria-hidden="true"
+              />
               {month.label}
             </div>
           ))}
           {/* Today line header indicator */}
           {todayOffset >= 0 && todayOffset <= 100 && (
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-cyan-400/40"
+              className="absolute top-0 bottom-0 w-0.5 bg-sky-400/40"
               style={{ left: `${todayOffset}%` }}
               aria-label="Today"
             />
@@ -218,35 +221,35 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
         </div>
 
         {/* Milestone rows */}
-        <div className="divide-y divide-taskflow-border/20">
+        <div className="divide-y divide-slate-800">
           {milestonesWithDates.map((ms, idx) => {
             const bar = getMilestoneBar(ms, displayStart, displayEnd);
-            const barClass = HEALTH_BAR_CLASS[ms.health as string] ?? 'bg-taskflow-muted/40';
-            const textClass = HEALTH_TEXT[ms.health as string] ?? 'text-taskflow-muted';
+            const barClass = HEALTH_BAR_CLASS[ms.health as string] ?? 'bg-slate-700';
+            const textClass = HEALTH_TEXT[ms.health as string] ?? 'text-slate-400';
 
             return (
               <div
                 key={ms.id}
-                className={`flex items-center min-h-[52px] ${idx % 2 === 0 ? 'bg-taskflow-surface' : 'bg-taskflow-bg/30'}`}
+                className={`flex items-center min-h-[48px] hover:bg-slate-850 transition-colors ${idx % 2 === 0 ? 'bg-[#111827]' : 'bg-slate-900/40'}`}
               >
                 {/* Left label */}
-                <div className="w-48 flex-shrink-0 px-4 py-2 border-r border-taskflow-border/30">
-                  <p className="text-xs font-semibold text-white truncate">{ms.title}</p>
+                <div className="w-48 flex-shrink-0 px-3.5 py-2 border-r border-slate-800">
+                  <p className="text-xs font-medium text-slate-200 truncate">{ms.title}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={`text-[10px] font-semibold ${textClass}`}>
+                    <span className={`text-[10px] font-medium ${textClass}`}>
                       {ms.health.replace('_', ' ')}
                     </span>
-                    <span className="text-taskflow-muted/40">·</span>
-                    <span className="text-[10px] text-taskflow-muted">{ms.progress}%</span>
+                    <span className="text-slate-600">·</span>
+                    <span className="text-[10px] text-slate-400">{ms.progress}%</span>
                   </div>
                 </div>
 
                 {/* Bar track */}
-                <div className="flex-1 relative h-full py-3 px-2">
+                <div className="flex-1 relative h-full py-2.5 px-2">
                   {/* Today line */}
                   {todayOffset >= 0 && todayOffset <= 100 && (
                     <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-cyan-400/50 z-10"
+                      className="absolute top-0 bottom-0 w-0.5 bg-sky-400/50 z-10"
                       style={{ left: `${todayOffset}%` }}
                       aria-hidden="true"
                     />
@@ -254,14 +257,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
 
                   {bar && (
                     <div
-                      className={`absolute h-6 top-1/2 -translate-y-1/2 rounded-lg ${barClass} opacity-90 hover:opacity-100 transition-opacity flex items-center px-2 overflow-hidden`}
-                      style={{ left: `${bar.left}%`, width: `${bar.width}%`, minWidth: '24px' }}
+                      className={`absolute h-5 top-1/2 -translate-y-1/2 rounded ${barClass} opacity-90 hover:opacity-100 transition-all flex items-center px-1.5 overflow-hidden cursor-pointer`}
+                      style={{ left: `${bar.left}%`, width: `${bar.width}%`, minWidth: '20px' }}
                       title={`${ms.title}: ${formatShort(ms.startDate)} → ${formatShort(ms.dueDate)}`}
                       role="img"
                       aria-label={`${ms.title}, ${ms.health}, ${ms.progress}% complete, ${formatShort(ms.startDate)} to ${formatShort(ms.dueDate)}`}
                     >
                       {bar.width > 8 && (
-                        <span className="text-[10px] font-bold text-white/90 truncate select-none">
+                        <span className="text-[10px] font-semibold text-white truncate select-none">
                           {ms.progress}%
                         </span>
                       )}
@@ -271,7 +274,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
                   {/* Date labels */}
                   {bar && (
                     <div
-                      className="absolute -bottom-0.5 text-[9px] text-taskflow-muted flex gap-1"
+                      className="absolute -bottom-0.5 text-[9px] text-slate-500 flex gap-1"
                       style={{ left: `${bar.left}%` }}
                     >
                       {ms.startDate && <span>{formatShort(ms.startDate)}</span>}
@@ -287,15 +290,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
 
         {/* No-date milestones footer */}
         {milestonesNoDates.length > 0 && (
-          <div className="border-t border-taskflow-border/40 p-4">
-            <p className="text-[10px] uppercase font-bold text-taskflow-muted mb-2">
+          <div className="border-t border-slate-800 p-3">
+            <p className="text-[10px] uppercase font-semibold text-slate-500 mb-1.5">
               No Date Set ({milestonesNoDates.length})
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {milestonesNoDates.map(ms => (
                 <span
                   key={ms.id}
-                  className="px-2.5 py-1 rounded-lg bg-taskflow-bg text-xs text-taskflow-muted border border-taskflow-border"
+                  className="px-2 py-0.5 rounded bg-slate-850 text-xs text-slate-400 border border-slate-700"
                 >
                   {ms.title}
                 </span>
@@ -310,12 +313,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ organizationId, proj
         {timeline.milestones.slice(0, 3).map(ms => (
           <div
             key={ms.id}
-            className="glass-panel rounded-xl border border-taskflow-border p-4 bg-taskflow-surface/40 space-y-2"
+            className="rounded-lg border border-slate-800 p-3 bg-[#111827] space-y-1.5"
           >
             <div className="flex items-start justify-between gap-2">
               <p className="text-xs font-semibold text-white truncate">{ms.title}</p>
               <span
-                className={`text-[10px] font-bold flex-shrink-0 ${HEALTH_TEXT[ms.health as string] ?? 'text-taskflow-muted'}`}
+                className={`text-[10px] font-medium flex-shrink-0 ${HEALTH_TEXT[ms.health as string] ?? 'text-slate-400'}`}
               >
                 {ms.health.replace('_', ' ')}
               </span>

@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 import {
-  Activity,
   Layers,
-  GitBranch,
-  Brain,
-  ShieldCheck,
-  Server,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
-  Boxes,
   Workflow,
   LogOut,
   Building2,
   Settings,
   LayoutDashboard,
-  Users,
   CheckSquare,
   Search,
+  Menu,
+  X,
+  ArrowRight,
+  Users,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  Gauge,
+  ShieldCheck,
 } from 'lucide-react';
 import type { HealthCheckData } from '@taskflow/shared';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -32,11 +32,11 @@ import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-
+import { LandingPage } from './components/landing/LandingPage';
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
     useAuth();
-  const [authView, setAuthView] = useState<'login' | 'register'>('login');
+  const [authView, setAuthView] = useState<'landing' | 'login' | 'register'>('landing');
   const [currentView, setCurrentView] = useState<
     'dashboard' | 'projects' | 'project-details' | 'settings' | 'my-work'
   >('dashboard');
@@ -44,19 +44,17 @@ const MainApp: React.FC = () => {
   const [deepLinkTaskId, setDeepLinkTaskId] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('profile');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
   const [healthError, setHealthError] = useState<string | null>(null);
-  const [lastChecked, setLastChecked] = useState<Date>(new Date());
 
   const fetchHealth = async () => {
     setHealthLoading(true);
     setHealthError(null);
     try {
       const res = await fetch('/api/v1/health');
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const json = await res.json();
       if (json.success && json.data) {
         setHealth(json.data);
@@ -69,7 +67,6 @@ const MainApp: React.FC = () => {
       setHealth(null);
     } finally {
       setHealthLoading(false);
-      setLastChecked(new Date());
     }
   };
 
@@ -82,7 +79,6 @@ const MainApp: React.FC = () => {
       setCurrentView('dashboard');
       setSelectedProjectId(null);
       setDeepLinkTaskId(null);
-      setAuthView('login');
     }
   }, [isAuthenticated]);
 
@@ -106,6 +102,7 @@ const MainApp: React.FC = () => {
     setSettingsTab(tab);
     setDeepLinkTaskId(null);
     setCurrentView('settings');
+    setIsMobileMenuOpen(false);
   };
 
   const handleOpenTask = (projectId: string, taskId: string) => {
@@ -114,148 +111,232 @@ const MainApp: React.FC = () => {
     setCurrentView('project-details');
   };
 
+  const healthStatus = healthLoading
+    ? 'loading'
+    : healthError
+      ? 'error'
+      : health?.status === 'healthy'
+        ? 'healthy'
+        : 'error';
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
-          <p className="text-sm text-taskflow-muted">Restoring secure session...</p>
+      <div className="min-h-screen bg-[#141210] flex items-center justify-center">
+        <div className="flex flex-col items-start gap-3">
+          <span className="font-display text-2xl text-[#f3ede4]">TaskFlow</span>
+          <div className="flex items-center gap-2 text-sm text-[#9c948a]">
+            <RefreshCw className="w-4 h-4 animate-spin text-[#c45c26]" />
+            <span>Restoring session</span>
+          </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-taskflow-bg text-taskflow-text flex flex-col">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 glass-panel border-b border-taskflow-border px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div
-              className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => setCurrentView('dashboard')}
-            >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center">
-                <div className="w-full h-full bg-taskflow-surface rounded-[10px] flex items-center justify-center">
-                  <Workflow className="w-5 h-5 text-cyan-400" />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-lg tracking-tight text-white">TaskFlow</span>
-                  <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 rounded-md">
-                    v0.5.0 • PR 5
-                  </span>
-                </div>
-                <p className="text-xs text-taskflow-muted">
-                  AI-Powered Project Operations Platform
-                </p>
-              </div>
-            </div>
+  if (!isAuthenticated && authView === 'landing') {
+    return (
+      <LandingPage
+        onSignIn={() => setAuthView('login')}
+        onGetStarted={() => setAuthView('register')}
+      />
+    );
+  }
 
-            {/* Navigation Tabs (Dashboard vs Settings) */}
-            {isAuthenticated && (
-              <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-taskflow-border">
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('dashboard')}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'dashboard'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
-                  }`}
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Dashboard</span>
-                </button>
+  const navItems = [
+    { id: 'dashboard', label: 'Home', icon: LayoutDashboard, view: 'dashboard' as const },
+    { id: 'projects', label: 'Projects', icon: Layers, view: 'projects' as const },
+    { id: 'my-work', label: 'My Work', icon: CheckSquare, view: 'my-work' as const },
+  ];
 
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('projects')}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'projects' || currentView === 'project-details'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
-                  }`}
-                >
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>Projects</span>
-                </button>
+  const isNavActive = (view: typeof currentView | 'projects') =>
+    currentView === view || (view === 'projects' && currentView === 'project-details');
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDeepLinkTaskId(null);
-                    setCurrentView('my-work');
-                  }}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'my-work'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
-                  }`}
-                >
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  <span>My Work</span>
-                </button>
+  const SidebarNav = ({ mobile = false }: { mobile?: boolean }) => (
+    <div className="flex flex-col h-full">
+      <button
+        type="button"
+        onClick={() => {
+          if (!isAuthenticated) {
+            setAuthView('landing');
+          } else {
+            setCurrentView('dashboard');
+            setIsMobileMenuOpen(false);
+          }
+        }}
+        className="flex items-center gap-2.5 px-5 h-14 border-b border-[#2e2924] shrink-0 text-left"
+      >
+        <span className="w-7 h-7 rounded-[4px] bg-[#c45c26] text-white flex items-center justify-center relative">
+          <Workflow className="w-3.5 h-3.5" />
+          <span
+            className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[#141210] ${
+              healthStatus === 'healthy'
+                ? 'bg-[#3d8b6e]'
+                : healthStatus === 'loading'
+                  ? 'bg-[#c4843a]'
+                  : 'bg-[#c44a4a]'
+            }`}
+            title={
+              healthStatus === 'healthy'
+                ? 'All systems operational'
+                : healthStatus === 'loading'
+                  ? 'Connecting…'
+                  : 'Backend offline'
+            }
+          />
+        </span>
+        <span className="font-display text-[1.05rem] text-[#f3ede4]">TaskFlow</span>
+      </button>
 
-                <button
-                  type="button"
-                  onClick={() => openSettings('workspace')}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    currentView === 'settings'
-                      ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/30 shadow-glow-cyan'
-                      : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/40'
-                  }`}
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>Settings & Workspace</span>
-                </button>
-              </nav>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            {/* System Health Indicator Badge */}
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
-              <span className="text-taskflow-muted">API:</span>
-              {healthLoading && !health ? (
-                <span className="flex items-center text-amber-400">
-                  <RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />
-                  Connecting...
-                </span>
-              ) : health?.status === 'healthy' ? (
-                <span className="flex items-center text-emerald-400 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5 shadow-[0_0_8px_#34d399]" />
-                  Operational
-                </span>
-              ) : (
-                <span className="flex items-center text-rose-400 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5 mr-1" />
-                  Offline
-                </span>
-              )}
-            </div>
-
-            {isAuthenticated && user ? (
-              <div className="flex items-center space-x-3">
-                {/* Global Search & Command Trigger */}
-                {activeOrg && (
-                  <button
-                    type="button"
-                    onClick={() => setIsSearchOpen(true)}
-                    className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-taskflow-muted hover:text-white transition-all cursor-pointer shadow-sm group"
-                    title={`Global Search & Commands (${platformKey}K)`}
-                  >
-                    <Search className="w-3.5 h-3.5 text-taskflow-muted group-hover:text-cyan-400 transition-colors" />
-                    <span className="hidden sm:inline">Search...</span>
-                    <kbd className="hidden sm:inline px-1.5 py-0.2 rounded text-[10px] font-mono text-taskflow-muted bg-taskflow-bg border border-taskflow-border group-hover:text-cyan-300 transition-colors">
-                      {platformKey}K
-                    </kbd>
-                  </button>
+      {isAuthenticated && (
+        <nav className="flex-1 overflow-y-auto py-4">
+          <div className="px-5 mb-2 tf-kicker">Workspace</div>
+          {navItems.map(({ id, label, icon: Icon, view }) => {
+            const active = isNavActive(view);
+            return (
+              <button
+                key={id}
+                type="button"
+                id={mobile ? `mobile-nav-${id}` : `nav-${id}`}
+                onClick={() => {
+                  if (view === 'my-work') setDeepLinkTaskId(null);
+                  setCurrentView(view);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`tf-nav-item relative ${active ? 'tf-nav-item-active' : ''}`}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="nav-active-indicator"
+                    className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
                 )}
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                {label}
+              </button>
+            );
+          })}
 
-                {/* Cross-Project Quick Switcher */}
-                {activeOrg && (
+          <div className="mx-5 my-5 tf-rule" />
+
+          <div className="px-5 mb-2 tf-kicker">Admin</div>
+          {[
+            { id: 'members', label: 'Members', icon: Users },
+            { id: 'usage', label: 'Usage', icon: Gauge },
+            { id: 'audit', label: 'Audit', icon: ShieldCheck },
+            { id: 'workspace', label: 'Settings', icon: Settings },
+          ].map(({ id, label, icon: Icon }) => {
+            const active = currentView === 'settings' && settingsTab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                id={mobile ? `mobile-nav-settings-${id}` : undefined}
+                onClick={() => openSettings(id as any)}
+                className={`tf-nav-item relative ${active ? 'tf-nav-item-active' : ''}`}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="nav-active-indicator"
+                    className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-[#c45c26]"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                {label}
+              </button>
+            );
+          })}
+        </nav>
+      )}
+
+      {isAuthenticated && user && (
+        <div className="border-t border-[#2e2924] p-4 space-y-3">
+          {organizations.length > 0 && activeOrg && (
+            <div className="flex items-center gap-2 text-xs text-[#9c948a]">
+              <Building2 className="w-3.5 h-3.5 shrink-0" />
+              <select
+                value={activeOrg.organizationId}
+                onChange={e => {
+                  const found = organizations.find(o => o.organizationId === e.target.value);
+                  if (found) setActiveOrg(found);
+                }}
+                className="bg-transparent text-[#f3ede4] font-medium focus:outline-none cursor-pointer truncate w-full text-xs"
+              >
+                {organizations.map(org => (
+                  <option
+                    key={org.organizationId}
+                    value={org.organizationId}
+                    className="bg-[#211e1a] text-[#f3ede4]"
+                  >
+                    {org.organizationName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => openSettings('profile')}
+              className="flex items-center gap-2 min-w-0 text-left"
+            >
+              <span className="w-7 h-7 rounded-[4px] bg-[#c45c26] flex items-center justify-center text-[11px] font-semibold text-white overflow-hidden shrink-0">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  user.name.charAt(0).toUpperCase()
+                )}
+              </span>
+              <span className="truncate text-xs text-[#f3ede4]">{user.name}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthView('login');
+                setCurrentView('dashboard');
+                logout();
+              }}
+              title="Sign out"
+              aria-label="Sign Out"
+              className="p-1.5 text-[#9c948a] hover:text-[#f3ede4]"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#141210] text-[#f3ede4] flex selection:bg-[#c45c26]/30 overflow-x-hidden">
+      {isAuthenticated && (
+        <aside className="hidden lg:flex w-[232px] shrink-0 border-r border-[#2e2924] bg-[#161310] flex-col sticky top-0 h-screen">
+          <SidebarNav />
+        </aside>
+      )}
+
+      <div className="flex-1 min-w-0 flex flex-col">
+        <header className="sticky top-0 z-50 bg-[#141210]/95 border-b border-[#2e2924]">
+          <div className="h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              {!isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => setAuthView('landing')}
+                  className="flex items-center gap-2"
+                >
+                  <span className="w-7 h-7 rounded-[4px] bg-[#c45c26] text-white flex items-center justify-center">
+                    <Workflow className="w-3.5 h-3.5" />
+                  </span>
+                  <span className="font-display text-lg">TaskFlow</span>
+                </button>
+              )}
+              {isAuthenticated && activeOrg && (
+                <div className="hidden sm:block min-w-0">
                   <ProjectSwitcher
                     organizationId={activeOrg.organizationId}
                     selectedProjectId={selectedProjectId}
@@ -269,341 +350,149 @@ const MainApp: React.FC = () => {
                       setCurrentView('projects');
                     }}
                   />
-                )}
+                </div>
+              )}
+            </div>
 
-                {/* Organization / Workspace Selector */}
-                {organizations.length > 0 && activeOrg && (
-                  <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs">
-                    <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-                    <select
-                      value={activeOrg.organizationId}
-                      onChange={e => {
-                        const found = organizations.find(o => o.organizationId === e.target.value);
-                        if (found) setActiveOrg(found);
-                      }}
-                      className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isAuthenticated && user ? (
+                <>
+                  {activeOrg && (
+                    <button
+                      type="button"
+                      id="global-search-trigger"
+                      onClick={() => setIsSearchOpen(true)}
+                      className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#9c948a] hover:text-[#f3ede4] hover:bg-[#1c1916] rounded-[4px] transition-colors"
+                      title={`Search (${platformKey}K)`}
                     >
-                      {organizations.map(org => (
-                        <option
-                          key={org.organizationId}
-                          value={org.organizationId}
-                          className="bg-taskflow-surface text-white"
-                        >
-                          {org.organizationName} ({org.role})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Notification Center */}
-                <NotificationCenter onOpenTask={handleOpenTask} />
-
-                {/* Authenticated User Pill -> Opens Settings */}
-                <button
-                  type="button"
-                  onClick={() => openSettings('profile')}
-                  title="Open user profile settings"
-                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border hover:border-cyan-500/40 text-xs text-white transition-all cursor-pointer"
-                >
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden">
+                      <Search className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Search</span>
+                      <kbd className="hidden md:inline px-1 py-0.5 text-[10px] font-mono text-[#7d756c] border border-[#3a342c] rounded-[3px]">
+                        {platformKey}K
+                      </kbd>
+                    </button>
+                  )}
+                  <NotificationCenter onOpenTask={handleOpenTask} />
+                  <button
+                    type="button"
+                    id="user-avatar-btn"
+                    onClick={() => openSettings('profile')}
+                    title="Profile settings"
+                    className="w-7 h-7 rounded-[4px] bg-[#c45c26] flex items-center justify-center text-[11px] font-semibold text-white overflow-hidden"
+                  >
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      user.name.charAt(0)
+                      user.name.charAt(0).toUpperCase()
                     )}
-                  </div>
-                  <span className="hidden md:inline font-medium">{user.name}</span>
-                </button>
-
-                {/* Sign Out Button */}
-                <button
-                  onClick={() => {
-                    setAuthView('login');
-                    setCurrentView('dashboard');
-                    logout();
-                  }}
-                  title="Sign out of current session"
-                  aria-label="Sign Out"
-                  className="p-2 rounded-lg bg-taskflow-surface hover:bg-rose-950/40 border border-taskflow-border hover:border-rose-800/60 text-taskflow-muted hover:text-rose-300 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : null}
-
-            <button
-              onClick={fetchHealth}
-              disabled={healthLoading}
-              title="Refresh Health Status"
-              className="p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${healthLoading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-8">
-        {!isAuthenticated ? (
-          <div className="py-6 space-y-8">
-            {authView === 'login' ? (
-              <LoginPage onSwitchToRegister={() => setAuthView('register')} />
-            ) : (
-              <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
-            )}
-          </div>
-        ) : currentView === 'my-work' ? (
-          <MyWorkView onOpenTask={handleOpenTask} />
-        ) : currentView === 'settings' ? (
-          <SettingsLayout
-            onBackToDashboard={() => setCurrentView('dashboard')}
-            initialTab={settingsTab}
-          />
-        ) : currentView === 'projects' && activeOrg ? (
-          <ProjectsList
-            organizationId={activeOrg.organizationId}
-            organizationName={activeOrg.organizationName}
-            onSelectProject={id => {
-              setSelectedProjectId(id);
-              setDeepLinkTaskId(null);
-              setCurrentView('project-details');
-            }}
-          />
-        ) : currentView === 'project-details' && activeOrg && selectedProjectId ? (
-          <ProjectDetailShell
-            organizationId={activeOrg.organizationId}
-            projectId={selectedProjectId}
-            initialTaskId={deepLinkTaskId}
-            onBack={() => {
-              setSelectedProjectId(null);
-              setDeepLinkTaskId(null);
-              setCurrentView('projects');
-            }}
-          />
-        ) : (
-          <>
-            {/* Authenticated Hero Banner */}
-            <section className="relative overflow-hidden rounded-2xl glass-panel p-8 border border-taskflow-border">
-              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/10 to-indigo-600/10 blur-3xl pointer-events-none" />
-
-              <div className="relative z-10 max-w-3xl space-y-4">
-                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/50 text-emerald-300 text-xs font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>
-                    Active Workspace: {activeOrg?.organizationName || 'Personal Workspace'}
-                  </span>
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-                  Welcome back, {user?.name}.
-                </h1>
-                <p className="text-taskflow-text-dim text-base leading-relaxed">
-                  You are viewing the{' '}
-                  <span className="text-cyan-300 font-semibold">{activeOrg?.organizationName}</span>{' '}
-                  workspace with{' '}
-                  <span className="text-indigo-300 font-mono font-medium">{activeOrg?.role}</span>{' '}
-                  permissions. Manage your identity, update workspace metadata, or administer team
-                  members through the Settings panel.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentView('projects')}
-                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-semibold flex items-center space-x-2 shadow-glow-cyan transition-all cursor-pointer"
-                  >
-                    <Layers className="w-4 h-4" />
-                    <span>View Projects</span>
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() => openSettings('members')}
-                    className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center space-x-2 transition-colors cursor-pointer"
-                  >
-                    <Users className="w-4 h-4" />
-                    <span>Manage Workspace Members</span>
-                  </button>
-
                   <button
                     type="button"
                     onClick={() => openSettings('profile')}
-                    className="px-4 py-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-white text-xs font-medium flex items-center space-x-2 transition-colors cursor-pointer"
+                    title="Settings"
+                    className="p-1.5 text-[#9c948a] hover:text-[#f3ede4] rounded-[4px] hover:bg-[#1c1916]"
                   >
-                    <Settings className="w-4 h-4 text-taskflow-muted" />
-                    <span>Edit Profile & Security</span>
+                    <Settings className="w-4 h-4" />
                   </button>
-                </div>
-              </div>
-            </section>
-          </>
-        )}
-
-        {/* System Health Card (Always visible to inspect live PostgreSQL status) */}
-        <section className="glass-card rounded-xl p-6 border border-taskflow-border space-y-4">
-          <div className="flex items-center justify-between border-b border-taskflow-border pb-4">
-            <div className="flex items-center space-x-2.5">
-              <Server className="w-5 h-5 text-cyan-400" />
-              <h2 className="font-semibold text-white text-base">
-                Backend & Database Health Probe
-              </h2>
+                  <button
+                    type="button"
+                    id="mobile-menu-toggle"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    aria-label="Toggle Navigation"
+                    className="lg:hidden p-1.5 text-[#9c948a] hover:text-[#f3ede4]"
+                  >
+                    {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                  </button>
+                </>
+              ) : null}
             </div>
-            <span className="text-xs text-taskflow-muted font-mono">
-              Last checked: {lastChecked.toLocaleTimeString()}
-            </span>
           </div>
 
-          {healthError ? (
-            <div className="p-4 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-sm flex items-start space-x-3">
-              <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Backend connection offline</p>
-                <p className="text-xs text-rose-400/80 mt-1">
-                  Start the API server using{' '}
-                  <code className="bg-rose-900/60 px-1.5 py-0.5 rounded font-mono">
-                    npm run dev:api
-                  </code>{' '}
-                  to establish live telemetry.
-                </p>
-              </div>
-            </div>
-          ) : health ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
-                <span className="text-xs text-taskflow-muted block">Service</span>
-                <span className="font-mono text-sm font-semibold text-cyan-300">
-                  {health.service}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
-                <span className="text-xs text-taskflow-muted block">API Status</span>
-                <span className="font-semibold text-sm text-emerald-400 uppercase flex items-center mt-0.5">
-                  <CheckCircle2 className="w-4 h-4 mr-1 inline" />
-                  {health.status}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
-                <span className="text-xs text-taskflow-muted block">Database</span>
-                <span
-                  className={`font-semibold text-sm flex items-center mt-0.5 ${
-                    health.database?.status === 'connected' ? 'text-emerald-400' : 'text-amber-400'
-                  }`}
-                >
-                  {health.database?.status === 'connected' ? (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 mr-1 inline" />
-                      Connected
-                      {health.database.latencyMs !== undefined
-                        ? ` (${health.database.latencyMs}ms)`
-                        : ''}
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-4 h-4 mr-1 inline" />
-                      Offline
-                    </>
-                  )}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
-                <span className="text-xs text-taskflow-muted block">Environment</span>
-                <span className="font-mono text-sm font-medium text-white capitalize">
-                  {health.environment}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-lg bg-taskflow-surface border border-taskflow-border">
-                <span className="text-xs text-taskflow-muted block">Uptime</span>
-                <span className="font-mono text-sm font-medium text-white">
-                  {health.uptimeSeconds}s
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-6 text-sm text-taskflow-muted">
-              <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-cyan-400" />
-              Verifying backend status...
+          {isMobileMenuOpen && isAuthenticated && (
+            <div className="lg:hidden border-t border-[#2e2924] bg-[#161310] max-h-[80vh] overflow-y-auto">
+              <SidebarNav mobile />
             </div>
           )}
-        </section>
+        </header>
 
-        {/* Planned Product Architecture Pillars */}
-        <section className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Layers className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-lg font-semibold text-white">
-              Platform Pillars (Roadmap Blueprint)
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-cyan-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/60 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-105 transition-transform">
-                <Boxes className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">Project Execution</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Multi-tier work hierarchy: Projects, Objectives, Tasks, Subtasks, and Milestones
-                with fine-grained status lifecycle.
-              </p>
+        <main className="flex-1 w-full">
+          {!isAuthenticated ? (
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+              <button
+                type="button"
+                onClick={() => setAuthView('landing')}
+                className="mb-6 text-xs font-medium text-[#9c948a] hover:text-[#f3ede4]"
+              >
+                ← Back to TaskFlow
+              </button>
+              {authView === 'login' ? (
+                <LoginPage onSwitchToRegister={() => setAuthView('register')} />
+              ) : (
+                <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
+              )}
             </div>
-
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-indigo-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/60 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-105 transition-transform">
-                <GitBranch className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">Dependency Graphs</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Deterministic DAG blocking dependencies, critical path detection, and cascade delay
-                warnings across timeline views.
-              </p>
+          ) : currentView === 'my-work' ? (
+            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+              <MyWorkView onOpenTask={handleOpenTask} />
             </div>
-
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-purple-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-800/60 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-105 transition-transform">
-                <Activity className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">Real-Time Operations</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Low-latency state synchronization via Socket.IO, live presence, collaborative task
-                updates, and instant notification stream.
-              </p>
+          ) : currentView === 'settings' ? (
+            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+              <SettingsLayout
+                onBackToDashboard={() => setCurrentView('dashboard')}
+                initialTab={settingsTab}
+              />
             </div>
-
-            <div className="glass-card p-5 rounded-xl border border-taskflow-border hover:border-emerald-500/40 transition-all group">
-              <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/60 flex items-center justify-center text-emerald-400 mb-3 group-hover:scale-105 transition-transform">
-                <Brain className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-white text-sm">AI Delivery Intelligence</h3>
-              <p className="text-xs text-taskflow-muted mt-2 leading-relaxed">
-                Automated task breakdowns, workload balancing, risk detection, schedule compression
-                recommendations, and daily digests.
-              </p>
+          ) : currentView === 'projects' && activeOrg ? (
+            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+              <ProjectsList
+                organizationId={activeOrg.organizationId}
+                organizationName={activeOrg.organizationName}
+                onSelectProject={id => {
+                  setSelectedProjectId(id);
+                  setDeepLinkTaskId(null);
+                  setCurrentView('project-details');
+                }}
+              />
             </div>
-          </div>
-        </section>
+          ) : currentView === 'project-details' && activeOrg && selectedProjectId ? (
+            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1280px]">
+              <ProjectDetailShell
+                organizationId={activeOrg.organizationId}
+                projectId={selectedProjectId}
+                initialTaskId={deepLinkTaskId}
+                onBack={() => {
+                  setSelectedProjectId(null);
+                  setDeepLinkTaskId(null);
+                  setCurrentView('projects');
+                }}
+              />
+            </div>
+          ) : isAuthenticated ? (
+            <DashboardView
+              user={user}
+              activeOrg={activeOrg}
+              organizations={organizations}
+              health={health}
+              healthLoading={healthLoading}
+              healthError={healthError}
+              onRefreshHealth={fetchHealth}
+              onGoToProjects={() => setCurrentView('projects')}
+              onGoToMyWork={() => {
+                setDeepLinkTaskId(null);
+                setCurrentView('my-work');
+              }}
+              onOpenSettings={openSettings}
+              onGoToSearch={() => setIsSearchOpen(true)}
+            />
+          ) : (
+            <PreAuthLanding
+              onLogin={() => setAuthView('login')}
+              onRegister={() => setAuthView('register')}
+            />
+          )}
+        </main>
+      </div>
 
-        {/* Scope Milestone Notice */}
-        <section className="rounded-xl border border-taskflow-border bg-taskflow-surface/60 p-5 flex items-start space-x-3.5">
-          <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-          <div className="text-xs space-y-1">
-            <span className="font-semibold text-white">PR 4 Identity & Workspace Operations</span>
-            <p className="text-taskflow-muted leading-relaxed">
-              This milestone establishes the complete user profile and organization workspace
-              operations: Profile & avatar management, cryptographic password rotation with session
-              invalidation, workspace metadata updates, member directory with RBAC
-              promotion/demotion matrix, and multi-tenant security guards.
-            </p>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-taskflow-border py-4 px-6 text-center text-xs text-taskflow-muted">
-        TaskFlow Operations Platform • PR 4 Workspace Management Complete
-      </footer>
-
-      {/* Global Search & Command Palette Modal */}
       {isAuthenticated && activeOrg && (
         <GlobalSearchModal
           isOpen={isSearchOpen}
@@ -624,9 +513,7 @@ const MainApp: React.FC = () => {
             setDeepLinkTaskId(null);
             setCurrentView('my-work');
           }}
-          openNotifications={() => {
-            // Can open notifications
-          }}
+          openNotifications={() => {}}
           openSettings={openSettings}
         />
       )}
@@ -634,12 +521,259 @@ const MainApp: React.FC = () => {
   );
 };
 
-export const App: React.FC = () => {
+interface DashboardViewProps {
+  user: { name: string; avatarUrl?: string | null } | null;
+  activeOrg: { organizationId: string; organizationName: string; role: string } | null;
+  organizations: { organizationId: string; organizationName: string; role: string }[];
+  health: HealthCheckData | null;
+  healthLoading: boolean;
+  healthError: string | null;
+  onRefreshHealth: () => void;
+  onGoToProjects: () => void;
+  onGoToMyWork: () => void;
+  onOpenSettings: (tab?: SettingsTab) => void;
+  onGoToSearch: () => void;
+}
+
+const DashboardView: React.FC<DashboardViewProps> = ({
+  user,
+  activeOrg,
+  health,
+  healthError,
+  onGoToProjects,
+  onGoToMyWork,
+  onOpenSettings,
+}) => {
+  const firstName = user?.name?.split(' ')[0] ?? 'there';
+  const [projects, setProjects] = React.useState<any[]>([]);
+  const [myWork, setMyWork] = React.useState<any>(null);
+  const [loadingData, setLoadingData] = React.useState(true);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
+  React.useEffect(() => {
+    if (!activeOrg) return;
+    const loadData = async () => {
+      setLoadingData(true);
+      try {
+        const { projectApi, workApi } = await import('./lib/api');
+        const [projRes, workRes] = await Promise.all([
+          projectApi
+            .listProjects(activeOrg.organizationId)
+            .then(data => ({ success: true, data }))
+            .catch(() => ({ success: false, data: [] })),
+          workApi
+            .getMyWork()
+            .then(data => ({ success: true, data }))
+            .catch(() => ({ success: false, data: null })),
+        ]);
+        if (projRes.success) setProjects(projRes.data);
+        if (workRes.success) setMyWork(workRes.data);
+      } catch (error) {
+        console.error('Failed to load dashboard data', error);
+      } finally {
+        setLoadingData(false);
+      }
+    };
+    loadData();
+  }, [activeOrg]);
+
+  const containerVariants: any = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 },
+    },
+  };
+
+  const itemVariants: any = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+  };
+
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <MainApp />
-      </AuthProvider>
-    </ErrorBoundary>
+    <motion.div
+      className="px-4 sm:px-8 lg:px-10 py-10 max-w-[1100px] relative group"
+      onMouseMove={handleMouseMove}
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+    >
+      {/* Pointer Spotlight */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-500 group-hover:opacity-100 hidden sm:block"
+        style={{
+          background: useMotionTemplate`
+      radial-gradient(
+       400px circle at ${mouseX}px ${mouseY}px,
+       rgba(196, 92, 38, 0.04),
+       transparent 80%
+      )
+     `,
+        }}
+      />
+
+      <motion.p variants={itemVariants} className="tf-kicker mb-3 relative z-10">
+        {activeOrg ? `${activeOrg.organizationName} · Workspace Home` : 'Workspace'}
+      </motion.p>
+      <motion.h1 variants={itemVariants} className="tf-page-title mb-8 relative z-10">
+        Good to see you, <span className="italic text-[#c45c26]">{firstName}</span>
+      </motion.h1>
+
+      {/* Primary Actions */}
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-wrap items-center gap-2 mb-10 relative z-10"
+      >
+        <button
+          type="button"
+          onClick={onGoToProjects}
+          className="btn-interactive inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[#c45c26] text-white text-sm font-semibold hover:bg-[#a84d20] shadow-[0_4px_12px_rgba(196,92,38,0.2)] hover:shadow-[0_6px_16px_rgba(196,92,38,0.3)] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0"
+        >
+          View projects
+          <ArrowRight className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onGoToMyWork}
+          className="btn-interactive inline-flex items-center gap-2 px-4 py-2 rounded-[4px] border border-[#3a342c] text-sm text-[#f3ede4] hover:bg-[#1c1916] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0"
+        >
+          My work
+        </button>
+      </motion.div>
+
+      {/* Dashboard Content */}
+      <motion.div
+        variants={itemVariants}
+        className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 relative z-10"
+      >
+        {/* Your Work Section */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-[#f3ede4] border-b border-[#2e2924] pb-2">
+            Your Work
+          </h2>
+          {loadingData ? (
+            <div className="animate-pulse flex flex-col gap-3">
+              <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+              <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+            </div>
+          ) : myWork && myWork.tasks && myWork.tasks.length > 0 ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px] card-interactive hover:bg-[#1c1916]">
+                <span className="text-sm text-[#f3ede4]">{myWork.tasks.length} active tasks</span>
+                <button onClick={onGoToMyWork} className="text-xs text-[#c45c26] hover:underline">
+                  View all
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a] bg-[#161310]">
+              You have no assigned tasks.
+            </div>
+          )}
+        </div>
+
+        {/* Projects Section */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-[#f3ede4] border-b border-[#2e2924] pb-2">
+            Projects
+          </h2>
+          {loadingData ? (
+            <div className="animate-pulse flex flex-col gap-3">
+              <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+              <div className="h-10 bg-[#1c1916] rounded-[4px]" />
+            </div>
+          ) : projects.length > 0 ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 bg-[#161310] border border-[#2e2924] rounded-[4px] card-interactive hover:bg-[#1c1916]">
+                <span className="text-sm text-[#f3ede4]">{projects.length} active projects</span>
+                <button onClick={onGoToProjects} className="text-xs text-[#c45c26] hover:underline">
+                  View all
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 border border-[#2e2924] rounded-[4px] text-sm text-[#9c948a] bg-[#161310]">
+              No active projects.
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* System Status (Contextual) */}
+      <motion.div
+        variants={itemVariants}
+        className="mt-12 pt-6 border-t border-[#2e2924] flex flex-wrap items-center justify-between gap-3 text-xs text-[#7d756c] relative z-10"
+      >
+        <span>TaskFlow · Workspace operations</span>
+        <div className="flex items-center gap-4">
+          {health && (
+            <span className="flex items-center gap-1.5">
+              {healthError ? (
+                <AlertCircle className="w-3 h-3 text-[#c44a4a]" />
+              ) : (
+                <CheckCircle2 className="w-3 h-3 text-[#3d8b6e]" />
+              )}
+              {healthError ? 'Offline' : 'Online'}
+            </span>
+          )}
+          <button
+            onClick={() => onOpenSettings('members')}
+            className="hover:text-[#f3ede4] transition-colors"
+          >
+            Manage Members
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
+
+interface PreAuthLandingProps {
+  onLogin: () => void;
+  onRegister: () => void;
+}
+
+const PreAuthLanding: React.FC<PreAuthLandingProps> = ({ onLogin, onRegister }) => (
+  <div className="px-4 sm:px-8 py-20 max-w-[720px]">
+    <p className="tf-kicker mb-4">Project operations</p>
+    <h1 className="tf-page-title mb-4">Ship work with a clear operating picture.</h1>
+    <p className="text-[#9c948a] leading-relaxed mb-8">
+      Dependency graphs, delivery analysis, and collaboration in one workspace.
+    </p>
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        id="landing-cta-login"
+        onClick={onLogin}
+        className="px-5 py-2.5 rounded-[4px] bg-[#c45c26] text-white text-sm font-semibold"
+      >
+        Sign in
+      </button>
+      <button
+        type="button"
+        id="landing-cta-register"
+        onClick={onRegister}
+        className="px-5 py-2.5 rounded-[4px] border border-[#3a342c] text-sm"
+      >
+        Create account
+      </button>
+    </div>
+  </div>
+);
+
+export const App: React.FC = () => (
+  <ErrorBoundary>
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  </ErrorBoundary>
+);

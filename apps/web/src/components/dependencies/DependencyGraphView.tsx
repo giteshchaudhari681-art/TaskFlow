@@ -103,7 +103,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
       case TaskStatus.DONE:
         return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
       case TaskStatus.IN_PROGRESS:
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+        return 'bg-taskflow-accent-subtle text-taskflow-accent border-taskflow-accent';
       case TaskStatus.IN_REVIEW:
         return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
       case TaskStatus.BLOCKED:
@@ -120,7 +120,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
       case TaskPriority.HIGH:
         return 'text-amber-400';
       case TaskPriority.MEDIUM:
-        return 'text-cyan-400';
+        return 'text-taskflow-accent';
       default:
         return 'text-slate-400';
     }
@@ -130,28 +130,30 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
     <div className="space-y-6">
       {/* Header & Metrics Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl">
+        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-md">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
             Total Dependencies
           </span>
           <span className="text-xl font-bold text-white mt-1 block">{stats.totalEdges}</span>
         </div>
 
-        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl">
+        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-md">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
             Blocked Tasks
           </span>
           <span className="text-xl font-bold text-rose-400 mt-1 block">{stats.blockedCount}</span>
         </div>
 
-        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl">
+        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-md">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
             Blocking Tasks
           </span>
-          <span className="text-xl font-bold text-cyan-400 mt-1 block">{stats.blockingCount}</span>
+          <span className="text-xl font-bold text-taskflow-accent mt-1 block">
+            {stats.blockingCount}
+          </span>
         </div>
 
-        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl">
+        <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-md">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
             Total Graph Tasks
           </span>
@@ -160,7 +162,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
       </div>
 
       {/* Toolbar: Search and Filter */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-900/40 border border-slate-800/80 rounded-xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-900/40 border border-slate-800/80 rounded-md">
         <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[240px]">
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-500" />
@@ -169,14 +171,14 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search task in graph..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-taskflow-accent"
             />
           </div>
 
           <select
             value={filterType}
             onChange={e => setFilterType(e.target.value as any)}
-            className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:border-cyan-500"
+            className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:border-taskflow-accent"
           >
             <option value="ALL">All Relationships</option>
             <option value="BLOCKS">Blocking Only</option>
@@ -188,7 +190,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
               type="checkbox"
               checked={onlyConnected}
               onChange={e => setOnlyConnected(e.target.checked)}
-              className="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0 cursor-pointer"
+              className="rounded border-slate-700 bg-slate-950 text-taskflow-accent focus:ring-0 cursor-pointer"
             />
             <span>Connected only</span>
           </label>
@@ -206,7 +208,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
 
       {/* Error display */}
       {error && (
-        <div className="flex items-center justify-between p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400">
+        <div className="flex items-center justify-between p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-md text-xs text-rose-400">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
@@ -220,13 +222,13 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
       {/* Loading state */}
       {loading ? (
         <div className="flex flex-col items-center justify-center p-16 text-slate-500 space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-taskflow-accent" />
           <span className="text-xs">Computing project dependency graph...</span>
         </div>
       ) : graph && graph.edges.length === 0 ? (
         /* Empty State: No Dependencies */
-        <div className="p-12 text-center bg-slate-900/30 border border-slate-800 rounded-2xl space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mx-auto">
+        <div className="p-12 text-center bg-slate-900/30 border border-slate-800 rounded-lg space-y-3">
+          <div className="w-12 h-12 rounded-md bg-taskflow-accent-subtle border border-taskflow-accent flex items-center justify-center text-taskflow-accent mx-auto">
             <GitFork className="w-6 h-6" />
           </div>
           <h3 className="text-sm font-semibold text-white">No Task Dependencies Yet</h3>
@@ -240,10 +242,10 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
         /* Visual Dependency List & Flow */
         <div className="space-y-4">
           {/* Active Relationship Chains */}
-          <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-2xl space-y-3">
+          <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-white flex items-center gap-2">
-                <GitFork className="w-4 h-4 text-cyan-400" />
+                <GitFork className="w-4 h-4 text-taskflow-accent" />
                 Active Dependency Chains ({filteredEdges.length})
               </span>
             </div>
@@ -264,7 +266,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
                 return (
                   <div
                     key={edge.id}
-                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                    className={`flex items-center justify-between p-3 rounded-md border transition-all ${
                       isBlockedUnresolved
                         ? 'bg-rose-950/20 border-rose-900/40'
                         : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
@@ -277,7 +279,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
                       title="Click to view predecessor task"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-mono font-bold text-cyan-400">
+                        <span className="text-xs font-mono font-bold text-taskflow-accent">
                           {sourceNode.issueKey}
                         </span>
                         <span
@@ -321,7 +323,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
                         >
                           {targetNode.status.replace('_', ' ')}
                         </span>
-                        <span className="text-xs font-mono font-bold text-cyan-400">
+                        <span className="text-xs font-mono font-bold text-taskflow-accent">
                           {targetNode.issueKey}
                         </span>
                       </div>
@@ -336,9 +338,9 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
           </div>
 
           {/* Connected Tasks Grid */}
-          <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-2xl space-y-3">
+          <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-lg space-y-3">
             <span className="text-xs font-semibold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" />
+              <Layers className="w-4 h-4 text-taskflow-accent" />
               Tasks in Dependency Graph ({filteredNodes.length})
             </span>
 
@@ -347,10 +349,10 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
                 <div
                   key={node.id}
                   onClick={() => onSelectTask && onSelectTask(node.id)}
-                  className="p-3.5 bg-slate-950/70 border border-slate-800/80 hover:border-cyan-500/40 rounded-xl cursor-pointer transition-all hover:shadow-glow-cyan/10 space-y-2"
+                  className="p-3.5 bg-slate-950/70 border border-slate-800/80 hover:border-taskflow-accent rounded-md cursor-pointer transition-all hover:shadow-glow-cyan/10 space-y-2"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-cyan-400">
+                    <span className="text-xs font-mono font-bold text-taskflow-accent">
                       {node.issueKey}
                     </span>
                     <div className="flex items-center gap-1.5">
@@ -383,7 +385,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
                         </span>
                       )}
                       {node.blockingCount > 0 && (
-                        <span className="text-cyan-400 font-medium">
+                        <span className="text-taskflow-accent font-medium">
                           Blocks {node.blockingCount}
                         </span>
                       )}

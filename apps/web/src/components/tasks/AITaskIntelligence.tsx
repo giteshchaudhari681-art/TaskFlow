@@ -109,10 +109,10 @@ const CATEGORY_LABELS: Record<RecommendationCategory, { label: string; icon: Rea
     label: 'Delivery Risk',
     icon: <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />,
   },
-  MILESTONE: { label: 'Milestone', icon: <Clock className="w-3.5 h-3.5 text-cyan-400" /> },
+  MILESTONE: { label: 'Milestone', icon: <Clock className="w-3.5 h-3.5 text-taskflow-accent" /> },
   PRIORITY: { label: 'Priority', icon: <AlertCircle className="w-3.5 h-3.5 text-orange-400" /> },
   OWNERSHIP: { label: 'Ownership', icon: <UserCheck className="w-3.5 h-3.5 text-indigo-400" /> },
-  WORKLOAD: { label: 'Workload', icon: <Layers className="w-3.5 h-3.5 text-violet-400" /> },
+  WORKLOAD: { label: 'Workload', icon: <Layers className="w-3.5 h-3.5 text-taskflow-text" /> },
   PROCESS: { label: 'Process', icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> },
   RISK_MITIGATION: {
     label: 'Risk Mitigation',
@@ -120,7 +120,7 @@ const CATEGORY_LABELS: Record<RecommendationCategory, { label: string; icon: Rea
   },
   PLANNING: { label: 'Planning', icon: <Clock className="w-3.5 h-3.5 text-sky-400" /> },
   QUALITY: { label: 'Quality', icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> },
-  RESOURCE: { label: 'Resource', icon: <Layers className="w-3.5 h-3.5 text-purple-400" /> },
+  RESOURCE: { label: 'Resource', icon: <Layers className="w-3.5 h-3.5 text-taskflow-text" /> },
   DEPENDENCY: { label: 'Dependency', icon: <Layers className="w-3.5 h-3.5 text-blue-400" /> },
   DEADLINE: { label: 'Deadline', icon: <Clock className="w-3.5 h-3.5 text-rose-400" /> },
   UNBLOCK: { label: 'Unblock', icon: <ShieldAlert className="w-3.5 h-3.5 text-amber-400" /> },
@@ -503,34 +503,33 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
 
   return (
     <div
-      className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 backdrop-blur-sm relative overflow-hidden transition-all duration-200 mt-4"
+      className="border border-slate-800 bg-[#111827] rounded-lg p-4 relative transition-colors mt-4"
       data-testid="ai-task-intelligence"
     >
-      {/* Decorative gradient overlay */}
-      <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-
       {/* Header bar with Mode Tabs */}
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-            <Sparkles className="w-4 h-4" />
+      <div className="flex items-center justify-between mb-3.5 relative z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+            <h4 className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
               AI Task Assistant
-              {taskKey && <span className="text-xs text-indigo-400 font-mono">[{taskKey}]</span>}
+              {taskKey && (
+                <span className="text-[11px] text-indigo-400 font-mono">[{taskKey}]</span>
+              )}
             </h4>
           </div>
         </div>
 
         {/* Tab switch buttons */}
-        <div className="flex items-center bg-slate-950/80 p-0.5 rounded-lg border border-slate-800 text-xs">
+        <div className="flex items-center bg-slate-900 p-0.5 rounded-md border border-slate-800 text-xs">
           <button
             type="button"
             onClick={() => setActiveTab('intelligence')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
               activeTab === 'intelligence'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                ? 'bg-slate-800 text-white font-medium shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -540,9 +539,9 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('decomposition')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
               activeTab === 'decomposition'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                ? 'bg-slate-800 text-white font-medium shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
             data-testid="ai-tab-decomposition"
@@ -553,9 +552,9 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('actions')}
-            className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded text-xs transition-colors flex items-center gap-1 cursor-pointer ${
               activeTab === 'actions'
-                ? 'bg-indigo-600 text-white font-medium shadow-sm'
+                ? 'bg-slate-800 text-white font-medium shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
             data-testid="ai-tab-actions"
@@ -595,7 +594,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 1: TASK INTELLIGENCE & ASSESSMENT                                     */}
+      {/* TAB 1: TASK INTELLIGENCE & ASSESSMENT                   */}
       {/* ========================================================================= */}
       {activeTab === 'intelligence' && (
         <>
@@ -618,7 +617,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           {/* Idle State */}
           {!intelHasRun && !intelLoading && !intelError && (
             <div className="text-center py-5 px-4 relative z-10" data-testid="ai-task-idle">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3">
+              <div className="w-10 h-10 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3">
                 <Zap className="w-5 h-5" />
               </div>
               <p className="text-xs text-slate-300 max-w-sm mx-auto mb-4">
@@ -847,14 +846,14 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: AI TASK DECOMPOSITION                                              */}
+      {/* TAB 2: AI TASK DECOMPOSITION                       */}
       {/* ========================================================================= */}
       {activeTab === 'decomposition' && (
         <div className="relative z-10 space-y-4">
           {/* Idle State */}
           {!decompHasRun && !decompLoading && !decompError && (
             <div className="text-center py-5 px-4" data-testid="ai-task-decomposition-idle">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3">
+              <div className="w-10 h-10 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3">
                 <ListTree className="w-5 h-5" />
               </div>
               <p className="text-xs text-slate-300 max-w-sm mx-auto mb-4">
@@ -1137,7 +1136,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* Tab 3: AI Actions                                         */}
+      {/* Tab 3: AI Actions                     */}
       {/* ========================================================= */}
       {activeTab === 'actions' && (
         <div className="space-y-4" data-testid="ai-task-actions-section">
@@ -1164,7 +1163,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
           {/* Idle State */}
           {!actionsHasRun && !actionsLoading && !actionsError && (
             <div className="text-center py-5 px-4 relative z-10" data-testid="ai-task-actions-idle">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3">
+              <div className="w-10 h-10 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-3">
                 <SlidersHorizontal className="w-5 h-5" />
               </div>
               <p className="text-xs text-slate-300 max-w-sm mx-auto mb-4">
@@ -1315,7 +1314,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                               {currentStatus || act.expectedCurrentState?.status || 'UNKNOWN'}
                             </span>
                             <ArrowRight className="w-3 h-3 text-slate-500" />
-                            <span className="font-mono text-cyan-300 font-semibold bg-cyan-950/60 border border-cyan-800/50 px-1.5 py-0.5 rounded">
+                            <span className="font-mono text-taskflow-accent font-semibold bg-taskflow-accent-subtle border border-taskflow-accent px-1.5 py-0.5 rounded">
                               {targetStatus}
                             </span>
                           </div>
@@ -1375,12 +1374,12 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                       return (
                         <div
                           key={act.actionId}
-                          className={`bg-slate-950/60 border rounded-xl p-4 transition-all duration-200 ${
+                          className={`bg-slate-950/60 border rounded-md p-4 transition-all duration-200 card-interactive ${
                             isStale
                               ? 'border-amber-500/40 bg-amber-950/10'
                               : status === 'applied'
                                 ? 'border-emerald-500/30 bg-emerald-950/10'
-                                : 'border-slate-800 hover:border-slate-700'
+                                : 'border-slate-800 hover:border-indigo-500/40'
                           }`}
                           data-testid={`ai-action-card-${act.actionId}`}
                         >
@@ -1404,7 +1403,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                             <button
                               type="button"
                               onClick={() => handleDismissAction(act.actionId)}
-                              className="text-slate-500 hover:text-slate-300 p-1 rounded transition-colors"
+                              className="text-slate-500 hover:text-slate-300 p-1 rounded transition-colors btn-interactive cursor-pointer"
                               data-testid="ai-action-dismiss-btn"
                               title="Dismiss proposal"
                             >
@@ -1442,7 +1441,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => onTaskUpdated()}
-                                  className="text-[11px] underline text-amber-200 hover:text-white"
+                                  className="text-[11px] underline text-amber-200 hover:text-white cursor-pointer"
                                   data-testid="ai-action-refresh-task-btn"
                                 >
                                   Refresh Task
@@ -1480,7 +1479,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                                 type="button"
                                 onClick={() => handleDismissAction(act.actionId)}
                                 disabled={status === 'applying'}
-                                className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800/60 transition-colors"
+                                className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800/60 btn-interactive transition-colors cursor-pointer"
                               >
                                 Dismiss
                               </button>
@@ -1489,7 +1488,7 @@ export const AITaskIntelligence: React.FC<AITaskIntelligenceProps> = ({
                                 type="button"
                                 onClick={() => handleApplyAction(act)}
                                 disabled={status === 'applying' || isStale}
-                                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30"
+                                className="flex items-center gap-1.5 bg-taskflow-surface hover:from-indigo-400 hover: disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm shadow-indigo-500/20 btn-interactive-primary cursor-pointer"
                                 data-testid="ai-action-apply-btn"
                               >
                                 {status === 'applying' ? (

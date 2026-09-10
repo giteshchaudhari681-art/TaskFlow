@@ -1,25 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  Sparkles,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle2,
-  ShieldAlert,
-  ArrowRight,
-  Info,
-  Layers,
-  Clock,
-  UserCheck,
-  AlertCircle,
-} from 'lucide-react';
-import {
-  AIAnalysisResponse,
-  AIRecommendation,
-  AIAttentionArea,
-  RecommendationPriority,
-  RecommendationCategory,
-} from '@taskflow/shared';
+import { RefreshCw, ArrowRight, Zap } from 'lucide-react';
+import { AIAnalysisResponse } from '@taskflow/shared';
 import { projectApi } from '../../lib/api';
+import { motion } from 'framer-motion';
 
 interface AIProjectIntelligenceProps {
   organizationId: string;
@@ -28,68 +11,10 @@ interface AIProjectIntelligenceProps {
   onNavigateTab?: (tab: 'tasks' | 'milestones' | 'dependencies' | 'activity' | 'settings') => void;
 }
 
-const PRIORITY_BADGES: Record<
-  RecommendationPriority,
-  { bg: string; border: string; text: string; dot: string }
-> = {
-  CRITICAL: {
-    bg: 'bg-rose-950/50',
-    border: 'border-rose-500/30',
-    text: 'text-rose-300',
-    dot: 'bg-rose-500',
-  },
-  HIGH: {
-    bg: 'bg-amber-950/50',
-    border: 'border-amber-500/30',
-    text: 'text-amber-300',
-    dot: 'bg-amber-500',
-  },
-  MEDIUM: {
-    bg: 'bg-blue-950/50',
-    border: 'border-blue-500/30',
-    text: 'text-blue-300',
-    dot: 'bg-blue-500',
-  },
-  LOW: {
-    bg: 'bg-emerald-950/50',
-    border: 'border-emerald-500/30',
-    text: 'text-emerald-300',
-    dot: 'bg-emerald-500',
-  },
-};
-
-const CATEGORY_LABELS: Record<RecommendationCategory, { label: string; icon: React.ReactNode }> = {
-  BLOCKER: { label: 'Blocker', icon: <ShieldAlert className="w-3.5 h-3.5 text-rose-400" /> },
-  DELIVERY_RISK: {
-    label: 'Delivery Risk',
-    icon: <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />,
-  },
-  MILESTONE: { label: 'Milestone', icon: <Clock className="w-3.5 h-3.5 text-cyan-400" /> },
-  PRIORITY: { label: 'Priority', icon: <AlertCircle className="w-3.5 h-3.5 text-orange-400" /> },
-  OWNERSHIP: { label: 'Ownership', icon: <UserCheck className="w-3.5 h-3.5 text-indigo-400" /> },
-  WORKLOAD: { label: 'Workload', icon: <Layers className="w-3.5 h-3.5 text-violet-400" /> },
-  PROCESS: { label: 'Process', icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> },
-  RISK_MITIGATION: {
-    label: 'Risk Mitigation',
-    icon: <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />,
-  },
-  PLANNING: { label: 'Planning', icon: <Clock className="w-3.5 h-3.5 text-sky-400" /> },
-  QUALITY: { label: 'Quality', icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> },
-  RESOURCE: { label: 'Resource', icon: <Layers className="w-3.5 h-3.5 text-purple-400" /> },
-  DEPENDENCY: { label: 'Dependency', icon: <Layers className="w-3.5 h-3.5 text-blue-400" /> },
-  DEADLINE: { label: 'Deadline', icon: <Clock className="w-3.5 h-3.5 text-rose-400" /> },
-  UNBLOCK: { label: 'Unblock', icon: <ShieldAlert className="w-3.5 h-3.5 text-amber-400" /> },
-  EXECUTION: {
-    label: 'Execution',
-    icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />,
-  },
-};
-
 export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
   organizationId,
   projectId,
   totalTasks = 0,
-  onNavigateTab,
 }) => {
   const [data, setData] = useState<AIAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -106,7 +31,7 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
   }, []);
 
   const runAnalysis = useCallback(async () => {
-    if (loading) return; // Prevent concurrent requests
+    if (loading) return;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -120,17 +45,13 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
       const response = await projectApi.analyzeProject(
         organizationId,
         projectId,
-        {
-          operation: 'PROJECT_INSIGHT',
-        },
+        { operation: 'PROJECT_INSIGHT' },
         controller.signal
       );
       setData(response);
       setHasRun(true);
     } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        return;
-      }
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       const message =
         err instanceof Error ? err.message : 'AI analysis is temporarily unavailable.';
       setError(message);
@@ -141,222 +62,167 @@ export const AIProjectIntelligence: React.FC<AIProjectIntelligenceProps> = ({
     }
   }, [organizationId, projectId, loading]);
 
-  return (
-    <div
-      className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 backdrop-blur-sm relative overflow-hidden transition-all duration-200"
-      data-testid="ai-project-intelligence"
-    >
-      {/* Decorative gradient overlay */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div>
+  // ── State: Uninitialised / Initial prompt ─────────────────────────────────
+  if (!data && !loading && !error) {
+    return (
+      <div
+        className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8 shadow-elevation-1"
+        data-testid="ai-project-intelligence"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-xl">
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-semibold text-white">AI Project Intelligence</h3>
-              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300">
-                Advisory
+              <Zap className="w-4 h-4 text-[#e05638]" />
+              <span className="text-xs text-[#e05638] uppercase tracking-widest font-bold font-display">
+                Delivery Intelligence &amp; Risk Engine
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Actionable recommendations grounded in live telemetry • PR14 engine authoritative
+            <h3 className="text-xl font-bold text-white font-display tracking-tight">
+              Evaluate delivery velocity, blocker risks &amp; milestone health
+            </h3>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              {totalTasks === 0
+                ? 'Create your first tasks and milestones to unlock AI-powered analysis, risk detection, and delivery recommendations.'
+                : "Analyze your project's blocker chains, milestone health, velocity trends, and delivery risks — surfaced as concrete, prioritized recommendations."}
             </p>
           </div>
-        </div>
 
-        {hasRun && (
-          <button
-            type="button"
-            onClick={runAnalysis}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-start sm:self-auto"
-            data-testid="ai-refresh-btn"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Analyzing...' : 'Refresh Analysis'}</span>
-          </button>
-        )}
+          {totalTasks > 0 && (
+            <button
+              type="button"
+              onClick={runAnalysis}
+              disabled={loading}
+              data-testid="ai-analyze-btn"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#e05638] hover:bg-[#c94a2e] text-white text-sm font-semibold shadow-sm transition-all duration-150 active:scale-95 cursor-pointer shrink-0 whitespace-nowrap"
+            >
+              <Zap className="w-4 h-4" />
+              Analyze Project
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
+    );
+  }
 
-      {/* State 1: Error Notification */}
-      {error && (
-        <div className="mt-5 p-4 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-300 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="flex-1 text-sm">
-            <p className="font-medium text-rose-200">AI Analysis Unavailable</p>
-            <p className="text-xs text-rose-300/80 mt-1">{error}</p>
-            <div className="mt-3">
-              <button
-                type="button"
-                onClick={runAnalysis}
-                disabled={loading}
-                className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-medium rounded border border-rose-500/40 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
+  // ── State: Loading ───────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8 shadow-elevation-1 overflow-hidden"
+        data-testid="ai-project-intelligence"
+      >
+        <div data-testid="ai-loading-skeleton">
+          <div className="flex items-center gap-3 mb-6">
+            <RefreshCw className="w-4 h-4 text-[#e05638] animate-spin" />
+            <span className="text-sm text-slate-400 font-medium">
+              Analyzing project context, blocker graph, and milestone velocity…
+            </span>
+          </div>
+          <div className="space-y-3">
+            <motion.div
+              className="h-5 bg-[#1f232d] rounded w-3/4"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="h-4 bg-[#1a1d26] rounded w-full"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, delay: 0.2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="h-4 bg-[#1a1d26] rounded w-5/6"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, delay: 0.4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="h-4 bg-[#1a1d26] rounded w-2/3"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, delay: 0.6, repeat: Infinity, ease: 'easeInOut' }}
+            />
           </div>
         </div>
-      )}
+      </motion.div>
+    );
+  }
 
-      {/* State 2: Idle (Unanalyzed) */}
-      {!hasRun && !loading && !error && (
-        <div className="mt-5 py-6 px-4 rounded-lg bg-slate-800/40 border border-dashed border-slate-700/60 flex flex-col items-center text-center">
-          <div className="p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
-            <Sparkles className="w-6 h-6" />
+  // ── State: Error (fallback advisory) ─────────────────────────────────────────
+  if (error) {
+    return (
+      <div
+        className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8 shadow-elevation-1"
+        data-testid="ai-project-intelligence"
+      >
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-6 h-6 rounded-md bg-[#e05638]/15 border border-[#e05638]/20 flex items-center justify-center">
+            <Zap className="w-3.5 h-3.5 text-[#e05638]" />
           </div>
-          <h4 className="text-sm font-semibold text-slate-200">
-            {totalTasks === 0
-              ? 'No Tasks Logged in Project Yet'
-              : 'Synthesize Real-Time Intelligence & Recommendations'}
-          </h4>
-          <p className="text-xs text-slate-400 max-w-md mt-1 mb-4">
-            {totalTasks === 0
-              ? 'Create your first tasks and milestones to enable telemetry-backed AI project intelligence and delivery risk mitigation.'
-              : 'Evaluate current blocker chains, milestone health, velocity metrics, and delivery risks to generate concrete, telemetry-backed actions.'}
-          </p>
+          <span className="text-sm font-semibold text-white">Rule-Based Telemetry Advisory</span>
+          <span className="text-xs text-[#e05638] bg-[#e05638]/10 px-2 py-0.5 rounded font-mono border border-[#e05638]/20">
+            Active
+          </span>
+        </div>
+
+        <p className="text-sm text-slate-300 leading-relaxed mb-6 max-w-2xl">
+          Live dependency tracking and milestone telemetry are operating normally. Project
+          deliverables are being evaluated using deterministic DAG rule engines while cloud AI
+          provider setup is completed.
+        </p>
+
+        <div className="flex items-center gap-4 text-xs text-slate-500">
+          <span className="font-mono">{error}</span>
           <button
             type="button"
             onClick={runAnalysis}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            data-testid="ai-analyze-btn"
+            className="flex items-center gap-1.5 text-[#e05638] hover:text-[#c94a2e] transition-colors cursor-pointer font-semibold"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Analyze Project Telemetry</span>
+            <RefreshCw className="w-3 h-3" />
+            Retry
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* State 3: Loading Skeleton */}
-      {loading && (
-        <div className="mt-5 space-y-4 animate-pulse" data-testid="ai-loading-skeleton">
-          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 space-y-2">
-            <div className="flex items-center gap-2 text-indigo-400 text-xs font-medium">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>Analyzing project context, blocker graph, and milestone dates...</span>
-            </div>
-            <div className="h-4 bg-slate-700/60 rounded w-3/4" />
-            <div className="h-4 bg-slate-700/40 rounded w-5/6" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="h-24 bg-slate-800/30 rounded-lg border border-slate-800/60" />
-            <div className="h-24 bg-slate-800/30 rounded-lg border border-slate-800/60" />
-          </div>
-        </div>
-      )}
+  // ── State: Success ───────────────────────────────────────────────────────────
+  if (!hasRun || !data) return null;
 
-      {/* State 4: Success Results */}
-      {hasRun && data && !loading && (
-        <div className="mt-5 space-y-6">
-          {/* Executive Summary Card */}
-          <div className="p-4 rounded-lg bg-slate-800/60 border border-slate-700/80 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              <Info className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Executive Synthesis</span>
-            </div>
-            <p className="text-sm text-slate-200 leading-relaxed font-normal">{data.summary}</p>
-          </div>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="rounded-lg bg-[#161920] border border-[#222630] p-6 sm:p-8 overflow-hidden"
+    >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
+        <div className="text-sm text-slate-300 font-medium mb-4">Executive Summary</div>
+        <div className="text-base text-slate-100">{data.summary}</div>
+      </motion.div>
 
-          {/* Key Recommendations Grid */}
-          {data.recommendations && data.recommendations.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Actionable Recommendations ({data.recommendations.length})</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {data.recommendations.map((rec: AIRecommendation, index: number) => {
-                  const prioStyle = PRIORITY_BADGES[rec.priority] || PRIORITY_BADGES.MEDIUM;
-                  const catConfig = CATEGORY_LABELS[rec.category] || {
-                    label: rec.category,
-                    icon: <Layers className="w-3.5 h-3.5 text-slate-400" />,
-                  };
-
-                  return (
-                    <div
-                      key={`rec-${index}`}
-                      className="p-3.5 rounded-lg bg-slate-800/40 border border-slate-800 hover:border-slate-700/80 transition-all flex flex-col justify-between"
-                      data-testid={`ai-recommendation-${index}`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold border ${prioStyle.bg} ${prioStyle.border} ${prioStyle.text}`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${prioStyle.dot}`} />
-                            {rec.priority}
-                          </span>
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
-                            {catConfig.icon}
-                            <span>{catConfig.label}</span>
-                          </span>
-                        </div>
-                        <h5 className="text-xs font-semibold text-slate-200 mb-1">{rec.title}</h5>
-                        <p className="text-xs text-slate-400 leading-relaxed">{rec.description}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Attention Areas List */}
-          {data.attention_areas && data.attention_areas.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                <span>Areas Requiring Attention ({data.attention_areas.length})</span>
-              </h4>
-              <div className="space-y-2">
-                {data.attention_areas.map((area: AIAttentionArea, index: number) => {
-                  const prioStyle = PRIORITY_BADGES[area.severity] || PRIORITY_BADGES.HIGH;
-
-                  return (
-                    <div
-                      key={`attention-${index}`}
-                      className="p-3 rounded-lg bg-slate-800/30 border border-slate-800/80 flex items-start gap-3"
-                      data-testid={`ai-attention-${index}`}
-                    >
-                      <span
-                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0 mt-0.5 ${prioStyle.bg} ${prioStyle.border} ${prioStyle.text}`}
-                      >
-                        {area.severity}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-slate-200">{area.title}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{area.description}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Footer Metadata */}
-          <div className="pt-3 border-t border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-slate-500 gap-2">
-            <span>
-              Generated from project telemetry • Advisory only • Grounded in TaskFlow PR14 signals
-            </span>
-            {onNavigateTab && (
-              <button
-                type="button"
-                onClick={() => onNavigateTab('tasks')}
-                className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 self-start sm:self-auto"
-              >
-                <span>View project tasks</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.3 }}
+        className="mt-6"
+      >
+        <div className="text-sm text-slate-300 font-medium mb-3">AI Recommendations</div>
+        <ul className="space-y-2">
+          {data.recommendations.map((rec, i) => (
+            <li key={i} className="text-sm text-slate-400 flex items-start gap-2">
+              <span className="text-[#e05638] mt-0.5">•</span>
+              {rec.description}
+            </li>
+          ))}
+        </ul>
+      </motion.div>
+    </motion.div>
   );
 };

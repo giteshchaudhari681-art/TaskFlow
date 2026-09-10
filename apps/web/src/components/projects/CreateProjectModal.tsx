@@ -93,12 +93,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg glass-panel rounded-2xl border border-taskflow-border shadow-2xl p-6 bg-taskflow-surface text-taskflow-text">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn">
+      <div className="relative w-full max-w-lg editorial-surface rounded-lg border border-taskflow-border shadow-2xl p-6 bg-taskflow-surface text-taskflow-text">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-taskflow-border/80">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="w-10 h-10 rounded-md bg-taskflow-surface border border-taskflow-accent flex items-center justify-center text-taskflow-accent">
               <Layers className="w-5 h-5" />
             </div>
             <div>
@@ -118,7 +118,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         </div>
 
         {error && (
-          <div className="mt-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-start space-x-2.5">
+          <div className="mt-4 p-3.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-start space-x-2.5">
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -137,7 +137,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. Core Engine Platform"
                 required
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white placeholder-taskflow-muted transition-all"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white placeholder-taskflow-muted transition-all"
               />
             </div>
 
@@ -156,7 +156,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 placeholder="CORE"
                 maxLength={10}
                 required
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm font-mono text-cyan-300 placeholder-taskflow-muted uppercase transition-all"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm font-mono text-taskflow-accent placeholder-taskflow-muted uppercase transition-all"
               />
             </div>
           </div>
@@ -172,7 +172,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               placeholder="Brief summary of project objectives, scope, and target outcomes..."
               rows={3}
               maxLength={500}
-              className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white placeholder-taskflow-muted transition-all resize-none"
+              className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white placeholder-taskflow-muted transition-all resize-none"
             />
           </div>
 
@@ -183,7 +183,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               <select
                 value={status}
                 onChange={e => setStatus(e.target.value as ProjectStatus)}
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white transition-all cursor-pointer"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all cursor-pointer"
               >
                 <option value={ProjectStatus.PLANNING}>Planning</option>
                 <option value={ProjectStatus.ACTIVE}>Active</option>
@@ -214,8 +214,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
 
           {/* Project Creator Notice */}
-          <div className="p-3 rounded-xl bg-cyan-950/30 border border-cyan-800/40 text-[11px] text-cyan-300 flex items-center space-x-2">
-            <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div className="p-3 rounded-md bg-taskflow-accent-subtle border border-taskflow-accent text-[11px] text-taskflow-accent flex items-center space-x-2">
+            <Sparkles className="w-4 h-4 text-taskflow-accent shrink-0" />
             <span>You will automatically become the initial project LEAD upon creation.</span>
           </div>
 
@@ -225,14 +225,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-taskflow-muted hover:text-white hover:bg-taskflow-border/40 transition-colors"
+              className="px-4 py-2 rounded-md text-xs font-semibold text-taskflow-muted hover:text-white hover:bg-taskflow-border/40 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !name.trim() || !key.trim()}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-all"
+              className="px-5 py-2 rounded-md text-xs font-semibold bg-taskflow-surface hover: hover: text-white shadow-glow-cyan disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-all"
             >
               {loading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
               <span>{loading ? 'Creating...' : 'Create Project'}</span>

@@ -15,6 +15,7 @@ import {
   Tag,
   GitFork,
   History,
+  Lock,
 } from 'lucide-react';
 import {
   ProjectDetail,
@@ -22,9 +23,11 @@ import {
   ProjectStatus,
   ProjectMemberDetail,
   OrganizationMemberItem,
+  UserRole,
 } from '@taskflow/shared';
 import { updateProjectSchema } from '@taskflow/validation';
 import { projectApi, orgApi } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 import { TaskList } from '../tasks/TaskList';
 import { KanbanBoard } from '../kanban/KanbanBoard';
 import { ProjectLabelsSettings } from '../labels/ProjectLabelsSettings';
@@ -67,7 +70,9 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
   onBack,
   initialTaskId,
 }) => {
+  const { activeOrg } = useAuth();
   const [project, setProject] = useState<ProjectDetail | null>(null);
+  const isOwner = activeOrg?.role === UserRole.OWNER || project?.userRole === ProjectRole.LEAD;
   const [activeTab, setActiveTab] = useState<ProjectTab>(initialTaskId ? 'tasks' : 'overview');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null | undefined>(initialTaskId);
   const [taskViewMode, setTaskViewMode] = useState<'board' | 'list'>('board');
@@ -228,6 +233,12 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
   const handleRoleChange = async (userId: string, newRole: ProjectRole) => {
     setMemberError(null);
     setMemberSuccess(null);
+
+    if (!isOwner) {
+      setMemberError('Only workspace owners or project leads can change member roles');
+      return;
+    }
+
     try {
       await projectApi.updateMemberRole(organizationId, projectId, userId, newRole);
       setMemberSuccess('Member role updated');
@@ -260,7 +271,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
     return (
       <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center space-y-3">
-          <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
+          <RefreshCw className="w-8 h-8 text-taskflow-accent animate-spin mx-auto" />
           <p className="text-sm text-taskflow-muted">Loading project telemetry...</p>
         </div>
       </div>
@@ -269,13 +280,13 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
 
   if (error || !project) {
     return (
-      <div className="glass-panel rounded-2xl border border-rose-500/30 p-8 text-center bg-rose-500/5">
+      <div className="editorial-surface rounded-lg border border-rose-500/30 p-8 text-center bg-rose-500/5">
         <AlertCircle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
         <h3 className="text-base font-bold text-white">Project Not Found</h3>
         <p className="text-xs text-rose-300 mt-1">{error || 'This project does not exist.'}</p>
         <button
           onClick={onBack}
-          className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-taskflow-surface border border-taskflow-border text-white hover:bg-taskflow-surface/80 transition-colors"
+          className="mt-4 px-4 py-2 rounded-md text-xs font-semibold bg-taskflow-surface border border-taskflow-border text-white hover:bg-taskflow-surface/80 transition-colors"
         >
           Return to Projects
         </button>
@@ -302,7 +313,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         <div className="flex items-center space-x-3">
           <button
             onClick={onBack}
-            className="p-2 rounded-xl bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-taskflow-muted hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-md bg-taskflow-surface hover:bg-taskflow-surface/80 border border-taskflow-border text-taskflow-muted hover:text-white transition-colors cursor-pointer"
             title="Back to Projects"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -314,7 +325,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: project.color || '#06b6d4' }}
               />
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-taskflow-surface border border-taskflow-border text-cyan-300 uppercase">
+              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-taskflow-surface border border-taskflow-border text-taskflow-accent uppercase">
                 {project.key}
               </span>
               <h1 className="text-xl font-bold text-white tracking-tight">{project.name}</h1>
@@ -330,7 +341,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         </div>
 
         {/* Sub Navigation Tabs */}
-        <div className="flex items-center space-x-1 overflow-x-auto pb-1 md:pb-0">
+        <div className="flex items-center space-x-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {(
             [
               { id: 'overview', label: 'Overview', icon: Activity },
@@ -348,10 +359,10 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold font-display transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
-                    ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                    : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50 border border-transparent'
+                    ? 'bg-slate-800 text-sky-400 border border-sky-500/30 shadow-sm'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -412,7 +423,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
 
       {/* TAB 3: LABELS */}
       {activeTab === 'labels' && (
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-taskflow-surface/30">
+        <div className="editorial-surface rounded-lg border border-taskflow-border p-6 bg-taskflow-surface/30">
           <ProjectLabelsSettings
             organizationId={organizationId}
             projectId={projectId}
@@ -423,7 +434,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
 
       {/* TAB 4: DEPENDENCIES GRAPH */}
       {activeTab === 'dependencies' && (
-        <div className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-taskflow-surface/30">
+        <div className="editorial-surface rounded-lg border border-taskflow-border p-6 bg-taskflow-surface/30">
           <DependencyGraphView
             organizationId={organizationId}
             projectId={projectId}
@@ -441,9 +452,9 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               <button
                 key={subTab}
                 onClick={() => setMilestoneSubTab(subTab)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
                   milestoneSubTab === subTab
-                    ? 'bg-taskflow-surface text-cyan-300 border-cyan-500/40'
+                    ? 'bg-taskflow-surface text-taskflow-accent border-taskflow-accent'
                     : 'text-taskflow-muted hover:text-white border-transparent hover:bg-taskflow-surface/50'
                 }`}
               >
@@ -480,13 +491,13 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 value={memberSearch}
                 onChange={e => setMemberSearch(e.target.value)}
                 placeholder="Filter members..."
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-surface border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs text-white placeholder-taskflow-muted transition-all"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-surface border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-xs text-white placeholder-taskflow-muted transition-all"
               />
             </div>
 
             <button
               onClick={() => setAddMemberModalOpen(true)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan flex items-center justify-center space-x-2 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-md text-xs font-semibold bg-taskflow-surface hover: hover: text-white shadow-glow-cyan flex items-center justify-center space-x-2 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Member</span>
@@ -494,24 +505,24 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
           </div>
 
           {memberError && (
-            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2">
+            <div className="p-3.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{memberError}</span>
             </div>
           )}
 
           {memberSuccess && (
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center space-x-2">
+            <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center space-x-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{memberSuccess}</span>
             </div>
           )}
 
           {/* Members Table */}
-          <div className="glass-panel rounded-2xl border border-taskflow-border overflow-hidden bg-taskflow-surface">
+          <div className="editorial-surface rounded-lg border border-taskflow-border overflow-hidden bg-taskflow-surface">
             {membersLoading ? (
               <div className="p-8 text-center text-xs text-taskflow-muted">
-                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-cyan-400" />
+                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-taskflow-accent" />
                 Loading members...
               </div>
             ) : filteredMembers.length === 0 ? (
@@ -534,7 +545,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                       <tr key={m.id} className="hover:bg-taskflow-bg/40 transition-colors">
                         <td className="py-3.5 px-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+                            <div className="w-8 h-8 rounded-full bg-taskflow-surface flex items-center justify-center text-xs font-bold text-white overflow-hidden">
                               {m.user.avatarUrl ? (
                                 <img
                                   src={m.user.avatarUrl}
@@ -553,18 +564,25 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <select
-                            value={m.role}
-                            onChange={e =>
-                              handleRoleChange(m.userId, e.target.value as ProjectRole)
-                            }
-                            className="px-2.5 py-1 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer font-semibold"
-                          >
-                            <option value={ProjectRole.LEAD}>LEAD</option>
-                            <option value={ProjectRole.ADMIN}>ADMIN</option>
-                            <option value={ProjectRole.MEMBER}>MEMBER</option>
-                            <option value={ProjectRole.VIEWER}>VIEWER</option>
-                          </select>
+                          {isOwner ? (
+                            <select
+                              value={m.role}
+                              onChange={e =>
+                                handleRoleChange(m.userId, e.target.value as ProjectRole)
+                              }
+                              className="px-2.5 py-1 rounded-lg bg-taskflow-bg border border-taskflow-border text-xs text-white focus:outline-none focus:border-taskflow-accent cursor-pointer font-semibold"
+                            >
+                              <option value={ProjectRole.LEAD}>LEAD</option>
+                              <option value={ProjectRole.ADMIN}>ADMIN</option>
+                              <option value={ProjectRole.MEMBER}>MEMBER</option>
+                              <option value={ProjectRole.VIEWER}>VIEWER</option>
+                            </select>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300">
+                              <Lock className="w-3 h-3 text-slate-500" />
+                              <span>{m.role}</span>
+                            </span>
+                          )}
                         </td>
 
                         <td className="py-3.5 px-4 text-taskflow-muted">
@@ -572,13 +590,15 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
-                          <button
-                            onClick={() => setRemovingMemberId(m.userId)}
-                            className="p-1.5 rounded-lg text-taskflow-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                            title="Remove member from project"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {isOwner && (
+                            <button
+                              onClick={() => setRemovingMemberId(m.userId)}
+                              className="p-1.5 rounded-lg text-taskflow-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                              title="Remove member from project"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -595,7 +615,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
         <div className="max-w-2xl space-y-6">
           <form
             onSubmit={handleUpdateSettings}
-            className="glass-panel rounded-2xl border border-taskflow-border p-6 bg-taskflow-surface space-y-4"
+            className="editorial-surface rounded-lg border border-taskflow-border p-6 bg-taskflow-surface space-y-4"
           >
             <h2 className="text-base font-bold text-white tracking-tight">Project Configuration</h2>
             <p className="text-xs text-taskflow-muted">
@@ -603,14 +623,14 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
             </p>
 
             {settingsError && (
-              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2">
+              <div className="p-3.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{settingsError}</span>
               </div>
             )}
 
             {settingsSuccess && (
-              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center space-x-2">
+              <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{settingsSuccess}</span>
               </div>
@@ -624,7 +644,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 type="text"
                 value={project.key}
                 disabled
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/40 border border-taskflow-border text-sm font-mono text-cyan-300 opacity-70 cursor-not-allowed uppercase"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/40 border border-taskflow-border text-sm font-mono text-taskflow-accent opacity-70 cursor-not-allowed uppercase"
               />
               <p className="text-[10px] text-taskflow-muted">
                 Project keys are immutable after creation to protect URL routing and task
@@ -639,7 +659,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white transition-all"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all"
               />
             </div>
 
@@ -649,7 +669,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 rows={3}
-                className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white transition-all resize-none"
+                className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all resize-none"
               />
             </div>
 
@@ -659,7 +679,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 <select
                   value={status}
                   onChange={e => setStatus(e.target.value as ProjectStatus)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg/80 border border-taskflow-border focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm text-white transition-all cursor-pointer"
+                  className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all cursor-pointer"
                 >
                   <option value={ProjectStatus.PLANNING}>Planning</option>
                   <option value={ProjectStatus.ACTIVE}>Active</option>
@@ -694,7 +714,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               <button
                 type="submit"
                 disabled={settingsLoading}
-                className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan disabled:opacity-50 flex items-center space-x-2 transition-all cursor-pointer"
+                className="px-5 py-2 rounded-md text-xs font-semibold bg-taskflow-surface hover: hover: text-white shadow-glow-cyan disabled:opacity-50 flex items-center space-x-2 transition-all cursor-pointer"
               >
                 {settingsLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Save Changes</span>
@@ -703,7 +723,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
           </form>
 
           {/* Danger Zone: Archive / Unarchive */}
-          <div className="glass-panel rounded-2xl border border-rose-500/30 p-6 bg-rose-500/5 space-y-3">
+          <div className="editorial-surface rounded-lg border border-rose-500/30 p-6 bg-rose-500/5 space-y-3">
             <h3 className="text-sm font-bold text-rose-400 flex items-center space-x-2">
               <Archive className="w-4 h-4" />
               <span>Project Lifecycle Archive</span>
@@ -717,7 +737,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 type="button"
                 onClick={handleToggleArchive}
                 disabled={settingsLoading}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-md text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-all cursor-pointer"
               >
                 {project.status === ProjectStatus.ARCHIVED
                   ? 'Unarchive Project'
@@ -730,8 +750,8 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
 
       {/* Add Member Modal */}
       {addMemberModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md glass-panel rounded-2xl border border-taskflow-border shadow-2xl p-6 bg-taskflow-surface text-taskflow-text space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn">
+          <div className="w-full max-w-md editorial-surface rounded-lg border border-taskflow-border shadow-2xl p-6 bg-taskflow-surface text-taskflow-text space-y-4">
             <h3 className="text-base font-bold text-white">Add Team Member to Project</h3>
             <p className="text-xs text-taskflow-muted">
               Select an existing organization member to grant project access
@@ -741,7 +761,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-taskflow-text">Select Member</label>
                 {availableOrgMembers.length === 0 ? (
-                  <p className="text-xs text-amber-400 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <p className="text-xs text-amber-400 p-3 rounded-md bg-amber-500/10 border border-amber-500/20">
                     All organization members are already assigned to this project.
                   </p>
                 ) : (
@@ -749,7 +769,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                     value={selectedOrgUserId}
                     onChange={e => setSelectedOrgUserId(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg border border-taskflow-border text-sm text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg border border-taskflow-border text-sm text-white focus:outline-none focus:border-taskflow-accent cursor-pointer"
                   >
                     <option value="">Choose an organization member...</option>
                     {availableOrgMembers.map(m => (
@@ -766,7 +786,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 <select
                   value={selectedProjectRole}
                   onChange={e => setSelectedProjectRole(e.target.value as ProjectRole)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-taskflow-bg border border-taskflow-border text-sm text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+                  className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg border border-taskflow-border text-sm text-white focus:outline-none focus:border-taskflow-accent cursor-pointer"
                 >
                   <option value={ProjectRole.MEMBER}>MEMBER (Contributor)</option>
                   <option value={ProjectRole.ADMIN}>ADMIN (Project Administrator)</option>
@@ -779,14 +799,14 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 <button
                   type="button"
                   onClick={() => setAddMemberModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-taskflow-muted hover:text-white"
+                  className="px-4 py-2 rounded-md text-xs font-semibold text-taskflow-muted hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={memberActionLoading || !selectedOrgUserId}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-glow-cyan disabled:opacity-50"
+                  className="px-4 py-2 rounded-md text-xs font-semibold bg-taskflow-surface text-white shadow-glow-cyan disabled:opacity-50"
                 >
                   {memberActionLoading ? 'Adding...' : 'Add to Project'}
                 </button>
@@ -798,8 +818,8 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
 
       {/* Remove Member Confirmation Modal */}
       {removingMemberId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-sm glass-panel rounded-2xl border border-rose-500/30 shadow-2xl p-6 bg-taskflow-surface text-taskflow-text space-y-4 text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn">
+          <div className="w-full max-w-sm editorial-surface rounded-lg border border-rose-500/30 shadow-2xl p-6 bg-taskflow-surface text-taskflow-text space-y-4 text-center">
             <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
@@ -814,7 +834,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 type="button"
                 onClick={() => setRemovingMemberId(null)}
                 disabled={memberActionLoading}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-taskflow-muted hover:text-white"
+                className="px-4 py-2 rounded-md text-xs font-semibold text-taskflow-muted hover:text-white"
               >
                 Cancel
               </button>
@@ -822,7 +842,7 @@ export const ProjectDetailShell: React.FC<ProjectDetailShellProps> = ({
                 type="button"
                 onClick={handleConfirmRemove}
                 disabled={memberActionLoading}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30"
+                className="px-4 py-2 rounded-md text-xs font-semibold bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30"
               >
                 {memberActionLoading ? 'Removing...' : 'Confirm Remove'}
               </button>

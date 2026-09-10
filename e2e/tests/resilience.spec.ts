@@ -25,7 +25,7 @@ test.describe('E2E Production Hardening & System Resilience Workflows', () => {
     await projectPage.selectTab('Overview');
 
     await expect(page.locator(`text=${project.name}`).first()).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Executive Health Assessment')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Project Health')).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Total Tasks', { exact: true })).toBeVisible();
   });
 
@@ -74,9 +74,10 @@ test.describe('E2E Production Hardening & System Resilience Workflows', () => {
     // Access application without session token
     await page.goto('/');
 
-    // Renders login screen
-    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('text=Active Workspace:')).not.toBeVisible();
+    // Renders landing page screen
+    await expect(page.getByRole('button', { name: /^sign in$/i }).first()).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByRole('button', { name: 'Projects', exact: true })).not.toBeVisible();
   });
 });

@@ -62,8 +62,8 @@ export const NotificationSettings: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="glass-card p-12 text-center rounded-xl border border-taskflow-border">
-        <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+      <div className="editorial-card p-12 text-center rounded-md border border-taskflow-border">
+        <div className="w-6 h-6 border-2 border-taskflow-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
         <p className="text-xs text-taskflow-muted">Loading preferences...</p>
       </div>
     );
@@ -75,7 +75,7 @@ export const NotificationSettings: React.FC = () => {
       label: 'Task Assignments',
       description: 'Receive notifications when tasks are assigned to you or unassigned.',
       icon: UserCheck,
-      color: 'text-cyan-400',
+      color: 'text-taskflow-accent',
     },
     {
       key: 'comments' as keyof NotificationPreferences,
@@ -107,7 +107,7 @@ export const NotificationSettings: React.FC = () => {
       description:
         'Receive notifications whenever a collaborator changes the status of a task assigned to you.',
       icon: GitCommit,
-      color: 'text-purple-400',
+      color: 'text-taskflow-text',
     },
   ];
 
@@ -116,7 +116,7 @@ export const NotificationSettings: React.FC = () => {
       {/* Header */}
       <div>
         <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-          <Bell className="w-5 h-5 text-cyan-400" />
+          <Bell className="w-5 h-5 text-taskflow-accent" />
           <span>Notification Preferences</span>
         </h2>
         <p className="text-xs text-taskflow-muted mt-0.5">
@@ -126,21 +126,21 @@ export const NotificationSettings: React.FC = () => {
       </div>
 
       {savedSuccess && (
-        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800/60 flex items-center space-x-2 text-xs text-emerald-300">
+        <div className="p-3 rounded-md bg-emerald-950/60 border border-emerald-800/60 flex items-center space-x-2 text-xs text-emerald-300">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
           <span>Notification preferences updated successfully.</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800/60 flex items-center space-x-2 text-xs text-rose-300">
+        <div className="p-3 rounded-md bg-rose-950/60 border border-rose-800/60 flex items-center space-x-2 text-xs text-rose-300">
           <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       <form onSubmit={handleSave} className="space-y-4">
-        <div className="glass-card rounded-xl border border-taskflow-border divide-y divide-taskflow-border/50">
+        <div className="editorial-card rounded-md border border-taskflow-border divide-y divide-taskflow-border/50">
           {preferenceItems.map(item => {
             const Icon = item.icon;
             const isChecked = preferences[item.key];
@@ -170,7 +170,7 @@ export const NotificationSettings: React.FC = () => {
                   <div
                     className={`w-11 h-6 rounded-full transition-colors relative p-0.5 cursor-pointer ${
                       isChecked
-                        ? 'bg-gradient-to-r from-cyan-500 to-indigo-600'
+                        ? 'bg-taskflow-surface'
                         : 'bg-taskflow-surface border border-taskflow-border'
                     }`}
                   >
@@ -191,7 +191,7 @@ export const NotificationSettings: React.FC = () => {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-glow-cyan transition-all disabled:opacity-50 cursor-pointer"
+            className="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-semibold bg-taskflow-surface hover: hover: text-white shadow-glow-cyan transition-all disabled:opacity-50 cursor-pointer"
           >
             {saving ? (
               <>

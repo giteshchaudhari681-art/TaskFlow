@@ -10,7 +10,6 @@ import {
   RefreshCw,
   FolderKanban,
   Flag,
-  Calendar,
   ExternalLink,
 } from 'lucide-react';
 import {
@@ -21,6 +20,12 @@ import {
   TaskPriority,
 } from '@taskflow/shared';
 import { workApi, taskApi } from '../../lib/api';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Badge } from '../ui/Badge';
+import { Card } from '../ui/Card';
+import { EmptyState } from '../ui/EmptyState';
+import { Skeleton } from '../ui/Skeleton';
 
 interface MyWorkViewProps {
   onOpenTask: (projectId: string, taskId: string) => void;
@@ -74,7 +79,6 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
         item.id,
         newStatus
       );
-      // Re-fetch work queue to dynamically update metrics and ordering
       await fetchWorkQueue(activeFilter, searchQuery);
     } catch {
       // Best-effort
@@ -96,31 +100,27 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
     switch (item.dueDateCategory) {
       case 'OVERDUE':
         return (
-          <span className="flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-950/80 text-rose-400 border border-rose-800/60 shadow-[0_0_8px_rgba(244,63,94,0.2)]">
-            <AlertCircle className="w-3 h-3" />
-            <span>Overdue ({label})</span>
-          </span>
+          <Badge variant="danger" size="sm" dot>
+            Overdue ({label})
+          </Badge>
         );
       case 'DUE_TODAY':
         return (
-          <span className="flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-800/60 shadow-[0_0_8px_rgba(245,158,11,0.2)]">
-            <Clock className="w-3 h-3" />
-            <span>Due Today</span>
-          </span>
+          <Badge variant="warning" size="sm" dot>
+            Due Today
+          </Badge>
         );
       case 'DUE_SOON':
         return (
-          <span className="flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-yellow-950/60 text-yellow-300 border border-yellow-800/50">
-            <Clock className="w-3 h-3" />
-            <span>Due Soon ({label})</span>
-          </span>
+          <Badge variant="warning" size="sm">
+            Due Soon ({label})
+          </Badge>
         );
       default:
         return (
-          <span className="flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] text-taskflow-muted bg-taskflow-surface border border-taskflow-border">
-            <Calendar className="w-3 h-3" />
-            <span>{label}</span>
-          </span>
+          <Badge variant="default" size="sm">
+            {label}
+          </Badge>
         );
     }
   };
@@ -129,27 +129,27 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
     switch (priority) {
       case TaskPriority.URGENT:
         return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800/60 uppercase tracking-wide">
+          <Badge variant="danger" size="sm" dot>
             Urgent
-          </span>
+          </Badge>
         );
       case TaskPriority.HIGH:
         return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-orange-950/80 text-orange-300 border border-orange-800/60 uppercase tracking-wide">
+          <Badge variant="warning" size="sm" dot>
             High
-          </span>
+          </Badge>
         );
       case TaskPriority.MEDIUM:
         return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 uppercase tracking-wide">
+          <Badge variant="primary" size="sm" dot>
             Medium
-          </span>
+          </Badge>
         );
       case TaskPriority.LOW:
         return (
-          <span className="px-2 py-0.5 rounded text-[10px] text-taskflow-muted bg-taskflow-surface border border-taskflow-border uppercase tracking-wide">
+          <Badge variant="default" size="sm">
             Low
-          </span>
+          </Badge>
         );
       default:
         return null;
@@ -174,156 +174,165 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-0.5 shadow-glow-cyan flex items-center justify-center">
-              <div className="w-full h-full bg-taskflow-surface rounded-[10px] flex items-center justify-center">
-                <CheckSquare className="w-5 h-5 text-cyan-400" />
-              </div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-md bg-taskflow-surface p-0.5 shadow-glow-cyan flex items-center justify-center shrink-0">
+            <div className="w-full h-full bg-[#0b0f17] rounded-[10px] flex items-center justify-center">
+              <CheckSquare className="w-5 h-5 text-sky-400" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Personal Work Queue</h1>
-              <p className="text-xs text-taskflow-muted">
-                Your execution cockpit: prioritized tasks, upcoming deadlines, and blocked
-                dependencies.
-              </p>
-            </div>
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white font-display tracking-tight">
+              Personal Work Queue
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              Your execution cockpit: prioritized tasks, upcoming deadlines, and blocked
+              dependencies.
+            </p>
           </div>
         </div>
 
         {/* Search and Refresh */}
         <div className="flex items-center space-x-3">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-taskflow-muted" />
-            <input
+          <form onSubmit={handleSearchSubmit} className="w-52 sm:w-64">
+            <Input
               type="text"
-              placeholder="Search your assigned tasks..."
+              placeholder="Search assigned tasks..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-xs text-white placeholder-taskflow-muted focus:outline-none focus:border-cyan-500/50 w-52 sm:w-64"
+              leftIcon={<Search className="w-4 h-4" />}
             />
           </form>
 
-          <button
-            type="button"
+          <Button
+            variant="glass"
+            size="icon"
             onClick={() => fetchWorkQueue(activeFilter, searchQuery)}
             disabled={loading}
-            className="p-2 rounded-lg bg-taskflow-surface hover:bg-taskflow-card-hover border border-taskflow-border text-taskflow-muted hover:text-white transition-colors disabled:opacity-50"
             title="Refresh Work Queue"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-sky-400' : ''}`} />
+          </Button>
         </div>
       </div>
 
       {/* Summary Metrics Grid */}
       {summary && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {/* Total Assigned */}
-          <div
+          <Card
+            variant="interactive"
+            padding="sm"
             onClick={() => setActiveFilter('all')}
-            className={`glass-card p-3 rounded-xl border transition-all cursor-pointer ${
-              activeFilter === 'all'
-                ? 'border-cyan-500/50 bg-cyan-950/20 shadow-glow-cyan'
-                : 'border-taskflow-border hover:border-taskflow-border/80'
-            }`}
+            className={
+              activeFilter === 'all' ? 'border-sky-500/50 bg-sky-950/20 shadow-glow-cyan' : ''
+            }
           >
-            <div className="flex items-center justify-between text-taskflow-muted mb-1">
-              <span className="text-[11px] font-medium">Assigned</span>
-              <CheckSquare className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[11px] font-bold font-display uppercase tracking-wider">
+                Assigned
+              </span>
+              <CheckSquare className="w-3.5 h-3.5 text-sky-400" />
             </div>
-            <p className="text-xl font-bold text-white">{summary.totalAssigned}</p>
-          </div>
+            <p className="text-xl sm:text-2xl font-extrabold text-white font-display">
+              {summary.totalAssigned}
+            </p>
+          </Card>
 
-          {/* Overdue */}
-          <div
+          <Card
+            variant="interactive"
+            padding="sm"
             onClick={() => setActiveFilter('overdue')}
-            className={`glass-card p-3 rounded-xl border transition-all cursor-pointer ${
-              activeFilter === 'overdue'
-                ? 'border-rose-500/50 bg-rose-950/20 shadow-[0_0_12px_rgba(244,63,94,0.3)]'
-                : summary.overdueCount > 0
-                  ? 'border-rose-800/40 bg-rose-950/10 hover:border-rose-700/60'
-                  : 'border-taskflow-border hover:border-taskflow-border/80'
-            }`}
+            className={
+              activeFilter === 'overdue' ? 'border-rose-500/50 bg-rose-950/20 shadow-glow-cyan' : ''
+            }
           >
-            <div className="flex items-center justify-between text-taskflow-muted mb-1">
-              <span className="text-[11px] font-medium text-rose-400">Overdue</span>
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[11px] font-bold font-display uppercase tracking-wider text-rose-400">
+                Overdue
+              </span>
               <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
             </div>
-            <p className="text-xl font-bold text-rose-300">{summary.overdueCount}</p>
-          </div>
+            <p className="text-xl sm:text-2xl font-extrabold text-rose-300 font-display">
+              {summary.overdueCount}
+            </p>
+          </Card>
 
-          {/* Due Soon */}
-          <div
+          <Card
+            variant="interactive"
+            padding="sm"
             onClick={() => setActiveFilter('due_soon')}
-            className={`glass-card p-3 rounded-xl border transition-all cursor-pointer ${
-              activeFilter === 'due_soon'
-                ? 'border-amber-500/50 bg-amber-950/20 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
-                : 'border-taskflow-border hover:border-taskflow-border/80'
-            }`}
+            className={activeFilter === 'due_soon' ? 'border-amber-500/50 bg-amber-950/20' : ''}
           >
-            <div className="flex items-center justify-between text-taskflow-muted mb-1">
-              <span className="text-[11px] font-medium text-amber-400">Due Soon</span>
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[11px] font-bold font-display uppercase tracking-wider text-amber-400">
+                Due Soon
+              </span>
               <Clock className="w-3.5 h-3.5 text-amber-400" />
             </div>
-            <p className="text-xl font-bold text-amber-300">{summary.dueSoonCount}</p>
-          </div>
+            <p className="text-xl sm:text-2xl font-extrabold text-amber-300 font-display">
+              {summary.dueSoonCount}
+            </p>
+          </Card>
 
-          {/* Blocked */}
-          <div
+          <Card
+            variant="interactive"
+            padding="sm"
             onClick={() => setActiveFilter('blocked')}
-            className={`glass-card p-3 rounded-xl border transition-all cursor-pointer ${
-              activeFilter === 'blocked'
-                ? 'border-rose-500/50 bg-rose-950/20 shadow-[0_0_12px_rgba(244,63,94,0.3)]'
-                : summary.blockedCount > 0
-                  ? 'border-rose-900/40 bg-rose-950/10'
-                  : 'border-taskflow-border hover:border-taskflow-border/80'
-            }`}
+            className={activeFilter === 'blocked' ? 'border-rose-500/50 bg-rose-950/20' : ''}
           >
-            <div className="flex items-center justify-between text-taskflow-muted mb-1">
-              <span className="text-[11px] font-medium text-rose-400">Blocked</span>
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[11px] font-bold font-display uppercase tracking-wider text-rose-400">
+                Blocked
+              </span>
               <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
             </div>
-            <p className="text-xl font-bold text-rose-300">{summary.blockedCount}</p>
-          </div>
+            <p className="text-xl sm:text-2xl font-extrabold text-rose-300 font-display">
+              {summary.blockedCount}
+            </p>
+          </Card>
 
-          {/* In Progress */}
-          <div
+          <Card
+            variant="interactive"
+            padding="sm"
             onClick={() => setActiveFilter('in_progress')}
-            className={`glass-card p-3 rounded-xl border transition-all cursor-pointer ${
-              activeFilter === 'in_progress'
-                ? 'border-indigo-500/50 bg-indigo-950/20 shadow-glow-cyan'
-                : 'border-taskflow-border hover:border-taskflow-border/80'
-            }`}
+            className={
+              activeFilter === 'in_progress' ? 'border-indigo-500/50 bg-indigo-950/20' : ''
+            }
           >
-            <div className="flex items-center justify-between text-taskflow-muted mb-1">
-              <span className="text-[11px] font-medium text-indigo-400">In Progress</span>
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[11px] font-bold font-display uppercase tracking-wider text-indigo-400">
+                In Progress
+              </span>
               <Loader2 className="w-3.5 h-3.5 text-indigo-400" />
             </div>
-            <p className="text-xl font-bold text-indigo-300">{summary.inProgressCount}</p>
-          </div>
+            <p className="text-xl sm:text-2xl font-extrabold text-indigo-300 font-display">
+              {summary.inProgressCount}
+            </p>
+          </Card>
 
-          {/* Completed */}
-          <div
+          <Card
+            variant="interactive"
+            padding="sm"
             onClick={() => setActiveFilter('completed')}
-            className={`glass-card p-3 rounded-xl border transition-all cursor-pointer ${
-              activeFilter === 'completed'
-                ? 'border-emerald-500/50 bg-emerald-950/20 shadow-[0_0_12px_rgba(52,211,153,0.2)]'
-                : 'border-taskflow-border hover:border-taskflow-border/80'
-            }`}
+            className={
+              activeFilter === 'completed' ? 'border-emerald-500/50 bg-emerald-950/20' : ''
+            }
           >
-            <div className="flex items-center justify-between text-taskflow-muted mb-1">
-              <span className="text-[11px] font-medium text-emerald-400">Done Recently</span>
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[11px] font-bold font-display uppercase tracking-wider text-emerald-400">
+                Done Recently
+              </span>
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             </div>
-            <p className="text-xl font-bold text-emerald-300">{summary.completedRecentlyCount}</p>
-          </div>
+            <p className="text-xl sm:text-2xl font-extrabold text-emerald-300 font-display">
+              {summary.completedRecentlyCount}
+            </p>
+          </Card>
         </div>
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-2 border-b border-taskflow-border">
+      <div className="flex items-center space-x-1.5 overflow-x-auto pb-2 border-b border-white/[0.08] scrollbar-none">
         {filters.map(f => {
           const isActive = activeFilter === f.id;
           return (
@@ -331,23 +340,23 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
               key={f.id}
               type="button"
               onClick={() => setActiveFilter(f.id)}
-              className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold font-display whitespace-nowrap transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-taskflow-surface text-cyan-300 border border-cyan-500/40 shadow-glow-cyan'
-                  : 'text-taskflow-muted hover:text-white hover:bg-taskflow-surface/50 border border-transparent'
+                  ? 'bg-slate-800 text-sky-400 border border-sky-500/30 shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
               }`}
             >
               <span>{f.label}</span>
               {f.count !== undefined && (
                 <span
-                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                  className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold ${
                     isActive
-                      ? 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                      ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
                       : f.alert && f.count > 0
-                        ? 'bg-rose-950 text-rose-400 border border-rose-800'
+                        ? 'bg-rose-950/80 text-rose-300 border border-rose-800/60'
                         : f.warning && f.count > 0
-                          ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                          : 'bg-taskflow-surface text-taskflow-muted'
+                          ? 'bg-amber-950/80 text-amber-300 border border-amber-800/60'
+                          : 'bg-slate-800 text-slate-400'
                   }`}
                 >
                   {f.count}
@@ -361,38 +370,42 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
       {/* Work Item List */}
       <div className="space-y-3">
         {loading ? (
-          <div className="glass-card p-12 text-center text-taskflow-muted space-y-3 rounded-xl border border-taskflow-border">
-            <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs">Loading personal work queue...</p>
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="p-4 space-y-2">
+                <Skeleton className="w-1/3 h-5" />
+                <Skeleton className="w-full h-4" />
+              </Card>
+            ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="glass-card p-12 text-center text-taskflow-muted space-y-3 rounded-xl border border-taskflow-border">
-            <div className="w-12 h-12 rounded-full bg-taskflow-surface mx-auto flex items-center justify-center text-taskflow-muted">
-              <CheckSquare className="w-6 h-6 opacity-40 text-cyan-400" />
-            </div>
-            <p className="text-sm font-semibold text-white">No tasks in this queue</p>
-            <p className="text-xs text-taskflow-muted max-w-sm mx-auto">
-              {activeFilter === 'overdue'
+          <EmptyState
+            icon={<CheckSquare className="w-6 h-6" />}
+            title="No tasks in this queue"
+            description={
+              activeFilter === 'overdue'
                 ? 'Great job! You have zero overdue tasks.'
                 : activeFilter === 'blocked'
                   ? 'None of your assigned tasks are blocked by dependencies.'
-                  : 'No assigned work matches your selected filter criteria.'}
-            </p>
-          </div>
+                  : 'No assigned work matches your selected filter criteria.'
+            }
+          />
         ) : (
           items.map(item => (
-            <div
+            <Card
               key={item.id}
+              variant="interactive"
+              padding="sm"
               onClick={() => onOpenTask(item.projectId, item.id)}
-              className="glass-card p-4 rounded-xl border border-taskflow-border hover:border-cyan-500/40 transition-all cursor-pointer group space-y-3"
+              className="group space-y-3"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 {/* Issue Key, Title, Project */}
                 <div className="flex items-start sm:items-center space-x-3">
-                  <span className="font-mono text-xs font-bold text-cyan-400 px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/60">
+                  <span className="font-mono text-xs font-bold text-sky-400 px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700">
                     {item.issueKey || `#${item.taskNumber}`}
                   </span>
-                  <span className="text-sm font-medium text-white group-hover:text-cyan-300 transition-colors">
+                  <span className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors font-display">
                     {item.title}
                   </span>
                 </div>
@@ -408,7 +421,7 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
                     onClick={e => e.stopPropagation()}
                     onChange={e => handleStatusChange(item, e.target.value as TaskStatus, e)}
                     disabled={updatingTaskId === item.id}
-                    className="px-2.5 py-1 rounded-lg text-xs font-medium bg-taskflow-surface border border-taskflow-border text-taskflow-text hover:border-cyan-500/40 focus:outline-none cursor-pointer"
+                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 border border-white/[0.08] text-slate-200 hover:border-sky-500/40 focus:outline-none cursor-pointer"
                   >
                     <option value={TaskStatus.BACKLOG}>Backlog</option>
                     <option value={TaskStatus.TODO}>To Do</option>
@@ -425,27 +438,25 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
                       e.stopPropagation();
                       onOpenTask(item.projectId, item.id);
                     }}
-                    className="p-1 text-taskflow-muted group-hover:text-white transition-colors"
-                    title="Open task drawer"
+                    className="p-1.5 text-slate-400 group-hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                    title="Open task details"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
               {/* Sub-row: Project, Milestone, Blocked Predecessors */}
-              <div className="flex items-center justify-between pt-1 border-t border-taskflow-border/40 text-xs text-taskflow-muted flex-wrap gap-2">
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.08] text-xs text-slate-400 flex-wrap gap-2">
                 <div className="flex items-center space-x-4">
-                  {/* Project name */}
-                  <span className="flex items-center space-x-1.5">
+                  <span className="flex items-center space-x-1.5 font-medium">
                     <FolderKanban className="w-3.5 h-3.5 text-indigo-400" />
                     <span>{item.project.name}</span>
                   </span>
 
-                  {/* Milestone */}
                   {item.milestone && (
-                    <span className="flex items-center space-x-1.5">
-                      <Flag className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="flex items-center space-x-1.5 font-medium">
+                      <Flag className="w-3.5 h-3.5 text-sky-400" />
                       <span>{item.milestone.title}</span>
                     </span>
                   )}
@@ -453,8 +464,8 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
 
                 {/* Blocked Banner */}
                 {item.isBlocked && item.blockingDependencies.length > 0 && (
-                  <div className="flex items-center space-x-1.5 text-[11px] font-semibold text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-800/60">
-                    <ShieldAlert className="w-3 h-3" />
+                  <div className="flex items-center space-x-1.5 text-[11px] font-semibold text-rose-300 bg-rose-950/60 px-2.5 py-0.5 rounded-md border border-rose-800/60">
+                    <ShieldAlert className="w-3.5 h-3.5" />
                     <span>
                       Blocked by{' '}
                       {item.blockingDependencies
@@ -464,7 +475,7 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
           ))
         )}
       </div>

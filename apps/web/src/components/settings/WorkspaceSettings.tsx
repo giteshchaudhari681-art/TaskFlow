@@ -86,7 +86,7 @@ export const WorkspaceSettings: React.FC = () => {
   if (loading) {
     return (
       <div className="py-12 text-center text-taskflow-muted">
-        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
+        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-taskflow-accent" />
         <p className="text-sm">Loading workspace settings...</p>
       </div>
     );
@@ -110,21 +110,21 @@ export const WorkspaceSettings: React.FC = () => {
       </div>
 
       {successMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center space-x-2.5">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center space-x-2.5">
           <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {!isAuthorized && (
-        <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs flex items-center space-x-2.5">
+        <div className="p-3.5 rounded-md bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs flex items-center space-x-2.5">
           <Shield className="w-4 h-4 text-amber-400 flex-shrink-0" />
           <span>
             Read-only view: You have {activeOrg.role} access. Only workspace Owners and
@@ -135,15 +135,15 @@ export const WorkspaceSettings: React.FC = () => {
 
       {/* Telemetry overview */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <div className="glass-card p-4 rounded-xl border border-taskflow-border">
+        <div className="editorial-card p-4 rounded-md border border-taskflow-border">
           <div className="flex items-center space-x-2 text-taskflow-muted text-xs">
-            <Users className="w-4 h-4 text-cyan-400" />
+            <Users className="w-4 h-4 text-taskflow-accent" />
             <span>Total Members</span>
           </div>
           <div className="text-2xl font-bold text-white mt-1">{workspace?.memberCount ?? 1}</div>
         </div>
 
-        <div className="glass-card p-4 rounded-xl border border-taskflow-border">
+        <div className="editorial-card p-4 rounded-md border border-taskflow-border">
           <div className="flex items-center space-x-2 text-taskflow-muted text-xs">
             <FolderGit2 className="w-4 h-4 text-indigo-400" />
             <span>Active Projects</span>
@@ -151,9 +151,9 @@ export const WorkspaceSettings: React.FC = () => {
           <div className="text-2xl font-bold text-white mt-1">{workspace?.projectCount ?? 0}</div>
         </div>
 
-        <div className="glass-card p-4 rounded-xl border border-taskflow-border col-span-2 sm:col-span-1">
+        <div className="editorial-card p-4 rounded-md border border-taskflow-border col-span-2 sm:col-span-1">
           <div className="flex items-center space-x-2 text-taskflow-muted text-xs">
-            <Building2 className="w-4 h-4 text-violet-400" />
+            <Building2 className="w-4 h-4 text-taskflow-text" />
             <span>Tenant Status</span>
           </div>
           <div className="text-sm font-semibold text-emerald-400 mt-2 flex items-center space-x-1.5">
@@ -164,7 +164,7 @@ export const WorkspaceSettings: React.FC = () => {
       </div>
 
       <form onSubmit={handleSave} className="space-y-5">
-        <div className="glass-card p-5 rounded-xl border border-taskflow-border space-y-4">
+        <div className="editorial-card p-5 rounded-md border border-taskflow-border space-y-4">
           <div>
             <label className="block text-xs font-medium text-taskflow-text-dim mb-1.5">
               Workspace Display Name *
@@ -178,7 +178,7 @@ export const WorkspaceSettings: React.FC = () => {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Acme Operations HQ"
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-cyan-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-taskflow-surface border border-taskflow-border text-white placeholder-taskflow-muted text-sm focus:outline-none focus:border-taskflow-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -228,7 +228,7 @@ export const WorkspaceSettings: React.FC = () => {
             <button
               type="submit"
               disabled={saving}
-              className="py-2.5 px-5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 disabled:opacity-50"
+              className="py-2.5 px-5 rounded-lg bg-taskflow-surface hover: hover: text-white text-sm font-semibold shadow-glow-cyan transition-all flex items-center space-x-2 disabled:opacity-50"
             >
               {saving ? (
                 <>

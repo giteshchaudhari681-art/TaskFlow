@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = async () => {
     setIsLoading(true);
     try {
-      await api.logout();
+      await api.logout().catch(console.error);
       setUser(null);
       setOrganizations([]);
       setActiveOrg(null);

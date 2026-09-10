@@ -9,73 +9,57 @@ export interface ColumnConfig {
   dotColor: string;
   badgeBg: string;
   badgeText: string;
-  borderColor: string;
-  glowColor: string;
 }
 
 export const COLUMN_CONFIGS: Record<TaskStatus, ColumnConfig> = {
   [TaskStatus.BACKLOG]: {
     id: TaskStatus.BACKLOG,
     label: 'Backlog',
-    dotColor: 'bg-slate-400',
-    badgeBg: 'bg-slate-900/60',
-    badgeText: 'text-slate-300',
-    borderColor: 'border-slate-800/80',
-    glowColor: 'shadow-[0_0_15px_rgba(148,163,184,0.15)]',
+    dotColor: 'bg-slate-500',
+    badgeBg: 'bg-[#1a1d26]',
+    badgeText: 'text-slate-400',
   },
   [TaskStatus.TODO]: {
     id: TaskStatus.TODO,
     label: 'To Do',
-    dotColor: 'bg-cyan-400',
-    badgeBg: 'bg-cyan-950/60',
-    badgeText: 'text-cyan-300',
-    borderColor: 'border-cyan-800/80',
-    glowColor: 'shadow-[0_0_15px_rgba(6,182,212,0.15)]',
+    dotColor: 'bg-slate-300',
+    badgeBg: 'bg-[#1a1d26]',
+    badgeText: 'text-slate-300',
   },
   [TaskStatus.IN_PROGRESS]: {
     id: TaskStatus.IN_PROGRESS,
     label: 'In Progress',
-    dotColor: 'bg-blue-400',
-    badgeBg: 'bg-blue-950/60',
-    badgeText: 'text-blue-300',
-    borderColor: 'border-blue-800/80',
-    glowColor: 'shadow-[0_0_15px_rgba(59,130,246,0.15)]',
+    dotColor: 'bg-amber-400',
+    badgeBg: 'bg-[#1a1d26]',
+    badgeText: 'text-amber-300',
   },
   [TaskStatus.IN_REVIEW]: {
     id: TaskStatus.IN_REVIEW,
     label: 'In Review',
-    dotColor: 'bg-purple-400',
-    badgeBg: 'bg-purple-950/60',
-    badgeText: 'text-purple-300',
-    borderColor: 'border-purple-800/80',
-    glowColor: 'shadow-[0_0_15px_rgba(168,85,247,0.15)]',
+    dotColor: 'bg-violet-400',
+    badgeBg: 'bg-[#1a1d26]',
+    badgeText: 'text-taskflow-text',
   },
   [TaskStatus.BLOCKED]: {
     id: TaskStatus.BLOCKED,
     label: 'Blocked',
     dotColor: 'bg-rose-400',
-    badgeBg: 'bg-rose-950/60',
+    badgeBg: 'bg-[#1a1d26]',
     badgeText: 'text-rose-300',
-    borderColor: 'border-rose-800/80',
-    glowColor: 'shadow-[0_0_15px_rgba(244,63,94,0.15)]',
   },
   [TaskStatus.DONE]: {
     id: TaskStatus.DONE,
     label: 'Done',
-    dotColor: 'bg-emerald-400',
-    badgeBg: 'bg-emerald-950/60',
+    dotColor: 'bg-emerald-500',
+    badgeBg: 'bg-[#1a1d26]',
     badgeText: 'text-emerald-300',
-    borderColor: 'border-emerald-800/80',
-    glowColor: 'shadow-[0_0_15px_rgba(52,211,153,0.15)]',
   },
   [TaskStatus.CANCELLED]: {
     id: TaskStatus.CANCELLED,
     label: 'Cancelled',
-    dotColor: 'bg-slate-500',
-    badgeBg: 'bg-slate-900/60',
-    badgeText: 'text-slate-400',
-    borderColor: 'border-slate-800/80',
-    glowColor: 'shadow-[0_0_15px_rgba(100,116,139,0.15)]',
+    dotColor: 'bg-slate-600',
+    badgeBg: 'bg-[#1a1d26]',
+    badgeText: 'text-slate-500',
   },
 };
 
@@ -132,20 +116,18 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`flex flex-col flex-shrink-0 w-80 max-w-[85vw] rounded-2xl border transition-all duration-200 bg-taskflow-surface/40 backdrop-blur-md min-h-[500px] ${
-        isDragOver
-          ? `border-cyan-400 ring-2 ring-cyan-500/30 bg-cyan-950/20 ${config.glowColor}`
-          : 'border-taskflow-border'
+      className={`flex flex-col flex-shrink-0 w-72 max-w-[85vw] rounded-lg border transition-colors bg-[#12141a] min-h-[500px] ${
+        isDragOver ? 'border-[#e05638] ring-1 ring-[#e05638]/30 bg-[#1a1512]' : 'border-[#1e2230]'
       }`}
     >
       {/* Column Header */}
-      <div className="flex items-center justify-between p-3.5 border-b border-taskflow-border/80">
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-[#1e2230]">
         <div className="flex items-center space-x-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${config.dotColor}`} />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-white">{config.label}</h3>
-          <span
-            className={`px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold ${config.badgeBg} ${config.badgeText} border ${config.borderColor}`}
-          >
+          <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
+          <h3 className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">
+            {config.label}
+          </h3>
+          <span className="px-1.5 py-px rounded text-[10px] font-mono font-medium bg-[#1a1d26] text-slate-500 border border-[#252b3a]">
             {tasks.length}
           </span>
         </div>
@@ -155,15 +137,15 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
             type="button"
             onClick={() => onAddTask(status)}
             title={`Add task to ${config.label}`}
-            className="p-1 rounded-lg hover:bg-taskflow-surface-hover text-taskflow-muted hover:text-white transition-colors"
+            className="p-1 rounded hover:bg-[#1e2230] text-slate-500 hover:text-slate-200 transition-colors cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
 
       {/* Cards Container */}
-      <div className="flex-1 p-2.5 space-y-2.5 overflow-y-auto max-h-[calc(100vh-320px)] scrollbar-thin">
+      <div className="flex-1 p-2 space-y-2 overflow-y-auto max-h-[calc(100vh-300px)] scrollbar-thin">
         {tasks.map(task => (
           <KanbanCard
             key={task.id}
@@ -176,21 +158,21 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
         {tasks.length === 0 && (
           <div
-            className={`h-36 rounded-xl border border-dashed flex flex-col items-center justify-center p-4 text-center transition-colors ${
+            className={`h-24 rounded border border-dashed flex flex-col items-center justify-center p-3 text-center transition-colors ${
               isDragOver
-                ? 'border-cyan-500 bg-cyan-950/30 text-cyan-300'
-                : 'border-taskflow-border/60 text-taskflow-muted/80'
+                ? 'border-[#e05638]/50 bg-[#1a1512] text-[#e05638]'
+                : 'border-[#1e2230] text-slate-600'
             }`}
           >
-            <p className="text-xs font-medium">No tasks in {config.label.toLowerCase()}</p>
+            <p className="text-xs">No tasks in {config.label.toLowerCase()}</p>
             {canCreate && (
               <button
                 type="button"
                 onClick={() => onAddTask(status)}
-                className="mt-2 text-[11px] text-cyan-400 hover:text-cyan-300 hover:underline inline-flex items-center"
+                className="mt-1.5 text-[11px] text-[#e05638] hover:text-[#f06848] hover:underline inline-flex items-center cursor-pointer"
               >
                 <Plus className="w-3 h-3 mr-1" />
-                Add a task
+                Add task
               </button>
             )}
           </div>

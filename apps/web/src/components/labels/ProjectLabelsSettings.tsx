@@ -129,7 +129,7 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
         <div>
           <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
-            <Tag className="w-5 h-5 text-cyan-400" />
+            <Tag className="w-5 h-5 text-taskflow-accent" />
             Project Labels & Tags
           </h2>
           <p className="text-xs text-zinc-400 mt-1">
@@ -141,7 +141,7 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-medium text-xs transition-colors shadow-lg shadow-cyan-500/10 shrink-0"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-taskflow-accent hover:bg-taskflow-accent text-zinc-950 font-medium text-xs transition-colors shadow-lg shadow-elevation-1 shrink-0"
           >
             <Plus className="w-4 h-4" />
             New Label
@@ -158,7 +158,7 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search project labels..."
-            className="w-full pl-9 pr-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-md text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50"
+            className="w-full pl-9 pr-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-md text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-taskflow-accent"
           />
         </div>
         <div className="text-xs text-zinc-500">
@@ -193,7 +193,7 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
         </div>
       ) : filteredLabels.length === 0 ? (
         /* Empty State */
-        <div className="p-8 text-center border border-zinc-800/80 rounded-xl bg-zinc-900/30 flex flex-col items-center justify-center">
+        <div className="p-8 text-center border border-zinc-800/80 rounded-md bg-zinc-900/30 flex flex-col items-center justify-center">
           <div className="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center text-zinc-500 mb-3">
             <Tag className="w-6 h-6" />
           </div>
@@ -270,11 +270,11 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
 
       {/* Create / Edit Modal */}
       {(isCreateModalOpen || editingLabel) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
             <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-                <Tag className="w-4 h-4 text-cyan-400" />
+                <Tag className="w-4 h-4 text-taskflow-accent" />
                 {editingLabel ? 'Edit Label' : 'Create New Label'}
               </h3>
               <button
@@ -306,7 +306,7 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
                   value={formName}
                   onChange={e => setFormName(e.target.value)}
                   placeholder="e.g. Frontend, Bug, High Priority"
-                  className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-taskflow-accent"
                   maxLength={50}
                   autoFocus
                 />
@@ -351,7 +351,7 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
                   value={formDescription}
                   onChange={e => setFormDescription(e.target.value)}
                   placeholder="Explain when this label should be used..."
-                  className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-cyan-500 resize-none h-16"
+                  className="w-full px-3 py-2 bg-zinc-950/60 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-taskflow-accent resize-none h-16"
                   maxLength={200}
                 />
               </div>
@@ -382,7 +382,7 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
                 <button
                   type="submit"
                   disabled={isSaving || !formName.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-medium text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-4 py-1.5 rounded-lg bg-taskflow-accent hover:bg-taskflow-accent text-zinc-950 font-medium text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   {editingLabel ? 'Save Changes' : 'Create Label'}
@@ -395,8 +395,8 @@ export const ProjectLabelsSettings: React.FC<ProjectLabelsSettingsProps> = ({
 
       {/* Delete Confirmation Modal */}
       {deletingLabel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-in fade-in duration-150">
+          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-md p-5 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3 text-rose-400">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <h3 className="text-sm font-semibold text-zinc-100">Delete Label?</h3>
