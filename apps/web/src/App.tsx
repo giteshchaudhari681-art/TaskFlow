@@ -79,7 +79,6 @@ const MainApp: React.FC = () => {
       setCurrentView('dashboard');
       setSelectedProjectId(null);
       setDeepLinkTaskId(null);
-      setAuthView('landing');
     }
   }, [isAuthenticated]);
 

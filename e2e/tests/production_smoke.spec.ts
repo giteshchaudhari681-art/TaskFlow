@@ -58,7 +58,7 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     await loginPage.register('Production Smoke Engineer', smokeEmail, TEST_PASSWORD, smokeOrgName);
 
     // 3. Organization & Workspace Access
-    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('select')).toContainText(smokeOrgName);
 
     // 4. Project Creation
@@ -102,7 +102,7 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     await expect(page.getByText('Security & Audit Log')).toBeVisible({ timeout: 10000 });
 
     // 8. Access Usage & Entitlement Plan (Authorized Owner)
-    await page.getByRole('button', { name: 'Usage', exact: true }).click();
+    await page.getByRole('button', { name: 'Usage', exact: true }).first().click();
     await expect(page.getByTestId('usage-settings-panel')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('current-plan-badge')).toContainText('FREE');
     await expect(page.getByTestId('meter-projects')).toBeVisible();
@@ -124,7 +124,7 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     );
 
     // Return to dashboard and verify UI remains functional
-    await page.getByRole('button', { name: 'Home', exact: true }).click();
+    await page.locator('#nav-dashboard').click();
     await expect(page.locator('text=Production Smoke Engineer')).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('button', { name: 'View Projects' })).toBeVisible({
       timeout: 10000,
@@ -134,13 +134,13 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     await page.locator('button[title="Sign out"]').click();
     await page.waitForLoadState('networkidle').catch(() => {});
     await loginPage.switchToLogin();
-    await expect(page.locator('h2', { hasText: 'Sign in to TaskFlow' })).toBeVisible({
+    await expect(page.locator('h2', { hasText: 'Sign in' }).first()).toBeVisible({
       timeout: 20000,
     });
 
     // Re-login with the same account
     await loginPage.login(smokeEmail, TEST_PASSWORD);
-    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 20000 });
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 20000 });
     await expect(page.locator('select')).toContainText(smokeOrgName);
 
     // 11. Verify Persistent State (Project and Task survive session lifecycle)

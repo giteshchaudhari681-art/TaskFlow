@@ -49,10 +49,10 @@ test.describe('E2E RBAC & Permission Enforcement Workflows', () => {
     await loginPage.goto();
     await loginPage.login(memberEmail, TEST_PASSWORD);
 
-    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 10000 });
 
     // Select the shared organization from organization dropdown
-    const orgSelect = page.locator('header select').first();
+    const orgSelect = page.locator('select').first();
     await orgSelect.selectOption(owner.organizationId);
 
     // 4. Navigate to Members

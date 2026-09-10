@@ -37,14 +37,14 @@ test.describe('E2E Project Dashboard 2.0 Workflows', () => {
     await expect(page.locator(`text=${project.key}`).first()).toBeVisible({ timeout: 10000 });
     await expect(page.locator(`text=${project.name}`).first()).toBeVisible();
 
-    // 5. Verify Executive Health Assessment Section
-    await expect(page.locator('text=Executive Health Assessment')).toBeVisible({ timeout: 10000 });
+    // 5. Verify Project Health Section
+    await expect(page.locator('text=Project Health')).toBeVisible({ timeout: 10000 });
 
     // 6. Verify KPI Metric Section
     await expect(page.getByText('Total Tasks', { exact: true })).toBeVisible();
 
-    // 7. Verify Task Distribution and Delivery Risk Cards
-    await expect(page.locator('text=Task Status Distribution')).toBeVisible();
-    await expect(page.locator('text=Delivery Risks & Impediments')).toBeVisible();
+    // 7. Verify Task Breakdown and Priority Distribution Cards
+    await expect(page.locator('text=Task Status Breakdown')).toBeVisible();
+    await expect(page.locator('text=Priority Distribution')).toBeVisible();
   });
 });

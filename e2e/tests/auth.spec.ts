@@ -26,7 +26,7 @@ test.describe('E2E Authentication Workflows', () => {
     await loginPage.register(name, email, TEST_PASSWORD, orgName);
 
     // Expect successful transition to authenticated application
-    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 10000 });
     await expect(page.locator(`text=${name}`)).toBeVisible();
     await expect(page.locator('select')).toContainText(orgName);
   });
@@ -63,7 +63,7 @@ test.describe('E2E Authentication Workflows', () => {
     await loginPage.login(user.email, user.password);
 
     // Wait for the UI to update with authenticated state
-    await expect(page.getByRole('button', { name: 'Home' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 10000 });
     await expect(page.locator(`text=${user.name}`)).toBeVisible();
   });
 
