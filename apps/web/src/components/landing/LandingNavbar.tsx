@@ -19,7 +19,9 @@ import {
   Clock,
   Bell,
   CheckCircle2,
+  Send,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LandingNavbarProps {
   onSignIn: () => void;
@@ -135,6 +137,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<DropdownId>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -354,7 +357,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
 
           <button
             type="button"
-            onClick={() => scrollToSection('contact')}
+            onClick={() => setIsContactModalOpen(true)}
             className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
             Contact
@@ -426,14 +429,14 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
 
           <div className="border-t border-[#1E1E1E] mt-3 pt-3 space-y-1">
             {[
-              { label: 'Pricing', action: () => scrollToSection('contact') },
+              { label: 'Pricing', action: () => scrollToSection('pricing') },
               { label: 'Docs', action: () => openLink('https://docs.taskflow.dev') },
               {
                 label: 'Changelog',
                 action: () =>
                   openLink('https://github.com/giteshchaudhari681-art/TaskFlow/releases'),
               },
-              { label: 'Contact', action: () => scrollToSection('contact') },
+              { label: 'Contact', action: () => setIsContactModalOpen(true) },
             ].map(({ label, action }) => (
               <button
                 key={label}
@@ -460,6 +463,77 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
           </div>
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <AnimatePresence>
+        {isContactModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsContactModalOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="relative w-full max-w-md bg-[#0D0D0D] border border-[#222222] rounded-[24px] shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 sm:p-8">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-xl font-display font-medium text-[#F3EDE4]">Contact Sales</h3>
+                    <p className="text-sm text-[#A3A3A3] mt-1">We'd love to hear from you.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsContactModalOpen(false)}
+                    className="p-2 text-[#555555] hover:text-[#F3EDE4] hover:bg-[#1A1A1A] rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#737373] mb-1.5">
+                      Work Email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="you@company.com"
+                      className="w-full bg-[#141414] border border-[#2A2A2A] rounded-xl px-4 py-3 text-sm text-[#F3EDE4] placeholder-[#555555] focus:outline-none focus:border-[#E85D22] focus:ring-1 focus:ring-[#E85D22] transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#737373] mb-1.5">
+                      Message
+                    </label>
+                    <textarea
+                      rows={4}
+                      placeholder="How can we help?"
+                      className="w-full bg-[#141414] border border-[#2A2A2A] rounded-xl px-4 py-3 text-sm text-[#F3EDE4] placeholder-[#555555] focus:outline-none focus:border-[#E85D22] focus:ring-1 focus:ring-[#E85D22] transition-all resize-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // simple mock action
+                      setIsContactModalOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-[#E85D22] hover:bg-[#F0703B] text-white py-3 rounded-xl font-semibold text-sm transition-all"
+                  >
+                    Send Message <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
