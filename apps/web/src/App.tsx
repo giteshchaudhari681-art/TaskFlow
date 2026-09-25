@@ -320,7 +320,8 @@ const MainApp: React.FC = () => {
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-50 bg-[#141210]/95 border-b border-[#2e2924]">
+        {(!isAuthenticated && authView === 'landing' || isAuthenticated) && (
+          <header className="sticky top-0 z-50 bg-[#141210]/95 border-b border-[#2e2924]">
           <div className="h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               {!isAuthenticated && (
@@ -414,10 +415,16 @@ const MainApp: React.FC = () => {
             </div>
           )}
         </header>
+        )}
 
         <main className="flex-1 w-full">
           {!isAuthenticated ? (
-            authView === 'login' ? (
+            authView === 'landing' ? (
+              <LandingPage 
+                onSignIn={() => setAuthView('login')} 
+                onGetStarted={() => setAuthView('register')} 
+              />
+            ) : authView === 'login' ? (
               <LoginPage 
                 onSwitchToRegister={() => setAuthView('register')} 
                 onBackToTaskFlow={() => setAuthView('landing')} 

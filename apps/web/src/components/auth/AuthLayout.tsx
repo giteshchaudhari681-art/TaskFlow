@@ -53,12 +53,13 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
       </div>
 
       {/* Main Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.985 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[1000px] grid grid-cols-1 md:grid-cols-12 bg-[rgba(20,20,20,0.75)] backdrop-blur-xl border border-white/[0.08] rounded-[20px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] relative z-10 overflow-hidden"
-      >
+      <div className="w-full max-w-[1000px] perspective-[2000px] relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 150, rotateX: 45, rotateY: -15, scale: 0.8, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, y: 0, rotateX: 0, rotateY: 0, scale: 1, filter: 'blur(0px)' }}
+          transition={{ type: 'spring', stiffness: 80, damping: 20, duration: 1.5 }}
+          className="w-full grid grid-cols-1 md:grid-cols-12 bg-[rgba(20,20,20,0.75)] backdrop-blur-xl border border-white/[0.08] rounded-[20px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] overflow-hidden"
+        >
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom,rgba(232,93,34,0.05)_0%,transparent_50%)] pointer-events-none" />
 
         {/* Left Panel */}
@@ -77,7 +78,8 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
         <div className="md:col-span-7 p-8 sm:p-12 relative flex flex-col justify-center">
           {children}
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };

@@ -146,10 +146,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onBack
   return (
     <AuthLayout leftPanelContent={leftPanel} onBackToTaskFlow={onBackToTaskFlow}>
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="w-full max-w-[360px] mx-auto"
+        initial={{ opacity: 0, x: 60, rotateY: -15, scale: 0.9, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1, filter: 'blur(0px)' }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+        className="w-full max-w-[360px] mx-auto perspective-[1000px]"
       >
         <div className="mb-8">
           <h2 className="font-display text-3xl font-medium text-[#f3ede4] mb-2">Sign in</h2>

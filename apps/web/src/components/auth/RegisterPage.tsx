@@ -106,6 +106,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onB
   const reqUpper = /[A-Z]/.test(password);
   const reqLower = /[a-z]/.test(password);
   const reqNumber = /[0-9]/.test(password);
+  const reqSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
   const leftPanel = (
     <div className="h-full flex flex-col relative z-10">
@@ -194,10 +195,10 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onB
   return (
     <AuthLayout leftPanelContent={leftPanel} onBackToTaskFlow={onBackToTaskFlow}>
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="w-full max-w-[380px] mx-auto"
+        initial={{ opacity: 0, x: 60, rotateY: -15, scale: 0.9, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1, filter: 'blur(0px)' }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+        className="w-full max-w-[380px] mx-auto perspective-[1000px]"
       >
         <div className="mb-8">
           <h2 className="font-display text-3xl font-medium text-[#f3ede4] mb-2">
@@ -304,6 +305,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onB
               <PasswordRequirement label="Uppercase" met={reqUpper} />
               <PasswordRequirement label="Lowercase" met={reqLower} />
               <PasswordRequirement label="Number" met={reqNumber} />
+              <PasswordRequirement label="Special character" met={reqSpecial} />
             </div>
           </motion.div>
 
