@@ -10,6 +10,7 @@ import {
   HeartHandshake,
   ArrowRight,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LandingNavbarProps {
   onSignIn: () => void;
@@ -53,6 +54,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<DropdownId>(null);
+  const [activeModal, setActiveModal] = useState<'customers' | 'enterprise' | 'resources' | 'company' | 'partners' | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -119,35 +121,35 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
           {/* New Simple links */}
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => setActiveModal('customers')}
             className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
             Customers
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => setActiveModal('enterprise')}
             className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
             Enterprise
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => setActiveModal('resources')}
             className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
             Resources
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => setActiveModal('company')}
             className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
             Company
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => setActiveModal('partners')}
             className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
             Partners
@@ -244,35 +246,35 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
           {/* New Simple links for mobile */}
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => { setMobileMenuOpen(false); setActiveModal('customers'); }}
             className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
           >
             Customers
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => { setMobileMenuOpen(false); setActiveModal('enterprise'); }}
             className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
           >
             Enterprise
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => { setMobileMenuOpen(false); setActiveModal('resources'); }}
             className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
           >
             Resources
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => { setMobileMenuOpen(false); setActiveModal('company'); }}
             className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
           >
             Company
           </button>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={() => { setMobileMenuOpen(false); setActiveModal('partners'); }}
             className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
           >
             Partners
@@ -307,6 +309,99 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
           </div>
         </div>
       </div>
+
+      {/* Unique Modals */}
+      <AnimatePresence>
+        {activeModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setActiveModal(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="relative w-full max-w-md bg-[#0D0D0D] border border-[#222222] rounded-[24px] shadow-2xl overflow-hidden p-8 text-center"
+            >
+              <div className="absolute top-4 right-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal(null)}
+                  className="p-2 text-[#555555] hover:text-[#F3EDE4] hover:bg-[#1A1A1A] rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {activeModal === 'customers' && (
+                <div className="space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] mx-auto flex items-center justify-center mb-6">
+                    <HeartHandshake className="w-8 h-8 text-[#E85D22]" />
+                  </div>
+                  <h3 className="text-2xl font-display font-medium text-[#F3EDE4]">Customer Stories</h3>
+                  <p className="text-[#A3A3A3] text-[15px] leading-relaxed">
+                    Read how top engineering teams use TaskFlow to increase velocity by 40%. Full case studies are being finalized.
+                  </p>
+                </div>
+              )}
+
+              {activeModal === 'enterprise' && (
+                <div className="space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] mx-auto flex items-center justify-center mb-6">
+                    <Building2 className="w-8 h-8 text-[#3B82F6]" />
+                  </div>
+                  <h3 className="text-2xl font-display font-medium text-[#F3EDE4]">TaskFlow Enterprise</h3>
+                  <p className="text-[#A3A3A3] text-[15px] leading-relaxed">
+                    Custom RBAC, SAML SSO, and dedicated success managers. Contact sales to arrange a custom implementation plan.
+                  </p>
+                </div>
+              )}
+
+              {activeModal === 'resources' && (
+                <div className="space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] mx-auto flex items-center justify-center mb-6">
+                    <Zap className="w-8 h-8 text-[#A855F7]" />
+                  </div>
+                  <h3 className="text-2xl font-display font-medium text-[#F3EDE4]">Learning Hub</h3>
+                  <p className="text-[#A3A3A3] text-[15px] leading-relaxed">
+                    Webinars, API guides, and best practice playbooks for mastering project operations are coming next quarter.
+                  </p>
+                </div>
+              )}
+
+              {activeModal === 'company' && (
+                <div className="space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] mx-auto flex items-center justify-center mb-6">
+                    <Workflow className="w-8 h-8 text-[#22C55E]" />
+                  </div>
+                  <h3 className="text-2xl font-display font-medium text-[#F3EDE4]">About Us</h3>
+                  <p className="text-[#A3A3A3] text-[15px] leading-relaxed">
+                    We are building the intelligence layer for engineering operations. See our open roles on our careers page.
+                  </p>
+                </div>
+              )}
+
+              {activeModal === 'partners' && (
+                <div className="space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] mx-auto flex items-center justify-center mb-6">
+                    <Rocket className="w-8 h-8 text-[#F59E0B]" />
+                  </div>
+                  <h3 className="text-2xl font-display font-medium text-[#F3EDE4]">Partner Network</h3>
+                  <p className="text-[#A3A3A3] text-[15px] leading-relaxed">
+                    Join our ecosystem of integrated tools and certified implementation agencies. Partner applications open soon.
+                  </p>
+                </div>
+              )}
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
