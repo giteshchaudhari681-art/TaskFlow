@@ -77,6 +77,7 @@ export const getAccessToken = () => accessToken;
  * Single-flight refresh mechanism to prevent duplicate concurrent refresh calls.
  */
 const refreshAccessToken = async (): Promise<string | null> => {
+ if (localStorage.getItem('auth_present') !== 'true') return null;
  if (refreshPromise) return refreshPromise;
 
  refreshPromise = (async () => {
@@ -175,6 +176,7 @@ export const api = {
    body: JSON.stringify(credentials),
   });
   setAccessToken(res.data.accessToken);
+  localStorage.setItem('auth_present', 'true');
   return res.data;
  },
 
@@ -184,6 +186,7 @@ export const api = {
    body: JSON.stringify(data),
   });
   setAccessToken(res.data.accessToken);
+  localStorage.setItem('auth_present', 'true');
   return res.data;
  },
 
@@ -200,6 +203,7 @@ export const api = {
    });
   } finally {
    setAccessToken(null);
+   localStorage.removeItem('auth_present');
   }
  },
 

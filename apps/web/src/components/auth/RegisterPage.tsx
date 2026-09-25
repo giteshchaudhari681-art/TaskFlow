@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Lock,
   Mail,
@@ -8,18 +9,58 @@ import {
   EyeOff,
   UserPlus,
   AlertCircle,
-  Sparkles,
   CheckCircle2,
-  Boxes,
   Workflow,
+  Sparkles,
+  ShieldCheck,
+  Circle,
+  Check,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { AuthLayout } from './AuthLayout';
 
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
 }
+
+const PasswordRequirement: React.FC<{ label: string; met: boolean }> = ({ label, met }) => {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative flex items-center justify-center w-3.5 h-3.5">
+        <AnimatePresence mode="wait">
+          {met ? (
+            <motion.div
+              key="met"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Check className="w-3.5 h-3.5 text-[#E85D22]" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="unmet"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Circle className="w-2.5 h-2.5 text-[#4a4339] fill-transparent" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <span
+        className={`text-xs transition-colors duration-300 ${met ? 'text-[#f3ede4]' : 'text-[#7d756c]'}`}
+      >
+        {label}
+      </span>
+    </div>
+  );
+};
 
 export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
   const { register } = useAuth();
@@ -60,142 +101,231 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
     }
   };
 
-  return (
-    <div className="w-full max-w-4xl mx-auto my-4 sm:my-8 grid grid-cols-1 md:grid-cols-12 rounded-lg bg-slate-900/90 border border-white/[0.08] shadow-elevation-4 overflow-hidden">
-      {/* Left Feature Showcase Banner */}
-      <div className="md:col-span-5 bg-taskflow-surface p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden border-b md:border-b-0 md:border-r border-white/[0.08]">
-        <div className="absolute -top-16 -left-16 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-sky-500/20 rounded-full blur-3xl" />
+  const reqLength = password.length >= 8;
+  const reqUpper = /[A-Z]/.test(password);
+  const reqLower = /[a-z]/.test(password);
+  const reqNumber = /[0-9]/.test(password);
 
-        <div className="relative z-10 space-y-6">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Workspace Provisioning</span>
-          </div>
-
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display tracking-tight leading-tight">
-              Create Your Operations Hub.
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
-              Launch a isolated multi-tenant organization, invite team members, and manage complex
-              engineering roadmaps.
-            </p>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center space-x-3 text-xs text-slate-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Full Owner role permissions & RBAC controls</span>
-            </div>
-            <div className="flex items-center space-x-3 text-xs text-slate-300">
-              <Workflow className="w-4 h-4 text-sky-400 shrink-0" />
-              <span>Automated Gantt timelines & milestone tracking</span>
-            </div>
-            <div className="flex items-center space-x-3 text-xs text-slate-300">
-              <Boxes className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span>Pre-seeded demo project templates</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 pt-8 border-t border-white/[0.08] mt-6">
-          <p className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">
-            No credit card required • Instant setup
-          </p>
+  const leftPanel = (
+    <div className="h-full flex flex-col relative z-10">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#E85D22] mb-4">
+          Workspace Provisioning
+        </p>
+        <h2 className="font-display text-3xl font-medium text-[#f3ede4] leading-[1.1] mb-3">
+          Create your<br />operations hub.
+        </h2>
+        <p className="text-sm text-[#9c948a] leading-relaxed mb-8 max-w-[280px]">
+          Launch your TaskFlow workspace, invite your team, and organize complex work in one place.
+        </p>
+        <div className="space-y-3.5 text-xs text-[#b7afa5]">
+          {[
+            { text: 'Full owner permissions & RBAC controls', icon: ShieldCheck },
+            { text: 'Project and milestone management', icon: Workflow },
+            { text: 'AI-powered project intelligence', icon: Sparkles },
+            { text: 'Secure multi-tenant workspace', icon: CheckCircle2 },
+          ].map((item, i) => (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+              key={i}
+              className="flex items-center gap-2.5"
+            >
+              <item.icon className="w-4 h-4 text-[#E85D22] shrink-0" />
+              <span>{item.text}</span>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      {/* Right Registration Form */}
-      <div className="md:col-span-7 p-6 sm:p-10 flex flex-col justify-center bg-[#0b0f17]/90 relative">
-        <div className="mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-white font-display tracking-tight">
-            Provision New Workspace
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Fill in your organization details to create your account
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-5 p-3.5 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-start space-x-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3.5">
-          <Input
-            label="Full Name *"
-            type="text"
-            required
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="Elena Rostova"
-            leftIcon={<User className="w-4 h-4" />}
-          />
-
-          <Input
-            label="Work Email *"
-            type="email"
-            required
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="elena@acme-engineering.com"
-            leftIcon={<Mail className="w-4 h-4" />}
-          />
-
-          <Input
-            label="Workspace / Organization Name"
-            type="text"
-            value={organizationName}
-            onChange={e => setOrganizationName(e.target.value)}
-            placeholder="Acme Systems (Optional)"
-            leftIcon={<Building2 className="w-4 h-4" />}
-          />
-
-          <Input
-            label="Password *"
-            type={showPassword ? 'text' : 'password'}
-            required
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="••••••••••••"
-            helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 number"
-            leftIcon={<Lock className="w-4 h-4" />}
-            rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-slate-500 hover:text-white transition-colors cursor-pointer"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            }
-          />
-
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            isLoading={loading}
-            className="w-full mt-3"
-            leftIcon={<UserPlus className="w-4 h-4" />}
+      <div className="mt-12 relative flex-1 flex items-end justify-center pointer-events-none">
+        {/* Abstract Workspace Visualization */}
+        <div className="relative w-full max-w-[280px]">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+            className="absolute -top-12 -left-4 w-[240px] bg-[#1a1714] border border-[#292929] rounded-lg p-3 shadow-2xl opacity-60 scale-95"
           >
-            Create Workspace (Owner)
-          </Button>
-        </form>
+            <div className="w-full h-8 bg-[#292929] rounded-sm mb-2" />
+            <div className="w-2/3 h-8 bg-[#292929] rounded-sm" />
+          </motion.div>
 
-        <div className="text-center mt-6 text-xs text-slate-400">
-          Already have an account?{' '}
-          <button
-            onClick={onSwitchToLogin}
-            className="text-sky-400 hover:text-sky-300 font-semibold transition-colors cursor-pointer underline underline-offset-4"
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            className="relative z-10 w-full bg-[#1c1916] border border-[#3a342c] rounded-xl p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)]"
           >
-            Sign in to existing account
-          </button>
+            <div className="flex items-center gap-2 mb-3">
+              <Building2 className="w-4 h-4 text-[#c45c26]" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#b7afa5]">
+                New Workspace
+              </span>
+            </div>
+            <div className="flex items-center justify-between mt-4 border-t border-[#292929] pt-3">
+              <div className="flex -space-x-2">
+                <div className="w-6 h-6 rounded-full bg-[#292929] border border-[#1c1916]" />
+                <div className="w-6 h-6 rounded-full bg-[#3a342c] border border-[#1c1916]" />
+                <div className="w-6 h-6 rounded-full bg-[#4a4339] border border-[#1c1916]" />
+              </div>
+              <div className="text-[10px] text-[#9c948a] font-medium">Ready to invite</div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <AuthLayout leftPanelContent={leftPanel} onBackToTaskFlow={() => (window.location.hash = '#/')}>
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="w-full max-w-[380px] mx-auto"
+      >
+        <div className="mb-8">
+          <h2 className="font-display text-3xl font-medium text-[#f3ede4] mb-2">
+            Provision New Workspace
+          </h2>
+          <p className="text-sm text-[#9c948a]">
+            Set up your organization and create your owner account.
+          </p>
+        </div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: 'auto', y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              className="mb-6 overflow-hidden"
+            >
+              <div className="p-3 bg-[#3a1a1a]/40 border border-[#c44a4a]/40 rounded-lg text-[#e07a7a] text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{error}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Input
+              label="Full Name"
+              type="text"
+              required
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Elena Rostova"
+              leftIcon={<User className="w-4 h-4" />}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Input
+              label="Work Email"
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="elena@acme-engineering.com"
+              leftIcon={<Mail className="w-4 h-4" />}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Input
+              label="Workspace / Organization Name"
+              type="text"
+              value={organizationName}
+              onChange={e => setOrganizationName(e.target.value)}
+              placeholder="Acme Systems (Optional)"
+              leftIcon={<Building2 className="w-4 h-4" />}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••••••"
+              leftIcon={<Lock className="w-4 h-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[#7d756c] hover:text-[#f3ede4] transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              }
+            />
+            {/* Password Requirements */}
+            <div className="mt-3 grid grid-cols-2 gap-y-2 gap-x-4 pl-1">
+              <PasswordRequirement label="8+ characters" met={reqLength} />
+              <PasswordRequirement label="Uppercase" met={reqUpper} />
+              <PasswordRequirement label="Lowercase" met={reqLower} />
+              <PasswordRequirement label="Number" met={reqNumber} />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="pt-4"
+          >
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              isLoading={loading}
+              className="w-full"
+              leftIcon={<UserPlus className="w-4 h-4" />}
+            >
+              {loading ? 'Creating workspace...' : 'Create Workspace (Owner)'}
+            </Button>
+          </motion.div>
+        </form>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="text-center mt-8 text-xs text-[#9c948a]"
+        >
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={onSwitchToLogin}
+            className="text-[#E85D22] hover:text-[#f3ede4] font-medium transition-colors"
+          >
+            Sign in to existing account
+          </button>
+        </motion.div>
+      </motion.div>
+    </AuthLayout>
   );
 };
