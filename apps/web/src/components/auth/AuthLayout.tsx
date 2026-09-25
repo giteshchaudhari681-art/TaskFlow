@@ -16,12 +16,33 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
   return (
     <div className="min-h-screen w-full bg-[#080808] relative flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden font-sans">
       {/* Background Effects */}
-      <motion.div 
-        animate={{ x: ['-5%', '5%', '-5%'] }}
-        transition={{ duration: 25, ease: 'easeInOut', repeat: Infinity }}
-        className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,rgba(232,93,34,0.03)_0%,transparent_70%)] pointer-events-none" 
-      />
-      <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-[0.02] pointer-events-none mix-blend-overlay" />
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Deep ambient background */}
+        <div className="absolute inset-0 bg-[#080808]" />
+        
+        {/* Animated gradient mesh */}
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.15, 0.2, 0.15],
+            rotate: [0, 5, 0]
+          }}
+          transition={{ duration: 15, ease: 'easeInOut', repeat: Infinity }}
+          className="absolute -top-1/4 -right-1/4 w-[70vw] h-[70vw] bg-[radial-gradient(circle,rgba(232,93,34,0.15)_0%,transparent_70%)] rounded-full blur-[120px]" 
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.1, 0.15, 0.1],
+            x: ['0%', '-5%', '0%']
+          }}
+          transition={{ duration: 20, ease: 'easeInOut', repeat: Infinity, delay: 2 }}
+          className="absolute -bottom-1/3 -left-1/4 w-[60vw] h-[60vw] bg-[radial-gradient(circle,rgba(196,92,38,0.12)_0%,transparent_70%)] rounded-full blur-[100px]" 
+        />
+        
+        {/* Subtle noise overlay */}
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+      </div>
 
       {/* Top Branding & Nav */}
       <div className="absolute top-0 left-0 w-full p-6 sm:p-8 flex justify-between items-center z-20">
