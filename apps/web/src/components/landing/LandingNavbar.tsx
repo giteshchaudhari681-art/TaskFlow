@@ -145,6 +145,13 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
           >
             Company
           </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
+          >
+            Partners
+          </button>
 
           {/* Solutions dropdown */}
           <div
@@ -262,6 +269,13 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
             className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
           >
             Company
+          </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
+          >
+            Partners
           </button>
 
           <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#555555] px-3 pt-4 pb-1">
