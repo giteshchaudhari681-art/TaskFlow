@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Workflow, Menu, X, ChevronDown, Building2, Rocket, ArrowRight,
-  Code2, Box, ShieldCheck, History, BrainCircuit, Network, BookOpen, Compass, Terminal, FileClock, PlayCircle, Layers, Users, Newspaper, MessageSquare, Cpu, Handshake, Plug, Globe, Briefcase, Lightbulb, Send
+  Workflow, Menu, X, ChevronDown, Building2, Rocket,
+  Code2, Box, ShieldCheck, History, BrainCircuit, Network, Users, MessageSquare, Cpu, Handshake, Plug, Globe, Briefcase, Lightbulb, Send,
+  BarChart2, Blocks, LayoutDashboard, Megaphone, Palette
 } from 'lucide-react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 
@@ -10,7 +11,7 @@ interface LandingNavbarProps {
   onGetStarted: () => void;
 }
 
-type DropdownId = 'customers' | 'enterprise' | 'resources' | 'company' | 'partners' | 'solutions' | null;
+type DropdownId = 'customers' | 'enterprise' | 'platform' | 'usecases' | 'partners' | 'solutions' | null;
 
 const MENUS = {
   customers: {
@@ -35,28 +36,26 @@ const MENUS = {
       { icon: Network, label: 'Scale', desc: 'Architecture designed for larger organizations.' },
     ]
   },
-  resources: {
-    title: 'RESOURCES',
-    desc: 'Learn, build, and explore with TaskFlow.',
-    cta: 'Explore all resources →',
+  platform: {
+    title: 'PLATFORM',
+    desc: 'The technical foundation of TaskFlow.',
+    cta: 'Explore Platform →',
     items: [
-      { icon: BookOpen, label: 'Documentation', desc: 'Learn how to configure and use TaskFlow.' },
-      { icon: Compass, label: 'Guides', desc: 'Practical workflows for projects, tasks and dependencies.' },
-      { icon: Terminal, label: 'API Reference', desc: 'Explore TaskFlow\'s API capabilities.' },
-      { icon: FileClock, label: 'Changelog', desc: 'See what has changed across TaskFlow releases.' },
-      { icon: PlayCircle, label: 'Getting Started', desc: 'Set up your workspace and create your first project.' },
-      { icon: Layers, label: 'Architecture', desc: 'Understand how TaskFlow is engineered.' },
+      { icon: BarChart2, label: 'Data & Analytics', desc: 'Real-time velocity and execution metrics.' },
+      { icon: BrainCircuit, label: 'AI Engine', desc: 'Predictive risk and task intelligence.' },
+      { icon: ShieldCheck, label: 'Security & Compliance', desc: 'Enterprise-grade data protection.' },
+      { icon: Blocks, label: 'Extensibility', desc: 'Webhooks, custom apps, and open APIs.' },
     ]
   },
-  company: {
-    title: 'COMPANY',
-    desc: 'Who we are and what we are building.',
-    cta: 'Read our manifesto →',
+  usecases: {
+    title: 'USE CASES',
+    desc: 'How different teams leverage TaskFlow.',
+    cta: 'See all Use Cases →',
     items: [
-      { icon: Workflow, label: 'About TaskFlow', desc: 'Why TaskFlow exists and what we\'re building.' },
-      { icon: Users, label: 'Careers', desc: 'Join the team building modern project operations software.' },
-      { icon: Newspaper, label: 'Blog', desc: 'Product, engineering and project-management insights.' },
-      { icon: MessageSquare, label: 'Contact', desc: 'Talk to the TaskFlow team.', isContact: true },
+      { icon: Code2, label: 'Agile Engineering', desc: 'Sprint planning and dependency tracking.' },
+      { icon: LayoutDashboard, label: 'Product Management', desc: 'Roadmaps, milestones, and release coordination.' },
+      { icon: Megaphone, label: 'Marketing Teams', desc: 'Campaign execution and cross-functional alignment.' },
+      { icon: Palette, label: 'Creative Agencies', desc: 'Client project delivery and resource management.' },
     ]
   },
   partners: {
@@ -87,8 +86,8 @@ const MENUS = {
 const NAV_ITEMS = [
   { id: 'customers', label: 'Customers' },
   { id: 'enterprise', label: 'Enterprise' },
-  { id: 'resources', label: 'Resources' },
-  { id: 'company', label: 'Company' },
+  { id: 'platform', label: 'Platform' },
+  { id: 'usecases', label: 'Use Cases' },
   { id: 'partners', label: 'Partners' },
   { id: 'solutions', label: 'Solutions' },
 ] as const;
