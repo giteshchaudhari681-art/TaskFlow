@@ -48,7 +48,6 @@ const MainApp: React.FC = () => {
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
   const [healthError, setHealthError] = useState<string | null>(null);
-  const [isLoaderDone, setIsLoaderDone] = useState(false);
 
   const fetchHealth = async () => {
     setHealthLoading(true);
@@ -294,15 +293,13 @@ const MainApp: React.FC = () => {
   return (
     <>
       <AnimatePresence>
-        {!isLoaderDone && (
-          <CinematicLoader isLoading={isLoading} onComplete={() => setIsLoaderDone(true)} />
-        )}
+        {isLoading && <CinematicLoader />}
       </AnimatePresence>
       {!isLoading && (
         <motion.div 
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           className="min-h-screen bg-[#070707] text-[#F5F5F5] flex selection:bg-[#FF6A21]/30 overflow-x-hidden"
         >
       {isAuthenticated && (
