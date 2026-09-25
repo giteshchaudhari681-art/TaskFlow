@@ -36,8 +36,28 @@ export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onC
       exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 1.2, filter: 'blur(12px)' }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Clean Background - NO GRID */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_85%)] pointer-events-none z-0" />
+      {/* Premium Cinematic Background Gradients */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Base dark layer */}
+        <div className="absolute inset-0 bg-[#030303]" />
+        
+        {/* Massive, subtle ambient glows */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.15, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,rgba(232,93,34,0.15)_0%,transparent_50%)]"
+        />
+        <motion.div 
+          initial={{ opacity: 0, rotate: 0 }}
+          animate={{ opacity: 0.1, rotate: 15 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          className="absolute -top-full right-[-50%] w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,rgba(255,106,33,0.1)_0%,transparent_60%)]"
+        />
+        
+        {/* Edge darkening vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#000000_100%)]" />
+      </div>
 
       {/* Main Assembly Group flying from the deep background */}
       <motion.div
