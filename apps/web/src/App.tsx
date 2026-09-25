@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
+import { motion, useMotionTemplate, useMotionValue, AnimatePresence } from 'framer-motion';
 import {
   Layers,
   Workflow,
@@ -13,7 +13,6 @@ import {
   X,
   ArrowRight,
   Users,
-  RefreshCw,
   AlertCircle,
   CheckCircle2,
   Gauge,
@@ -32,6 +31,7 @@ import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { CinematicLoader } from './components/common/CinematicLoader';
 import { LandingPage } from './components/landing/LandingPage';
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
@@ -48,6 +48,7 @@ const MainApp: React.FC = () => {
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
   const [healthError, setHealthError] = useState<string | null>(null);
+  const [isLoaderDone, setIsLoaderDone] = useState(false);
 
   const fetchHealth = async () => {
     setHealthLoading(true);
@@ -119,28 +120,7 @@ const MainApp: React.FC = () => {
         ? 'healthy'
         : 'error';
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#141210] flex items-center justify-center">
-        <div className="flex flex-col items-start gap-3">
-          <span className="font-display text-2xl text-[#f3ede4]">TaskFlow</span>
-          <div className="flex items-center gap-2 text-sm text-[#9c948a]">
-            <RefreshCw className="w-4 h-4 animate-spin text-[#c45c26]" />
-            <span>Restoring session</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated && authView === 'landing') {
-    return (
-      <LandingPage
-        onSignIn={() => setAuthView('login')}
-        onGetStarted={() => setAuthView('register')}
-      />
-    );
-  }
+  // Cinematic Loader state is now handled in the main return
 
   const navItems = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard, view: 'dashboard' as const },
@@ -312,7 +292,19 @@ const MainApp: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#141210] text-[#f3ede4] flex selection:bg-[#c45c26]/30 overflow-x-hidden">
+    <>
+      <AnimatePresence>
+        {!isLoaderDone && (
+          <CinematicLoader isLoading={isLoading} onComplete={() => setIsLoaderDone(true)} />
+        )}
+      </AnimatePresence>
+      {!isLoading && (
+        <motion.div 
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: 'easeOut', delay: 0.1 }}
+          className="min-h-screen bg-[#141210] text-[#f3ede4] flex selection:bg-[#c45c26]/30 overflow-x-hidden"
+        >
       {isAuthenticated && (
         <aside className="hidden lg:flex w-[232px] shrink-0 border-r border-[#2e2924] bg-[#161310] flex-col sticky top-0 h-screen">
           <SidebarNav />
@@ -521,7 +513,9 @@ const MainApp: React.FC = () => {
           openSettings={openSettings}
         />
       )}
-    </div>
+        </motion.div>
+      )}
+    </>
   );
 };
 
