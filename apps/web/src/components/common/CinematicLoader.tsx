@@ -26,147 +26,161 @@ export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onC
     }
   }, [phase, isLoading, onComplete]);
 
-  // Framer motion variants for text stagger
-  const textContainer = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05, delayChildren: 0.6 }
-    }
-  };
-
-  const textItem = {
-    hidden: { opacity: 0, y: 10, filter: 'blur(4px)' },
-    show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring' as const, stiffness: 200, damping: 20 } }
+  // Framer motion variants for vertical data streams
+  const dataStreamVariants = {
+    initial: { y: '-100%', opacity: 0 },
+    animate: (i: number) => ({
+      y: ['-100%', '200%'],
+      opacity: [0, 0.5, 0],
+      transition: {
+        duration: 1 + Math.random() * 1.5,
+        repeat: Infinity,
+        delay: i * 0.2,
+        ease: 'linear' as const
+      }
+    })
   };
 
   return (
     <motion.div
-      key="hyper-premium-cinematic-loader"
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] overflow-hidden perspective-[1200px]"
+      key="ultra-cinematic-loader"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#030303] overflow-hidden"
+      style={{ perspective: '1200px' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 1.15, filter: 'blur(10px)' }}
+      exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 1.2, filter: 'blur(12px)' }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Dynamic Background */}
-      <div 
-        className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)]"
-        style={{ backgroundSize: '48px 48px' }}
+      {/* Dynamic Grid Background with 3D floor effect */}
+      <motion.div 
+        initial={{ rotateX: 60, scale: 2, y: 100, opacity: 0 }}
+        animate={{ opacity: 0.2 }}
+        transition={{ duration: 1.5 }}
+        className="absolute inset-[-100%] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] pointer-events-none"
+        style={{ backgroundSize: '80px 80px', transformOrigin: 'bottom' }}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050505_80%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#030303_75%)] pointer-events-none z-0" />
 
-      {/* Sweeping background light (0s - 1.5s) */}
+      {/* Vertical Data Streams (Background) */}
       {!prefersReducedMotion && (
-        <motion.div
-          initial={{ x: '-100%', opacity: 0, skewX: -45 }}
-          animate={{ x: '200%', opacity: [0, 0.03, 0] }}
-          transition={{ duration: 1.5, ease: 'easeInOut' }}
-          className="absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-transparent via-[#FF6A21] to-transparent pointer-events-none"
-        />
+        <div className="absolute inset-0 flex justify-evenly opacity-30 z-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              custom={i}
+              variants={dataStreamVariants}
+              initial="initial"
+              animate="animate"
+              className="w-[1px] h-full bg-gradient-to-b from-transparent via-[#FF6A21] to-transparent"
+            />
+          ))}
+        </div>
       )}
 
-      {/* Laser Split Opening (0s - 0.5s) */}
-      {!prefersReducedMotion && (
+      {/* Central Assembly */}
+      <div className="relative z-10 flex flex-col items-center" style={{ transformStyle: 'preserve-3d' }}>
+        
+        {/* Massive 3D Text Flying in from the back */}
         <motion.div
-          initial={{ width: 0, opacity: 0, scaleY: 1 }}
-          animate={{ width: [0, 300, 500, 0], opacity: [0, 1, 1, 0], scaleY: [1, 2, 0] }}
-          transition={{ times: [0, 0.2, 0.6, 1], duration: 0.8, ease: 'easeInOut' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[1px] bg-white shadow-[0_0_20px_#E85D22,0_0_8px_#E85D22] z-0"
-        />
-      )}
-
-      <div className="relative z-10 flex flex-col items-center">
-        {/* Animated Logo Container (0.4s ->) */}
-        <motion.div
-          initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.5, rotateX: 45 }}
-          animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-          transition={{ duration: 0.7, delay: 0.3, type: 'spring', stiffness: 150, damping: 15 }}
-          className="relative w-20 h-20 bg-gradient-to-b from-[#1c1c1c] to-[#0a0a0a] border border-[#333] rounded-2xl flex items-center justify-center mb-8 shadow-[0_20px_40px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-visible"
+          initial={{ opacity: 0, scale: 5, z: -500, filter: 'blur(20px)' }}
+          animate={{ opacity: 1, scale: 1, z: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute -top-16 flex font-display text-[80px] font-black tracking-tighter text-transparent bg-clip-text bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0.0)_100%)] select-none pointer-events-none"
         >
-          {/* Subtle breathing inner glow */}
+          TASKFLOW
+        </motion.div>
+
+        {/* Animated Logo Container (Drops through the Z-axis) */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0, z: 200 }}
+          animate={{ opacity: 1, scale: 1, z: 0 }}
+          transition={{ duration: 0.8, delay: 0.3, type: 'spring', stiffness: 120, damping: 12 }}
+          className="relative w-24 h-24 bg-gradient-to-b from-[#1c1c1c] to-[#0a0a0a] border border-[#333] rounded-3xl flex items-center justify-center mb-8 shadow-[0_30px_60px_rgba(0,0,0,0.9),inset_0_2px_1px_rgba(255,255,255,0.15)] overflow-visible z-20"
+        >
+          {/* Intense breathing inner glow */}
           {!prefersReducedMotion && (
             <motion.div
-              animate={{ opacity: [0.1, 0.3, 0.1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-0 rounded-2xl shadow-[inset_0_0_20px_rgba(232,93,34,0.3)] pointer-events-none"
+              animate={{ opacity: [0.1, 0.4, 0.1] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute inset-0 rounded-3xl shadow-[inset_0_0_30px_rgba(232,93,34,0.4)] pointer-events-none"
             />
           )}
           
-          {/* Tri-layered high-speed data rings (0.6s ->) */}
+          {/* Complex Multi-layered High-Speed Data Rings */}
           {!prefersReducedMotion && (
-            <svg className="absolute inset-[-24px] w-[calc(100%+48px)] h-[calc(100%+48px)] pointer-events-none overflow-visible">
+            <svg className="absolute inset-[-40px] w-[calc(100%+80px)] h-[calc(100%+80px)] pointer-events-none overflow-visible z-0">
               <defs>
-                <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient id="glow-ring" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#E85D22" stopOpacity="1" />
-                  <stop offset="50%" stopColor="#E85D22" stopOpacity="0" />
-                  <stop offset="100%" stopColor="#E85D22" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#E85D22" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="#E85D22" stopOpacity="0.1" />
                 </linearGradient>
               </defs>
               
-              {/* Outer fast ring */}
+              {/* Outer thick dashed ring */}
               <motion.circle
-                cx="50%" cy="50%" r="48"
-                fill="none" stroke="url(#ring-gradient)" strokeWidth="1" strokeLinecap="round" strokeDasharray="60 200"
-                initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
-                animate={{ opacity: 1, rotate: 270, scale: 1 }}
-                transition={{ opacity: { delay: 0.6, duration: 0.4 }, scale: { delay: 0.6, duration: 0.5, type: 'spring' }, rotate: { duration: 1.5, repeat: Infinity, ease: 'linear' } }}
+                cx="50%" cy="50%" r="70"
+                fill="none" stroke="url(#glow-ring)" strokeWidth="2" strokeLinecap="round" strokeDasharray="80 180"
+                initial={{ opacity: 0, rotate: -180, scale: 0.5 }}
+                animate={{ opacity: 1, rotate: 360, scale: 1 }}
+                transition={{ opacity: { delay: 0.5, duration: 0.5 }, scale: { delay: 0.5, duration: 0.6, type: 'spring' }, rotate: { duration: 2, repeat: Infinity, ease: 'linear' } }}
                 style={{ originX: '50%', originY: '50%' }}
               />
 
-              {/* Middle dashed ring */}
+              {/* Middle dotted ring */}
               <motion.circle
-                cx="50%" cy="50%" r="42"
-                fill="none" stroke="#E85D22" strokeWidth="1.5" strokeOpacity="0.2" strokeDasharray="4 8"
-                initial={{ opacity: 0, rotate: 0, scale: 0.8 }}
+                cx="50%" cy="50%" r="60"
+                fill="none" stroke="#E85D22" strokeWidth="2" strokeOpacity="0.3" strokeDasharray="2 12"
+                initial={{ opacity: 0, rotate: 0, scale: 0.5 }}
                 animate={{ opacity: 1, rotate: -360, scale: 1 }}
-                transition={{ opacity: { delay: 0.7, duration: 0.4 }, scale: { delay: 0.7, duration: 0.5, type: 'spring' }, rotate: { duration: 4, repeat: Infinity, ease: 'linear' } }}
+                transition={{ opacity: { delay: 0.6, duration: 0.5 }, scale: { delay: 0.6, duration: 0.6, type: 'spring' }, rotate: { duration: 4, repeat: Infinity, ease: 'linear' } }}
+                style={{ originX: '50%', originY: '50%' }}
+              />
+
+              {/* Inner solid tracking ring */}
+              <motion.circle
+                cx="50%" cy="50%" r="52"
+                fill="none" stroke="#E85D22" strokeWidth="1" strokeOpacity="0.5" strokeDasharray="100 200"
+                initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                animate={{ opacity: 1, rotate: -270, scale: 1 }}
+                transition={{ opacity: { delay: 0.7, duration: 0.5 }, scale: { delay: 0.7, duration: 0.6, type: 'spring' }, rotate: { duration: 1.5, repeat: Infinity, ease: 'linear' } }}
                 style={{ originX: '50%', originY: '50%' }}
               />
             </svg>
           )}
 
-          <Workflow className="w-10 h-10 text-white relative z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]" />
+          <Workflow className="w-12 h-12 text-white relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
         </motion.div>
 
-        {/* Wordmark (Staggered text) */}
+        {/* Wordmark (The final sharp wordmark appearing in front) */}
         <motion.div
-          variants={textContainer}
-          initial="hidden"
-          animate="show"
-          className="flex flex-col items-center gap-5"
+          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
+          className="flex flex-col items-center gap-6 z-20"
         >
-          {/* Individual letters */}
-          <div className="flex font-display text-3xl font-semibold tracking-tight">
-            {['T', 'a', 's', 'k', 'F', 'l', 'o', 'w'].map((letter, index) => (
-              <motion.span 
-                key={index} 
-                variants={textItem}
-                className="text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#A0A0A0_100%)] drop-shadow-sm"
-              >
-                {letter}
-              </motion.span>
-            ))}
+          <div className="font-display text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#A0A0A0_100%)] drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+            TaskFlow
           </div>
           
           {/* Status Capsule (1.0s ->) */}
           <motion.div 
-            initial={{ opacity: 0, y: 10, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'auto' }}
             transition={{ duration: 0.5, delay: 1.0, type: 'spring' }}
-            className="flex items-center gap-2.5 px-4 py-2 bg-[#111] border border-[#222] rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
+            className="flex items-center gap-3 px-5 py-2.5 bg-[#0a0a0a]/80 backdrop-blur-md border border-[#222] rounded-full shadow-[0_12px_24px_rgba(0,0,0,0.8)] overflow-hidden"
           >
             {/* Status light */}
-            <div className="relative flex items-center justify-center w-2 h-2">
+            <div className="relative flex items-center justify-center w-2.5 h-2.5">
               <motion.div
-                animate={phase === 'waiting' && !isLoading ? { scale: 1, opacity: 1 } : { scale: [1, 1.8, 1], opacity: [0.5, 1, 0.5] }}
-                transition={phase === 'waiting' && !isLoading ? { duration: 0.2 } : { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-                className={`absolute inset-0 rounded-full blur-[2px] ${phase === 'waiting' && !isLoading ? 'bg-[#22c55e]' : 'bg-[#E85D22]'}`}
+                animate={phase === 'waiting' && !isLoading ? { scale: 1, opacity: 1 } : { scale: [1, 2, 1], opacity: [0.3, 1, 0.3] }}
+                transition={phase === 'waiting' && !isLoading ? { duration: 0.2 } : { duration: 1.0, repeat: Infinity, ease: 'easeInOut' }}
+                className={`absolute inset-0 rounded-full blur-[3px] ${phase === 'waiting' && !isLoading ? 'bg-[#22c55e]' : 'bg-[#E85D22]'}`}
               />
-              <div className={`w-1.5 h-1.5 rounded-full z-10 ${phase === 'waiting' && !isLoading ? 'bg-[#22c55e]' : 'bg-[#E85D22]'}`} />
+              <div className={`w-2 h-2 rounded-full z-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] ${phase === 'waiting' && !isLoading ? 'bg-[#22c55e]' : 'bg-[#E85D22]'}`} />
             </div>
 
-            <span className={`text-[11px] font-bold tracking-[0.15em] uppercase w-[130px] text-center transition-colors duration-300 ${phase === 'waiting' && !isLoading ? 'text-[#22c55e] drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'text-[#A0A0A0]'}`}>
+            <span className={`text-[12px] font-black tracking-[0.2em] uppercase w-[150px] text-center transition-colors duration-300 ${phase === 'waiting' && !isLoading ? 'text-[#22c55e] drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'text-[#A0A0A0]'}`}>
               {phase === 'waiting' && !isLoading ? 'SYSTEM ONLINE' : 'INITIALIZING'}
             </span>
           </motion.div>
