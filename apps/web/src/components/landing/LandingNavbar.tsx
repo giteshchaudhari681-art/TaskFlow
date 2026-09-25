@@ -5,19 +5,10 @@ import {
   X,
   ChevronDown,
   Zap,
-  GitBranch,
-  Users,
-  BarChart3,
-  Shield,
-  BrainCircuit,
-  Layers,
   Building2,
   Rocket,
   HeartHandshake,
   ArrowRight,
-  Clock,
-  Bell,
-  CheckCircle2,
 } from 'lucide-react';
 
 interface LandingNavbarProps {
@@ -25,79 +16,7 @@ interface LandingNavbarProps {
   onGetStarted: () => void;
 }
 
-type DropdownId = 'features' | 'solutions' | null;
-
-const FEATURES_MENU = [
-  {
-    category: 'Core',
-    items: [
-      {
-        icon: Layers,
-        label: 'Task Management',
-        desc: 'Boards, lists, and calendar views',
-        section: 'product',
-      },
-      {
-        icon: GitBranch,
-        label: 'Dependency Graphs',
-        desc: 'DAG blocking with critical-path detection',
-        section: 'product',
-      },
-      {
-        icon: Clock,
-        label: 'Execution Engine',
-        desc: 'Real-time progress tracking',
-        section: 'product',
-      },
-    ],
-  },
-  {
-    category: 'Intelligence',
-    items: [
-      {
-        icon: BrainCircuit,
-        label: 'AI Copilot',
-        desc: 'Risk detection & task decomposition',
-        section: 'features',
-      },
-      {
-        icon: Bell,
-        label: 'Smart Alerts',
-        desc: 'Proactive deadline & blocker notifications',
-        section: 'features',
-      },
-      {
-        icon: BarChart3,
-        label: 'Analytics',
-        desc: 'Velocity, health, and trend reports',
-        section: 'features',
-      },
-    ],
-  },
-  {
-    category: 'Platform',
-    items: [
-      {
-        icon: Shield,
-        label: 'Enterprise Security',
-        desc: 'SOC 2, GDPR, AES-256 encryption',
-        section: 'platform',
-      },
-      {
-        icon: Users,
-        label: 'Team Workload',
-        desc: 'Capacity balancing across sprints',
-        section: 'platform',
-      },
-      {
-        icon: CheckCircle2,
-        label: 'Real-Time Sync',
-        desc: 'WebSocket-powered live updates',
-        section: 'platform',
-      },
-    ],
-  },
-];
+type DropdownId = 'solutions' | null;
 
 const SOLUTIONS_MENU = [
   {
@@ -197,74 +116,35 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center justify-center gap-1 flex-1" ref={dropdownRef}>
-          {/* Features dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => handleMouseEnter('features')}
-            onMouseLeave={handleMouseLeave}
+          {/* New Simple links */}
+          <button
+            type="button"
+            onClick={() => {}}
+            className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
           >
-            <button
-              type="button"
-              className={`flex items-center gap-1 px-3.5 py-2 text-[13px] font-medium rounded-[7px] transition-all duration-150 ${activeDropdown === 'features' ? 'text-[#F3EDE4] bg-[#1A1A1A]' : 'text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414]'}`}
-            >
-              Features{' '}
-              <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'features' ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            {activeDropdown === 'features' && (
-              <div
-                onMouseEnter={handleDropdownMouseEnter}
-                onMouseLeave={handleMouseLeave}
-                className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50"
-              >
-                <div className="w-[640px] bg-[#0D0D0D] border border-[#222222] rounded-[18px] shadow-[0_24px_60px_rgba(0,0,0,0.9)] overflow-hidden">
-                  <div className="grid grid-cols-3 gap-0 p-5">
-                    {FEATURES_MENU.map(group => (
-                      <div key={group.category}>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#555555] mb-3 px-2">
-                          {group.category}
-                        </div>
-                        <div className="space-y-0.5">
-                          {group.items.map(item => (
-                            <button
-                              key={item.label}
-                              type="button"
-                              onClick={() => scrollToSection(item.section)}
-                              className="w-full flex items-start gap-3 p-2.5 rounded-[10px] hover:bg-[#161616] transition-all group/item text-left"
-                            >
-                              <div className="w-7 h-7 rounded-[7px] bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center shrink-0 group-hover/item:border-[#E85D22]/40 group-hover/item:bg-[#E85D22]/10 transition-all">
-                                <item.icon className="w-3.5 h-3.5 text-[#737373] group-hover/item:text-[#E85D22] transition-colors" />
-                              </div>
-                              <div>
-                                <div className="text-[12px] font-semibold text-[#D4D4D4] group-hover/item:text-white leading-tight">
-                                  {item.label}
-                                </div>
-                                <div className="text-[11px] text-[#555555] mt-0.5 leading-tight">
-                                  {item.desc}
-                                </div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="border-t border-[#1A1A1A] px-5 py-3 flex items-center justify-between bg-[#0A0A0A]">
-                    <span className="text-[11px] text-[#555555]">Explore all capabilities</span>
-                    <button
-                      type="button"
-                      onClick={() => scrollToSection('product')}
-                      className="flex items-center gap-1.5 text-[12px] text-[#E85D22] font-semibold hover:text-[#F0703B] transition-colors"
-                    >
-                      See product tour <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+            Customers
+          </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
+          >
+            Enterprise
+          </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
+          >
+            Resources
+          </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="px-3.5 py-2 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#141414] rounded-[7px] transition-all"
+          >
+            Company
+          </button>
 
           {/* Solutions dropdown */}
           <div
@@ -354,21 +234,35 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
         className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'max-h-[520px] border-t border-[#262626]' : 'max-h-0'} bg-[#0D0D0D]/98 backdrop-blur-xl`}
       >
         <div className="px-5 py-4 space-y-1">
-          {/* Features group mobile */}
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#555555] px-3 pt-2 pb-1">
-            Features
-          </div>
-          {FEATURES_MENU.flatMap(g => g.items).map(item => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => scrollToSection(item.section)}
-              className="flex items-center gap-3 w-full px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
-            >
-              <item.icon className="w-4 h-4 text-[#555555]" />
-              {item.label}
-            </button>
-          ))}
+          {/* New Simple links for mobile */}
+          <button
+            type="button"
+            onClick={() => {}}
+            className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
+          >
+            Customers
+          </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
+          >
+            Enterprise
+          </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
+          >
+            Resources
+          </button>
+          <button
+            type="button"
+            onClick={() => {}}
+            className="block w-full text-left px-3 py-2.5 text-[13px] font-medium text-[#A3A3A3] hover:text-[#F3EDE4] hover:bg-[#161616] rounded-[8px] transition-colors"
+          >
+            Company
+          </button>
 
           <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#555555] px-3 pt-4 pb-1">
             Solutions
