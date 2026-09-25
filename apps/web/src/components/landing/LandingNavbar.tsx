@@ -247,17 +247,6 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
                           ))}
                         </div>
                       </div>
-                      <motion.div variants={itemVariants} className="border-t border-white/5 bg-black/40 px-6 py-3.5">
-                        <button
-                          type="button"
-                          className="w-full flex items-center justify-between group/cta"
-                        >
-                          <span className="text-[12px] font-medium text-[#A3A3A3] group-hover/cta:text-[#F3EDE4] transition-colors">
-                            {MENUS[nav.id].cta.replace('→', '')}
-                          </span>
-                          <ArrowRight className="w-3.5 h-3.5 text-[#555555] group-hover/cta:text-[#E85D22] transition-colors group-hover/cta:translate-x-1" />
-                        </button>
-                      </motion.div>
                     </div>
                   </motion.div>
                 )}
