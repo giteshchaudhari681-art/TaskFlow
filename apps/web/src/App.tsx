@@ -300,10 +300,10 @@ const MainApp: React.FC = () => {
       </AnimatePresence>
       {!isLoading && (
         <motion.div 
-          initial={{ opacity: 0, y: 4 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut', delay: 0.1 }}
-          className="min-h-screen bg-[#141210] text-[#f3ede4] flex selection:bg-[#c45c26]/30 overflow-x-hidden"
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="min-h-screen bg-[#070707] text-[#F5F5F5] flex selection:bg-[#FF6A21]/30 overflow-x-hidden"
         >
       {isAuthenticated && (
         <aside className="hidden lg:flex w-[232px] shrink-0 border-r border-[#2e2924] bg-[#161310] flex-col sticky top-0 h-screen">

@@ -7,6 +7,15 @@ interface CinematicLoaderProps {
   onComplete: () => void;
 }
 
+const systemElements = [
+  { id: 'projects', title: 'PROJECTS', label: '12 Active', x: -180, y: -100, color: 'bg-[#FF6A21]' },
+  { id: 'tasks', title: 'TASKS', label: '28 In Progress', x: -220, y: 0, color: 'bg-[#3b82f6]' },
+  { id: 'team', title: 'TEAM', label: '8 Members', x: -180, y: 100, color: 'bg-[#10b981]' },
+  { id: 'ai', title: 'AI', label: '3 Risks', x: 180, y: -100, color: 'bg-[#a855f7]' },
+  { id: 'delivery', title: 'DELIVERY', label: '76% Healthy', x: 220, y: 0, color: 'bg-[#0ea5e9]' },
+  { id: 'dependencies', title: 'DEPENDENCIES', label: '4 Blocked', x: 180, y: 100, color: 'bg-[#f59e0b]' },
+];
+
 export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onComplete }) => {
   const [phase, setPhase] = useState<'initial' | 'waiting' | 'exiting'>('initial');
   const prefersReducedMotion = useReducedMotion();
@@ -28,161 +37,143 @@ export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onC
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0a0a] overflow-hidden"
-      exit={{ opacity: 0, scale: 1.02, filter: 'blur(4px)' }}
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#070707] overflow-hidden"
+      exit={{ opacity: 0, scale: 1.01, filter: 'blur(2px)' }}
+      transition={{ duration: 0.35, ease: 'easeInOut' }}
     >
-      {/* Subtle Background Grid */}
+      {/* Subtle Background Grid & Vignette */}
       <div 
-        className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]"
+        className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)]"
         style={{ backgroundSize: '40px 40px' }}
       />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#070707_90%)]" />
 
-      {/* Radial glow */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-        className="absolute w-[600px] h-[600px] bg-[#E85D22] rounded-full blur-[120px] opacity-[0.03] pointer-events-none"
-      />
+      {/* NO GIANT ORANGE GLOW. Only a very faint, restricted ambient highlight */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#FF6A21] opacity-[0.04] blur-[80px] rounded-full pointer-events-none" />
 
-      {/* Center Compo */}
-      <div className="relative z-10 flex flex-col items-center justify-center perspective-[1000px]">
+      <div className="relative z-10 flex flex-col items-center justify-center perspective-[1200px] w-full h-full max-w-[800px] max-h-[800px]">
         
-        {/* The 3D container */}
-        <motion.div
-          animate={prefersReducedMotion ? {} : { 
-            rotateX: [0, 2, -2, 0], 
-            rotateY: [0, -2, 2, 0] 
-          }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-          className="relative flex flex-col items-center justify-center"
-        >
-          {/* Central Dot -> Ring */}
+        {/* System Signal (0.0s - 0.2s) */}
+        {!prefersReducedMotion && (
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: [0, 1, 3], opacity: [0, 1, 0] }}
-            transition={{ duration: 0.8, ease: "easeOut", times: [0, 0.4, 1] }}
-            className="absolute w-2 h-2 bg-[#E85D22] rounded-full shadow-[0_0_12px_#E85D22]"
+            initial={{ width: 2, opacity: 0 }}
+            animate={{ width: [2, 2, 40, 0], opacity: [0, 1, 1, 0] }}
+            transition={{ times: [0, 0.2, 0.8, 1], duration: 0.3, delay: 0, ease: 'linear' }}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[2px] bg-[#FF6A21] shadow-[0_0_8px_#FF6A21]"
           />
-          
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0, borderWidth: '2px' }}
-            animate={{ scale: 2.5, opacity: [0, 0.5, 0], borderWidth: '0px' }}
-            transition={{ delay: 0.25, duration: 0.8, ease: "easeOut" }}
-            className="absolute w-12 h-12 border-[#E85D22] rounded-full"
-          />
+        )}
 
-          {/* Logo Reveal */}
-          <div className="relative flex items-center justify-center mb-6">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.7, rotate: -10 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ delay: 0.45, duration: 0.6, type: "spring", stiffness: 200, damping: 20 }}
-              className="relative w-14 h-14 bg-[#141414] border border-[#2A2A2A] rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(232,93,34,0.15)] z-10"
-            >
-              <Workflow className="w-7 h-7 text-[#E85D22]" />
-            </motion.div>
-
-            {/* Light Sweep */}
-            <motion.div
-              initial={{ x: '-150%', opacity: 0 }}
-              animate={{ x: '150%', opacity: [0, 1, 0] }}
-              transition={{ delay: 1.2, duration: 0.8, ease: "easeInOut" }}
-              className="absolute w-24 h-[1px] bg-gradient-to-r from-transparent via-[#E85D22] to-transparent blur-[1px] z-20"
-            />
+        {/* SVG Connecting Lines (0.2s - 1.6s) */}
+        {!prefersReducedMotion && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] pointer-events-none">
+            <svg width="800" height="800" viewBox="-400 -400 800 800" className="w-full h-full overflow-visible">
+              {systemElements.map((el, i) => (
+                <motion.line
+                  key={`line-${el.id}`}
+                  x1={0}
+                  y1={0}
+                  x2={el.x}
+                  y2={el.y}
+                  stroke="#262626"
+                  strokeWidth="1"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ 
+                    pathLength: [0, 1, 1, 0],
+                    opacity: [0, 1, 1, 0]
+                  }}
+                  transition={{ 
+                    times: [0, 0.35, 0.57, 1], 
+                    duration: 1.4, 
+                    delay: 0.2 + (i * 0.05),
+                    ease: 'easeInOut' 
+                  }}
+                />
+              ))}
+            </svg>
           </div>
+        )}
 
-          {/* Wordmark */}
+        {/* Interface Fragments (0.2s - 1.6s) */}
+        {!prefersReducedMotion && systemElements.map((el, i) => (
           <motion.div
-            initial={{ opacity: 0, y: 8, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            transition={{ delay: 0.8, duration: 0.5 }}
+            key={`card-${el.id}`}
+            initial={{ opacity: 0, x: el.x + (el.x > 0 ? 30 : -30), y: el.y, scale: 0.95 }}
+            animate={{ 
+              opacity: [0, 1, 1, 0], 
+              x: [el.x + (el.x > 0 ? 30 : -30), el.x, el.x, 0],
+              y: [el.y, el.y, el.y, 0],
+              scale: [0.95, 1, 1, 0.8]
+            }}
+            transition={{ 
+              times: [0, 0.35, 0.57, 1], 
+              duration: 1.4, 
+              delay: 0.2 + (i * 0.05),
+              ease: 'easeInOut' 
+            }}
+            style={{
+              rotateX: el.y > 0 ? -4 : 4,
+              rotateY: el.x > 0 ? -4 : 4,
+            }}
+            className="absolute left-1/2 top-1/2 -ml-[60px] -mt-[24px] w-[120px] h-[48px] bg-[#111111] border border-[#262626] rounded-md shadow-xl flex flex-col justify-center px-3"
           >
-            <span className="font-display text-3xl font-medium text-[#F3EDE4] tracking-tight">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <div className={`w-1.5 h-1.5 rounded-full ${el.color} shadow-[0_0_6px_currentColor]`} />
+              <span className="text-[9px] font-semibold tracking-widest text-[#F5F5F5]">{el.title}</span>
+            </div>
+            <span className="text-[10px] text-[#8A8A8A] ml-3">{el.label}</span>
+          </motion.div>
+        ))}
+
+        {/* Central TaskFlow Core (0.6s ->) */}
+        <div className="relative flex flex-col items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5, type: 'spring', stiffness: 200, damping: 20 }}
+            className="relative w-16 h-16 bg-[#111111] border border-[#262626] rounded-2xl shadow-2xl flex items-center justify-center z-20 overflow-hidden"
+          >
+            {/* Subtle inner edge glow */}
+            <div className="absolute inset-0 shadow-[inset_0_0_12px_rgba(255,106,33,0.1)] rounded-2xl pointer-events-none" />
+            <Workflow className="w-8 h-8 text-[#FF6A21]" />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, filter: 'blur(4px)', y: 6 }}
+            animate={{ opacity: 1, filter: 'blur(0px)', y: 0 }}
+            transition={{ delay: 0.75, duration: 0.35, ease: 'easeOut' }}
+            className="mt-4 z-20"
+          >
+            <span className="font-display text-2xl font-medium text-[#F5F5F5] tracking-tight">
               TaskFlow
             </span>
           </motion.div>
+        </div>
 
-          {/* Status Text */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-            className="mt-4 flex flex-col items-center gap-2"
-          >
-            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#E85D22]">
-              Initializing your workspace
-            </span>
-            {phase === 'waiting' && isLoading && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="w-32 h-[2px] bg-[#2A2A2A] rounded-full overflow-hidden mt-1"
-              >
-                <motion.div 
-                  className="h-full bg-[#E85D22]"
-                  animate={{ x: ['-100%', '100%'] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                />
-              </motion.div>
-            )}
-          </motion.div>
-          
-          {/* Micro Particles flowing in */}
-          {!prefersReducedMotion && (
-            <div className="absolute inset-0 pointer-events-none">
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ 
-                    opacity: 0, 
-                    x: Math.cos(i * (Math.PI / 3)) * 80, 
-                    y: Math.sin(i * (Math.PI / 3)) * 80,
-                    scale: 0
-                  }}
-                  animate={{ 
-                    opacity: [0, 0.8, 0], 
-                    x: 0, 
-                    y: 0,
-                    scale: [0, 1, 0.5]
-                  }}
-                  transition={{ delay: 1.0 + (i * 0.05), duration: 0.6, ease: "easeIn" }}
-                  className="absolute left-1/2 top-1/2 w-1 h-1 bg-[#E85D22] rounded-full -ml-[2px] -mt-[2px] shadow-[0_0_4px_#E85D22]"
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Conceptual Operational Elements */}
-          {!prefersReducedMotion && (
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              {['PROJECTS', 'TASKS', 'AI', 'TEAM'].map((label, i) => {
-                const angle = i * (Math.PI / 2);
-                const distance = 100;
-                return (
-                  <motion.div
-                    key={label}
-                    initial={{ 
-                      opacity: 0, 
-                      x: Math.cos(angle) * (distance + 20), 
-                      y: Math.sin(angle) * (distance + 20),
-                    }}
-                    animate={{ 
-                      opacity: [0, 1, 0], 
-                      x: Math.cos(angle) * distance, 
-                      y: Math.sin(angle) * distance,
-                    }}
-                    transition={{ delay: 1.45 + (i * 0.05), duration: 0.8, ease: "easeOut" }}
-                    className="absolute text-[8px] font-mono tracking-widest text-[#737373]"
-                  >
-                    {label}
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
+        {/* Status and Progress (1.0s ->) */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1, duration: 0.4 }}
+          className="absolute top-[65%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 w-[200px]"
+        >
+          <span className="text-[11px] text-[#8A8A8A] font-medium tracking-wide">
+            Connecting your workspace
+          </span>
+          <div className="w-full h-[2px] bg-[#161616] rounded-full overflow-hidden">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: phase === 'waiting' && isLoading ? [0.9, 0.95, 0.9] : 1 }}
+              transition={
+                phase === 'waiting' && isLoading 
+                  ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } 
+                  : { duration: 1.8, ease: 'easeOut' }
+              }
+              style={{ originX: 0 }}
+              className="w-full h-full bg-[#FF6A21] rounded-full shadow-[0_0_8px_rgba(255,106,33,0.4)]"
+            />
+          </div>
         </motion.div>
+        
       </div>
     </motion.div>
   );
