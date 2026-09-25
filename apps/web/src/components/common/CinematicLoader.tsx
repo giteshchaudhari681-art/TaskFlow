@@ -26,24 +26,9 @@ export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onC
     }
   }, [phase, isLoading, onComplete]);
 
-  // Framer motion variants for vertical data streams
-  const dataStreamVariants = {
-    initial: { y: '-100%', opacity: 0 },
-    animate: (i: number) => ({
-      y: ['-100%', '200%'],
-      opacity: [0, 0.5, 0],
-      transition: {
-        duration: 1 + Math.random() * 1.5,
-        repeat: Infinity,
-        delay: i * 0.2,
-        ease: 'linear' as const
-      }
-    })
-  };
-
   return (
     <motion.div
-      key="ultra-cinematic-loader"
+      key="deep-cinematic-loader"
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#030303] overflow-hidden"
       style={{ perspective: '1200px' }}
       initial={{ opacity: 0 }}
@@ -51,52 +36,21 @@ export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onC
       exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 1.2, filter: 'blur(12px)' }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Dynamic Grid Background with 3D floor effect */}
-      <motion.div 
-        initial={{ rotateX: 60, scale: 2, y: 100, opacity: 0 }}
-        animate={{ opacity: 0.2 }}
-        transition={{ duration: 1.5 }}
-        className="absolute inset-[-100%] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] pointer-events-none"
-        style={{ backgroundSize: '80px 80px', transformOrigin: 'bottom' }}
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#030303_75%)] pointer-events-none z-0" />
+      {/* Clean Background - NO GRID */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_85%)] pointer-events-none z-0" />
 
-      {/* Vertical Data Streams (Background) */}
-      {!prefersReducedMotion && (
-        <div className="absolute inset-0 flex justify-evenly opacity-30 z-0 overflow-hidden pointer-events-none">
-          {[...Array(6)].map((_, i) => (
-            <motion.div
-              key={i}
-              custom={i}
-              variants={dataStreamVariants}
-              initial="initial"
-              animate="animate"
-              className="w-[1px] h-full bg-gradient-to-b from-transparent via-[#FF6A21] to-transparent"
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Central Assembly */}
-      <div className="relative z-10 flex flex-col items-center" style={{ transformStyle: 'preserve-3d' }}>
+      {/* Main Assembly Group flying from the deep background */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.1, z: -1000, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, scale: 1, z: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} // smooth deceleration
+        className="relative z-10 flex flex-col items-center gap-6"
+        style={{ transformStyle: 'preserve-3d' }}
+      >
         
-        {/* Massive 3D Text Flying in from the back */}
-        <motion.div
-          initial={{ opacity: 0, scale: 5, z: -500, filter: 'blur(20px)' }}
-          animate={{ opacity: 1, scale: 1, z: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute -top-16 flex font-display text-[80px] font-black tracking-tighter text-transparent bg-clip-text bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0.0)_100%)] select-none pointer-events-none"
-        >
-          TASKFLOW
-        </motion.div>
-
-        {/* Animated Logo Container (Drops through the Z-axis) */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0, z: 200 }}
-          animate={{ opacity: 1, scale: 1, z: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, type: 'spring', stiffness: 120, damping: 12 }}
-          className="relative w-24 h-24 bg-gradient-to-b from-[#1c1c1c] to-[#0a0a0a] border border-[#333] rounded-3xl flex items-center justify-center mb-8 shadow-[0_30px_60px_rgba(0,0,0,0.9),inset_0_2px_1px_rgba(255,255,255,0.15)] overflow-visible z-20"
-        >
+        {/* Animated Logo Container */}
+        <div className="relative w-24 h-24 bg-gradient-to-b from-[#1c1c1c] to-[#0a0a0a] border border-[#333] rounded-3xl flex items-center justify-center shadow-[0_30px_60px_rgba(0,0,0,0.9),inset_0_2px_1px_rgba(255,255,255,0.15)] overflow-visible z-20">
+          
           {/* Intense breathing inner glow */}
           {!prefersReducedMotion && (
             <motion.div
@@ -150,24 +104,37 @@ export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onC
           )}
 
           <Workflow className="w-12 h-12 text-white relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
-        </motion.div>
+        </div>
 
-        {/* Wordmark (The final sharp wordmark appearing in front) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
-          className="flex flex-col items-center gap-6 z-20"
-        >
-          <div className="font-display text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#A0A0A0_100%)] drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-            TaskFlow
+        {/* Wordmark and Status aligned beautifully */}
+        <div className="flex flex-col items-center gap-6 z-20">
+          
+          {/* Fully Animated Shimmer Wordmark */}
+          <div className="relative font-display text-5xl font-black tracking-tight drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]">
+            <motion.span 
+              animate={!prefersReducedMotion ? { 
+                backgroundPosition: ['200% center', '-200% center']
+              } : {}}
+              transition={{ 
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className={`text-transparent bg-clip-text ${
+                prefersReducedMotion 
+                  ? 'bg-[#F5F5F5]' 
+                  : 'bg-[linear-gradient(90deg,#FFFFFF_0%,#777777_50%,#FFFFFF_100%)] bg-[length:200%_auto]'
+              }`}
+            >
+              TaskFlow
+            </motion.span>
           </div>
           
-          {/* Status Capsule (1.0s ->) */}
+          {/* Status Capsule (Drops in after fly-in) */}
           <motion.div 
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            transition={{ duration: 0.5, delay: 1.0, type: 'spring' }}
+            initial={{ opacity: 0, y: -20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.8, type: 'spring', stiffness: 200, damping: 20 }}
             className="flex items-center gap-3 px-5 py-2.5 bg-[#0a0a0a]/80 backdrop-blur-md border border-[#222] rounded-full shadow-[0_12px_24px_rgba(0,0,0,0.8)] overflow-hidden"
           >
             {/* Status light */}
@@ -184,8 +151,9 @@ export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onC
               {phase === 'waiting' && !isLoading ? 'SYSTEM ONLINE' : 'INITIALIZING'}
             </span>
           </motion.div>
-        </motion.div>
-      </div>
+        </div>
+
+      </motion.div>
     </motion.div>
   );
 };
