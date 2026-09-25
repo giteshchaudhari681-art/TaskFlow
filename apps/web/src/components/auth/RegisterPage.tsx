@@ -23,6 +23,7 @@ import { AuthLayout } from './AuthLayout';
 
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
+  onBackToTaskFlow: () => void;
 }
 
 const PasswordRequirement: React.FC<{ label: string; met: boolean }> = ({ label, met }) => {
@@ -62,7 +63,7 @@ const PasswordRequirement: React.FC<{ label: string; met: boolean }> = ({ label,
   );
 };
 
-export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
+export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onBackToTaskFlow }) => {
   const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -146,32 +147,44 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="absolute -top-12 -left-4 w-[240px] bg-[#1a1714] border border-[#292929] rounded-lg p-3 shadow-2xl opacity-60 scale-95"
+            className="absolute -top-12 -left-4 w-[240px] opacity-60 scale-95"
           >
-            <div className="w-full h-8 bg-[#292929] rounded-sm mb-2" />
-            <div className="w-2/3 h-8 bg-[#292929] rounded-sm" />
+            <motion.div
+              animate={{ y: [-3, 3, -3], rotate: [0, 0.5, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              className="bg-[#1a1714] border border-[#292929] rounded-lg p-3 shadow-2xl"
+            >
+              <div className="w-full h-8 bg-[#292929] rounded-sm mb-2" />
+              <div className="w-2/3 h-8 bg-[#292929] rounded-sm" />
+            </motion.div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.6 }}
-            className="relative z-10 w-full bg-[#1c1916] border border-[#3a342c] rounded-xl p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)]"
+            className="relative z-10 w-full group"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <Building2 className="w-4 h-4 text-[#c45c26]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#b7afa5]">
-                New Workspace
-              </span>
-            </div>
-            <div className="flex items-center justify-between mt-4 border-t border-[#292929] pt-3">
-              <div className="flex -space-x-2">
-                <div className="w-6 h-6 rounded-full bg-[#292929] border border-[#1c1916]" />
-                <div className="w-6 h-6 rounded-full bg-[#3a342c] border border-[#1c1916]" />
-                <div className="w-6 h-6 rounded-full bg-[#4a4339] border border-[#1c1916]" />
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              className="bg-[#1c1916] border border-[#3a342c] rounded-xl p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-[1.015] group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Building2 className="w-4 h-4 text-[#c45c26]" />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#b7afa5]">
+                  New Workspace
+                </span>
               </div>
-              <div className="text-[10px] text-[#9c948a] font-medium">Ready to invite</div>
-            </div>
+              <div className="flex items-center justify-between mt-4 border-t border-[#292929] pt-3">
+                <div className="flex -space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-[#292929] border border-[#1c1916]" />
+                  <div className="w-6 h-6 rounded-full bg-[#3a342c] border border-[#1c1916]" />
+                  <div className="w-6 h-6 rounded-full bg-[#4a4339] border border-[#1c1916]" />
+                </div>
+                <div className="text-[10px] text-[#9c948a] font-medium">Ready to invite</div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -179,7 +192,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
   );
 
   return (
-    <AuthLayout leftPanelContent={leftPanel} onBackToTaskFlow={() => (window.location.hash = '#/')}>
+    <AuthLayout leftPanelContent={leftPanel} onBackToTaskFlow={onBackToTaskFlow}>
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -273,13 +286,16 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
               placeholder="••••••••••••"
               leftIcon={<Lock className="w-4 h-4" />}
               rightIcon={
-                <button
+                <motion.button
+                  whileHover={{ opacity: 1 }}
+                  whileTap={{ scale: 0.92 }}
+                  initial={{ opacity: 0.7 }}
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="text-[#7d756c] hover:text-[#f3ede4] transition-colors focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                </motion.button>
               }
             />
             {/* Password Requirements */}

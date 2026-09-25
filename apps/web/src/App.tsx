@@ -417,20 +417,17 @@ const MainApp: React.FC = () => {
 
         <main className="flex-1 w-full">
           {!isAuthenticated ? (
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-              <button
-                type="button"
-                onClick={() => setAuthView('landing')}
-                className="mb-6 text-xs font-medium text-[#9c948a] hover:text-[#f3ede4]"
-              >
-                ← Back to TaskFlow
-              </button>
-              {authView === 'login' ? (
-                <LoginPage onSwitchToRegister={() => setAuthView('register')} />
-              ) : (
-                <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
-              )}
-            </div>
+            authView === 'login' ? (
+              <LoginPage 
+                onSwitchToRegister={() => setAuthView('register')} 
+                onBackToTaskFlow={() => setAuthView('landing')} 
+              />
+            ) : (
+              <RegisterPage 
+                onSwitchToLogin={() => setAuthView('login')} 
+                onBackToTaskFlow={() => setAuthView('landing')} 
+              />
+            )
           ) : currentView === 'my-work' ? (
             <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
               <MyWorkView onOpenTask={handleOpenTask} />
