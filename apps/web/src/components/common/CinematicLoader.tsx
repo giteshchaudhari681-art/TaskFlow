@@ -1,70 +1,100 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Workflow } from 'lucide-react';
 
-export const CinematicLoader: React.FC = () => {
+interface CinematicLoaderProps {
+  isLoading: boolean;
+  onComplete: () => void;
+}
+
+export const CinematicLoader: React.FC<CinematicLoaderProps> = ({ isLoading, onComplete }) => {
+  const [phase, setPhase] = useState<'initial' | 'waiting' | 'exiting'>('initial');
   const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    // STRICT 3 second cinematic sequence requirement
+    const timer = setTimeout(() => {
+      setPhase('waiting');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (phase === 'waiting' && !isLoading) {
+      setPhase('exiting');
+      onComplete();
+    }
+  }, [phase, isLoading, onComplete]);
 
   return (
     <motion.div
-      key="premium-minimal-loader"
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070707]"
+      key="premium-cinematic-loader"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070707] overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.98 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      {/* Ultra-subtle background depth to prevent it from feeling empty */}
       <div 
-        className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]"
+        className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)]"
         style={{ backgroundSize: '64px 64px' }}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#070707_75%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#070707_70%)] pointer-events-none" />
+
+      {/* Laser line opening sequence (0s - 0.8s) */}
+      {!prefersReducedMotion && (
+        <motion.div
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: [0, 400, 600, 0], opacity: [0, 1, 1, 0] }}
+          transition={{ times: [0, 0.3, 0.6, 1], duration: 1.2, ease: 'easeInOut' }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[1px] bg-[#E85D22] shadow-[0_0_12px_#E85D22] z-0"
+        />
+      )}
 
       <div className="relative z-10 flex flex-col items-center">
-        {/* Animated Logo Container */}
+        {/* Animated Logo Container (0.8s ->) */}
         <motion.div
-          initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9, y: prefersReducedMotion ? 0 : 4 }}
+          initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.8, y: prefersReducedMotion ? 0 : 8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          className="relative w-14 h-14 bg-[#111111] border border-[#262626] rounded-xl flex items-center justify-center mb-5 shadow-2xl"
+          transition={{ duration: 0.6, delay: 0.8, type: 'spring', stiffness: 200, damping: 20 }}
+          className="relative w-16 h-16 bg-[#111111]/80 backdrop-blur-xl border border-[#262626] rounded-2xl flex items-center justify-center mb-6 shadow-2xl overflow-visible"
         >
           {/* Subtle breathing inner glow */}
           {!prefersReducedMotion && (
             <motion.div
               animate={{ opacity: [0.05, 0.2, 0.05] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-0 rounded-xl shadow-[inset_0_0_12px_rgba(232,93,34,0.3)] pointer-events-none"
+              className="absolute inset-0 rounded-2xl shadow-[inset_0_0_12px_rgba(232,93,34,0.3)] pointer-events-none"
             />
           )}
           
-          {/* Circular progress ring tracing the border */}
+          {/* Dual circular data rings spinning around the box (1.5s ->) */}
           {!prefersReducedMotion && (
-            <svg className="absolute inset-0 w-full h-full -rotate-90 text-[#E85D22]/10" viewBox="0 0 56 56">
-              <circle cx="28" cy="28" r="26" fill="none" stroke="currentColor" strokeWidth="1" />
-              <motion.circle
-                cx="28" cy="28" r="26"
-                fill="none"
-                stroke="#E85D22"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: [0, 1, 0], rotate: [0, 180, 360] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ originX: '50%', originY: '50%' }}
+            <>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, rotate: 360 }}
+                transition={{ opacity: { duration: 0.5, delay: 1.2 }, scale: { duration: 0.5, delay: 1.2 }, rotate: { duration: 8, repeat: Infinity, ease: 'linear' } }}
+                className="absolute inset-[-14px] border border-dashed border-[#E85D22]/20 rounded-full"
               />
-            </svg>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, rotate: -360 }}
+                transition={{ opacity: { duration: 0.5, delay: 1.4 }, scale: { duration: 0.5, delay: 1.4 }, rotate: { duration: 5, repeat: Infinity, ease: 'linear' } }}
+                className="absolute inset-[-6px] border border-dotted border-[#E85D22]/40 rounded-full"
+              />
+            </>
           )}
 
-          <Workflow className="w-6 h-6 text-[#E85D22] relative z-10 drop-shadow-[0_0_8px_rgba(232,93,34,0.4)]" />
+          <Workflow className="w-8 h-8 text-[#E85D22] relative z-10 drop-shadow-[0_0_12px_rgba(232,93,34,0.5)]" />
         </motion.div>
 
-        {/* Wordmark and Status */}
+        {/* Wordmark (1.0s ->) */}
         <motion.div
-          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
-          className="flex flex-col items-center gap-3"
+          initial={{ opacity: 0, filter: 'blur(8px)', y: 4 }}
+          animate={{ opacity: 1, filter: 'blur(0px)', y: 0 }}
+          transition={{ duration: 0.6, delay: 1.0, ease: 'easeOut' }}
+          className="flex flex-col items-center gap-4"
         >
           {/* Shimmer text effect */}
           <div className="relative font-display text-2xl font-medium tracking-tight">
@@ -87,17 +117,22 @@ export const CinematicLoader: React.FC = () => {
             </motion.span>
           </div>
           
-          {/* Status Capsule */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#161616] border border-[#262626] rounded-full shadow-lg">
+          {/* Status Capsule (1.4s ->) */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 1.4, ease: 'easeOut' }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-[#161616] border border-[#262626] rounded-full shadow-lg"
+          >
             <motion.div
-              animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-1.5 h-1.5 rounded-full bg-[#E85D22]"
+              animate={phase === 'waiting' && !isLoading ? { opacity: 1, scale: 1 } : { scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
+              transition={phase === 'waiting' && !isLoading ? { duration: 0.3 } : { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              className={`w-1.5 h-1.5 rounded-full ${phase === 'waiting' && !isLoading ? 'bg-green-500 shadow-[0_0_6px_#22c55e]' : 'bg-[#E85D22]'}`}
             />
-            <span className="text-[#8A8A8A] text-[10px] font-semibold tracking-[0.1em] uppercase">
-              Restoring session
+            <span className={`text-[10px] font-semibold tracking-[0.1em] uppercase w-[120px] text-center transition-colors duration-300 ${phase === 'waiting' && !isLoading ? 'text-green-500' : 'text-[#8A8A8A]'}`}>
+              {phase === 'waiting' && !isLoading ? 'WORKSPACE READY' : 'RESTORING SESSION'}
             </span>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </motion.div>
