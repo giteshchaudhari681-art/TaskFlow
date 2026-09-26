@@ -16,7 +16,6 @@ import { api } from '../../lib/api';
 import { OrganizationMemberItem, UserRole } from '@taskflow/shared';
 import { Select } from '../ui/Select';
 
-
 export const MembersSettings: React.FC = () => {
   const { user, activeOrg } = useAuth();
   const [members, setMembers] = useState<OrganizationMemberItem[]>([]);

@@ -16,7 +16,6 @@ import { auditApi, projectApi } from '../../lib/api';
 import { AuditEvent, AuditAction, AuditSource, ActorType, ProjectListItem } from '@taskflow/shared';
 import { Select } from '../ui/Select';
 
-
 export const AuditLogSettings: React.FC = () => {
   const { activeOrg } = useAuth();
   const [events, setEvents] = useState<AuditEvent[]>([]);

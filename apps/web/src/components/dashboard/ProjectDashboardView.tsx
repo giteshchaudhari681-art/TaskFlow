@@ -77,7 +77,7 @@ const HealthRing: React.FC<{ score: number; state: ProjectHealthState }> = ({ sc
   const isNoData = state !== 'HEALTHY' && state !== 'AT_RISK' && state !== 'CRITICAL';
   const displayScore = isNoData ? 0 : score;
   const dashOffset = circ - (displayScore / 100) * circ;
-  
+
   const color =
     state === 'HEALTHY'
       ? '#34d399'
@@ -789,7 +789,12 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
                       { x: 150, y: 95, label: 'Week 2', val: '4 done' },
                       { x: 300, y: 70, label: 'Week 3', val: '6 done' },
                       { x: 450, y: 35, label: 'Week 4', val: '9 done' },
-                      { x: 600, y: 25, label: 'Current', val: `${metrics.completedTasks} completed` },
+                      {
+                        x: 600,
+                        y: 25,
+                        label: 'Current',
+                        val: `${metrics.completedTasks} completed`,
+                      },
                     ].map((pt, i) => (
                       <g key={i} className="group cursor-pointer">
                         <circle

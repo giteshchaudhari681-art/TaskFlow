@@ -11,7 +11,6 @@ import {
 import { dependencyApi, taskApi } from '../../lib/api';
 import { Select } from '../ui/Select';
 
-
 interface TaskDependenciesSectionProps {
   organizationId: string;
   projectId: string;

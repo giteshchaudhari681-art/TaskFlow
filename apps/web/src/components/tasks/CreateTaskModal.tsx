@@ -5,7 +5,6 @@ import { createTaskSchema } from '@taskflow/validation';
 import { taskApi } from '../../lib/api';
 import { Select } from '../ui/Select';
 
-
 interface CreateTaskModalProps {
   organizationId: string;
   projectId: string;

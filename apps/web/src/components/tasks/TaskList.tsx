@@ -27,7 +27,6 @@ import { TaskDetailDrawer } from './TaskDetailDrawer';
 import { LabelBadge } from '../labels/LabelBadge';
 import { Select } from '../ui/Select';
 
-
 interface TaskListProps {
   organizationId: string;
   projectId: string;

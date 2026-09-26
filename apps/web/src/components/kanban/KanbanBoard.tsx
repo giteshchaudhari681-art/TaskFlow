@@ -24,7 +24,6 @@ import { CreateTaskModal } from '../tasks/CreateTaskModal';
 import { TaskDetailDrawer } from '../tasks/TaskDetailDrawer';
 import { Select } from '../ui/Select';
 
-
 interface KanbanBoardProps {
   organizationId: string;
   projectId: string;

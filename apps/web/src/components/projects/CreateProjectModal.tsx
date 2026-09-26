@@ -5,7 +5,6 @@ import { createProjectSchema } from '@taskflow/validation';
 import { projectApi } from '../../lib/api';
 import { Select } from '../ui/Select';
 
-
 interface CreateProjectModalProps {
   organizationId: string;
   isOpen: boolean;

@@ -17,7 +17,6 @@ import { usageApi } from '../../lib/api';
 import { OrganizationUsage, Plan, UserRole } from '@taskflow/shared';
 import { Select } from '../ui/Select';
 
-
 export const UsageSettings: React.FC = () => {
   const { activeOrg } = useAuth();
   const [usage, setUsage] = useState<OrganizationUsage | null>(null);

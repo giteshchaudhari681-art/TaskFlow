@@ -12,7 +12,6 @@ import { ProjectDependencyGraph, TaskStatus, TaskPriority } from '@taskflow/shar
 import { dependencyApi } from '../../lib/api';
 import { Select } from '../ui/Select';
 
-
 interface DependencyGraphViewProps {
   organizationId: string;
   projectId: string;

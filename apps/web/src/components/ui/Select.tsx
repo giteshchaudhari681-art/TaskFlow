@@ -2,13 +2,22 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+export interface SelectProps extends Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  'onChange'
+> {
   value?: string | number;
   onChange?: (e: any) => void;
   children: React.ReactNode;
 }
 
-export const Select: React.FC<SelectProps> = ({ value, onChange, className, children, ...props }) => {
+export const Select: React.FC<SelectProps> = ({
+  value,
+  onChange,
+  className,
+  children,
+  ...props
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -76,12 +85,7 @@ export const Select: React.FC<SelectProps> = ({ value, onChange, className, chil
         )}
       </AnimatePresence>
 
-      <select
-        value={value}
-        onChange={onChange as any}
-        className="hidden"
-        {...props}
-      >
+      <select value={value} onChange={onChange as any} className="hidden" {...props}>
         {children}
       </select>
     </div>

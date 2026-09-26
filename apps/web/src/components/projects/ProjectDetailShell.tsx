@@ -38,7 +38,6 @@ import { ProjectActivityFeed } from '../collaboration/ProjectActivityFeed';
 import { ProjectDashboardView } from '../dashboard/ProjectDashboardView';
 import { Select } from '../ui/Select';
 
-
 interface ProjectDetailShellProps {
   organizationId: string;
   projectId: string;

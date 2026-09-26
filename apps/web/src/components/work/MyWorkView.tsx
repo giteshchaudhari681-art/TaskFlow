@@ -28,7 +28,6 @@ import { EmptyState } from '../ui/EmptyState';
 import { Skeleton } from '../ui/Skeleton';
 import { Select } from '../ui/Select';
 
-
 interface MyWorkViewProps {
   onOpenTask: (projectId: string, taskId: string) => void;
 }

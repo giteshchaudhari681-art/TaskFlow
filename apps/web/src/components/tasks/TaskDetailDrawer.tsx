@@ -34,7 +34,6 @@ import { TaskActivityTimeline } from '../collaboration/TaskActivityTimeline';
 import { AITaskIntelligence } from './AITaskIntelligence';
 import { Select } from '../ui/Select';
 
-
 interface TaskDetailDrawerProps {
   organizationId: string;
   projectId: string;

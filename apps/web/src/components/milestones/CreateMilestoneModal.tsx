@@ -3,7 +3,6 @@ import { X, AlertCircle, Loader2, Calendar, AlignLeft } from 'lucide-react';
 import { MilestoneStatus, CreateMilestonePayload } from '@taskflow/shared';
 import { Select } from '../ui/Select';
 
-
 interface CreateMilestoneModalProps {
   onClose: () => void;
   onSubmit: (data: CreateMilestonePayload) => Promise<void>;
