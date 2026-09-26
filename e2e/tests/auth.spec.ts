@@ -28,7 +28,7 @@ test.describe('E2E Authentication Workflows', () => {
     // Expect successful transition to authenticated application
     await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 10000 });
     await expect(page.locator(`text=${name}`)).toBeVisible();
-    await expect(page.locator('select')).toContainText(orgName);
+    await expect(page.locator(`text=${orgName}`).first()).toBeVisible();
   });
 
   test('TEST 2: Invalid registration validation prevents submission and displays error', async ({

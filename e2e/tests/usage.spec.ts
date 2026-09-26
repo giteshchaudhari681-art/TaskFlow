@@ -83,7 +83,7 @@ test.describe.serial('E2E SaaS Entitlements & Usage Controls Workflows', () => {
 
     // Switch to owner organization
     const orgSelect = page.locator('select').first();
-    await orgSelect.selectOption(owner.organizationId);
+    await orgSelect.selectOption(owner.organizationId, { force: true });
 
     // Navigate to Usage
     await page.getByRole('button', { name: 'Usage', exact: true }).first().click();

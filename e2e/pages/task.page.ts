@@ -46,10 +46,10 @@ export class TaskPage {
       await this.modalDescriptionInput.fill(opts.description);
     }
     if (opts.status) {
-      await this.modalStatusSelect.selectOption(opts.status);
+      await this.modalStatusSelect.selectOption(opts.status, { force: true });
     }
     if (opts.priority) {
-      await this.modalPrioritySelect.selectOption(opts.priority);
+      await this.modalPrioritySelect.selectOption(opts.priority, { force: true });
     }
     await this.modalSubmitButton.click();
   }

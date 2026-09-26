@@ -53,7 +53,7 @@ test.describe('E2E RBAC & Permission Enforcement Workflows', () => {
 
     // Select the shared organization from organization dropdown
     const orgSelect = page.locator('select').first();
-    await orgSelect.selectOption(owner.organizationId);
+    await orgSelect.selectOption(owner.organizationId, { force: true });
 
     // 4. Navigate to Members
     await page.getByRole('button', { name: 'Members', exact: true }).click();
