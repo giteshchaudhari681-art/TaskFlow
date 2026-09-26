@@ -33,6 +33,8 @@ import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { CinematicLoader } from './components/common/CinematicLoader';
 import { LandingPage } from './components/landing/LandingPage';
+import { Select } from './components/ui/Select';
+
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
     useAuth();
@@ -168,7 +170,7 @@ const MainApp: React.FC = () => {
       </button>
 
       {isAuthenticated && (
-        <nav className="flex-1 overflow-y-auto py-4">
+        <nav className="flex-1 py-4">
           <div className="px-5 mb-2 tf-kicker">Workspace</div>
           {navItems.map(({ id, label, icon: Icon, view }) => {
             const active = isNavActive(view);
@@ -237,24 +239,30 @@ const MainApp: React.FC = () => {
           {organizations.length > 0 && activeOrg && (
             <div className="flex items-center gap-2 text-xs text-[#9c948a]">
               <Building2 className="w-3.5 h-3.5 shrink-0" />
-              <select
-                value={activeOrg.organizationId}
-                onChange={e => {
-                  const found = organizations.find(o => o.organizationId === e.target.value);
-                  if (found) setActiveOrg(found);
-                }}
-                className="bg-transparent text-[#f3ede4] font-medium focus:outline-none cursor-pointer truncate w-full text-xs"
-              >
-                {organizations.map(org => (
-                  <option
-                    key={org.organizationId}
-                    value={org.organizationId}
-                    className="bg-[#211e1a] text-[#f3ede4]"
-                  >
-                    {org.organizationName}
-                  </option>
-                ))}
-              </select>
+              {organizations.length > 1 ? (
+                <Select
+                  value={activeOrg.organizationId}
+                  onChange={e => {
+                    const found = organizations.find(o => o.organizationId === e.target.value);
+                    if (found) setActiveOrg(found);
+                  }}
+                  className="bg-transparent text-[#f3ede4] font-medium focus:outline-none cursor-pointer truncate w-full text-xs"
+                >
+                  {organizations.map(org => (
+                    <option
+                      key={org.organizationId}
+                      value={org.organizationId}
+                      className="bg-[#211e1a] text-[#f3ede4]"
+                    >
+                      {org.organizationName}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <span className="text-[#f3ede4] font-medium truncate w-full text-xs cursor-default">
+                  {activeOrg.organizationName}
+                </span>
+              )}
             </div>
           )}
           <div className="flex items-center justify-between gap-2">
@@ -303,32 +311,20 @@ const MainApp: React.FC = () => {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="min-h-screen bg-[#070707] text-[#F5F5F5] flex selection:bg-[#FF6A21]/30 overflow-x-hidden"
+          className="h-screen w-full bg-[#070707] text-[#F5F5F5] flex selection:bg-[#FF6A21]/30 overflow-hidden"
         >
           {isAuthenticated && (
-            <aside className="hidden lg:flex w-[232px] shrink-0 border-r border-[#2e2924] bg-[#161310] flex-col sticky top-0 h-screen">
+            <aside className="hidden lg:flex w-[232px] shrink-0 border-r border-[#2e2924] bg-[#161310] flex-col h-full">
               <SidebarNav />
             </aside>
           )}
 
-          <div className="flex-1 min-w-0 flex flex-col">
-            {((!isAuthenticated && authView === 'landing') || isAuthenticated) && (
-              <header className="sticky top-0 z-50 bg-[#141210]/95 border-b border-[#2e2924]">
+          <div className="flex-1 min-w-0 flex flex-col h-full">
+            {isAuthenticated && (
+              <header className="shrink-0 z-50 bg-[#141210]/95 border-b border-[#2e2924]">
                 <div className="h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    {!isAuthenticated && (
-                      <button
-                        type="button"
-                        onClick={() => setAuthView('landing')}
-                        className="flex items-center gap-2"
-                      >
-                        <span className="w-7 h-7 rounded-[4px] bg-[#c45c26] text-white flex items-center justify-center">
-                          <Workflow className="w-3.5 h-3.5" />
-                        </span>
-                        <span className="font-display text-lg">TaskFlow</span>
-                      </button>
-                    )}
-                    {isAuthenticated && activeOrg && (
+                    {activeOrg && (
                       <div className="hidden sm:block min-w-0">
                         <ProjectSwitcher
                           organizationId={activeOrg.organizationId}
@@ -417,7 +413,7 @@ const MainApp: React.FC = () => {
               </header>
             )}
 
-            <main className="flex-1 w-full">
+            <main className="flex-1 w-full overflow-y-auto">
               {!isAuthenticated ? (
                 authView === 'landing' ? (
                   <LandingPage
@@ -436,18 +432,18 @@ const MainApp: React.FC = () => {
                   />
                 )
               ) : currentView === 'my-work' ? (
-                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+                <div className="px-4 sm:px-8 lg:px-10 py-8 w-full">
                   <MyWorkView onOpenTask={handleOpenTask} />
                 </div>
               ) : currentView === 'settings' ? (
-                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+                <div className="px-4 sm:px-8 lg:px-10 py-8 w-full">
                   <SettingsLayout
                     onBackToDashboard={() => setCurrentView('dashboard')}
                     initialTab={settingsTab}
                   />
                 </div>
               ) : currentView === 'projects' && activeOrg ? (
-                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+                <div className="px-4 sm:px-8 lg:px-10 py-8 w-full">
                   <ProjectsList
                     organizationId={activeOrg.organizationId}
                     organizationName={activeOrg.organizationName}
@@ -459,7 +455,7 @@ const MainApp: React.FC = () => {
                   />
                 </div>
               ) : currentView === 'project-details' && activeOrg && selectedProjectId ? (
-                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1280px]">
+                <div className="px-4 sm:px-8 lg:px-10 py-8 w-full">
                   <ProjectDetailShell
                     organizationId={activeOrg.organizationId}
                     projectId={selectedProjectId}
@@ -607,7 +603,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <motion.div
-      className="px-4 sm:px-8 lg:px-10 py-10 max-w-[1100px] relative group"
+      className="px-4 sm:px-8 lg:px-10 py-10 w-full relative group"
       onMouseMove={handleMouseMove}
       variants={containerVariants}
       initial="hidden"

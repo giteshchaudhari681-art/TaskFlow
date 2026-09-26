@@ -25,6 +25,8 @@ import { taskApi, labelApi } from '../../lib/api';
 import { CreateTaskModal } from './CreateTaskModal';
 import { TaskDetailDrawer } from './TaskDetailDrawer';
 import { LabelBadge } from '../labels/LabelBadge';
+import { Select } from '../ui/Select';
+
 
 interface TaskListProps {
   organizationId: string;
@@ -221,7 +223,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         {/* Filters dropdown row */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Status filter */}
-          <select
+          <Select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
             className="px-2.5 py-1.5 bg-[#0e1018] border border-[#242834] rounded text-xs font-medium text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer"
@@ -234,10 +236,10 @@ export const TaskList: React.FC<TaskListProps> = ({
             <option value={TaskStatus.BACKLOG}>Backlog</option>
             <option value={TaskStatus.BLOCKED}>Blocked</option>
             <option value={TaskStatus.CANCELLED}>Cancelled</option>
-          </select>
+          </Select>
 
           {/* Priority filter */}
-          <select
+          <Select
             value={priorityFilter}
             onChange={e => setPriorityFilter(e.target.value)}
             className="px-2.5 py-1.5 bg-[#0e1018] border border-[#242834] rounded text-xs font-medium text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer"
@@ -247,10 +249,10 @@ export const TaskList: React.FC<TaskListProps> = ({
             <option value={TaskPriority.HIGH}>High</option>
             <option value={TaskPriority.MEDIUM}>Medium</option>
             <option value={TaskPriority.LOW}>Low</option>
-          </select>
+          </Select>
 
           {/* Assignee filter */}
-          <select
+          <Select
             value={assigneeFilter}
             onChange={e => setAssigneeFilter(e.target.value)}
             className="px-2.5 py-1.5 bg-[#0e1018] border border-[#242834] rounded text-xs font-medium text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer max-w-[140px] truncate"
@@ -261,10 +263,10 @@ export const TaskList: React.FC<TaskListProps> = ({
                 {m.user.name}
               </option>
             ))}
-          </select>
+          </Select>
 
           {/* Label filter */}
-          <select
+          <Select
             value={labelFilter}
             onChange={e => setLabelFilter(e.target.value)}
             className="px-2.5 py-1.5 bg-[#0e1018] border border-[#242834] rounded text-xs font-medium text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer max-w-[140px] truncate"
@@ -275,7 +277,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                 {l.name}
               </option>
             ))}
-          </select>
+          </Select>
 
           {/* Show Archived Toggle */}
           <button

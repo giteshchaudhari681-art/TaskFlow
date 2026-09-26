@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { ProjectDependencyGraph, TaskStatus, TaskPriority } from '@taskflow/shared';
 import { dependencyApi } from '../../lib/api';
+import { Select } from '../ui/Select';
+
 
 interface DependencyGraphViewProps {
   organizationId: string;
@@ -175,7 +177,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
             />
           </div>
 
-          <select
+          <Select
             value={filterType}
             onChange={e => setFilterType(e.target.value as any)}
             className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:border-taskflow-accent"
@@ -183,7 +185,7 @@ export const DependencyGraphView: React.FC<DependencyGraphViewProps> = ({
             <option value="ALL">All Relationships</option>
             <option value="BLOCKS">Blocking Only</option>
             <option value="RELATES_TO">Related Only</option>
-          </select>
+          </Select>
 
           <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer select-none">
             <input

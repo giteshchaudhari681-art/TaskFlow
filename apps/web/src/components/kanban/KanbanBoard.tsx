@@ -22,6 +22,8 @@ import { taskApi, labelApi } from '../../lib/api';
 import { KanbanColumn } from './KanbanColumn';
 import { CreateTaskModal } from '../tasks/CreateTaskModal';
 import { TaskDetailDrawer } from '../tasks/TaskDetailDrawer';
+import { Select } from '../ui/Select';
+
 
 interface KanbanBoardProps {
   organizationId: string;
@@ -282,7 +284,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
           {/* Priority filter */}
           <div className="relative">
-            <select
+            <Select
               value={priorityFilter}
               onChange={e => setPriorityFilter(e.target.value)}
               className="px-2.5 py-1.5 rounded text-xs bg-[#0e1018] border border-[#242834] text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer"
@@ -293,12 +295,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   {p}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Assignee filter */}
           <div className="relative">
-            <select
+            <Select
               value={assigneeFilter}
               onChange={e => setAssigneeFilter(e.target.value)}
               className="px-2.5 py-1.5 rounded text-xs bg-[#0e1018] border border-[#242834] text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer max-w-[140px] truncate"
@@ -310,12 +312,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   {m.user.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Label filter */}
           <div className="relative">
-            <select
+            <Select
               value={labelFilter}
               onChange={e => setLabelFilter(e.target.value)}
               className="px-2.5 py-1.5 rounded text-xs bg-[#0e1018] border border-[#242834] text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer max-w-[140px] truncate"
@@ -326,13 +328,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   {l.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Sort selector */}
           <div className="flex items-center space-x-1.5">
             <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
-            <select
+            <Select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as SortOption)}
               className="px-2.5 py-1.5 rounded text-xs bg-[#0e1018] border border-[#242834] text-slate-300 focus:outline-none focus:border-[#e05638] cursor-pointer"
@@ -342,7 +344,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               <option value="priority_desc">Priority (High to Low)</option>
               <option value="due_date">Due Date</option>
               <option value="created_desc">Created Date</option>
-            </select>
+            </Select>
           </div>
 
           {/* Archived Toggle */}

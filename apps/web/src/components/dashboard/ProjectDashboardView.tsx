@@ -74,7 +74,10 @@ const MILESTONE_HEALTH_CONFIG: Record<
 const HealthRing: React.FC<{ score: number; state: ProjectHealthState }> = ({ score, state }) => {
   const r = 44;
   const circ = 2 * Math.PI * r;
-  const dashOffset = circ - (score / 100) * circ;
+  const isNoData = state !== 'HEALTHY' && state !== 'AT_RISK' && state !== 'CRITICAL';
+  const displayScore = isNoData ? 0 : score;
+  const dashOffset = circ - (displayScore / 100) * circ;
+  
   const color =
     state === 'HEALTHY'
       ? '#34d399'
@@ -82,7 +85,7 @@ const HealthRing: React.FC<{ score: number; state: ProjectHealthState }> = ({ sc
         ? '#fbbf24'
         : state === 'CRITICAL'
           ? '#f87171'
-          : '#64748b';
+          : '#334155'; // Darker slate for no data
 
   return (
     <svg width="120" height="120" className="shrink-0 -rotate-90">
@@ -104,23 +107,23 @@ const HealthRing: React.FC<{ score: number; state: ProjectHealthState }> = ({ sc
           x="60"
           y="54"
           textAnchor="middle"
-          fill="white"
+          fill={isNoData ? '#64748b' : 'white'}
           fontSize="22"
           fontWeight="800"
           fontFamily="inherit"
         >
-          {score}
+          {isNoData ? '--' : score}
         </text>
         <text
           x="60"
           y="70"
           textAnchor="middle"
-          fill={color}
+          fill={isNoData ? '#475569' : color}
           fontSize="10"
           fontWeight="600"
           fontFamily="inherit"
         >
-          / 100
+          {isNoData ? 'No Data' : '/ 100'}
         </text>
       </g>
     </svg>
@@ -721,94 +724,102 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
               </div>
             </div>
 
-            {/* SVG Area Chart */}
-            <div className="relative w-full h-44">
-              <svg className="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#e05638" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#e05638" stopOpacity="0.0" />
-                  </linearGradient>
-                  <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#e05638" />
-                    <stop offset="50%" stopColor="#d97706" />
-                    <stop offset="100%" stopColor="#10b981" />
-                  </linearGradient>
-                </defs>
+            {totalTasks > 0 ? (
+              <>
+                {/* SVG Area Chart */}
+                <div className="relative w-full h-44">
+                  <svg className="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#e05638" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#e05638" stopOpacity="0.0" />
+                      </linearGradient>
+                      <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#e05638" />
+                        <stop offset="50%" stopColor="#d97706" />
+                        <stop offset="100%" stopColor="#10b981" />
+                      </linearGradient>
+                    </defs>
 
-                {/* Horizontal Grid lines */}
-                <line
-                  x1="0"
-                  y1="20"
-                  x2="600"
-                  y2="20"
-                  stroke="rgba(255,255,255,0.04)"
-                  strokeDasharray="4 4"
-                />
-                <line
-                  x1="0"
-                  y1="60"
-                  x2="600"
-                  y2="60"
-                  stroke="rgba(255,255,255,0.04)"
-                  strokeDasharray="4 4"
-                />
-                <line
-                  x1="0"
-                  y1="100"
-                  x2="600"
-                  y2="100"
-                  stroke="rgba(255,255,255,0.04)"
-                  strokeDasharray="4 4"
-                />
-                <line x1="0" y1="140" x2="600" y2="140" stroke="#222630" />
-
-                {/* Dynamic Trend Area Fill */}
-                <path
-                  d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25 L 600 140 L 0 140 Z"
-                  fill="url(#areaGradient)"
-                />
-
-                {/* Curved Trend Line */}
-                <path
-                  d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25"
-                  fill="none"
-                  stroke="url(#lineGradient)"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                />
-
-                {/* Interactive Data Points */}
-                {[
-                  { x: 0, y: 120, label: 'Week 1', val: '2 done' },
-                  { x: 150, y: 95, label: 'Week 2', val: '4 done' },
-                  { x: 300, y: 70, label: 'Week 3', val: '6 done' },
-                  { x: 450, y: 35, label: 'Week 4', val: '9 done' },
-                  { x: 600, y: 25, label: 'Current', val: `${metrics.completedTasks} completed` },
-                ].map((pt, i) => (
-                  <g key={i} className="group cursor-pointer">
-                    <circle
-                      cx={pt.x}
-                      cy={pt.y}
-                      r="5"
-                      fill="#12141a"
-                      stroke="#e05638"
-                      strokeWidth="2.5"
-                      className="group-hover:r-7 transition-all"
+                    {/* Horizontal Grid lines */}
+                    <line
+                      x1="0"
+                      y1="20"
+                      x2="600"
+                      y2="20"
+                      stroke="rgba(255,255,255,0.04)"
+                      strokeDasharray="4 4"
                     />
-                  </g>
-                ))}
-              </svg>
-            </div>
+                    <line
+                      x1="0"
+                      y1="60"
+                      x2="600"
+                      y2="60"
+                      stroke="rgba(255,255,255,0.04)"
+                      strokeDasharray="4 4"
+                    />
+                    <line
+                      x1="0"
+                      y1="100"
+                      x2="600"
+                      y2="100"
+                      stroke="rgba(255,255,255,0.04)"
+                      strokeDasharray="4 4"
+                    />
+                    <line x1="0" y1="140" x2="600" y2="140" stroke="#222630" />
 
-            {/* Timeline X-Axis Labels */}
-            <div className="flex justify-between items-center mt-2 text-[11px] text-slate-500 font-mono">
-              <span>Week 1</span>
-              <span>Week 2</span>
-              <span>Week 3</span>
-              <span>Week 4</span>
-              <span className="text-emerald-400 font-bold">Current Target</span>
-            </div>
+                    {/* Dynamic Trend Area Fill */}
+                    <path
+                      d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25 L 600 140 L 0 140 Z"
+                      fill="url(#areaGradient)"
+                    />
+
+                    {/* Curved Trend Line */}
+                    <path
+                      d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25"
+                      fill="none"
+                      stroke="url(#lineGradient)"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Interactive Data Points */}
+                    {[
+                      { x: 0, y: 120, label: 'Week 1', val: '2 done' },
+                      { x: 150, y: 95, label: 'Week 2', val: '4 done' },
+                      { x: 300, y: 70, label: 'Week 3', val: '6 done' },
+                      { x: 450, y: 35, label: 'Week 4', val: '9 done' },
+                      { x: 600, y: 25, label: 'Current', val: `${metrics.completedTasks} completed` },
+                    ].map((pt, i) => (
+                      <g key={i} className="group cursor-pointer">
+                        <circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r="5"
+                          fill="#12141a"
+                          stroke="#e05638"
+                          strokeWidth="2.5"
+                          className="group-hover:r-7 transition-all"
+                        />
+                      </g>
+                    ))}
+                  </svg>
+                </div>
+
+                {/* Timeline X-Axis Labels */}
+                <div className="flex justify-between items-center mt-2 text-[11px] text-slate-500 font-mono">
+                  <span>Week 1</span>
+                  <span>Week 2</span>
+                  <span>Week 3</span>
+                  <span>Week 4</span>
+                  <span className="text-emerald-400 font-bold">Current Target</span>
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-44 flex items-center justify-center text-center text-sm text-slate-500">
+                Not enough activity data to plot trends.
+              </div>
+            )}
           </div>
         </div>
       </section>

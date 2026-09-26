@@ -23,6 +23,8 @@ import {
   Send,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Select } from '../ui/Select';
+
 
 // --------------------------------------------------------
 // UI Wrappers
@@ -885,7 +887,7 @@ export const LandingFooter: React.FC = () => {
             </div>
             <div className="space-y-2">
               <label className="text-[13px] font-medium text-[#F3EDE4]">Subject</label>
-              <select
+              <Select
                 disabled={contactStatus !== 'idle'}
                 className="w-full bg-[#141210] border border-[#2e2924] rounded-lg px-4 py-2.5 text-[#F3EDE4] text-sm focus:outline-none focus:border-[#E85D22] transition-colors disabled:opacity-50 appearance-none"
               >
@@ -893,7 +895,7 @@ export const LandingFooter: React.FC = () => {
                 <option>Product question</option>
                 <option>Partnership</option>
                 <option>Technical support</option>
-              </select>
+              </Select>
             </div>
             <div className="space-y-2">
               <label className="text-[13px] font-medium text-[#F3EDE4]">Message</label>

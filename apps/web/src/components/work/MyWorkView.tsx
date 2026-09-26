@@ -26,6 +26,8 @@ import { Badge } from '../ui/Badge';
 import { Card } from '../ui/Card';
 import { EmptyState } from '../ui/EmptyState';
 import { Skeleton } from '../ui/Skeleton';
+import { Select } from '../ui/Select';
+
 
 interface MyWorkViewProps {
   onOpenTask: (projectId: string, taskId: string) => void;
@@ -416,7 +418,7 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
                   {renderDueDateBadge(item)}
 
                   {/* Status Changer */}
-                  <select
+                  <Select
                     value={item.status}
                     onClick={e => e.stopPropagation()}
                     onChange={e => handleStatusChange(item, e.target.value as TaskStatus, e)}
@@ -430,7 +432,7 @@ export const MyWorkView: React.FC<MyWorkViewProps> = ({ onOpenTask }) => {
                     <option value={TaskStatus.BLOCKED}>Blocked</option>
                     <option value={TaskStatus.DONE}>Done</option>
                     <option value={TaskStatus.CANCELLED}>Cancelled</option>
-                  </select>
+                  </Select>
 
                   <button
                     type="button"

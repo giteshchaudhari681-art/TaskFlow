@@ -14,6 +14,8 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../lib/api';
 import { OrganizationMemberItem, UserRole } from '@taskflow/shared';
+import { Select } from '../ui/Select';
+
 
 export const MembersSettings: React.FC = () => {
   const { user, activeOrg } = useAuth();
@@ -265,7 +267,7 @@ export const MembersSettings: React.FC = () => {
 
                     {/* Role selector or badge */}
                     {canEditThisRole ? (
-                      <select
+                      <Select
                         disabled={actionLoading}
                         value={m.role}
                         onChange={e => handleRoleChange(m, e.target.value as UserRole)}
@@ -275,7 +277,7 @@ export const MembersSettings: React.FC = () => {
                         <option value={UserRole.ADMIN}>ADMIN</option>
                         <option value={UserRole.MEMBER}>MEMBER</option>
                         <option value={UserRole.GUEST}>GUEST</option>
-                      </select>
+                      </Select>
                     ) : (
                       <span
                         className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${
@@ -360,7 +362,7 @@ export const MembersSettings: React.FC = () => {
                 <label className="block text-xs font-medium text-taskflow-text-dim mb-1.5">
                   Workspace Role
                 </label>
-                <select
+                <Select
                   value={inviteRole}
                   onChange={e => setInviteRole(e.target.value as UserRole)}
                   className="w-full px-3 py-2 rounded-lg bg-taskflow-surface border border-taskflow-border text-white text-xs focus:outline-none focus:border-taskflow-accent"
@@ -368,7 +370,7 @@ export const MembersSettings: React.FC = () => {
                   <option value={UserRole.MEMBER}>MEMBER (Standard execution access)</option>
                   <option value={UserRole.ADMIN}>ADMIN (Workspace administrator)</option>
                   <option value={UserRole.GUEST}>GUEST (Restricted observer access)</option>
-                </select>
+                </Select>
               </div>
 
               <div className="flex justify-end space-x-2.5 pt-2">
