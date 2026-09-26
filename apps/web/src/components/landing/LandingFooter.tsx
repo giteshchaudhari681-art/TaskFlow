@@ -20,7 +20,7 @@ import {
   AlertCircle,
   Database,
   Terminal,
-  Send
+  Send,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -246,7 +246,11 @@ export const LandingFooter: React.FC = () => {
   const [expandedGuide, setExpandedGuide] = useState<number | null>(null);
 
   // Article Modal State
-  const [activeArticle, setActiveArticle] = useState<{ title: string; category: string; content: React.ReactNode } | null>(null);
+  const [activeArticle, setActiveArticle] = useState<{
+    title: string;
+    category: string;
+    content: React.ReactNode;
+  } | null>(null);
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1051,14 +1055,14 @@ export const LandingFooter: React.FC = () => {
       >
         <div className="text-[15px] text-[#A3A3A3] space-y-8 max-w-3xl leading-relaxed">
           {activeArticle?.content}
-          
+
           <div className="mt-8 pt-8 border-t border-[#2e2924] flex justify-end">
-             <button 
-                onClick={() => setActiveArticle(null)}
-                className="px-6 py-2.5 rounded-xl bg-[#2e2924] hover:bg-[#3d3730] text-[#F3EDE4] font-medium transition-colors"
-             >
-                Close article
-             </button>
+            <button
+              onClick={() => setActiveArticle(null)}
+              className="px-6 py-2.5 rounded-xl bg-[#2e2924] hover:bg-[#3d3730] text-[#F3EDE4] font-medium transition-colors"
+            >
+              Close article
+            </button>
           </div>
         </div>
       </Modal>
@@ -1087,14 +1091,27 @@ export const LandingFooter: React.FC = () => {
                 icon: Book,
                 content: (
                   <div className="space-y-3">
-                    <p>TaskFlow is designed to be intuitive. Start by creating a workspace, inviting your team, and setting up your first project.</p>
+                    <p>
+                      TaskFlow is designed to be intuitive. Start by creating a workspace, inviting
+                      your team, and setting up your first project.
+                    </p>
                     <ul className="space-y-1.5 mt-2 ml-4 list-disc marker:text-[#E85D22]">
-                      <li><strong className="text-[#F3EDE4]">Create a Workspace:</strong> Isolate data across multiple organizations.</li>
-                      <li><strong className="text-[#F3EDE4]">Invite Members:</strong> Configure your role-based access controls (RBAC) to ensure everyone has the right permissions.</li>
-                      <li><strong className="text-[#F3EDE4]">Setup Integrations:</strong> Connect GitHub, OpenAI, and other tools.</li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Create a Workspace:</strong> Isolate data
+                        across multiple organizations.
+                      </li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Invite Members:</strong> Configure your
+                        role-based access controls (RBAC) to ensure everyone has the right
+                        permissions.
+                      </li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Setup Integrations:</strong> Connect
+                        GitHub, OpenAI, and other tools.
+                      </li>
                     </ul>
                     <div className="mt-4 pt-4 border-t border-[#2e2924]">
-                      <button 
+                      <button
                         onClick={() => {
                           setActiveDrawer(null);
                           setActiveArticle({
@@ -1102,15 +1119,38 @@ export const LandingFooter: React.FC = () => {
                             category: 'DOCUMENTATION',
                             content: (
                               <div className="space-y-4">
-                                <p>Welcome to TaskFlow! The setup process is designed to be as frictionless as possible while establishing a secure environment for your team's projects.</p>
-                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">1. Setting up your Workspace</h4>
-                                <p>Your workspace is the top-level container for all projects and members. Best practice is to create one workspace per organization or distinct business unit.</p>
-                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">2. Configuring Roles (RBAC)</h4>
-                                <p>Ensure you invite members with the correct baseline permissions. TaskFlow offers Admin, Member, and Viewer roles out of the box, with the ability to define custom roles based on your security policies.</p>
-                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">3. Activating Integrations</h4>
-                                <p>Link your GitHub and OpenAI accounts in the Workspace Settings to unlock the full power of TaskFlow's AI Copilot and traceability features.</p>
+                                <p>
+                                  Welcome to TaskFlow! The setup process is designed to be as
+                                  frictionless as possible while establishing a secure environment
+                                  for your team's projects.
+                                </p>
+                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">
+                                  1. Setting up your Workspace
+                                </h4>
+                                <p>
+                                  Your workspace is the top-level container for all projects and
+                                  members. Best practice is to create one workspace per organization
+                                  or distinct business unit.
+                                </p>
+                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">
+                                  2. Configuring Roles (RBAC)
+                                </h4>
+                                <p>
+                                  Ensure you invite members with the correct baseline permissions.
+                                  TaskFlow offers Admin, Member, and Viewer roles out of the box,
+                                  with the ability to define custom roles based on your security
+                                  policies.
+                                </p>
+                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">
+                                  3. Activating Integrations
+                                </h4>
+                                <p>
+                                  Link your GitHub and OpenAI accounts in the Workspace Settings to
+                                  unlock the full power of TaskFlow's AI Copilot and traceability
+                                  features.
+                                </p>
                               </div>
-                            )
+                            ),
                           });
                         }}
                         className="text-[#E85D22] hover:text-[#F0703B] font-medium transition-colors text-[13px] flex items-center"
@@ -1121,20 +1161,32 @@ export const LandingFooter: React.FC = () => {
                   </div>
                 ),
               },
-              { 
-                title: 'Projects & Tasks', 
-                desc: 'Core project management features', 
+              {
+                title: 'Projects & Tasks',
+                desc: 'Core project management features',
                 icon: Layers,
                 content: (
                   <div className="space-y-3">
-                    <p>Projects contain lists, boards, and timelines. Tasks are the fundamental units of work.</p>
+                    <p>
+                      Projects contain lists, boards, and timelines. Tasks are the fundamental units
+                      of work.
+                    </p>
                     <ul className="space-y-1.5 mt-2 ml-4 list-disc marker:text-[#E85D22]">
-                      <li><strong className="text-[#F3EDE4]">Hierarchies:</strong> Create subtasks, assign labels, and track activity.</li>
-                      <li><strong className="text-[#F3EDE4]">Views:</strong> Switch seamlessly between Kanban, List, and Timeline views.</li>
-                      <li><strong className="text-[#F3EDE4]">Dependencies:</strong> Set clear blocking tasks using the DAG engine.</li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Hierarchies:</strong> Create subtasks,
+                        assign labels, and track activity.
+                      </li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Views:</strong> Switch seamlessly between
+                        Kanban, List, and Timeline views.
+                      </li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Dependencies:</strong> Set clear blocking
+                        tasks using the DAG engine.
+                      </li>
                     </ul>
                     <div className="mt-4 pt-4 border-t border-[#2e2924]">
-                      <button 
+                      <button
                         onClick={() => {
                           setActiveDrawer(null);
                           setActiveArticle({
@@ -1142,13 +1194,29 @@ export const LandingFooter: React.FC = () => {
                             category: 'DOCUMENTATION',
                             content: (
                               <div className="space-y-4">
-                                <p>TaskFlow treats tasks not just as to-do items, but as nodes in a broader execution graph. This is where you actually define the work to be done.</p>
-                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">Project Architecture</h4>
-                                <p>Projects contain multiple views (Kanban, List, Timeline). They are the containers for your sprints, milestones, and epics.</p>
-                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">Task Lifecycle</h4>
-                                <p>Every task goes through a defined lifecycle. Our advanced Directed Acyclic Graph (DAG) dependency engine ensures that if a blocking task is delayed, all dependent tasks are automatically highlighted for review.</p>
+                                <p>
+                                  TaskFlow treats tasks not just as to-do items, but as nodes in a
+                                  broader execution graph. This is where you actually define the
+                                  work to be done.
+                                </p>
+                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">
+                                  Project Architecture
+                                </h4>
+                                <p>
+                                  Projects contain multiple views (Kanban, List, Timeline). They are
+                                  the containers for your sprints, milestones, and epics.
+                                </p>
+                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">
+                                  Task Lifecycle
+                                </h4>
+                                <p>
+                                  Every task goes through a defined lifecycle. Our advanced Directed
+                                  Acyclic Graph (DAG) dependency engine ensures that if a blocking
+                                  task is delayed, all dependent tasks are automatically highlighted
+                                  for review.
+                                </p>
                               </div>
-                            )
+                            ),
                           });
                         }}
                         className="text-[#E85D22] hover:text-[#F0703B] font-medium transition-colors text-[13px] flex items-center"
@@ -1165,11 +1233,23 @@ export const LandingFooter: React.FC = () => {
                 icon: Activity,
                 content: (
                   <div className="space-y-3">
-                    <p>TaskFlow's AI Copilot automatically analyzes your project's metadata and dependencies to foresee issues.</p>
+                    <p>
+                      TaskFlow's AI Copilot automatically analyzes your project's metadata and
+                      dependencies to foresee issues.
+                    </p>
                     <ul className="space-y-1.5 mt-2 ml-4 list-disc marker:text-[#E85D22]">
-                      <li><strong className="text-[#F3EDE4]">Risk Analysis:</strong> Highlight potential timeline risks automatically.</li>
-                      <li><strong className="text-[#F3EDE4]">Task Decomposition:</strong> Suggest subtask breakdowns for large epics.</li>
-                      <li><strong className="text-[#F3EDE4]">Quality Checks:</strong> Flag missing requirements before execution begins.</li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Risk Analysis:</strong> Highlight
+                        potential timeline risks automatically.
+                      </li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Task Decomposition:</strong> Suggest
+                        subtask breakdowns for large epics.
+                      </li>
+                      <li>
+                        <strong className="text-[#F3EDE4]">Quality Checks:</strong> Flag missing
+                        requirements before execution begins.
+                      </li>
                     </ul>
                   </div>
                 ),
@@ -1181,7 +1261,10 @@ export const LandingFooter: React.FC = () => {
                 content: (
                   <div className="space-y-3">
                     <p>Manage your organization's billing, security policies, and member access.</p>
-                    <p>You can define custom roles or use our pre-configured Admin, Member, and Viewer roles to enforce the principle of least privilege across all projects.</p>
+                    <p>
+                      You can define custom roles or use our pre-configured Admin, Member, and
+                      Viewer roles to enforce the principle of least privilege across all projects.
+                    </p>
                   </div>
                 ),
               },
@@ -1191,10 +1274,16 @@ export const LandingFooter: React.FC = () => {
                 icon: ShieldCheck,
                 content: (
                   <div className="space-y-3">
-                    <p>TaskFlow maintains an immutable audit log of all critical workspace activities.</p>
-                    <p>Monitor logins, permission changes, and project deletions to maintain strict SOC 2 compliance standards.</p>
+                    <p>
+                      TaskFlow maintains an immutable audit log of all critical workspace
+                      activities.
+                    </p>
+                    <p>
+                      Monitor logins, permission changes, and project deletions to maintain strict
+                      SOC 2 compliance standards.
+                    </p>
                     <div className="mt-4 pt-4 border-t border-[#2e2924]">
-                      <button 
+                      <button
                         onClick={() => {
                           setActiveDrawer(null);
                           setActiveArticle({
@@ -1202,13 +1291,28 @@ export const LandingFooter: React.FC = () => {
                             category: 'DOCUMENTATION',
                             content: (
                               <div className="space-y-4">
-                                <p>TaskFlow is built with security as a foundational principle. We maintain an immutable audit log of all critical workspace activities.</p>
-                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">Compliance Standards</h4>
-                                <p>Our infrastructure is designed to maintain strict SOC 2 compliance standards. You can export audit logs at any time for your internal security reviews.</p>
-                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">Data Isolation</h4>
-                                <p>Workspaces are logically isolated. We utilize enterprise-grade encryption for all data at rest and in transit.</p>
+                                <p>
+                                  TaskFlow is built with security as a foundational principle. We
+                                  maintain an immutable audit log of all critical workspace
+                                  activities.
+                                </p>
+                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">
+                                  Compliance Standards
+                                </h4>
+                                <p>
+                                  Our infrastructure is designed to maintain strict SOC 2 compliance
+                                  standards. You can export audit logs at any time for your internal
+                                  security reviews.
+                                </p>
+                                <h4 className="text-lg font-semibold text-[#F3EDE4] mt-6">
+                                  Data Isolation
+                                </h4>
+                                <p>
+                                  Workspaces are logically isolated. We utilize enterprise-grade
+                                  encryption for all data at rest and in transit.
+                                </p>
                               </div>
-                            )
+                            ),
                           });
                         }}
                         className="text-[#E85D22] hover:text-[#F0703B] font-medium transition-colors text-[13px] flex items-center"
@@ -1220,25 +1324,34 @@ export const LandingFooter: React.FC = () => {
                 ),
               },
             ].map(cat => (
-              <div key={cat.title} className="flex flex-col rounded-xl bg-[#141210] border border-[#2e2924] overflow-hidden transition-all focus-within:ring-2 focus-within:ring-[#E85D22] focus-within:border-transparent">
+              <div
+                key={cat.title}
+                className="flex flex-col rounded-xl bg-[#141210] border border-[#2e2924] overflow-hidden transition-all focus-within:ring-2 focus-within:ring-[#E85D22] focus-within:border-transparent"
+              >
                 <button
                   onClick={() => setExpandedDoc(expandedDoc === cat.title ? null : cat.title)}
                   className="group flex items-start gap-4 p-4 text-left transition-colors outline-none w-full hover:bg-[#1A1A1A]"
                 >
-                  <div className={`w-10 h-10 rounded-lg bg-[#1A1A1A] flex items-center justify-center shrink-0 transition-colors border border-[#333333] ${expandedDoc === cat.title ? 'text-[#E85D22]' : 'text-[#8A8A8A] group-hover:text-[#E85D22]'}`}>
+                  <div
+                    className={`w-10 h-10 rounded-lg bg-[#1A1A1A] flex items-center justify-center shrink-0 transition-colors border border-[#333333] ${expandedDoc === cat.title ? 'text-[#E85D22]' : 'text-[#8A8A8A] group-hover:text-[#E85D22]'}`}
+                  >
                     <cat.icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <h4 className={`text-[15px] font-medium transition-colors ${expandedDoc === cat.title ? 'text-[#E85D22]' : 'text-[#F3EDE4] group-hover:text-[#E85D22]'}`}>
+                    <h4
+                      className={`text-[15px] font-medium transition-colors ${expandedDoc === cat.title ? 'text-[#E85D22]' : 'text-[#F3EDE4] group-hover:text-[#E85D22]'}`}
+                    >
                       {cat.title}
                     </h4>
                     <p className="text-[13px] text-[#8A8A8A] mt-1">{cat.desc}</p>
                   </div>
-                  <div className={`text-[#8A8A8A] transition-transform duration-300 ${expandedDoc === cat.title ? 'rotate-90 text-[#E85D22]' : ''}`}>
+                  <div
+                    className={`text-[#8A8A8A] transition-transform duration-300 ${expandedDoc === cat.title ? 'rotate-90 text-[#E85D22]' : ''}`}
+                  >
                     <ChevronRight className="w-5 h-5" />
                   </div>
                 </button>
-                
+
                 <AnimatePresence>
                   {expandedDoc === cat.title && (
                     <motion.div
@@ -1275,58 +1388,89 @@ export const LandingFooter: React.FC = () => {
           </p>
           <div className="grid gap-4">
             {[
-              { 
-                title: 'Getting Started with TaskFlow', 
+              {
+                title: 'Getting Started with TaskFlow',
                 content: (
                   <div className="space-y-3">
                     <p>Explore the foundations of setting up your first workspace.</p>
-                    <p>We recommend establishing standard labels and milestone conventions early. A strong foundation allows your team to effectively filter tasks and manage capacity across multiple sprints.</p>
+                    <p>
+                      We recommend establishing standard labels and milestone conventions early. A
+                      strong foundation allows your team to effectively filter tasks and manage
+                      capacity across multiple sprints.
+                    </p>
                     <ul className="space-y-1 mt-2 text-[#8A8A8A]">
                       <li>• Setting up your profile</li>
                       <li>• Creating your first project</li>
                       <li>• Inviting team members</li>
                     </ul>
                   </div>
-                ) 
+                ),
               },
-              { 
-                title: 'Managing Projects effectively', 
+              {
+                title: 'Managing Projects effectively',
                 content: (
                   <div className="space-y-3">
-                    <p>A deep dive into prioritizing tasks, managing sprints through Kanban boards, and establishing clear lines of accountability.</p>
-                    <p>This guide covers how to run effective stand-ups using the Project Dashboard, and how to utilize custom views to track cross-team initiatives.</p>
+                    <p>
+                      A deep dive into prioritizing tasks, managing sprints through Kanban boards,
+                      and establishing clear lines of accountability.
+                    </p>
+                    <p>
+                      This guide covers how to run effective stand-ups using the Project Dashboard,
+                      and how to utilize custom views to track cross-team initiatives.
+                    </p>
                   </div>
-                )
+                ),
               },
-              { 
-                title: 'Creating Tasks and subtasks', 
+              {
+                title: 'Creating Tasks and subtasks',
                 content: (
                   <div className="space-y-3">
-                    <p>Learn how to decompose large pieces of work into actionable tasks. Discover keyboard shortcuts for rapid task entry.</p>
-                    <p>Effective tasks have clear acceptance criteria, assigned owners, and explicit due dates. We explore the anatomy of a perfect task.</p>
+                    <p>
+                      Learn how to decompose large pieces of work into actionable tasks. Discover
+                      keyboard shortcuts for rapid task entry.
+                    </p>
+                    <p>
+                      Effective tasks have clear acceptance criteria, assigned owners, and explicit
+                      due dates. We explore the anatomy of a perfect task.
+                    </p>
                   </div>
-                )
+                ),
               },
-              { 
-                title: 'Using Dependencies (DAG)', 
+              {
+                title: 'Using Dependencies (DAG)',
                 content: (
                   <div className="space-y-3">
-                    <p>TaskFlow uses a Directed Acyclic Graph to ensure tasks don't block each other. Learn how to construct healthy dependency chains without cycles.</p>
-                    <p>Discover how the AI Copilot automatically visualizes critical paths and flags circular dependencies before they cause timeline slips.</p>
+                    <p>
+                      TaskFlow uses a Directed Acyclic Graph to ensure tasks don't block each other.
+                      Learn how to construct healthy dependency chains without cycles.
+                    </p>
+                    <p>
+                      Discover how the AI Copilot automatically visualizes critical paths and flags
+                      circular dependencies before they cause timeline slips.
+                    </p>
                   </div>
-                ) 
+                ),
               },
-              { 
-                title: 'Using AI Task Intelligence', 
+              {
+                title: 'Using AI Task Intelligence',
                 content: (
                   <div className="space-y-3">
-                    <p>Activate the AI Copilot on individual tasks to suggest better descriptions, estimate complexity, or identify missing acceptance criteria.</p>
-                    <p>Always review AI suggestions before applying them. Human approval remains required for execution of AI recommendations.</p>
+                    <p>
+                      Activate the AI Copilot on individual tasks to suggest better descriptions,
+                      estimate complexity, or identify missing acceptance criteria.
+                    </p>
+                    <p>
+                      Always review AI suggestions before applying them. Human approval remains
+                      required for execution of AI recommendations.
+                    </p>
                   </div>
-                ) 
+                ),
               },
             ].map((guide, i) => (
-              <div key={i} className="flex flex-col rounded-xl bg-[#141210] border border-[#2e2924] overflow-hidden transition-all focus-within:ring-2 focus-within:ring-[#E85D22] focus-within:border-transparent">
+              <div
+                key={i}
+                className="flex flex-col rounded-xl bg-[#141210] border border-[#2e2924] overflow-hidden transition-all focus-within:ring-2 focus-within:ring-[#E85D22] focus-within:border-transparent"
+              >
                 <button
                   onClick={() => setExpandedGuide(expandedGuide === i ? null : i)}
                   className="group flex flex-col p-5 text-left transition-all hover:bg-[#1A1A1A] outline-none w-full"
@@ -1334,12 +1478,18 @@ export const LandingFooter: React.FC = () => {
                   <span className="text-[10px] font-bold text-[#E85D22] uppercase tracking-wider mb-2">
                     Guide
                   </span>
-                  <h4 className={`text-[16px] font-medium mb-3 transition-colors ${expandedGuide === i ? 'text-[#E85D22]' : 'text-[#F3EDE4] group-hover:text-[#E85D22]'}`}>
+                  <h4
+                    className={`text-[16px] font-medium mb-3 transition-colors ${expandedGuide === i ? 'text-[#E85D22]' : 'text-[#F3EDE4] group-hover:text-[#E85D22]'}`}
+                  >
                     {guide.title}
                   </h4>
-                  <div className={`flex items-center text-[13px] font-medium transition-colors ${expandedGuide === i ? 'text-[#E85D22]' : 'text-[#8A8A8A] group-hover:text-[#F3EDE4]'}`}>
+                  <div
+                    className={`flex items-center text-[13px] font-medium transition-colors ${expandedGuide === i ? 'text-[#E85D22]' : 'text-[#8A8A8A] group-hover:text-[#F3EDE4]'}`}
+                  >
                     {expandedGuide === i ? 'Close Guide' : 'Read Guide'}
-                    <ChevronRight className={`w-4 h-4 ml-1 transition-transform ${expandedGuide === i ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
+                    <ChevronRight
+                      className={`w-4 h-4 ml-1 transition-transform ${expandedGuide === i ? 'rotate-90' : 'group-hover:translate-x-1'}`}
+                    />
                   </div>
                 </button>
 
@@ -1355,7 +1505,7 @@ export const LandingFooter: React.FC = () => {
                       <div className="p-5 pt-0 text-[14px] text-[#A3A3A3] leading-relaxed border-t border-[#2e2924] bg-[#1A1A1A]">
                         {guide.content}
                         <div className="mt-5 flex">
-                          <button 
+                          <button
                             onClick={() => {
                               setActiveDrawer(null);
                               setActiveArticle({
@@ -1363,11 +1513,17 @@ export const LandingFooter: React.FC = () => {
                                 category: 'GUIDE',
                                 content: (
                                   <div className="space-y-4">
-                                    <h3 className="text-xl font-medium text-[#F3EDE4]">{guide.title}</h3>
+                                    <h3 className="text-xl font-medium text-[#F3EDE4]">
+                                      {guide.title}
+                                    </h3>
                                     {guide.content}
-                                    <p className="mt-6 pt-6 border-t border-[#2e2924]">This is an expanded view of the selected guide. In the full product, this would fetch the complete markdown article for this specific guide topic.</p>
+                                    <p className="mt-6 pt-6 border-t border-[#2e2924]">
+                                      This is an expanded view of the selected guide. In the full
+                                      product, this would fetch the complete markdown article for
+                                      this specific guide topic.
+                                    </p>
                                   </div>
-                                )
+                                ),
                               });
                             }}
                             className="text-[13px] px-4 py-2 rounded-lg bg-[#2e2924] hover:bg-[#3d3730] text-[#F3EDE4] font-medium transition-colors flex items-center gap-2"

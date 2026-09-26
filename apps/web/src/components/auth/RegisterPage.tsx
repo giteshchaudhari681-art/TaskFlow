@@ -63,7 +63,10 @@ const PasswordRequirement: React.FC<{ label: string; met: boolean }> = ({ label,
   );
 };
 
-export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onBackToTaskFlow }) => {
+export const RegisterPage: React.FC<RegisterPageProps> = ({
+  onSwitchToLogin,
+  onBackToTaskFlow,
+}) => {
   const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -115,7 +118,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onB
           Workspace Provisioning
         </p>
         <h2 className="font-display text-3xl font-medium text-[#f3ede4] leading-[1.1] mb-3">
-          Create your<br />operations hub.
+          Create your
+          <br />
+          operations hub.
         </h2>
         <p className="text-sm text-[#9c948a] leading-relaxed mb-8 max-w-[280px]">
           Launch your TaskFlow workspace, invite your team, and organize complex work in one place.

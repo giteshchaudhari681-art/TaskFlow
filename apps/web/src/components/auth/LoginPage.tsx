@@ -123,19 +123,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onBack
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
               className="bg-[#1c1916] border border-[#3a342c] rounded-xl p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-[1.015] group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
             >
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-4 h-4 text-[#c45c26]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#b7afa5]">
-                AI Insight
-              </span>
-            </div>
-            <p className="text-sm font-medium text-[#f3ede4] mb-1">3 tasks at risk</p>
-            <p className="text-xs text-[#9c948a] mb-3">
-              These tasks may delay your project by 2-4 days.
-            </p>
-            <div className="flex items-center text-xs text-[#E85D22] font-medium gap-1">
-              Review now <ArrowRight className="w-3 h-3" />
-            </div>
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="w-4 h-4 text-[#c45c26]" />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#b7afa5]">
+                  AI Insight
+                </span>
+              </div>
+              <p className="text-sm font-medium text-[#f3ede4] mb-1">3 tasks at risk</p>
+              <p className="text-xs text-[#9c948a] mb-3">
+                These tasks may delay your project by 2-4 days.
+              </p>
+              <div className="flex items-center text-xs text-[#E85D22] font-medium gap-1">
+                Review now <ArrowRight className="w-3 h-3" />
+              </div>
             </motion.div>
           </motion.div>
         </div>

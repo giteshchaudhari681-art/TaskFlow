@@ -1,8 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Workflow, Menu, X, ChevronDown, Building2, Rocket,
-  Code2, Box, ShieldCheck, History, BrainCircuit, Network, Users, MessageSquare, Cpu, Handshake, Plug, Globe, Briefcase, Lightbulb, Send,
-  BarChart2, Blocks, LayoutDashboard, Megaphone, Palette
+  Workflow,
+  Menu,
+  X,
+  ChevronDown,
+  Building2,
+  Rocket,
+  Code2,
+  Box,
+  ShieldCheck,
+  History,
+  BrainCircuit,
+  Network,
+  Users,
+  MessageSquare,
+  Cpu,
+  Handshake,
+  Plug,
+  Globe,
+  Briefcase,
+  Lightbulb,
+  Send,
+  BarChart2,
+  Blocks,
+  LayoutDashboard,
+  Megaphone,
+  Palette,
 } from 'lucide-react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 
@@ -11,7 +34,8 @@ interface LandingNavbarProps {
   onGetStarted: () => void;
 }
 
-type DropdownId = 'customers' | 'enterprise' | 'platform' | 'usecases' | 'partners' | 'solutions' | null;
+type DropdownId =
+  'customers' | 'enterprise' | 'platform' | 'usecases' | 'partners' | 'solutions' | null;
 
 const MENUS = {
   customers: {
@@ -19,33 +43,69 @@ const MENUS = {
     desc: 'Built for teams that need a clearer picture of delivery.',
     cta: 'See how teams use TaskFlow →',
     items: [
-      { icon: Code2, label: 'Engineering Teams', desc: 'Track dependencies, blockers, technical work and delivery risk.' },
-      { icon: Box, label: 'Product Teams', desc: 'Connect projects, milestones and execution progress.' },
-      { icon: Rocket, label: 'Startup Teams', desc: 'Keep a small team aligned without operational overhead.' },
-      { icon: Building2, label: 'Growing Organizations', desc: 'Manage permissions, workspaces and delivery at scale.' },
-    ]
+      {
+        icon: Code2,
+        label: 'Engineering Teams',
+        desc: 'Track dependencies, blockers, technical work and delivery risk.',
+      },
+      {
+        icon: Box,
+        label: 'Product Teams',
+        desc: 'Connect projects, milestones and execution progress.',
+      },
+      {
+        icon: Rocket,
+        label: 'Startup Teams',
+        desc: 'Keep a small team aligned without operational overhead.',
+      },
+      {
+        icon: Building2,
+        label: 'Growing Organizations',
+        desc: 'Manage permissions, workspaces and delivery at scale.',
+      },
+    ],
   },
   enterprise: {
     title: 'ENTERPRISE',
     desc: 'Operational control for teams that cannot afford blind spots.',
     cta: 'Explore Enterprise →',
     items: [
-      { icon: ShieldCheck, label: 'Enterprise Security', desc: 'Role-based access, tenant isolation and secure authentication.' },
-      { icon: History, label: 'Governance & Audit', desc: 'Track important actions and security events.' },
-      { icon: BrainCircuit, label: 'AI Governance', desc: 'Human-approved AI actions and deterministic safety boundaries.' },
+      {
+        icon: ShieldCheck,
+        label: 'Enterprise Security',
+        desc: 'Role-based access, tenant isolation and secure authentication.',
+      },
+      {
+        icon: History,
+        label: 'Governance & Audit',
+        desc: 'Track important actions and security events.',
+      },
+      {
+        icon: BrainCircuit,
+        label: 'AI Governance',
+        desc: 'Human-approved AI actions and deterministic safety boundaries.',
+      },
       { icon: Network, label: 'Scale', desc: 'Architecture designed for larger organizations.' },
-    ]
+    ],
   },
   platform: {
     title: 'PLATFORM',
     desc: 'The technical foundation of TaskFlow.',
     cta: 'Explore Platform →',
     items: [
-      { icon: BarChart2, label: 'Data & Analytics', desc: 'Real-time velocity and execution metrics.' },
+      {
+        icon: BarChart2,
+        label: 'Data & Analytics',
+        desc: 'Real-time velocity and execution metrics.',
+      },
       { icon: BrainCircuit, label: 'AI Engine', desc: 'Predictive risk and task intelligence.' },
-      { icon: ShieldCheck, label: 'Security & Compliance', desc: 'Enterprise-grade data protection.' },
+      {
+        icon: ShieldCheck,
+        label: 'Security & Compliance',
+        desc: 'Enterprise-grade data protection.',
+      },
       { icon: Blocks, label: 'Extensibility', desc: 'Webhooks, custom apps, and open APIs.' },
-    ]
+    ],
   },
   usecases: {
     title: 'USE CASES',
@@ -53,10 +113,22 @@ const MENUS = {
     cta: 'See all Use Cases →',
     items: [
       { icon: Code2, label: 'Agile Engineering', desc: 'Sprint planning and dependency tracking.' },
-      { icon: LayoutDashboard, label: 'Product Management', desc: 'Roadmaps, milestones, and release coordination.' },
-      { icon: Megaphone, label: 'Marketing Teams', desc: 'Campaign execution and cross-functional alignment.' },
-      { icon: Palette, label: 'Creative Agencies', desc: 'Client project delivery and resource management.' },
-    ]
+      {
+        icon: LayoutDashboard,
+        label: 'Product Management',
+        desc: 'Roadmaps, milestones, and release coordination.',
+      },
+      {
+        icon: Megaphone,
+        label: 'Marketing Teams',
+        desc: 'Campaign execution and cross-functional alignment.',
+      },
+      {
+        icon: Palette,
+        label: 'Creative Agencies',
+        desc: 'Client project delivery and resource management.',
+      },
+    ],
   },
   partners: {
     title: 'PARTNERS',
@@ -64,23 +136,47 @@ const MENUS = {
     cta: 'Become a Partner →',
     items: [
       { icon: Cpu, label: 'Technology Partners', desc: 'Build integrations around TaskFlow.' },
-      { icon: Handshake, label: 'Implementation Partners', desc: 'Help organizations adopt TaskFlow.' },
-      { icon: Plug, label: 'Integration Partners', desc: 'Connect TaskFlow with the tools your teams already use.' },
+      {
+        icon: Handshake,
+        label: 'Implementation Partners',
+        desc: 'Help organizations adopt TaskFlow.',
+      },
+      {
+        icon: Plug,
+        label: 'Integration Partners',
+        desc: 'Connect TaskFlow with the tools your teams already use.',
+      },
       { icon: Globe, label: 'Ecosystem', desc: 'Build alongside the TaskFlow platform.' },
-    ]
+    ],
   },
   solutions: {
     title: 'SOLUTIONS',
     desc: 'TaskFlow capabilities tailored to your workflow.',
     cta: 'View all solutions →',
     items: [
-      { icon: Briefcase, label: 'Project Operations', desc: 'Manage projects, tasks and dependencies.' },
-      { icon: BrainCircuit, label: 'AI Project Intelligence', desc: 'Understand risk and delivery health.' },
-      { icon: Lightbulb, label: 'Task Intelligence', desc: 'Get contextual insights for individual tasks.' },
+      {
+        icon: Briefcase,
+        label: 'Project Operations',
+        desc: 'Manage projects, tasks and dependencies.',
+      },
+      {
+        icon: BrainCircuit,
+        label: 'AI Project Intelligence',
+        desc: 'Understand risk and delivery health.',
+      },
+      {
+        icon: Lightbulb,
+        label: 'Task Intelligence',
+        desc: 'Get contextual insights for individual tasks.',
+      },
       { icon: Users, label: 'Team Workflows', desc: 'Coordinate execution across teams.' },
-      { icon: Building2, label: 'Enterprise Operations', desc: 'Security, governance and organizational control.' },
-    ]
-  }
+      {
+        icon: Building2,
+        label: 'Enterprise Operations',
+        desc: 'Security, governance and organizational control.',
+      },
+    ],
+  },
 };
 
 const NAV_ITEMS = [
@@ -93,13 +189,18 @@ const NAV_ITEMS = [
 ] as const;
 
 const menuVariants: Variants = {
-  hidden: { opacity: 0, y: -4, scale: 0.99, transition: { duration: 0.15, ease: "easeIn" } },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.2, ease: "easeOut", staggerChildren: 0.04 } }
+  hidden: { opacity: 0, y: -4, scale: 0.99, transition: { duration: 0.15, ease: 'easeIn' } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.2, ease: 'easeOut', staggerChildren: 0.04 },
+  },
 };
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: -4 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2 } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
 };
 
 export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetStarted }) => {
@@ -172,7 +273,11 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
     >
       <div className="max-w-[1400px] mx-auto px-6 h-[72px] flex items-center justify-between">
         {/* Logo */}
-        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5 group">
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center gap-2.5 group"
+        >
           <span className="w-7 h-7 rounded-[6px] bg-[#E85D22] text-white flex items-center justify-center shadow-[0_2px_8px_rgba(232,93,34,0.3)] transition-transform group-hover:scale-105">
             <Workflow className="w-[15px] h-[15px]" />
           </span>
@@ -182,8 +287,11 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
         </button>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center justify-center gap-1 flex-1 relative" ref={dropdownRef}>
-          {NAV_ITEMS.map((nav) => (
+        <nav
+          className="hidden lg:flex items-center justify-center gap-1 flex-1 relative"
+          ref={dropdownRef}
+        >
+          {NAV_ITEMS.map(nav => (
             <div
               key={nav.id}
               className="relative"
@@ -219,11 +327,13 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
                     <div className="w-[640px] bg-[rgba(15,15,15,0.96)] backdrop-blur-xl border border-white/5 rounded-[16px] shadow-[0_24px_48px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.02)] overflow-hidden">
                       <div className="p-6">
                         <motion.div variants={itemVariants} className="mb-4">
-                          <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E85D22] mb-1.5">{MENUS[nav.id].title}</h4>
+                          <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#E85D22] mb-1.5">
+                            {MENUS[nav.id].title}
+                          </h4>
                           <p className="text-[13px] text-[#A3A3A3]">{MENUS[nav.id].desc}</p>
                         </motion.div>
                         <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                          {MENUS[nav.id].items.map((item) => (
+                          {MENUS[nav.id].items.map(item => (
                             <motion.div variants={itemVariants} key={item.label}>
                               <button
                                 type="button"
@@ -287,7 +397,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
         className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'max-h-[85vh] overflow-y-auto border-t border-[#262626]' : 'max-h-0'} bg-[#0D0D0D]/98 backdrop-blur-xl`}
       >
         <div className="px-5 py-4 space-y-4">
-          {NAV_ITEMS.map((nav) => (
+          {NAV_ITEMS.map(nav => (
             <div key={nav.id}>
               <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#555555] px-3 pb-1.5">
                 {MENUS[nav.id].title}
@@ -365,7 +475,9 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ onSignIn, onGetSta
                 <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] mx-auto flex items-center justify-center mb-4">
                   <MessageSquare className="w-8 h-8 text-[#E85D22]" />
                 </div>
-                <h3 className="text-2xl font-display font-medium text-[#F3EDE4]">Contact TaskFlow</h3>
+                <h3 className="text-2xl font-display font-medium text-[#F3EDE4]">
+                  Contact TaskFlow
+                </h3>
                 <p className="text-[#A3A3A3] text-sm mt-1">Get in touch with our team.</p>
               </div>
 
