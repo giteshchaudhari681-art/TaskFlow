@@ -32,6 +32,7 @@ import { TaskDependenciesSection } from '../dependencies/TaskDependenciesSection
 import { TaskCommentsSection } from '../collaboration/TaskCommentsSection';
 import { TaskActivityTimeline } from '../collaboration/TaskActivityTimeline';
 import { AITaskIntelligence } from './AITaskIntelligence';
+import { Select } from '../ui/Select';
 
 interface TaskDetailDrawerProps {
   organizationId: string;
@@ -383,7 +384,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5">
                   Status
                 </label>
-                <select
+                <Select
                   value={status}
                   onChange={e => setStatus(e.target.value as TaskStatus)}
                   className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent text-sm"
@@ -396,7 +397,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   <option value={TaskStatus.BACKLOG}>Backlog</option>
                   <option value={TaskStatus.BLOCKED}>Blocked</option>
                   <option value={TaskStatus.CANCELLED}>Cancelled</option>
-                </select>
+                </Select>
               </div>
 
               <div>
@@ -404,7 +405,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   <Flag className="w-3.5 h-3.5 text-amber-400" />
                   Priority
                 </label>
-                <select
+                <Select
                   value={priority}
                   onChange={e => setPriority(e.target.value as TaskPriority)}
                   className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent text-sm"
@@ -414,7 +415,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   <option value={TaskPriority.MEDIUM}>Medium</option>
                   <option value={TaskPriority.HIGH}>High</option>
                   <option value={TaskPriority.URGENT}>Urgent</option>
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -425,7 +426,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                   <User className="w-3.5 h-3.5 text-taskflow-accent" />
                   Assignee
                 </label>
-                <select
+                <Select
                   value={assigneeId}
                   onChange={e => setAssigneeId(e.target.value)}
                   className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-md text-white focus:outline-none focus:border-taskflow-accent text-sm"
@@ -436,7 +437,7 @@ export const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                       {m.user.name} ({m.role})
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div>

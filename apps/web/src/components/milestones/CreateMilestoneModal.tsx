@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, AlertCircle, Loader2, Calendar, AlignLeft } from 'lucide-react';
 import { MilestoneStatus, CreateMilestonePayload } from '@taskflow/shared';
+import { Select } from '../ui/Select';
 
 interface CreateMilestoneModalProps {
   onClose: () => void;
@@ -159,7 +160,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
             <label className="text-xs font-semibold text-taskflow-text" htmlFor="ms-status">
               Status
             </label>
-            <select
+            <Select
               id="ms-status"
               value={status}
               onChange={e => setStatus(e.target.value as MilestoneStatus)}
@@ -168,7 +169,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
               <option value={MilestoneStatus.OPEN}>Open</option>
               <option value={MilestoneStatus.COMPLETED}>Completed</option>
               <option value={MilestoneStatus.CLOSED}>Closed</option>
-            </select>
+            </Select>
           </div>
 
           {/* Actions */}

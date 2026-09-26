@@ -9,6 +9,7 @@ import {
   TaskPriority,
 } from '@taskflow/shared';
 import { dependencyApi, taskApi } from '../../lib/api';
+import { Select } from '../ui/Select';
 
 interface TaskDependenciesSectionProps {
   organizationId: string;
@@ -306,7 +307,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
               <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-1">
                 Relationship
               </label>
-              <select
+              <Select
                 value={depType}
                 onChange={e => setDepType(e.target.value as DependencyType)}
                 className="w-full px-2.5 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-taskflow-accent"
@@ -314,7 +315,7 @@ export const TaskDependenciesSection: React.FC<TaskDependenciesSectionProps> = (
                 <option value={DependencyType.BLOCKS}>Blocks</option>
                 <option value={DependencyType.BLOCKED_BY}>Blocked By</option>
                 <option value={DependencyType.RELATES_TO}>Relates To</option>
-              </select>
+              </Select>
             </div>
 
             <div className="sm:col-span-2">

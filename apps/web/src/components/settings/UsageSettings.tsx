@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { usageApi } from '../../lib/api';
 import { OrganizationUsage, Plan, UserRole } from '@taskflow/shared';
+import { Select } from '../ui/Select';
 
 export const UsageSettings: React.FC = () => {
   const { activeOrg } = useAuth();
@@ -258,7 +259,7 @@ export const UsageSettings: React.FC = () => {
               {/* Owner internal plan changer */}
               {isOwner && (
                 <div className="flex items-center space-x-2 pt-2 md:pt-0">
-                  <select
+                  <Select
                     value={selectedPlan}
                     onChange={e => setSelectedPlan(e.target.value as Plan)}
                     className="bg-taskflow-bg border border-taskflow-border text-white text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-taskflow-accent"
@@ -267,7 +268,7 @@ export const UsageSettings: React.FC = () => {
                     <option value={Plan.FREE}>FREE</option>
                     <option value={Plan.PRO}>PRO</option>
                     <option value={Plan.BUSINESS}>BUSINESS</option>
-                  </select>
+                  </Select>
                   <button
                     type="button"
                     onClick={handleUpdatePlan}

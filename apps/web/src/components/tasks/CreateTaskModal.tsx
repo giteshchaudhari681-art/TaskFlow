@@ -3,6 +3,7 @@ import { X, CheckCircle2, AlertCircle, Loader2, Calendar, User, Flag } from 'luc
 import { TaskStatus, TaskPriority, ProjectMemberDetail } from '@taskflow/shared';
 import { createTaskSchema } from '@taskflow/validation';
 import { taskApi } from '../../lib/api';
+import { Select } from '../ui/Select';
 
 interface CreateTaskModalProps {
   organizationId: string;
@@ -159,7 +160,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <label className="block text-xs font-medium text-taskflow-text-dim uppercase tracking-wider mb-1.5">
                 Status
               </label>
-              <select
+              <Select
                 value={status}
                 onChange={e => setStatus(e.target.value as TaskStatus)}
                 className="w-full px-3.5 py-2.5 bg-taskflow-surface border border-taskflow-border rounded-md text-white focus:outline-none focus:border-taskflow-accent focus:ring-1 focus:ring-taskflow-accent text-sm cursor-pointer"
@@ -171,7 +172,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <option value={TaskStatus.BACKLOG}>Backlog</option>
                 <option value={TaskStatus.BLOCKED}>Blocked</option>
                 <option value={TaskStatus.CANCELLED}>Cancelled</option>
-              </select>
+              </Select>
             </div>
 
             <div>
@@ -179,7 +180,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <Flag className="w-3.5 h-3.5 text-amber-400" />
                 Priority
               </label>
-              <select
+              <Select
                 value={priority}
                 onChange={e => setPriority(e.target.value as TaskPriority)}
                 className="w-full px-3.5 py-2.5 bg-taskflow-surface border border-taskflow-border rounded-md text-white focus:outline-none focus:border-taskflow-accent focus:ring-1 focus:ring-taskflow-accent text-sm cursor-pointer"
@@ -188,7 +189,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <option value={TaskPriority.MEDIUM}>Medium</option>
                 <option value={TaskPriority.HIGH}>High</option>
                 <option value={TaskPriority.URGENT}>Urgent</option>
-              </select>
+              </Select>
             </div>
           </div>
 
@@ -199,7 +200,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 <User className="w-3.5 h-3.5 text-taskflow-accent" />
                 Assignee
               </label>
-              <select
+              <Select
                 value={assigneeId}
                 onChange={e => setAssigneeId(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-taskflow-surface border border-taskflow-border rounded-md text-white focus:outline-none focus:border-taskflow-accent focus:ring-1 focus:ring-taskflow-accent text-sm cursor-pointer"
@@ -210,7 +211,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                     {m.user.name} ({m.role})
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>

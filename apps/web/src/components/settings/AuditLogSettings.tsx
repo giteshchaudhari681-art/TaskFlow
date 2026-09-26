@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { auditApi, projectApi } from '../../lib/api';
 import { AuditEvent, AuditAction, AuditSource, ActorType, ProjectListItem } from '@taskflow/shared';
+import { Select } from '../ui/Select';
 
 export const AuditLogSettings: React.FC = () => {
   const { activeOrg } = useAuth();
@@ -248,7 +249,7 @@ export const AuditLogSettings: React.FC = () => {
             <label className="block text-[11px] font-medium text-taskflow-muted mb-1">
               Action Type
             </label>
-            <select
+            <Select
               value={selectedAction}
               onChange={e => {
                 setSelectedAction(e.target.value);
@@ -287,7 +288,7 @@ export const AuditLogSettings: React.FC = () => {
                 <option value={AuditAction.PROJECT_UPDATED}>Project Updated</option>
                 <option value={AuditAction.PROJECT_ARCHIVED}>Project Archived</option>
               </optgroup>
-            </select>
+            </Select>
           </div>
 
           {/* Project Filter */}
@@ -295,7 +296,7 @@ export const AuditLogSettings: React.FC = () => {
             <label className="block text-[11px] font-medium text-taskflow-muted mb-1">
               Project
             </label>
-            <select
+            <Select
               value={selectedProjectId}
               onChange={e => {
                 setSelectedProjectId(e.target.value);
@@ -309,7 +310,7 @@ export const AuditLogSettings: React.FC = () => {
                   {p.name} ({p.key})
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Date From */}

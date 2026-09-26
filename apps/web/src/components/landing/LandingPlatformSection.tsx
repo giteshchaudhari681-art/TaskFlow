@@ -234,7 +234,7 @@ export const LandingPlatformSection: React.FC = () => {
           >
             <motion.div
               style={{ y: yParallax, rotateX, rotateY }}
-              className="rounded-[20px] border border-[#222222] bg-[#0F0F0F] shadow-[0_40px_100px_rgba(0,0,0,0.9),_inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden preserve-3d"
+              className="rounded-[20px] border border-[#222222] bg-[#0F0F0F] shadow-[0_20px_50px_rgba(0,0,0,0.6),_inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden preserve-3d"
             >
               {/* Panel top bar */}
               <div className="flex items-center justify-between px-6 py-4 bg-[#161616] border-b border-[#1E1E1E]">
@@ -411,7 +411,7 @@ export const LandingPlatformSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="p-6 bg-[#111111] border border-[#1E1E1E] rounded-[16px] hover:border-[#2A2A2A] transition-all group cursor-pointer"
+              className="p-6 bg-[#111111] border border-[#1E1E1E] rounded-[16px] hover:border-[#2A2A2A] transition-all duration-300 group cursor-pointer hover:-translate-y-1 hover:shadow-2xl hover:bg-[#151515]"
             >
               <div
                 className="w-10 h-10 rounded-[10px] flex items-center justify-center mb-5 border"

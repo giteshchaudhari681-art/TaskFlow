@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Select } from '../ui/Select';
+
 import {
   X,
   Calendar,
@@ -265,7 +267,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
               Status
             </label>
             {isEditing ? (
-              <select
+              <Select
                 value={status}
                 onChange={e => setStatus(e.target.value as MilestoneStatus)}
                 className="w-full px-3 py-1.5 rounded-md bg-taskflow-bg border border-taskflow-border focus:border-taskflow-accent focus:outline-none text-xs text-white cursor-pointer transition-all"
@@ -273,7 +275,7 @@ export const MilestoneDetailPanel: React.FC<MilestoneDetailPanelProps> = ({
                 <option value={MilestoneStatus.OPEN}>Open</option>
                 <option value={MilestoneStatus.COMPLETED}>Completed</option>
                 <option value={MilestoneStatus.CLOSED}>Closed</option>
-              </select>
+              </Select>
             ) : (
               <span className="text-xs font-semibold text-white">{milestone.status}</span>
             )}

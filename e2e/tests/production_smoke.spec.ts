@@ -59,7 +59,7 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
 
     // 3. Organization & Workspace Access
     await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('select')).toContainText(smokeOrgName);
+    await expect(page.locator(`text=${smokeOrgName}`).first()).toBeVisible();
 
     // 4. Project Creation
     const projectsPage = new ProjectsPage(page);
@@ -141,7 +141,7 @@ test.describe('PR29: Production Smoke & Release Engineering Journey', () => {
     // Re-login with the same account
     await loginPage.login(smokeEmail, TEST_PASSWORD);
     await expect(page.locator('#nav-dashboard')).toBeVisible({ timeout: 20000 });
-    await expect(page.locator('select')).toContainText(smokeOrgName);
+    await expect(page.locator(`text=${smokeOrgName}`).first()).toBeVisible();
 
     // 11. Verify Persistent State (Project and Task survive session lifecycle)
     await projectsPage.goto();

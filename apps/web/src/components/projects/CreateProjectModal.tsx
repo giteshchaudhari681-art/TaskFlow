@@ -3,6 +3,7 @@ import { X, Sparkles, AlertCircle, RefreshCw, Layers } from 'lucide-react';
 import { ProjectStatus } from '@taskflow/shared';
 import { createProjectSchema } from '@taskflow/validation';
 import { projectApi } from '../../lib/api';
+import { Select } from '../ui/Select';
 
 interface CreateProjectModalProps {
   organizationId: string;
@@ -180,7 +181,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-taskflow-text">Initial Status</label>
-              <select
+              <Select
                 value={status}
                 onChange={e => setStatus(e.target.value as ProjectStatus)}
                 className="w-full px-3.5 py-2 rounded-md bg-taskflow-bg/80 border border-taskflow-border focus:border-taskflow-accent focus:outline-none focus:ring-1 focus:ring-taskflow-accent text-sm text-white transition-all cursor-pointer"
@@ -189,7 +190,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 <option value={ProjectStatus.ACTIVE}>Active</option>
                 <option value={ProjectStatus.PAUSED}>Paused</option>
                 <option value={ProjectStatus.COMPLETED}>Completed</option>
-              </select>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
