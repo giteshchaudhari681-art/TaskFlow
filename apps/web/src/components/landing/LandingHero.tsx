@@ -100,7 +100,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onGetStarted }) => {
             initial="hidden"
             animate="visible"
             variants={staggerVariants}
-            className="font-display text-[clamp(4rem,5.5vw,5.5rem)] font-medium tracking-tight leading-[1.02] mb-6 text-[#F3EDE4]"
+            className="font-display text-6xl md:text-[5.5vw] xl:text-[5.5rem] font-medium tracking-tight leading-[1.02] mb-6 text-[#F3EDE4]"
           >
             Serious work deserves a <span className="text-[#E85D22]">calm</span> operating picture.
           </motion.h1>

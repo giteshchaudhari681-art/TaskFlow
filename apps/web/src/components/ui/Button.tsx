@@ -27,7 +27,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c45c26]/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none';
+      'inline-flex items-center justify-center font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c45c26]/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none active:scale-[0.985] active:translate-y-0';
 
     const sizeStyles = {
       sm: 'px-2.5 py-1.5 text-xs rounded-[4px] gap-1.5',
@@ -38,7 +38,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        'bg-[#c45c26] hover:bg-[#a84d20] text-[#fff8f2] border border-[#a84d20] font-semibold',
+        'bg-[#E85D22] hover:bg-[#F0703B] text-white border border-[#F0703B] font-semibold hover:-translate-y-px hover:shadow-[0_6px_20px_rgba(232,93,34,0.35)]',
       secondary: 'bg-[#2a2621] text-[#f3ede4] hover:bg-[#322d27] border border-[#3a342c]',
       glass:
         'bg-[#211e1a] text-[#e8e0d6] hover:text-[#f3ede4] border border-[#3a342c] hover:border-[#4a4339]',

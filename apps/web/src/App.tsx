@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
+import { motion, useMotionTemplate, useMotionValue, AnimatePresence } from 'framer-motion';
 import {
   Layers,
   Workflow,
@@ -13,7 +13,6 @@ import {
   X,
   ArrowRight,
   Users,
-  RefreshCw,
   AlertCircle,
   CheckCircle2,
   Gauge,
@@ -32,6 +31,7 @@ import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { ProjectSwitcher } from './components/navigation/ProjectSwitcher';
 import { getPlatformCommandKey } from './components/command/commandRegistry';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { CinematicLoader } from './components/common/CinematicLoader';
 import { LandingPage } from './components/landing/LandingPage';
 const MainApp: React.FC = () => {
   const { user, activeOrg, organizations, setActiveOrg, isAuthenticated, isLoading, logout } =
@@ -48,6 +48,7 @@ const MainApp: React.FC = () => {
   const [health, setHealth] = useState<HealthCheckData | null>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
   const [healthError, setHealthError] = useState<string | null>(null);
+  const [isLoaderDone, setIsLoaderDone] = useState(false);
 
   const fetchHealth = async () => {
     setHealthLoading(true);
@@ -119,28 +120,7 @@ const MainApp: React.FC = () => {
         ? 'healthy'
         : 'error';
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#141210] flex items-center justify-center">
-        <div className="flex flex-col items-start gap-3">
-          <span className="font-display text-2xl text-[#f3ede4]">TaskFlow</span>
-          <div className="flex items-center gap-2 text-sm text-[#9c948a]">
-            <RefreshCw className="w-4 h-4 animate-spin text-[#c45c26]" />
-            <span>Restoring session</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated && authView === 'landing') {
-    return (
-      <LandingPage
-        onSignIn={() => setAuthView('login')}
-        onGetStarted={() => setAuthView('register')}
-      />
-    );
-  }
+  // Cinematic Loader state is now handled in the main return
 
   const navItems = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard, view: 'dashboard' as const },
@@ -312,212 +292,238 @@ const MainApp: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#141210] text-[#f3ede4] flex selection:bg-[#c45c26]/30 overflow-x-hidden">
-      {isAuthenticated && (
-        <aside className="hidden lg:flex w-[232px] shrink-0 border-r border-[#2e2924] bg-[#161310] flex-col sticky top-0 h-screen">
-          <SidebarNav />
-        </aside>
-      )}
+    <>
+      <AnimatePresence>
+        {!isLoaderDone && (
+          <CinematicLoader isLoading={isLoading} onComplete={() => setIsLoaderDone(true)} />
+        )}
+      </AnimatePresence>
+      {isLoaderDone && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="min-h-screen bg-[#070707] text-[#F5F5F5] flex selection:bg-[#FF6A21]/30 overflow-x-hidden"
+        >
+          {isAuthenticated && (
+            <aside className="hidden lg:flex w-[232px] shrink-0 border-r border-[#2e2924] bg-[#161310] flex-col sticky top-0 h-screen">
+              <SidebarNav />
+            </aside>
+          )}
 
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-50 bg-[#141210]/95 border-b border-[#2e2924]">
-          <div className="h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              {!isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => setAuthView('landing')}
-                  className="flex items-center gap-2"
-                >
-                  <span className="w-7 h-7 rounded-[4px] bg-[#c45c26] text-white flex items-center justify-center">
-                    <Workflow className="w-3.5 h-3.5" />
-                  </span>
-                  <span className="font-display text-lg">TaskFlow</span>
-                </button>
-              )}
-              {isAuthenticated && activeOrg && (
-                <div className="hidden sm:block min-w-0">
-                  <ProjectSwitcher
+          <div className="flex-1 min-w-0 flex flex-col">
+            {((!isAuthenticated && authView === 'landing') || isAuthenticated) && (
+              <header className="sticky top-0 z-50 bg-[#141210]/95 border-b border-[#2e2924]">
+                <div className="h-14 px-4 sm:px-6 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {!isAuthenticated && (
+                      <button
+                        type="button"
+                        onClick={() => setAuthView('landing')}
+                        className="flex items-center gap-2"
+                      >
+                        <span className="w-7 h-7 rounded-[4px] bg-[#c45c26] text-white flex items-center justify-center">
+                          <Workflow className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="font-display text-lg">TaskFlow</span>
+                      </button>
+                    )}
+                    {isAuthenticated && activeOrg && (
+                      <div className="hidden sm:block min-w-0">
+                        <ProjectSwitcher
+                          organizationId={activeOrg.organizationId}
+                          selectedProjectId={selectedProjectId}
+                          onSelectProject={id => {
+                            setSelectedProjectId(id);
+                            setDeepLinkTaskId(null);
+                            setCurrentView('project-details');
+                          }}
+                          onViewAllProjects={() => {
+                            setSelectedProjectId(null);
+                            setCurrentView('projects');
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {isAuthenticated && user ? (
+                      <>
+                        {activeOrg && (
+                          <button
+                            type="button"
+                            id="global-search-trigger"
+                            onClick={() => setIsSearchOpen(true)}
+                            className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#9c948a] hover:text-[#f3ede4] hover:bg-[#1c1916] rounded-[4px] transition-colors"
+                            title={`Search (${platformKey}K)`}
+                          >
+                            <Search className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Search</span>
+                            <kbd className="hidden md:inline px-1 py-0.5 text-[10px] font-mono text-[#7d756c] border border-[#3a342c] rounded-[3px]">
+                              {platformKey}K
+                            </kbd>
+                          </button>
+                        )}
+                        <NotificationCenter onOpenTask={handleOpenTask} />
+                        <button
+                          type="button"
+                          id="user-avatar-btn"
+                          onClick={() => openSettings('profile')}
+                          title="Profile settings"
+                          className="w-7 h-7 rounded-[4px] bg-[#c45c26] flex items-center justify-center text-[11px] font-semibold text-white overflow-hidden"
+                        >
+                          {user.avatarUrl ? (
+                            <img
+                              src={user.avatarUrl}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            user.name.charAt(0).toUpperCase()
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openSettings('profile')}
+                          title="Settings"
+                          className="p-1.5 text-[#9c948a] hover:text-[#f3ede4] rounded-[4px] hover:bg-[#1c1916]"
+                        >
+                          <Settings className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          id="mobile-menu-toggle"
+                          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                          aria-label="Toggle Navigation"
+                          className="lg:hidden p-1.5 text-[#9c948a] hover:text-[#f3ede4]"
+                        >
+                          {isMobileMenuOpen ? (
+                            <X className="w-4 h-4" />
+                          ) : (
+                            <Menu className="w-4 h-4" />
+                          )}
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+
+                {isMobileMenuOpen && isAuthenticated && (
+                  <div className="lg:hidden border-t border-[#2e2924] bg-[#161310] max-h-[80vh] overflow-y-auto">
+                    <SidebarNav mobile />
+                  </div>
+                )}
+              </header>
+            )}
+
+            <main className="flex-1 w-full">
+              {!isAuthenticated ? (
+                authView === 'landing' ? (
+                  <LandingPage
+                    onSignIn={() => setAuthView('login')}
+                    onGetStarted={() => setAuthView('register')}
+                  />
+                ) : authView === 'login' ? (
+                  <LoginPage
+                    onSwitchToRegister={() => setAuthView('register')}
+                    onBackToTaskFlow={() => setAuthView('landing')}
+                  />
+                ) : (
+                  <RegisterPage
+                    onSwitchToLogin={() => setAuthView('login')}
+                    onBackToTaskFlow={() => setAuthView('landing')}
+                  />
+                )
+              ) : currentView === 'my-work' ? (
+                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+                  <MyWorkView onOpenTask={handleOpenTask} />
+                </div>
+              ) : currentView === 'settings' ? (
+                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+                  <SettingsLayout
+                    onBackToDashboard={() => setCurrentView('dashboard')}
+                    initialTab={settingsTab}
+                  />
+                </div>
+              ) : currentView === 'projects' && activeOrg ? (
+                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
+                  <ProjectsList
                     organizationId={activeOrg.organizationId}
-                    selectedProjectId={selectedProjectId}
+                    organizationName={activeOrg.organizationName}
                     onSelectProject={id => {
                       setSelectedProjectId(id);
                       setDeepLinkTaskId(null);
                       setCurrentView('project-details');
                     }}
-                    onViewAllProjects={() => {
+                  />
+                </div>
+              ) : currentView === 'project-details' && activeOrg && selectedProjectId ? (
+                <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1280px]">
+                  <ProjectDetailShell
+                    organizationId={activeOrg.organizationId}
+                    projectId={selectedProjectId}
+                    initialTaskId={deepLinkTaskId}
+                    onBack={() => {
                       setSelectedProjectId(null);
+                      setDeepLinkTaskId(null);
                       setCurrentView('projects');
                     }}
                   />
                 </div>
+              ) : isAuthenticated ? (
+                <DashboardView
+                  user={user}
+                  activeOrg={activeOrg}
+                  organizations={organizations}
+                  health={health}
+                  healthLoading={healthLoading}
+                  healthError={healthError}
+                  onRefreshHealth={fetchHealth}
+                  onGoToProjects={() => setCurrentView('projects')}
+                  onGoToMyWork={() => {
+                    setDeepLinkTaskId(null);
+                    setCurrentView('my-work');
+                  }}
+                  onOpenSettings={openSettings}
+                  onGoToSearch={() => setIsSearchOpen(true)}
+                />
+              ) : (
+                <PreAuthLanding
+                  onLogin={() => setAuthView('login')}
+                  onRegister={() => setAuthView('register')}
+                />
               )}
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              {isAuthenticated && user ? (
-                <>
-                  {activeOrg && (
-                    <button
-                      type="button"
-                      id="global-search-trigger"
-                      onClick={() => setIsSearchOpen(true)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#9c948a] hover:text-[#f3ede4] hover:bg-[#1c1916] rounded-[4px] transition-colors"
-                      title={`Search (${platformKey}K)`}
-                    >
-                      <Search className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Search</span>
-                      <kbd className="hidden md:inline px-1 py-0.5 text-[10px] font-mono text-[#7d756c] border border-[#3a342c] rounded-[3px]">
-                        {platformKey}K
-                      </kbd>
-                    </button>
-                  )}
-                  <NotificationCenter onOpenTask={handleOpenTask} />
-                  <button
-                    type="button"
-                    id="user-avatar-btn"
-                    onClick={() => openSettings('profile')}
-                    title="Profile settings"
-                    className="w-7 h-7 rounded-[4px] bg-[#c45c26] flex items-center justify-center text-[11px] font-semibold text-white overflow-hidden"
-                  >
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      user.name.charAt(0).toUpperCase()
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openSettings('profile')}
-                    title="Settings"
-                    className="p-1.5 text-[#9c948a] hover:text-[#f3ede4] rounded-[4px] hover:bg-[#1c1916]"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    id="mobile-menu-toggle"
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    aria-label="Toggle Navigation"
-                    className="lg:hidden p-1.5 text-[#9c948a] hover:text-[#f3ede4]"
-                  >
-                    {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-                  </button>
-                </>
-              ) : null}
-            </div>
+            </main>
           </div>
 
-          {isMobileMenuOpen && isAuthenticated && (
-            <div className="lg:hidden border-t border-[#2e2924] bg-[#161310] max-h-[80vh] overflow-y-auto">
-              <SidebarNav mobile />
-            </div>
-          )}
-        </header>
-
-        <main className="flex-1 w-full">
-          {!isAuthenticated ? (
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-              <button
-                type="button"
-                onClick={() => setAuthView('landing')}
-                className="mb-6 text-xs font-medium text-[#9c948a] hover:text-[#f3ede4]"
-              >
-                ← Back to TaskFlow
-              </button>
-              {authView === 'login' ? (
-                <LoginPage onSwitchToRegister={() => setAuthView('register')} />
-              ) : (
-                <RegisterPage onSwitchToLogin={() => setAuthView('login')} />
-              )}
-            </div>
-          ) : currentView === 'my-work' ? (
-            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
-              <MyWorkView onOpenTask={handleOpenTask} />
-            </div>
-          ) : currentView === 'settings' ? (
-            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
-              <SettingsLayout
-                onBackToDashboard={() => setCurrentView('dashboard')}
-                initialTab={settingsTab}
-              />
-            </div>
-          ) : currentView === 'projects' && activeOrg ? (
-            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1200px]">
-              <ProjectsList
-                organizationId={activeOrg.organizationId}
-                organizationName={activeOrg.organizationName}
-                onSelectProject={id => {
-                  setSelectedProjectId(id);
-                  setDeepLinkTaskId(null);
-                  setCurrentView('project-details');
-                }}
-              />
-            </div>
-          ) : currentView === 'project-details' && activeOrg && selectedProjectId ? (
-            <div className="px-4 sm:px-8 lg:px-10 py-8 max-w-[1280px]">
-              <ProjectDetailShell
-                organizationId={activeOrg.organizationId}
-                projectId={selectedProjectId}
-                initialTaskId={deepLinkTaskId}
-                onBack={() => {
-                  setSelectedProjectId(null);
-                  setDeepLinkTaskId(null);
-                  setCurrentView('projects');
-                }}
-              />
-            </div>
-          ) : isAuthenticated ? (
-            <DashboardView
-              user={user}
-              activeOrg={activeOrg}
-              organizations={organizations}
-              health={health}
-              healthLoading={healthLoading}
-              healthError={healthError}
-              onRefreshHealth={fetchHealth}
-              onGoToProjects={() => setCurrentView('projects')}
-              onGoToMyWork={() => {
+          {isAuthenticated && activeOrg && (
+            <GlobalSearchModal
+              isOpen={isSearchOpen}
+              onClose={() => setIsSearchOpen(false)}
+              organizationId={activeOrg.organizationId}
+              onSelectTask={handleOpenTask}
+              onSelectProject={id => {
+                setSelectedProjectId(id);
+                setDeepLinkTaskId(null);
+                setCurrentView('project-details');
+              }}
+              goToDashboard={() => setCurrentView('dashboard')}
+              goToProjects={() => {
+                setSelectedProjectId(null);
+                setCurrentView('projects');
+              }}
+              goToMyWork={() => {
                 setDeepLinkTaskId(null);
                 setCurrentView('my-work');
               }}
-              onOpenSettings={openSettings}
-              onGoToSearch={() => setIsSearchOpen(true)}
-            />
-          ) : (
-            <PreAuthLanding
-              onLogin={() => setAuthView('login')}
-              onRegister={() => setAuthView('register')}
+              openNotifications={() => {}}
+              openSettings={openSettings}
             />
           )}
-        </main>
-      </div>
-
-      {isAuthenticated && activeOrg && (
-        <GlobalSearchModal
-          isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-          organizationId={activeOrg.organizationId}
-          onSelectTask={handleOpenTask}
-          onSelectProject={id => {
-            setSelectedProjectId(id);
-            setDeepLinkTaskId(null);
-            setCurrentView('project-details');
-          }}
-          goToDashboard={() => setCurrentView('dashboard')}
-          goToProjects={() => {
-            setSelectedProjectId(null);
-            setCurrentView('projects');
-          }}
-          goToMyWork={() => {
-            setDeepLinkTaskId(null);
-            setCurrentView('my-work');
-          }}
-          openNotifications={() => {}}
-          openSettings={openSettings}
-        />
+        </motion.div>
       )}
-    </div>
+    </>
   );
 };
 
