@@ -66,7 +66,9 @@ export const Select: React.FC<SelectProps> = ({
             exit={{ opacity: 0, y: placement === 'top' ? 5 : -5, scale: 0.98 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className={`absolute z-[999] left-0 min-w-[140px] w-max max-w-[280px] bg-[#161920] border border-[#222630] rounded-md shadow-xl overflow-hidden shadow-black/50 ${
-              placement === 'top' ? 'bottom-full mb-1.5 origin-bottom' : 'top-full mt-1.5 origin-top'
+              placement === 'top'
+                ? 'bottom-full mb-1.5 origin-bottom'
+                : 'top-full mt-1.5 origin-top'
             }`}
           >
             <div className={`${maxHeight} overflow-y-auto py-1 custom-scrollbar`}>

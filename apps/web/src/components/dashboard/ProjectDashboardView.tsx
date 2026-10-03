@@ -728,7 +728,11 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
               <>
                 {/* SVG Area Chart */}
                 <div className="relative w-full h-44">
-                  <svg className="w-full h-full overflow-visible" viewBox="-10 0 620 160" preserveAspectRatio="none">
+                  <svg
+                    className="w-full h-full overflow-visible"
+                    viewBox="-10 0 620 160"
+                    preserveAspectRatio="none"
+                  >
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#e05638" stopOpacity="0.25" />
