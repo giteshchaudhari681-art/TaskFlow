@@ -17,6 +17,11 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  if (process.env.ENABLE_DEMO_ACCOUNTS !== 'true') {
+    console.log('🌱 Skipping seed: ENABLE_DEMO_ACCOUNTS is not true. Demo seed data is isolated to development.');
+    return;
+  }
+
   console.log('🌱 Starting deterministic TaskFlow development seed...');
 
   // Safe development purge (in reverse dependency order)

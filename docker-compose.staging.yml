@@ -73,6 +73,7 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-https://staging.taskflow.dev}
       SENTRY_DSN: ${SENTRY_DSN:-}
       SENTRY_ENVIRONMENT: staging
+      ENABLE_DEMO_ACCOUNTS: "false"
     ports:
       - '5000:5000'
     depends_on:
