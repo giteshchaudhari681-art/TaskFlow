@@ -8,12 +8,16 @@ export interface SelectProps extends Omit<
 > {
   value?: string | number;
   onChange?: (e: any) => void;
+  placement?: 'top' | 'bottom';
+  maxHeight?: string;
   children: React.ReactNode;
 }
 
 export const Select: React.FC<SelectProps> = ({
   value,
   onChange,
+  placement = 'bottom',
+  maxHeight = 'max-h-60',
   className,
   children,
   ...props
@@ -57,13 +61,17 @@ export const Select: React.FC<SelectProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -5, scale: 0.98 }}
+            initial={{ opacity: 0, y: placement === 'top' ? 5 : -5, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -5, scale: 0.98 }}
+            exit={{ opacity: 0, y: placement === 'top' ? 5 : -5, scale: 0.98 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute z-[999] top-full mt-1.5 left-0 min-w-[140px] w-max max-w-[280px] bg-[#161920] border border-[#222630] rounded-md shadow-xl overflow-hidden shadow-black/50 origin-top"
+            className={`absolute z-[999] left-0 min-w-[140px] w-max max-w-[280px] bg-[#161920] border border-[#222630] rounded-md shadow-xl overflow-hidden shadow-black/50 ${
+              placement === 'top'
+                ? 'bottom-full mb-1.5 origin-bottom'
+                : 'top-full mt-1.5 origin-top'
+            }`}
           >
-            <div className="max-h-60 overflow-y-auto py-1 custom-scrollbar">
+            <div className={`${maxHeight} overflow-y-auto py-1 custom-scrollbar`}>
               {options.map((opt, i) => (
                 <div
                   key={i}

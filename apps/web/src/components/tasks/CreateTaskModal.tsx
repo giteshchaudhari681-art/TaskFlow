@@ -97,9 +97,9 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-taskflow-card border border-taskflow-border rounded-lg shadow-2xl shadow-elevation-1 overflow-hidden">
+      <div className="relative w-full max-w-xl bg-taskflow-card border border-taskflow-border rounded-lg shadow-2xl shadow-elevation-1">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-taskflow-border bg-taskflow-surface/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-taskflow-border bg-taskflow-surface/50 rounded-t-lg">
           <div className="flex items-center gap-3">
             <span className="px-2.5 py-1 text-xs font-mono font-semibold bg-taskflow-accent-subtle text-taskflow-accent border border-taskflow-accent rounded-md">
               {projectKey}
@@ -163,6 +163,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <Select
                 value={status}
                 onChange={e => setStatus(e.target.value as TaskStatus)}
+                maxHeight="max-h-32"
                 className="w-full px-3.5 py-2.5 bg-taskflow-surface border border-taskflow-border rounded-md text-white focus:outline-none focus:border-taskflow-accent focus:ring-1 focus:ring-taskflow-accent text-sm cursor-pointer"
               >
                 <option value={TaskStatus.TODO}>To Do</option>
@@ -183,6 +184,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <Select
                 value={priority}
                 onChange={e => setPriority(e.target.value as TaskPriority)}
+                maxHeight="max-h-32"
                 className="w-full px-3.5 py-2.5 bg-taskflow-surface border border-taskflow-border rounded-md text-white focus:outline-none focus:border-taskflow-accent focus:ring-1 focus:ring-taskflow-accent text-sm cursor-pointer"
               >
                 <option value={TaskPriority.LOW}>Low</option>
@@ -203,6 +205,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               <Select
                 value={assigneeId}
                 onChange={e => setAssigneeId(e.target.value)}
+                maxHeight="max-h-32"
                 className="w-full px-3.5 py-2.5 bg-taskflow-surface border border-taskflow-border rounded-md text-white focus:outline-none focus:border-taskflow-accent focus:ring-1 focus:ring-taskflow-accent text-sm cursor-pointer"
               >
                 <option value="">Unassigned</option>
