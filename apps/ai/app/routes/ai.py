@@ -101,7 +101,7 @@ async def analyze_context(
                     ),
                 ).model_dump(),
             )
-        
+
         logger.warning("AI provider configuration error: %s. Returning mock data.", str(exc))
         return AIAnalysisResponse(
             request_id=request.request_id or str(uuid.uuid4()),
