@@ -88,6 +88,20 @@ async def analyze_context(
     try:
         return await service.analyze(request)
     except AIProviderConfigurationError as exc:
+        if settings.app_env != "development":
+            logger.warning("AI provider configuration error: %s", str(exc))
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content=ErrorResponse(
+                    success=False,
+                    error=ErrorDetail(
+                        code="AI_PROVIDER_NOT_CONFIGURED",
+                        message="AI service is not configured with valid provider credentials.",
+                        request_id=request.request_id,
+                    ),
+                ).model_dump(),
+            )
+        
         logger.warning("AI provider configuration error: %s. Returning mock data.", str(exc))
         return AIAnalysisResponse(
             request_id=request.request_id or str(uuid.uuid4()),
