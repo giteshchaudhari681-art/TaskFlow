@@ -98,31 +98,31 @@ async def analyze_context(
                     title="Configure API Key",
                     description="Set the OPENAI_API_KEY environment variable to enable real AI.",
                     priority=RecommendationPriority.MEDIUM,
-                    category=RecommendationCategory.PLANNING
+                    category=RecommendationCategory.PLANNING,
                 )
             ],
             attention_areas=[
                 AIAttentionArea(
                     title="Missing Configuration",
                     description="The AI service is running in mock mode.",
-                    severity=RecommendationPriority.HIGH
+                    severity=RecommendationPriority.HIGH,
                 )
             ],
             dependency_impact=AIDependencyImpact(
                 has_blocking_dependencies=False,
-                description="No blocking dependencies detected in mock mode."
+                description="No blocking dependencies detected in mock mode.",
             ),
             subtasks=[
                 AIDecomposedSubtask(
                     title="Add API Key to .env",
                     description="Configure the environment for the AI service.",
                     priority=RecommendationPriority.HIGH,
-                    order=1
+                    order=1,
                 )
             ],
             actions=[],
             notes=["This mock data is provided by the fallback handler."],
-            metadata={"mocked": True}
+            metadata={"mocked": True},
         )
     except AIProviderExecutionError as exc:
         logger.error("AI provider execution failed: %s", str(exc))
