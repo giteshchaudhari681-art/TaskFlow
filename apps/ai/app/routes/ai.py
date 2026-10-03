@@ -2,6 +2,7 @@
 
 import hmac
 import logging
+import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, status
@@ -11,8 +12,14 @@ from app.config import Settings, get_settings
 from app.models.requests import AIAnalysisRequest
 from app.models.responses import (
     AIAnalysisResponse,
+    AIAttentionArea,
+    AIDecomposedSubtask,
+    AIDependencyImpact,
+    AIRecommendation,
     ErrorDetail,
     ErrorResponse,
+    RecommendationCategory,
+    RecommendationPriority,
 )
 from app.monitoring import capture_exception
 from app.services.ai_service import AIService
@@ -82,15 +89,6 @@ async def analyze_context(
         return await service.analyze(request)
     except AIProviderConfigurationError as exc:
         logger.warning("AI provider configuration error: %s. Returning mock data.", str(exc))
-        import uuid
-        from app.models.responses import (
-            AIRecommendation,
-            RecommendationPriority,
-            RecommendationCategory,
-            AIAttentionArea,
-            AIDependencyImpact,
-            AIDecomposedSubtask,
-        )
         return AIAnalysisResponse(
             request_id=request.request_id or str(uuid.uuid4()),
             operation=request.operation,
