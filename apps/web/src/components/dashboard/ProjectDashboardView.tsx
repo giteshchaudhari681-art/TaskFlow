@@ -728,7 +728,7 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
               <>
                 {/* SVG Area Chart */}
                 <div className="relative w-full h-44">
-                  <svg className="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
+                  <svg className="w-full h-full overflow-visible" viewBox="-10 0 620 160" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#e05638" stopOpacity="0.25" />
@@ -743,40 +743,40 @@ export const ProjectDashboardView: React.FC<ProjectDashboardViewProps> = ({
 
                     {/* Horizontal Grid lines */}
                     <line
-                      x1="0"
+                      x1="-10"
                       y1="20"
-                      x2="600"
+                      x2="610"
                       y2="20"
                       stroke="rgba(255,255,255,0.04)"
                       strokeDasharray="4 4"
                     />
                     <line
-                      x1="0"
+                      x1="-10"
                       y1="60"
-                      x2="600"
+                      x2="610"
                       y2="60"
                       stroke="rgba(255,255,255,0.04)"
                       strokeDasharray="4 4"
                     />
                     <line
-                      x1="0"
+                      x1="-10"
                       y1="100"
-                      x2="600"
+                      x2="610"
                       y2="100"
                       stroke="rgba(255,255,255,0.04)"
                       strokeDasharray="4 4"
                     />
-                    <line x1="0" y1="140" x2="600" y2="140" stroke="#222630" />
+                    <line x1="-10" y1="140" x2="610" y2="140" stroke="#222630" />
 
                     {/* Dynamic Trend Area Fill */}
                     <path
-                      d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25 L 600 140 L 0 140 Z"
+                      d="M 0 120 C 75 120, 75 95, 150 95 C 225 95, 225 70, 300 70 C 375 70, 375 35, 450 35 C 525 35, 525 25, 600 25 L 600 140 L 0 140 Z"
                       fill="url(#areaGradient)"
                     />
 
                     {/* Curved Trend Line */}
                     <path
-                      d="M 0 120 Q 100 90, 200 100 T 400 40 T 600 25"
+                      d="M 0 120 C 75 120, 75 95, 150 95 C 225 95, 225 70, 300 70 C 375 70, 375 35, 450 35 C 525 35, 525 25, 600 25"
                       fill="none"
                       stroke="url(#lineGradient)"
                       strokeWidth="3.5"

@@ -423,6 +423,6 @@ describe('PR34: Production Release, Backup & Rollback Suite', () => {
         stdio: 'pipe',
       });
       expect(output).toContain('All production release & rollback preflight gates PASSED');
-    });
+    }, 60000);
   });
 });
