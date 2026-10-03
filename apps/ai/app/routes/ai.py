@@ -81,17 +81,50 @@ async def analyze_context(
     try:
         return await service.analyze(request)
     except AIProviderConfigurationError as exc:
-        logger.warning("AI provider configuration error: %s", str(exc))
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content=ErrorResponse(
-                success=False,
-                error=ErrorDetail(
-                    code="AI_PROVIDER_NOT_CONFIGURED",
-                    message="AI service is not configured with valid provider credentials.",
-                    request_id=request.request_id,
-                ),
-            ).model_dump(),
+        logger.warning("AI provider configuration error: %s. Returning mock data.", str(exc))
+        import uuid
+        from app.models.responses import (
+            AIRecommendation,
+            RecommendationPriority,
+            RecommendationCategory,
+            AIAttentionArea,
+            AIDependencyImpact,
+            AIDecomposedSubtask,
+        )
+        return AIAnalysisResponse(
+            request_id=request.request_id or str(uuid.uuid4()),
+            operation=request.operation,
+            summary="[MOCK AI] AI Provider not configured. This is fallback development data.",
+            recommendations=[
+                AIRecommendation(
+                    title="Configure API Key",
+                    description="Set the OPENAI_API_KEY environment variable to enable real AI.",
+                    priority=RecommendationPriority.MEDIUM,
+                    category=RecommendationCategory.PLANNING
+                )
+            ],
+            attention_areas=[
+                AIAttentionArea(
+                    title="Missing Configuration",
+                    description="The AI service is running in mock mode.",
+                    severity=RecommendationPriority.HIGH
+                )
+            ],
+            dependency_impact=AIDependencyImpact(
+                has_blocking_dependencies=False,
+                description="No blocking dependencies detected in mock mode."
+            ),
+            subtasks=[
+                AIDecomposedSubtask(
+                    title="Add API Key to .env",
+                    description="Configure the environment for the AI service.",
+                    priority=RecommendationPriority.HIGH,
+                    order=1
+                )
+            ],
+            actions=[],
+            notes=["This mock data is provided by the fallback handler."],
+            metadata={"mocked": True}
         )
     except AIProviderExecutionError as exc:
         logger.error("AI provider execution failed: %s", str(exc))
