@@ -33,13 +33,16 @@ export const test = base.extend<AuthFixtures>({
     // Fill credentials through real login form
     await page.locator('input[type="email"]').fill(authenticatedUser.email);
     await page.locator('input[type="password"]').fill(authenticatedUser.password);
-    await page.getByRole('button', { name: /sign in to workspace/i }).click();
-
-    // Verify authenticated state is established
-    await page.waitForResponse(
+    // Set up the listener before clicking to avoid missing the response
+    const loginResponsePromise = page.waitForResponse(
       resp => resp.url().includes('/api/v1/auth/login') && resp.status() === 200,
       { timeout: 15000 }
     );
+
+    await page.getByRole('button', { name: /sign in to workspace/i }).click();
+
+    // Verify authenticated state is established
+    await loginResponsePromise;
 
     // Wait until authenticated navigation / hero is visible
     await page.getByRole('button', { name: 'Home' }).waitFor({ state: 'visible', timeout: 15000 });
