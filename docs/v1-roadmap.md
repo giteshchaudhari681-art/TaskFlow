@@ -14,7 +14,7 @@ TaskFlow v1.0 establishes the core, fully-functional, secure, and production-val
 - Security Hardening (Rate limiting, Zod validation, HTTP-only secure cookies)
 - Docker Containerization & Release Artifact Generation
 
-*No further feature development will occur in v1.0. Future work is strictly deferred to v1.1+.*
+_No further feature development will occur in v1.0. Future work is strictly deferred to v1.1+._
 
 ## V1.1 / FUTURE (DEFERRED INENTIONALLY FROM V1.0)
 

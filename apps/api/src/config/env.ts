@@ -39,7 +39,10 @@ export const envSchema = z
     WORKER_SHUTDOWN_GRACE_PERIOD_MS: z.coerce.number().min(1000).default(10000),
     RELEASE_VERSION: z.string().default('1.0.0'),
     GIT_SHA: z.string().optional(),
-    ENABLE_DEMO_ACCOUNTS: z.string().transform((val) => val === 'true').default('false'),
+    ENABLE_DEMO_ACCOUNTS: z
+      .string()
+      .transform(val => val === 'true')
+      .default('false'),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production' || data.NODE_ENV === 'staging') {

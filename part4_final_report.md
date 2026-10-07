@@ -18,7 +18,7 @@
 ## 3. Environment
 
 - **Docker**: EXECUTED — Daemon active natively
-- **Docker Compose**: v5.4.0 
+- **Docker Compose**: v5.4.0
 - **OS**: windows/amd64
 - **Container runtime**: EXECUTED
 
@@ -81,14 +81,14 @@
 - **Audit**: EXECUTED
 - **Usage**: EXECUTED
 
-> *End-to-End Production User Journey successfully executed in 20.8 seconds natively via Playwright against the local staging topology.*
+> _End-to-End Production User Journey successfully executed in 20.8 seconds natively via Playwright against the local staging topology._
 
 ## 11. Failure Injection
 
 - **Database failure**: EXECUTED (Stopped `taskflow-staging-postgres`; API correctly degraded to `503 Service Unavailable` with `status: down`).
 - **AI failure**: EXECUTED (Stopped `taskflow-staging-ai`; API remained `200 OK` for core CRUD operations, fulfilling intentional resilient degradation design).
 - **AI timeout**: EXECUTED
-- **Worker failure**: EXECUTED 
+- **Worker failure**: EXECUTED
 - **Recovery**: EXECUTED (Restarted `taskflow-staging-postgres`; API dynamically recovered healthchecks to `200 OK` within 3 seconds).
 
 ## 12. Backup & Restore
@@ -108,14 +108,14 @@
 
 ## 14. Sentry
 
-- **SDK/configuration**: VERIFIED 
+- **SDK/configuration**: VERIFIED
 - **Live ingestion**: NOT EXECUTED (External DSN not seeded to prevent junk ingestion).
 
 ## 15. Defects
 
-| ID | Severity | Area | Root Cause | Fix | Regression |
-|---|---|---|---|---|---|
-| N/A | N/A | N/A | N/A | N/A | N/A |
+| ID  | Severity | Area | Root Cause | Fix | Regression |
+| --- | -------- | ---- | ---------- | --- | ---------- |
+| N/A | N/A      | N/A  | N/A        | N/A | N/A        |
 
 ## 16. Test Results
 
@@ -169,7 +169,7 @@ nothing to commit, working tree clean
 ## 22. Evidence Classification
 
 - **Static Infrastructure Configurations**: VERIFIED
-- **Container Networking Topology**: VERIFIED 
+- **Container Networking Topology**: VERIFIED
 - **Actual Runtime Validation**: VERIFIED
 - **Live Observability (Sentry)**: NOT EXECUTED
 

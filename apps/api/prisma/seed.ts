@@ -18,7 +18,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   if (process.env.ENABLE_DEMO_ACCOUNTS !== 'true') {
-    console.log('🌱 Skipping seed: ENABLE_DEMO_ACCOUNTS is not true. Demo seed data is isolated to development.');
+    console.log(
+      '🌱 Skipping seed: ENABLE_DEMO_ACCOUNTS is not true. Demo seed data is isolated to development.'
+    );
     return;
   }
 

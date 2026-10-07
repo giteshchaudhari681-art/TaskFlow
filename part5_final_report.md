@@ -32,9 +32,9 @@ Sentry release: taskflow-api@1.0.0-963fb08
 ## 4. Production Configuration Validation
 
 Report exact results:
-  ✓ Valid production configuration passes strict schema parsing
-  ✓ Fail-closed rejection active on weak secrets, default DB credentials, & wildcard CORS
-  ✓ Validation error messages do not leak secret values
+✓ Valid production configuration passes strict schema parsing
+✓ Fail-closed rejection active on weak secrets, default DB credentials, & wildcard CORS
+✓ Validation error messages do not leak secret values
 
 ## 5. Release Artifact Validation
 
@@ -46,6 +46,7 @@ Frontend: VERIFIED (Production bundle devoid of backend secrets like `JWT_SECRET
 ## 6. Secret / Artifact Leakage Audit
 
 Report:
+
 - production bundle: CLEAN
 - Docker images: CLEAN
 - logs: CLEAN
@@ -141,17 +142,17 @@ Result: PASSED
 
 ## 18. Failure Scenarios
 
-| Scenario | Expected | Actual | Result |
-|---|---|---|---|
-| AI Image Fails | Degrade AI features cleanly | API remains healthy (200 OK) | PASS |
-| DB Unavailable | 503 Service Unavailable | 503 Service Unavailable | PASS |
-| Worker Fails | Job timeout backoff | Restart/re-polling triggers | PASS |
+| Scenario       | Expected                    | Actual                       | Result |
+| -------------- | --------------------------- | ---------------------------- | ------ |
+| AI Image Fails | Degrade AI features cleanly | API remains healthy (200 OK) | PASS   |
+| DB Unavailable | 503 Service Unavailable     | 503 Service Unavailable      | PASS   |
+| Worker Fails   | Job timeout backoff         | Restart/re-polling triggers  | PASS   |
 
 ## 19. Defects
 
-| ID | Severity | Area | Root Cause | Fix | Regression |
-|---|---|---|---|---|---|
-| 01 | Low | Dependencies | npm audit flags tailwind/postcss dev dependencies | None (accepted as Dev-Only risk) | N/A |
+| ID  | Severity | Area         | Root Cause                                        | Fix                              | Regression |
+| --- | -------- | ------------ | ------------------------------------------------- | -------------------------------- | ---------- |
+| 01  | Low      | Dependencies | npm audit flags tailwind/postcss dev dependencies | None (accepted as Dev-Only risk) | N/A        |
 
 ## 20. Final Regression
 

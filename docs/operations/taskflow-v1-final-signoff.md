@@ -11,6 +11,7 @@ Overall engineering result: CONTAINER RELEASE VERIFIED — CLOUD DEPLOYMENT PEND
 ## 2. Scope
 
 What v1.0 contains:
+
 - Core Organization & Project Management
 - Task & Subtask Management (Kanban, Dependencies, Milestones)
 - Role-Based Access Control (RBAC) & Tenant Isolation
@@ -23,6 +24,7 @@ What v1.0 contains:
 ## 3. Architecture
 
 Final architecture summary:
+
 - **Frontend**: React SPA
 - **API**: Express / Node.js
 - **Database**: PostgreSQL / Prisma (Authoritative truth)
@@ -32,26 +34,27 @@ Final architecture summary:
 
 ## 4. PR1–PR35 Summary
 
-| PR | Capability | Final State | Evidence |
-|----|------------|-------------|----------|
-| PR1-35 | Major Engineering Implementation | Merged/Closed | Commits up to 4f5b23f |
-| PR36-39 | QA / Flake Elimination | Merged | E2E suite passes 100% locally |
-| PR40 | Final Release Closure | Verified locally | PR commits / validation reports |
+| PR      | Capability                       | Final State      | Evidence                        |
+| ------- | -------------------------------- | ---------------- | ------------------------------- |
+| PR1-35  | Major Engineering Implementation | Merged/Closed    | Commits up to 4f5b23f           |
+| PR36-39 | QA / Flake Elimination           | Merged           | E2E suite passes 100% locally   |
+| PR40    | Final Release Closure            | Verified locally | PR commits / validation reports |
 
 ## 5. Part 1–Part 6 Summary
 
-| Part | Purpose | Result | Evidence |
-|------|---------|--------|----------|
-| Part 1 | Production Security & Environment Hardening | VERIFIED | part1_final_report.md |
-| Part 2 | Dependency / Security Validation | VERIFIED | part2_final_audit.md |
-| Part 3 | Application QA / Integration | VERIFIED | playwright test results |
-| Part 4 | Container Runtime / Staging | VERIFIED | part4_final_report.md |
-| Part 5 | Release / DR / Rollback Rehearsal | VERIFIED | part5_final_report.md |
-| Part 6 | Deployment Validation | VERIFIED CONTAINER | part6-final-deployment-validation.md |
+| Part   | Purpose                                     | Result             | Evidence                             |
+| ------ | ------------------------------------------- | ------------------ | ------------------------------------ |
+| Part 1 | Production Security & Environment Hardening | VERIFIED           | part1_final_report.md                |
+| Part 2 | Dependency / Security Validation            | VERIFIED           | part2_final_audit.md                 |
+| Part 3 | Application QA / Integration                | VERIFIED           | playwright test results              |
+| Part 4 | Container Runtime / Staging                 | VERIFIED           | part4_final_report.md                |
+| Part 5 | Release / DR / Rollback Rehearsal           | VERIFIED           | part5_final_report.md                |
+| Part 6 | Deployment Validation                       | VERIFIED CONTAINER | part6-final-deployment-validation.md |
 
 ## 6. Final Test Results
 
 Previously verified in Part 6; not rerun during final sign-off.
+
 - API: 675/675
 - Python: 76/76
 - Playwright: 24/24
@@ -114,6 +117,7 @@ Exact remaining advisories: 10 dev-dependency vulnerabilities in `tailwindcss`, 
 ## 15. Manual Production Handoff
 
 Exact human actions:
+
 - Provision PostgreSQL instance and run `npx prisma migrate deploy`.
 - Deploy Docker containers (API, Worker, AI) mapped to internal VPC.
 - Expose Frontend and API edge routes to the internet.
@@ -122,6 +126,7 @@ Exact human actions:
 ## 16. V1.1 Deferred Scope
 
 Future work intentionally deferred from v1.0:
+
 - Redis distributed rate limiting
 - Stripe billing
 - Enterprise SAML/OIDC/SCIM
