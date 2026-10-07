@@ -236,44 +236,46 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onBack
           </motion.div>
         </form>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 pt-6 border-t border-[#292929]"
-        >
-          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c948a] block mb-3">
-            Demo accounts
-          </span>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => handleQuickFill('alex.chen@taskflow.dev')}
-              className="group p-3 border border-[#292929] rounded-lg bg-[#111111]/50 hover:bg-[#161616] hover:border-[#E85D22]/50 transition-all flex items-center gap-3 text-left"
-            >
-              <div className="w-8 h-8 rounded-full bg-[#E85D22]/10 flex items-center justify-center group-hover:bg-[#E85D22]/20 transition-colors">
-                <UserCheck className="w-4 h-4 text-[#E85D22]" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-[#f3ede4]">Alex</span>
-                <span className="text-[10px] text-[#7d756c] uppercase tracking-wider">Owner</span>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill('sam.miller@taskflow.dev')}
-              className="group p-3 border border-[#292929] rounded-lg bg-[#111111]/50 hover:bg-[#161616] hover:border-[#E85D22]/50 transition-all flex items-center gap-3 text-left"
-            >
-              <div className="w-8 h-8 rounded-full bg-[#292929] flex items-center justify-center group-hover:bg-[#3a342c] transition-colors">
-                <UserCheck className="w-4 h-4 text-[#9c948a] group-hover:text-[#f3ede4]" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-[#f3ede4]">Sam</span>
-                <span className="text-[10px] text-[#7d756c] uppercase tracking-wider">Admin</span>
-              </div>
-            </button>
-          </div>
-        </motion.div>
+        {import.meta.env.VITE_ENABLE_DEMO_ACCOUNTS === 'true' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 pt-6 border-t border-[#292929]"
+          >
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9c948a] block mb-3">
+              Demo accounts
+            </span>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleQuickFill('alex.chen@taskflow.dev')}
+                className="group p-3 border border-[#292929] rounded-lg bg-[#111111]/50 hover:bg-[#161616] hover:border-[#E85D22]/50 transition-all flex items-center gap-3 text-left"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#E85D22]/10 flex items-center justify-center group-hover:bg-[#E85D22]/20 transition-colors">
+                  <UserCheck className="w-4 h-4 text-[#E85D22]" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-[#f3ede4]">Alex</span>
+                  <span className="text-[10px] text-[#7d756c] uppercase tracking-wider">Owner</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('sam.miller@taskflow.dev')}
+                className="group p-3 border border-[#292929] rounded-lg bg-[#111111]/50 hover:bg-[#161616] hover:border-[#E85D22]/50 transition-all flex items-center gap-3 text-left"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#292929] flex items-center justify-center group-hover:bg-[#3a342c] transition-colors">
+                  <UserCheck className="w-4 h-4 text-[#9c948a] group-hover:text-[#f3ede4]" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-[#f3ede4]">Sam</span>
+                  <span className="text-[10px] text-[#7d756c] uppercase tracking-wider">Admin</span>
+                </div>
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0 }}
