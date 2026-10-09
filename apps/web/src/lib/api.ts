@@ -93,6 +93,12 @@ const refreshAccessToken = async (): Promise<string | null> => {
     return null;
    }
 
+   const contentType = response.headers.get('content-type');
+   if (!contentType || !contentType.includes('application/json')) {
+    setAccessToken(null);
+    return null;
+   }
+
    const resData = (await response.json()) as ApiSuccessResponse<AuthResponseData>;
    if (resData.success && resData.data.accessToken) {
     setAccessToken(resData.data.accessToken);
@@ -154,7 +160,19 @@ export const apiFetch = async <T>(
   }
  }
 
- const payload = await response.json();
+ let payload: any;
+ const contentType = response.headers.get('content-type');
+ if (contentType && contentType.includes('application/json')) {
+  payload = await response.json();
+ } else {
+  const text = await response.text();
+  const errMessage = response.status === 502 || text.includes('502')
+   ? 'Service temporarily unavailable (502 Bad Gateway). Please try again shortly.'
+   : `Unexpected API response format (${response.status})`;
+  const err = new Error(errMessage);
+  (err as any).code = 'BAD_GATEWAY';
+  throw err;
+ }
 
  if (!response.ok || !payload.success) {
   const errorPayload = payload as ApiErrorResponse;

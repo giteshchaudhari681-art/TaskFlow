@@ -167,7 +167,11 @@ describe('TaskFlow PR 7: Kanban Execution Board & Status Workflow Suite', () => 
     }
     await prisma.user.deleteMany({
       where: {
-        email: { in: [ownerEmail, adminEmail, memberEmail, viewerEmail, foreignEmail] },
+        email: {
+          in: [ownerEmail, adminEmail, memberEmail, viewerEmail, foreignEmail].filter(
+            Boolean
+          ) as string[],
+        },
       },
     });
   });

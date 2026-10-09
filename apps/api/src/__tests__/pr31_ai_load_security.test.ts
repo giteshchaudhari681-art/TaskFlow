@@ -123,7 +123,7 @@ describe('PR31: AI Load, Failure & Human-Approval Validation Suite', () => {
     }
     if (ownerUser?.id) {
       await prisma.user.deleteMany({
-        where: { id: { in: [ownerUser.id, viewerUser.id] } },
+        where: { id: { in: [ownerUser.id, viewerUser.id].filter(Boolean) as string[] } },
       });
     }
     await prisma.$disconnect();

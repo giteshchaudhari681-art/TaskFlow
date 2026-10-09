@@ -95,21 +95,26 @@ describe('TaskFlow PR 5: Project Management Foundation Suite', () => {
 
   afterAll(async () => {
     // Cleanup created test records
-    await prisma.project.deleteMany({
-      where: {
-        organizationId: { in: [ownerOrgId, foreignOrgId] },
-      },
-    });
+    const orgIds = [ownerOrgId, foreignOrgId].filter(Boolean);
+    if (orgIds.length > 0) {
+      await prisma.project.deleteMany({
+        where: {
+          organizationId: { in: orgIds as string[] },
+        },
+      });
+    }
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: [ownerEmail, adminEmail, memberEmail, externalEmail, foreignEmail],
+          in: [ownerEmail, adminEmail, memberEmail, externalEmail, foreignEmail].filter(
+            Boolean
+          ) as string[],
         },
       },
     });
     await prisma.organization.deleteMany({
       where: {
-        id: { in: [ownerOrgId, foreignOrgId] },
+        id: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] },
       },
     });
   });

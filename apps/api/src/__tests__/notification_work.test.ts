@@ -169,7 +169,9 @@ describe('TaskFlow PR 12: Notifications & Personal Work Queue Suite', () => {
       }
       await prisma.user.deleteMany({
         where: {
-          email: { in: [ownerEmail, memberAEmail, memberBEmail, foreignEmail] },
+          email: {
+            in: [ownerEmail, memberAEmail, memberBEmail, foreignEmail].filter(Boolean) as string[],
+          },
         },
       });
     } catch {

@@ -3,9 +3,27 @@ import { env } from '../config/env.js';
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
+if (env.NODE_ENV === 'test') {
+  try {
+    const url = new URL(env.DATABASE_URL);
+    if (url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
+      throw new Error(`Test database hostname must be localhost (got ${url.hostname})`);
+    }
+    if (url.port !== '5433') {
+      throw new Error(`Test database port must be 5433 (got ${url.port})`);
+    }
+    if (!url.pathname.includes('taskflow_test')) {
+      throw new Error(`Test database name must be taskflow_test (got ${url.pathname})`);
+    }
+  } catch (err) {
+    throw new Error(`FATAL: Database connection rejected in test mode. ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    datasourceUrl: env.DATABASE_URL,
     log:
       env.NODE_ENV === 'development'
         ? [

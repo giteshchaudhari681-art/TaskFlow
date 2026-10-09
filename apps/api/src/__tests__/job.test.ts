@@ -119,30 +119,34 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
     // Clean up created jobs
     await prisma.job.deleteMany({
       where: {
-        organizationId: { in: [ownerOrgId, foreignOrgId] },
+        organizationId: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] },
       },
     });
     // Clean up notifications
     await prisma.notification.deleteMany({
       where: {
-        userId: { in: [ownerUserId, adminUserId, memberUserId, foreignUserId] },
+        userId: {
+          in: [ownerUserId, adminUserId, memberUserId, foreignUserId].filter(Boolean) as string[],
+        },
       },
     });
     // Clean up projects
     await prisma.project.deleteMany({
       where: {
-        id: { in: [testProjectId, foreignProjectId] },
+        id: { in: [testProjectId, foreignProjectId].filter(Boolean) as string[] },
       },
     });
     // Clean up test users
     await prisma.user.deleteMany({
       where: {
-        email: { in: [ownerEmail, adminEmail, memberEmail, foreignEmail] },
+        email: {
+          in: [ownerEmail, adminEmail, memberEmail, foreignEmail].filter(Boolean) as string[],
+        },
       },
     });
     await prisma.organization.deleteMany({
       where: {
-        id: { in: [ownerOrgId, foreignOrgId] },
+        id: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] },
       },
     });
   });
@@ -183,7 +187,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
         payload: { notificationId: 'claim-test', recipientUserId: ownerUserId },
       });
 
-      const claimed = await jobRepository.claimNextJob();
+      const claimed = await jobRepository.claimNextJob(ownerOrgId);
       expect(claimed).not.toBeNull();
       expect(claimed!.status).toBe(JobStatus.PROCESSING);
       expect(claimed!.lockedAt).not.toBeNull();
@@ -202,8 +206,8 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
 
       // Two concurrent claims
       const [claimA, claimB] = await Promise.all([
-        jobRepository.claimNextJob(),
-        jobRepository.claimNextJob(),
+        jobRepository.claimNextJob(ownerOrgId),
+        jobRepository.claimNextJob(ownerOrgId),
       ]);
 
       const claimedIds = [claimA?.id, claimB?.id].filter(id => id === job.id);
@@ -221,7 +225,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
         payload: { test: 'complete' },
       });
 
-      const claimed = await jobRepository.claimNextJob();
+      const claimed = await jobRepository.claimNextJob(ownerOrgId);
       expect(claimed).not.toBeNull();
 
       const completed = await jobRepository.markCompleted(claimed!.id);
@@ -254,7 +258,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
       expect(retried.lockedAt).toBeNull();
 
       // Should not be claimable immediately because availableAt is in the future
-      const immediateClaim = await jobRepository.claimNextJob();
+      const immediateClaim = await jobRepository.claimNextJob(ownerOrgId);
       expect(immediateClaim?.id).not.toBe(job.id);
       if (immediateClaim) await jobRepository.markCompleted(immediateClaim.id);
 
@@ -435,7 +439,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
       });
 
       // Claim & execute attempt 1
-      const claimed1 = await jobRepository.claimNextJob();
+      const claimed1 = await jobRepository.claimNextJob(ownerOrgId);
       expect(claimed1?.id).toBe(job.id);
       const result1 = await jobService.processJob(claimed1!);
       expect(result1.success).toBe(false);
@@ -452,7 +456,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
       });
 
       // Claim & execute attempt 2 (maxAttempts reached)
-      const claimed2 = await jobRepository.claimNextJob();
+      const claimed2 = await jobRepository.claimNextJob(ownerOrgId);
       expect(claimed2?.id).toBe(job.id);
       const result2 = await jobService.processJob(claimed2!);
       expect(result2.success).toBe(false);
@@ -482,7 +486,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
         maxAttempts: 5,
       });
 
-      const claimed = await jobRepository.claimNextJob();
+      const claimed = await jobRepository.claimNextJob(ownerOrgId);
       expect(claimed?.id).toBe(job.id);
 
       const result = await jobService.processJob(claimed!);
@@ -526,7 +530,7 @@ describe('TaskFlow PR 26: Production Resilience & Background Jobs Suite', () => 
         },
       });
 
-      const claimed = await jobRepository.claimNextJob();
+      const claimed = await jobRepository.claimNextJob(ownerOrgId);
       expect(claimed?.id).toBe(crossTenantJob.id);
 
       // Execution must fail permanently because Org A cannot process Org B's notification

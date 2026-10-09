@@ -113,9 +113,15 @@ describe('TaskFlow PR 10: Milestones & Project Timeline Suite', () => {
   });
 
   afterAll(async () => {
-    await prisma.project.deleteMany({ where: { id: { in: [testProjectId, foreignProjectId] } } });
+    await prisma.project.deleteMany({
+      where: { id: { in: [testProjectId, foreignProjectId].filter(Boolean) as string[] } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { in: [ownerEmail, memberEmail, viewerEmail, foreignEmail] } },
+      where: {
+        email: {
+          in: [ownerEmail, memberEmail, viewerEmail, foreignEmail].filter(Boolean) as string[],
+        },
+      },
     });
   });
 

@@ -169,9 +169,17 @@ describe('TaskFlow PR 11: Comments, Activity Feed & Task Collaboration Suite', (
   });
 
   afterAll(async () => {
-    await prisma.project.deleteMany({ where: { id: { in: [testProjectId, foreignProjectId] } } });
+    await prisma.project.deleteMany({
+      where: { id: { in: [testProjectId, foreignProjectId].filter(Boolean) as string[] } },
+    });
     await prisma.user.deleteMany({
-      where: { email: { in: [ownerEmail, memberAEmail, memberBEmail, viewerEmail, foreignEmail] } },
+      where: {
+        email: {
+          in: [ownerEmail, memberAEmail, memberBEmail, viewerEmail, foreignEmail].filter(
+            Boolean
+          ) as string[],
+        },
+      },
     });
   });
 

@@ -104,28 +104,40 @@ describe('TaskFlow PR 27: SaaS Administration, Usage Controls & Entitlements Sui
     // Clean up created entities
     try {
       await prisma.aIUsageRecord.deleteMany({
-        where: { organizationId: { in: [ownerOrgId, foreignOrgId] } },
+        where: { organizationId: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] } },
       });
       await prisma.auditEvent.deleteMany({
-        where: { organizationId: { in: [ownerOrgId, foreignOrgId] } },
+        where: { organizationId: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] } },
       });
       await prisma.task.deleteMany({
-        where: { project: { organizationId: { in: [ownerOrgId, foreignOrgId] } } },
+        where: {
+          project: {
+            organizationId: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] },
+          },
+        },
       });
       await prisma.projectMember.deleteMany({
-        where: { project: { organizationId: { in: [ownerOrgId, foreignOrgId] } } },
+        where: {
+          project: {
+            organizationId: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] },
+          },
+        },
       });
       await prisma.project.deleteMany({
-        where: { organizationId: { in: [ownerOrgId, foreignOrgId] } },
+        where: { organizationId: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] } },
       });
       await prisma.organizationMember.deleteMany({
-        where: { organizationId: { in: [ownerOrgId, foreignOrgId] } },
+        where: { organizationId: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] } },
       });
       await prisma.organization.deleteMany({
-        where: { id: { in: [ownerOrgId, foreignOrgId] } },
+        where: { id: { in: [ownerOrgId, foreignOrgId].filter(Boolean) as string[] } },
       });
       await prisma.user.deleteMany({
-        where: { id: { in: [ownerUserId, adminUserId, memberUserId, foreignUserId] } },
+        where: {
+          id: {
+            in: [ownerUserId, adminUserId, memberUserId, foreignUserId].filter(Boolean) as string[],
+          },
+        },
       });
     } catch {
       // Best effort cleanup

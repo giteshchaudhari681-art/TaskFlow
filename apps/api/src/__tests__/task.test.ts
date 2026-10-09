@@ -159,7 +159,11 @@ describe('TaskFlow PR 6: Task Management Foundation Suite', () => {
     }
     await prisma.user.deleteMany({
       where: {
-        email: { in: [ownerEmail, adminEmail, memberEmail, viewerEmail, foreignEmail] },
+        email: {
+          in: [ownerEmail, adminEmail, memberEmail, viewerEmail, foreignEmail].filter(
+            Boolean
+          ) as string[],
+        },
       },
     });
   });

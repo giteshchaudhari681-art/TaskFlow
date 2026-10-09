@@ -1,7 +1,17 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
 
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: path.resolve(__dirname, '../../.env.test'), override: true });
+} else {
+  dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+}
 
 const DEFAULT_DEV_JWT_SECRET = 'development-jwt-secret-min-32-chars-for-taskflow-api';
 const DEFAULT_DEV_COOKIE_SECRET = 'development-cookie-secret-min-32-chars-taskflow';

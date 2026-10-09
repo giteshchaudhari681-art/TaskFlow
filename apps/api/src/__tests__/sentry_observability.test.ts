@@ -13,6 +13,7 @@ import {
 import { errorHandler, AppError } from '../middleware/errorHandler.js';
 import { requestIdMiddleware } from '../middleware/requestId.js';
 import { HTTP_STATUS, ERROR_CODES } from '@taskflow/shared';
+import { env } from '../config/env.js';
 
 // Mock Sentry SDK
 vi.mock('@sentry/node', () => {
@@ -42,10 +43,18 @@ describe('TaskFlow Observability & Sentry Error Monitoring Suite', () => {
 
   describe('1. Sentry SDK Lifecycle & Safe Initialization', () => {
     it('gracefully skips initialization when SENTRY_DSN is absent', () => {
+      vi.stubEnv('SENTRY_DSN', '');
+      const originalEnvDsn = env.SENTRY_DSN;
+
+      env.SENTRY_DSN = undefined;
+
       const result = initSentry();
       expect(result).toBe(false);
       expect(isSentryEnabled()).toBe(false);
       expect(Sentry.init).not.toHaveBeenCalled();
+
+      env.SENTRY_DSN = originalEnvDsn;
+      vi.unstubAllEnvs();
     });
 
     it('initializes safely when DSN is present and prevents duplicate initialization', () => {

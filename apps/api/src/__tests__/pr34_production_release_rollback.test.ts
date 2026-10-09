@@ -414,15 +414,18 @@ describe('PR34: Production Release, Backup & Rollback Suite', () => {
   // 8. PRODUCTION PREFLIGHT RUNNER TEST
   // =========================================================================
   describe('8. Automated Production Preflight Execution', () => {
-    it('8.1 executes full production preflight without error', () => {
-      const root = findMonorepoRoot();
-      const scriptPath = path.join(root, 'scripts/validate_production_release.ts');
-      const output = execSync(`npx tsx "${scriptPath}"`, {
-        cwd: root,
-        encoding: 'utf-8',
-        stdio: 'pipe',
-      });
-      expect(output).toContain('All production release & rollback preflight gates PASSED');
-    }, 60000);
+    it('8.1 executes full production preflight without error', async () => {
+      // Evaluate the logic directly instead of spawning an expensive tsx subprocess.
+      const { runProductionPreflight } = await import('../../../../scripts/validate_production_release.js');
+
+      const originalConsoleLog = console.log;
+      console.log = vi.fn();
+
+      const result = runProductionPreflight();
+
+      console.log = originalConsoleLog;
+      expect(result.failed).toBe(0);
+      expect(result.total).toBeGreaterThan(0);
+    });
   });
 });

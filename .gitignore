@@ -79,3 +79,7 @@ playwright-report/
 blob-report/
 test-results/
 playwright/.cache/
+
+# Local staging secrets
+.env.staging
+apps/api/.env.test

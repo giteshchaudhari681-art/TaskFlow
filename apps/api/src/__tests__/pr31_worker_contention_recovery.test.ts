@@ -56,7 +56,7 @@ describe('PR31: Worker Contention & Recovery Validation Suite', () => {
     }
 
     // 10 concurrent claim attempts across simulated worker threads
-    const claimAttempts = Array.from({ length: 10 }, () => jobRepository.claimNextJob());
+    const claimAttempts = Array.from({ length: 10 }, () => jobRepository.claimNextJob(testOrgId));
     const claimed = (await Promise.all(claimAttempts)).filter(Boolean);
 
     // Exactly 5 jobs should be claimed, 5 should be null
@@ -121,7 +121,7 @@ describe('PR31: Worker Contention & Recovery Validation Suite', () => {
       maxAttempts: 3,
     });
 
-    const claimed = await jobRepository.claimNextJob();
+    const claimed = await jobRepository.claimNextJob(testOrgId);
     expect(claimed?.id).toBe(job.id);
 
     const result = await jobService.processJob(claimed!);
@@ -154,7 +154,7 @@ describe('PR31: Worker Contention & Recovery Validation Suite', () => {
       maxAttempts: 5,
     });
 
-    const claimed = await jobRepository.claimNextJob();
+    const claimed = await jobRepository.claimNextJob(testOrgId);
     const result = await jobService.processJob(claimed!);
 
     expect(result.success).toBe(false);
@@ -195,7 +195,7 @@ describe('PR31: Worker Contention & Recovery Validation Suite', () => {
     expect(updated?.status).toBe(JobStatus.PENDING);
 
     // Claimable by next worker
-    const reclaimed = await jobRepository.claimNextJob();
+    const reclaimed = await jobRepository.claimNextJob(testOrgId);
     expect(reclaimed?.id).toBe(staleJob.id);
   });
 
@@ -229,10 +229,15 @@ describe('PR31: Worker Contention & Recovery Validation Suite', () => {
     // In unit simulation, consecutiveErrors is initialized to 0
     expect(worker.getConsecutiveErrors()).toBe(0);
 
+    // Mock claimNextJob to guarantee an empty queue (no jobs from other concurrent tests)
+    vi.spyOn(jobRepository, 'claimNextJob').mockResolvedValueOnce(null);
+
     // Verify single-step runOnce cleanly returns false when queue is empty
     const ran = await worker.runOnce();
     expect(ran).toBe(false);
     expect(worker.getConsecutiveErrors()).toBe(0);
+
+    vi.restoreAllMocks();
   });
 
   // ---------------------------------------------------------------------------

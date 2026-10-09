@@ -93,7 +93,7 @@ describe('TaskFlow PR 4: User Profile, Organization & Workspace Management Suite
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: [ownerEmail, adminEmail, memberEmail, foreignEmail],
+          in: [ownerEmail, adminEmail, memberEmail, foreignEmail].filter(Boolean) as string[],
         },
       },
     });

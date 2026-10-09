@@ -24,6 +24,9 @@ export const createServer = (): Express => {
 
   const app = express();
 
+  // Trust the first reverse proxy (Render) to correctly resolve client IPs for rate-limiting
+  app.set('trust proxy', 1);
+
   // Request correlation middleware (sets X-Request-ID on request and response)
   app.use(requestIdMiddleware);
 
