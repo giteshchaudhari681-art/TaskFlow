@@ -25,7 +25,8 @@ import {
   RollbackScenario,
 } from '../apps/api/src/utils/release.js';
 
-export { findMonorepoRoot, evaluateRollbackStrategy, RollbackAction, RollbackScenario };
+export { findMonorepoRoot, evaluateRollbackStrategy };
+export type { RollbackAction, RollbackScenario };
 
 export interface PreflightCheckResult {
   category: string;
