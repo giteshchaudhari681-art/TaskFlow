@@ -58,6 +58,12 @@ export const createServer = (): Express => {
     })
   );
 
+  // Root Health Probes (excluded from application rate limiting for container/cloud infrastructure probes)
+  app.use('/health', healthRoutes);
+
+  // Versioned Health Probes (excluded from application rate limiting)
+  app.use(`${env.API_PREFIX}/health`, healthRoutes);
+
   // Rate Limiting
   const limiter = rateLimit({
     windowMs: env.RATE_LIMIT_WINDOW_MS,
@@ -80,9 +86,6 @@ export const createServer = (): Express => {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // Root Health Probe (useful for container / cloud platform probes)
-  app.use('/health', healthRoutes);
-
   // OpenAPI Specification & Swagger UI Documentation Endpoints
   app.get(['/openapi.json', '/api/openapi.json', `${env.API_PREFIX}/openapi.json`], (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -93,7 +96,6 @@ export const createServer = (): Express => {
   app.use(`${env.API_PREFIX}/docs`, docsRouter);
 
   // Versioned API Routes
-  app.use(`${env.API_PREFIX}/health`, healthRoutes);
   app.use(`${env.API_PREFIX}/auth`, authRoutes);
   app.use(`${env.API_PREFIX}/users`, userRoutes);
   app.use(`${env.API_PREFIX}/organizations`, organizationRoutes);
