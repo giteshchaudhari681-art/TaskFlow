@@ -6,7 +6,7 @@
  * retry transitions, and graceful shutdown.
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { prisma } from '../lib/prisma.js';
 import { jobRepository } from '../repositories/job.repository.js';
 import { jobService } from '../services/job.service.js';
